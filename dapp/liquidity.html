@@ -28,7 +28,39 @@
 		createHeader();
 	</script>
 	
-	LIQUIDITY
+	Add liquidity to the Bridge.. the FEE can be negative<br>
+	<br>
+	You <b>MUST</b> have some native minima to send broadcast messages<br>
+	<br>
+	You <b>MUST</b> have some ETH to pay the fee for transferring wMinima<br>
+	<br>
+	
+	<table>
+		<tr>
+			<td colspan=2>
+				<input type=checkbox id=usenativeminima>
+				<label for=usenativeminima>Use my Bridge Wallet Native Minima</label>
+			</td>
+		</tr>
+		<tr>
+			<td>FEE as % :</td>
+			<td><input type=text id=nativefee placeholder=5 /></td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td colspan=2>
+				<input type=checkbox id=usewminima>
+				<label for=usenativeminima>Use my Bridge Wallet wMinima</label>
+			</td>
+		</tr>
+		<tr>
+			<td>FEE as % :</td>
+			<td><input type=text id=wrappedfee placeholder=5 /></td>
+		</tr>
+	</table>
+	<br>
+	<br>
+	<button onclick="updateorderbook();">UPDATE MY ORDERBOOK</button>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -38,6 +70,48 @@
 <script type="text/javascript">
 	
 	var USER_DETAILS = {};
+	
+	function checkIsNumber(val){
+		if(val == +val){
+			return true;
+		}
+		
+		return false;
+	}
+	
+	function updateorderbook(){
+		
+		var nativeenable 	= usenativeminima.checked;
+		var wrappedenable 	= usewminima.checked;
+		
+		var nativefeeamt 	= nativefee.value.trim();
+		if(nativeenable){
+			if(nativefeeamt == "" || !checkIsNumber(nativefeeamt)){
+				alert("You must specify a valid Fee for Native Minima");
+				return;
+			}
+		}
+		
+		var wrappedfeeamt 	= wrappedfee.value;
+		if(wrappedenable){
+			if(wrappedfeeamt == "" || !checkIsNumber(wrappedfeeamt)){
+				alert("You must specify a valid Fee for wMinima");
+				return;
+			}
+		}
+		
+		//Create the JSON orderbook..
+		var orderbook = {};
+		orderbook.nativeenable 	= nativeenable;
+		orderbook.nativefee 	= nativefeeamt;
+		orderbook.wrappedenable	= wrappedenable;
+		orderbook.wrappedfee	= wrappedfeeamt;
+		
+		//Store this..
+		
+		MDS.log(JSON.stringify(orderbook,null,2));
+		
+	}
 	
 	//Main message handler..
 	MDS.init(function(msg){
