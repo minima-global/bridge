@@ -18,8 +18,7 @@ function _getUserMinimaPublicKey(callback){
 function _getUserAddress(publickey,callback){
 	var script = MAIN_ADDRESS.replace("*",publickey);
 	MDS.cmd("runscript script:\""+script+"\"",function(resp){
-		var address = resp.response.clean.mxaddress;
-		callback(address);
+		callback(resp.response.clean);
 	});
 }
 

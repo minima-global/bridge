@@ -28,10 +28,7 @@
 		createHeader();
 	</script>
 	
-	Welcome to Bridge.<br>
-	<br>
-	Here you can Swap native Minima for wMinima on ETH.<br>
-	<br>
+	SWAP
 	
 	<script type="text/javascript">
 		createFooter();
@@ -51,11 +48,6 @@
 			getUserDetails(function(userdets){
 				USER_DETAILS=userdets;
 				MDS.log(JSON.stringify(USER_DETAILS));
-				
-				//Add the user address as a new address
-				MDS.cmd("newscript trackall:true script:\""+USER_DETAILS.minimaaddress.script+"\"",function(resp){
-					MDS.log(JSON.stringify(resp));	
-				});
 			});
 		}
 	});

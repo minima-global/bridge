@@ -1,0 +1,125 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/pagelayout.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/auth.js"></script>
+	
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		createHeader();
+	</script>
+	
+	BALANCE : <br>
+	<br>
+	<table>
+		<tr>
+			<td>Native Minima : </td>
+			<td><div id=nativeminimabalance>0</div></td>
+			<td><button onclick="deposit();">DEPOSIT</button></td>
+			<td><button onclick="withdraw();">WITHDRAW</button></td>
+			<td><button onclick="refresh();">REFRESH</button></td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td>ETH : </td>
+			<td><div id=ethbalance>0</div></td>
+		</tr>
+		<tr>
+			<td>wMinima : </td>
+			<td><div id=wminimabalance>0</div></td>
+		</tr>
+	</table>
+	
+	<script type="text/javascript">
+		createFooter();
+	</script>
+	
+
+<script type="text/javascript">
+	
+	var USER_DETAILS = {};
+	
+	function refresh(){
+		MDS.cmd("balance address:"+USER_DETAILS.minimaaddress.mxaddress,function(resp){
+			if(resp.response[0].unconfirmed != 0){
+				nativeminimabalance.innerHTML = resp.response[0].confirmed+" (unconfirmed:"+resp.response[0].unconfirmed+")";	
+			}else{
+				nativeminimabalance.innerHTML = resp.response[0].confirmed;
+			}
+		});	
+	}
+	
+	function deposit(){
+		var amount = prompt("How much Minima do you want to send to the Bridge Wallet ?","0");
+		if(amount != null){
+			//Send that amount to his address
+			MDS.cmd("send amount:"+amount+" address:"+USER_DETAILS.minimaaddress.mxaddress+" tokenid:0x00",function(resp){
+				if(resp.status){
+					alert("Funds Sent!");
+				}else{
+					alert(resp.error);
+				}				
+			});
+		}
+	}
+	
+	function withdraw(){
+		var amount = prompt("How much Minima do you want to withdraw from the Bridge Wallet ?","0");
+		if(amount != null){
+			
+			//Get an address
+			MDS.cmd("getaddress",function(getaddr){
+				var getaddress = getaddr.response.miniaddress;
+				MDS.cmd("send amount:"+amount+" address:"+getaddress
+						+" fromaddress:"+USER_DETAILS.minimaaddress.mxaddress
+						+" signkey:"+USER_DETAILS.minimapublickey
+						+" tokenid:0x00",function(resp){
+					if(resp.status){
+						alert("Funds withdrawn to main wallet!");
+					}else{
+						alert(resp.error);
+					}				
+				});	
+			});
+		}
+	}
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		
+		//Do initialisation
+		if(msg.event == "inited"){
+			
+			getUserDetails(function(userdets){
+				USER_DETAILS=userdets;
+				MDS.log(JSON.stringify(USER_DETAILS));
+				
+				refresh();
+			});
+		}
+	});
+
+</script>
+
+</body>
+
+</html>
