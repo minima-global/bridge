@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/orderbook.js"></script>
 	
 </head>
 
@@ -72,11 +73,7 @@
 	var USER_DETAILS = {};
 	
 	function checkIsNumber(val){
-		if(val == +val){
-			return true;
-		}
-		
-		return false;
+		return (val == +val);
 	}
 	
 	function updateorderbook(){
@@ -90,6 +87,8 @@
 				alert("You must specify a valid Fee for Native Minima");
 				return;
 			}
+		}else{
+			nativefeeamt = 0;
 		}
 		
 		var wrappedfeeamt 	= wrappedfee.value;
@@ -98,19 +97,31 @@
 				alert("You must specify a valid Fee for wMinima");
 				return;
 			}
+		}else{
+			wrappedfeeamt 	= 0;
 		}
 		
-		//Create the JSON orderbook..
-		var orderbook = {};
-		orderbook.nativeenable 	= nativeenable;
-		orderbook.nativefee 	= nativefeeamt;
-		orderbook.wrappedenable	= wrappedenable;
-		orderbook.wrappedfee	= wrappedfeeamt;
-		
 		//Store this..
-		
-		MDS.log(JSON.stringify(orderbook,null,2));
-		
+		setMyOrderBook(nativeenable,nativefeeamt, wrappedenable, wrappedfeeamt, function(dets){
+			
+			//Set details as may have been set to ZERO
+			setOrderBookDetails();
+			
+			alert("Your updated order will be sent out to the network shortly\n\n"
+					+"Checks every minute..");
+		});
+	}
+	
+	function setOrderBookDetails(){
+		//Get the details..
+		getMyOrderBook(function(orderbook){
+			
+			//Set GUI
+			usenativeminima.checked = orderbook.nativeenable;
+			nativefee.value			= orderbook.nativefee;
+			usewminima.checked		= orderbook.wrappedenable;
+			wrappedfee.value		= orderbook.wrappedfee;
+		});
 	}
 	
 	//Main message handler..
@@ -121,7 +132,9 @@
 			
 			getUserDetails(function(userdets){
 				USER_DETAILS=userdets;
-				MDS.log(JSON.stringify(USER_DETAILS));
+				//MDS.log(JSON.stringify(USER_DETAILS));
+				
+				setOrderBookDetails();
 			});
 		}
 	});

@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
 	
 </head>
 
@@ -60,11 +61,11 @@
 	var USER_DETAILS = {};
 	
 	function refresh(){
-		MDS.cmd("balance address:"+USER_DETAILS.minimaaddress.mxaddress,function(resp){
-			if(resp.response[0].unconfirmed != 0){
-				nativeminimabalance.innerHTML = resp.response[0].confirmed+" (unconfirmed:"+resp.response[0].unconfirmed+")";	
+		getAllBalances(USER_DETAILS,function(balances){
+			if(balances.nativeminima.unconfirmed != 0){
+				nativeminimabalance.innerHTML = balances.nativeminima.confirmed+" (unconfirmed:"+balances.nativeminima.unconfirmed+")";	
 			}else{
-				nativeminimabalance.innerHTML = resp.response[0].confirmed;
+				nativeminimabalance.innerHTML = balances.nativeminima.confirmed;
 			}
 		});	
 	}
@@ -112,7 +113,6 @@
 			
 			getUserDetails(function(userdets){
 				USER_DETAILS=userdets;
-				MDS.log(JSON.stringify(USER_DETAILS));
 				
 				refresh();
 			});

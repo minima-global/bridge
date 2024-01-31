@@ -17,8 +17,11 @@
 	<!-- Load the local JS lib -->
 	<script type="text/javascript" src="./js/pagelayout.js"></script>
 	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/puresha1.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/orderbook.js"></script>
 	
 </head>
 
@@ -28,7 +31,9 @@
 		createHeader();
 	</script>
 	
-	Complete order book for Bridge
+	Complete order book for Bridge<br>
+	<br>
+	<pre style="text-align:left;width:200;" id=completeorderbook></pre>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -39,16 +44,28 @@
 	
 	var USER_DETAILS = {};
 	
+	function loadCompleteOrderBook(){
+		
+		//Load the complete order book..
+		getCompleteOrderBook(function(orderbook){
+			
+			var totalorder = orderbook.length;
+			
+			//Show with pretty graphics..
+			completeorderbook.innerHTML = "TOTAL:"+totalorder
+			+"<br><br>"
+			+JSON.stringify(orderbook,null,2);
+			
+		});
+		
+	}
+	
 	//Main message handler..
 	MDS.init(function(msg){
 		
 		//Do initialisation
 		if(msg.event == "inited"){
-			
-			getUserDetails(function(userdets){
-				USER_DETAILS=userdets;
-				MDS.log(JSON.stringify(USER_DETAILS));
-			});
+			loadCompleteOrderBook();
 		}
 	});
 

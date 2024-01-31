@@ -1,5 +1,5 @@
 
-var DEXMAKERADDRESS = "0xDEADDEADDEADFF";
+var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
 
 function signData(publickey,data, callback){
 	MDS.cmd("maxsign data:"+data,function(resp){
@@ -21,13 +21,16 @@ function verifyData(publickey,data,signature, callback){
 	});
 }
 
-function sendOrderBook(publickey, objson, callback){
+function sendOrderBook(userdetails, objson, callback){
 	
 	//Convert to String..
 	var obstr = encodeStringForDB(JSON.stringify(objson));
 	
 	//Now sha
 	var hashdata = hashString(obstr);
+	
+	//The public key we are signiung with
+	var publickey = userdetails.maximapublickey;
 	
 	//Sign it..
 	signData(publickey,hashdata,function(signresp){
@@ -38,7 +41,10 @@ function sendOrderBook(publickey, objson, callback){
 		state[1] = "["+obstr+"]";
 		state[2] = signature;
 		
-		var func = "send amount:0.0000001 address:"+DEXMAKERADDRESS+" state:"+JSON.stringify(state);
+		//Send from the bridge wallet..
+		var sendfrom = "fromaddress:"+userdetails.minimaaddress.mxaddress+" signkey:"+userdetails.minimapublickey;
+		
+		var func = "send "+sendfrom+" amount:0.0000000001 address:"+BRIDGEORDERBBOK+" state:"+JSON.stringify(state);
 			
 		MDS.cmd(func,function(resp){
 			if(callback){
@@ -48,7 +54,7 @@ function sendOrderBook(publickey, objson, callback){
 	});
 }
 
-function getOrderBook(callback){
+function getCompleteOrderBook(callback){
 	
 	//First get ALL the records..
 	_getAllOrderCoins(function(allrecords){
@@ -74,7 +80,7 @@ function getOrderBook(callback){
 function _getAllOrderCoins(callback){
 	
 	//Search for coins..
-	var search = "coins simplestate:true address:"+DEXMAKERADDRESS;
+	var search = "coins simplestate:true address:"+BRIDGEORDERBBOK;
 	
 	//Run it..
 	MDS.cmd(search,function(resp){
@@ -154,14 +160,14 @@ function getUniqueRecords(validrecords){
 			
 			//Create a new JSON
 			var ob 	= {};
-			ob[0] 	= publickey;
+			ob.maximapublickey 	= publickey;
 			
 			try {
 				//Now convert the data to a JSON
 			    var orderstr = decodeStringFromDB(record.data);
 			
 				//Convert to a JSON
-				ob[1] = JSON.parse(orderstr);
+				ob.orderbook = JSON.parse(orderstr);
 				
 				//Add it to our list
 				orderbook.push(ob);
@@ -175,5 +181,43 @@ function getUniqueRecords(validrecords){
 		} 
 	}
 	
+	return orderbook;
+}
+
+function setMyOrderBook(nativeenable, nativefee, wrappedenable, wrappedfee, callback){
+	
+	var orderbook = {};
+	orderbook.nativeenable 	= nativeenable;
+	orderbook.nativefee 	= nativefee;
+	orderbook.wrappedenable	= wrappedenable;
+	orderbook.wrappedfee	= wrappedfee;
+	
+	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
+		if(callback){
+			callback(setorder);
+		}
+	});
+}
+
+function getMyOrderBook(callback){
+	//Get the details..
+	MDS.keypair.get("myorderbook",function(getorders){
+		var orderbook = {};
+		if(getorders.status){
+			orderbook = JSON.parse(getorders.value);
+		}else{
+			orderbook = getEmptyOrderBook();
+		}
+		
+		callback(orderbook);
+	});
+}
+
+function getEmptyOrderBook(){
+	var orderbook 			= {};
+	orderbook.nativeenable 	= false;
+	orderbook.nativefee 	= 0;
+	orderbook.wrappedenable	= false;
+	orderbook.wrappedfee	= 0;
 	return orderbook;
 }
