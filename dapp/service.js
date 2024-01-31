@@ -38,7 +38,6 @@ function checkMyOrderBook(callback){
 				}	
 			});
 		}else{
-			MDS.log("My Order book is the same.. "+newbook);
 			if(callback){
 				callback();
 			}
