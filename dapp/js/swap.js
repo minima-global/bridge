@@ -1,4 +1,7 @@
 
+/**
+ * Start a Minima -> wMinima SWAP
+ */
 function startNativeSwap(userdets, amount, requestamount, swappublickey, callback){
 	
 	//Get the current block
@@ -26,7 +29,9 @@ function startNativeSwap(userdets, amount, requestamount, swappublickey, callbac
 	});
 }
 
-//Check if there are any coins in the HTLC that have expired..
+/**
+ * Check if there are any coins in the HTLC that have expired..
+ */
 function checkTimeLockMinimaHTLC(callback){
 	
 	//First search coins
@@ -101,7 +106,9 @@ function collectExpiredCoin(userdets,coin,callback){
 	});
 }
 
-//Check if there are any coins in the HTLC that have expired..
+/**
+ * Check if there are any coins we can collect
+ */
 function checkMinimaHTLC(callback){
 	
 	//First search coins
@@ -137,11 +144,43 @@ function checkCanCollectCoin(coin, callback){
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
 		if(secret != null){
-			
 			//We know the secret! - Collect this coin..
+			MDS.log("Can Collect HTLC coin as we know secret!!");
 			
+		}else{
 			
+			//Have we sent the OTHER side txn to get them to reveal the secret..
+			haveSentCounterPartyTxn(hash,function(sent){
+				if(!sent){
+					
+					//Check the details are valid!.. FEES etc.. 
+					//..
+					
+					//Send the ETH counter TXN - to make him reveal the secret
+					//..
+					
+					//FOR NOW..use Minima..
+					var state = {};
+					state[0]  = userdets.minimapublickey;
+					state[1]  = requestamount;
+					state[2]  = "0x00000001"; // wMinima on ETH
+					state[3]  = timelock;
+					state[4]  = swappublickey;
+					state[5]  = secret;
+					 
+					//And send from the native wallet..
+					sendFromNativeWallet(userdets,amount,HTLC_ADDRESS,state,function(resp){
+						callback(resp);	
+					});	
+					
+					//It's sent..
+					sentCounterPartyTxn(hash,function(){
+						if(callback){
+							callback();
+						}
+					});	
+				}
+			});
 		}
-	})
-	
+	});
 }

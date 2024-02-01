@@ -21,18 +21,27 @@ function createDB(callback){
 	//Run this..
 	MDS.sql(initsql,function(msg){
 		
-		var logsql = "CREATE TABLE IF NOT EXISTS `logs` ( "
+		/*var logsql = "CREATE TABLE IF NOT EXISTS `logs` ( "
 				+"  `id` bigint auto_increment, "
 				+"  `event` varchar(128) NOT NULL, "
 				+"  `secret` varchar(128) NOT NULL, "
 				+"  `amount` varchar(128) NOT NULL, "
 				+"  `details` varchar(1024) NOT NULL, "
 				+"  `logdate` bigint NOT NULL "
-				+" )";
+				+" )";*/
 				
-		if(callback){
-			callback(msg);
-		}
+		var counterpartytxn = "CREATE TABLE IF NOT EXISTS `counterparty` ( "
+				+"  `id` bigint auto_increment, "
+				+"  `hash` varchar(128) NOT NULL, "
+				+"  `event` varchar(128) NOT NULL, "
+				+"  `eventdate` bigint NOT NULL "
+				+" )";
+		
+		MDS.sql(counterpartytxn,function(countermsg){
+			if(callback){
+				callback(msg);
+			}	
+		});
 	});
 }
 
@@ -68,18 +77,25 @@ function getSecretFromHash(hash, callback){
 
 function insertSecret(secret,hash,callback){
 	
-	//Check is Valid..
-	checkSecret(secret,hash,function(valid){
-		if(!valid){
-			MDS.log("Attempt to add invalid secret.. ");
-			callback(false);
+	//do we already have it..
+	getSecretFromHash(hash,function(secret){
+		if(secret == null){
+			//Check is Valid..
+			checkSecret(secret,hash,function(valid){
+				if(!valid){
+					MDS.log("Attempt to add invalid secret.. ");
+					callback(false);
+				}else{
+					
+					//Insert into the DB
+					var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
+					MDS.sql(sql,function(msg){
+						callback(true);
+					});
+				}
+			});	
 		}else{
-			
-			//Insert into the DB
-			var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
-			MDS.sql(sql,function(msg){
-				callback(true);
-			});
+			callback(true);
 		}
 	});
 }
@@ -87,10 +103,28 @@ function insertSecret(secret,hash,callback){
 function checkSecret(secret, hash, callback){
 	var cmd = "runscript script:\"LET hash=SHA2("+secret+")\"";
 	MDS.cmd(cmd,function(resp){
-		//Get the value
-		var hashed = resp.response.variables.hash;
-		
 		//Are they the same
-		callback(hash == hashed);
+		callback(hash == resp.response.variables.hash);
+	});
+}
+
+/**
+ * Counterparty events..
+ */
+function sentCounterPartyTxn(hash,callback){
+	
+	//the date
+	var recdate = new Date();
+	
+	//Insert into DB
+	var sql = "INSERT INTO counterparty(hash,event,eventdate) VALUES ('"+hash+"','CPTXN_SENT',"+recdate.getTime()+")";
+	MDS.sql(sql,function(msg){
+		callback(msg);
+	});
+}
+
+function haveSentCounterPartyTxn(hash, callback){
+	MDS.sql("SELECT * FROM counterparty WHERE hash='"+hash+"' AND event='CPTXN_SENT'", function(sqlmsg){
+		callback(sqlmsg.rows.length>0);
 	});
 }
