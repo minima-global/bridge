@@ -19,6 +19,8 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/swap.js"></script>
 	
 </head>
 
@@ -32,7 +34,7 @@
 		<tr>
 			<td>Amount : </td>
 			<td><input type=text></td>
-			<td><button>I WANT TO SWAP NATIVE MINIMA</button></td>
+			<td><button onclick="swapnative();">I WANT TO SWAP NATIVE MINIMA</button></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
@@ -52,8 +54,15 @@
 	
 	var USER_DETAILS = {};
 	
+	//Start a native swap..
+	function swapnative(){
+		
+	}
+	
 	//Main message handler..
 	MDS.init(function(msg){
+		
+		
 		
 		//Do initialisation
 		if(msg.event == "inited"){

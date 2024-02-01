@@ -27,3 +27,23 @@ function getAllBalances(userdetails,callback){
 		callback(balance);
 	});
 }
+
+function depositNativeMinima(userdets, amount, callback){
+	//Send that amount to his address
+	MDS.cmd("send amount:"+amount
+			+" address:"+userdets.minimaaddress.mxaddress
+			+" tokenid:0x00 split:10",function(resp){
+		callback(resp);			
+	});
+}
+
+function sendFromNativeWallet(userdets, amount, address, callback){
+	//Send that amount to his address
+	MDS.cmd("send amount:"+amount
+			+" address:"+address
+			+" fromaddress:"+userdets.minimaaddress.mxaddress
+			+" signkey:"+userdets.minimapublickey
+			+" tokenid:0x00", function(resp){
+		callback(resp);				
+	});
+}

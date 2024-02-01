@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
 	
 </head>
 
@@ -57,6 +58,30 @@
 					MDS.log(JSON.stringify(resp));	
 				});
 			});
+			
+			
+			//TEST
+			if(false){
+				wipeDB();
+			}else{
+				createDB(function(){
+					
+					//Now ruyn something..
+					createSecretHash(function(hash){
+						
+						MDS.log("Secret Hash created : "+hash);
+						
+						//Now get the preimage..
+						getSecretFromHash(hash, function(secret){
+							MDS.log("Secret : "+secret);
+							
+							checkSecret(secret,hash,function(valid){
+								MDS.log("Valid : "+valid);
+							});
+						});
+					});
+				});
+			}
 		}
 	});
 

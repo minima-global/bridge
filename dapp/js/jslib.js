@@ -1,4 +1,7 @@
 
+/**
+ * Some UTIL functions
+ */
 function encodeStringForDB(str){
 	return encodeURIComponent(str).split("'").join("%27");
 }
@@ -27,4 +30,27 @@ function stripBrackets(coinstr){
 
 function hashString(str){
 	return 	"0x"+sha1(str).toUpperCase();
+}
+
+function checkIsNumber(val){
+	if(val == null){
+		return false;
+	}
+	
+	return (val == +val);
+}
+
+function checkIsPositiveNumber(val){
+	if(!checkIsNumber(val)){
+		return false
+	}
+	
+	return (val>0);
+}
+
+//Get the current block
+function getCurrentBlock(callback){
+	MDS.cmd("block",function(resp){
+		callback(resp.response.block);
+	});
 }

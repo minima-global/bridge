@@ -67,42 +67,51 @@
 			}else{
 				nativeminimabalance.innerHTML = balances.nativeminima.confirmed;
 			}
+			
+			//Fill in ETH details..
+			//..
 		});	
 	}
 	
 	function deposit(){
 		var amount = prompt("How much Minima do you want to send to the Bridge Wallet ?","0");
-		if(amount != null){
-			//Send that amount to his address
-			MDS.cmd("send amount:"+amount+" address:"+USER_DETAILS.minimaaddress.mxaddress+" tokenid:0x00",function(resp){
-				if(resp.status){
-					alert("Funds Sent!");
-				}else{
-					alert(resp.error);
-				}				
-			});
+		if(amount == null){return;}
+		if(!checkIsPositiveNumber(amount)){
+			alert("Must be a valid number greater than zero.. "+amount);
+			return;
 		}
+		
+		//Send that amount to his address
+		depositNativeMinima(USER_DETAILS, amount, function(resp){
+			if(resp.status){
+				alert("Funds Sent!");
+			}else{
+				alert(resp.error);
+			}
+		});
 	}
 	
 	function withdraw(){
 		var amount = prompt("How much Minima do you want to withdraw from the Bridge Wallet ?","0");
-		if(amount != null){
-			
-			//Get an address
-			MDS.cmd("getaddress",function(getaddr){
-				var getaddress = getaddr.response.miniaddress;
-				MDS.cmd("send amount:"+amount+" address:"+getaddress
-						+" fromaddress:"+USER_DETAILS.minimaaddress.mxaddress
-						+" signkey:"+USER_DETAILS.minimapublickey
-						+" tokenid:0x00",function(resp){
-					if(resp.status){
-						alert("Funds withdrawn to main wallet!");
-					}else{
-						alert(resp.error);
-					}				
-				});	
-			});
+		if(amount == null){return;}
+		if(!checkIsPositiveNumber(amount)){
+			alert("Must be a valid number greater than zero.. "+amount);
+			return;
 		}
+			
+		//Get an address
+		MDS.cmd("getaddress",function(getaddr){
+			var address = getaddr.response.miniaddress;
+			
+			//And send from the native wallet..
+			sendFromNativeWallet(USER_DETAILS,amount,address,function(resp){
+				if(resp.status){
+					alert("Funds withdrawn to main wallet!");
+				}else{
+					alert(resp.error);
+				}
+			});
+		});
 	}
 	
 	//Main message handler..
@@ -116,6 +125,9 @@
 				
 				refresh();
 			});
+			
+		}else if(msg.event == "NEWBALANCE"){
+			refresh();
 		}
 	});
 

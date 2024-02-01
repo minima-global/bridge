@@ -94,7 +94,7 @@ MDS.init(function(msg){
 			});
 		});
 		
-	}else if(msg.event == "MDS_TIMER_60SECONDS"){
+	}else if(msg.event == "MDS_TIMER_10SECONDS"){
 		//Check if your order book has changed..
 		checkMyOrderBook();
 			

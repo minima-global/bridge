@@ -26,7 +26,7 @@ function createDB(callback){
 	});
 }
 
-function createSecret(callback){
+function createSecretHash(callback){
 	
 	//First create a random 32 byte
 	MDS.cmd("random",function(random){
@@ -35,16 +35,34 @@ function createSecret(callback){
 		var hash 	= random.response.hashed;
 		
 		//Insert into DB
-		var sql = "INSERT INTO secret(secret,hash) VALUES ('"+secret+"','"+hash+"')";
+		var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
 		MDS.sql(sql,function(msg){
-			callback(secret);
+			callback(hash);
 		});
 	});
 }
 
-function getSecret(hash){
-	
+function getSecretFromHash(hash, callback){
+	//Find a record
+	var sql = "SELECT * FROM secrets WHERE hash='"+hash+"' LIMIT 1";
+				
+	//Run this..
+	MDS.sql(sql,function(msg){
+		if(msg.count>0){
+			callback(msg.rows[0].SECRET);	
+		}else{
+			callback(null);
+		}
+	});
 }
-function getSecret(hash){
-	
+
+function checkSecret(secret, hash, callback){
+	var cmd = "runscript script:\"LET hash=SHA3("+secret+")\"";
+	MDS.cmd(cmd,function(resp){
+		//Get the value
+		var hashed = resp.response.variables.hash;
+		
+		//Are they the same
+		callback(hash == hashed);
+	});
 }
