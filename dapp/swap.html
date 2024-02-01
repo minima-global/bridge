@@ -44,12 +44,6 @@
 		</tr>
 	</table>
 	
-	<br>
-	
-	<br><br>
-	<button onclick="docheck();">CHECK TIMELOCK</button>
-	<br>
-	
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -57,52 +51,6 @@
 <script type="text/javascript">
 	
 	var USER_DETAILS = {};
-	
-	function docheck(){
-		checkTimeLockMinimaHTLC(function(resp){
-			MDS.log(JSON.stringify(resp));
-		});
-	}
-	
-	//Check if there are any coins in the HTLC that have expired..
-	function checkTimeLockMinimaHTLC(callback){
-		
-		//First search coins
-		var cmd = "coins simplestate:true relevant:true address:"+HTLC_ADDRESS;		
-		MDS.cmd(cmd,function(resp){
-			
-			//How many coins..
-			var len=resp.response.length;
-			if(len>0){
-				
-				//Coins found..
-				getCurrentBlock(function(blockstr){
-					
-					//Convert to a number
-					var block = +blockstr;
-					
-					//Now cycle through the coins..
-					for(var i=0;i<len;i++){
-						//Get the coin
-						var coin=resp.response[i];
-						try{
-							//Are we the Owner..
-							if(coin.state[0] == USER_DETAILS.minimapublickey){
-								//Check if we can collect it..
-								var timelock=+coin.state[3];
-								if(block>timelock){
-									MDS.log("Timelock Collect Expired Coin! "+timelock+"/"+block);
-									collectExpiredCoin(USER_DETAILS,coin,function(resp){});
-								}	
-							}
-						}catch(e){
-							MDS.log("ERROR parsing coin : "+JSON.stringify(coin));
-						}
-					}
-				});
-			}
-		});
-	}
 	
 	//Start a native swap..
 	function swapnative(){

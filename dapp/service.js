@@ -6,6 +6,8 @@ MDS.load("./js/scripts.js");
 MDS.load("./js/auth.js");
 MDS.load("./js/orderbook.js");
 MDS.load("./js/balance.js");
+MDS.load("./js/sql.js");
+MDS.load("./js/swap.js");
 
 //The USER details..
 var USER_DETAILS 	= {};
@@ -84,13 +86,12 @@ MDS.init(function(msg){
 	if(msg.event == "inited"){
 		
 		//Set Up the HTLC contract script
-		setUpHTLCScript(function(resp){
-			//MDS.log("HTLC : "+JSON.stringify(resp));
-		});	
+		setUpHTLCScript(function(resp){});	
 			
 		//Set up the DB
-		//..
+		createDB(function(res){});
 		
+		//Get the main user details.. thesew don't change..
 		getUserDetails(function(userdets){
 			//Get User Details..
 			USER_DETAILS=userdets;

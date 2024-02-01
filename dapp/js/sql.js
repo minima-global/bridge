@@ -20,6 +20,16 @@ function createDB(callback){
 				
 	//Run this..
 	MDS.sql(initsql,function(msg){
+		
+		var logsql = "CREATE TABLE IF NOT EXISTS `logs` ( "
+				+"  `id` bigint auto_increment, "
+				+"  `event` varchar(128) NOT NULL, "
+				+"  `secret` varchar(128) NOT NULL, "
+				+"  `amount` varchar(128) NOT NULL, "
+				+"  `details` varchar(1024) NOT NULL, "
+				+"  `logdate` bigint NOT NULL "
+				+" )";
+				
 		if(callback){
 			callback(msg);
 		}
@@ -52,6 +62,24 @@ function getSecretFromHash(hash, callback){
 			callback(msg.rows[0].SECRET);	
 		}else{
 			callback(null);
+		}
+	});
+}
+
+function insertSecret(secret,hash,callback){
+	
+	//Check is Valid..
+	checkSecret(secret,hash,function(valid){
+		if(!valid){
+			MDS.log("Attempt to add invalid secret.. ");
+			callback(false);
+		}else{
+			
+			//Insert into the DB
+			var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
+			MDS.sql(sql,function(msg){
+				callback(true);
+			});
 		}
 	});
 }

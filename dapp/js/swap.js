@@ -4,6 +4,7 @@ function startNativeSwap(userdets, amount, requestamount, swappublickey, callbac
 	//Get the current block
 	getCurrentBlock(function(block){
 		
+		//How long do we wait..
 		var timelock = +block+10;
 		
 		//Create a secret
@@ -12,12 +13,10 @@ function startNativeSwap(userdets, amount, requestamount, swappublickey, callbac
 			var state = {};
 			state[0]  = userdets.minimapublickey;
 			state[1]  = requestamount;
-			state[2]  = "0x0001"; // wMinima on ETH
+			state[2]  = "0x00000001"; // wMinima on ETH
 			state[3]  = timelock;
 			state[4]  = swappublickey;
 			state[5]  = secret;
-			
-			MDS.log(JSON.stringify(state));
 			 
 			//And send from the native wallet..
 			sendFromNativeWallet(userdets,amount,HTLC_ADDRESS,state,function(resp){
@@ -57,7 +56,7 @@ function checkTimeLockMinimaHTLC(callback){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
-								MDS.log("Timelock Collect Expired Coin! "+timelock+"/"+block);
+								MDS.log("Timelock Collect Expired Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 								
 								//Add to our list
 								expired.push(coin);
@@ -81,7 +80,8 @@ function checkTimeLockMinimaHTLC(callback){
 
 function collectExpiredCoin(userdets,coin,callback){
 	
-	var txnid = "txn_"+randomInteger(1,1000000000);
+	//Random txn ID
+	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
 	
 	//Create a txn to collect this coin..
 	var cmd = "txncreate id:"+txnid+";"
@@ -90,11 +90,58 @@ function collectExpiredCoin(userdets,coin,callback){
 			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
 			+"txnpost id:"+txnid+" auto:true txndelete:true;";
 	
+	//Run it.. 
 	MDS.cmd(cmd,function(resp){
-		MDS.log(JSON.stringify(resp));
+		//always delete whatever happens
+		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			if(callback){
+				callback(resp);
+			}
+		});
+	});
+}
+
+//Check if there are any coins in the HTLC that have expired..
+function checkMinimaHTLC(callback){
+	
+	//First search coins
+	var cmd = "coins simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	MDS.cmd(cmd,function(resp){
 		
-		if(callback){
-			callback(resp);
+		//How many coins..
+		var len=resp.response.length;
+		if(len>0){
+			
+			//Now cycle through the coins..
+			for(var i=0;i<len;i++){
+				//Get the coin
+				var coin=resp.response[i];
+				try{
+					//Are we the Counterparty..
+					if(coin.state[4] == USER_DETAILS.minimapublickey){
+						checkCanCollectCoin(coin);		
+					}
+				}catch(e){
+					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin));
+				}
+			}
+		}
+	});
+}
+
+function checkCanCollectCoin(coin, callback){
+	
+	//What is the hash of the secret
+	var hash = coin.state[5];
+	
+	//Do we know the secret..
+	getSecretFromHash(hash, function(secret){
+		if(secret != null){
+			
+			//We know the secret! - Collect this coin..
+			
+			
 		}
 	})
+	
 }
