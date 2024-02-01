@@ -103,8 +103,8 @@
 		MDS.cmd("getaddress",function(getaddr){
 			var address = getaddr.response.miniaddress;
 			
-			//And send from the native wallet..
-			sendFromNativeWallet(USER_DETAILS,amount,address,function(resp){
+			//And send from the native wallet.. no state vars
+			sendFromNativeWallet(USER_DETAILS,amount,address,{},function(resp){
 				if(resp.status){
 					alert("Funds withdrawn to main wallet!");
 				}else{

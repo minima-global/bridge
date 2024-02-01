@@ -37,6 +37,10 @@ function checkIsNumber(val){
 		return false;
 	}
 	
+	if(val == ""){
+		return false;
+	}
+	
 	return (val == +val);
 }
 
@@ -46,6 +50,10 @@ function checkIsPositiveNumber(val){
 	}
 	
 	return (val>0);
+}
+
+function randomInteger(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 //Get the current block

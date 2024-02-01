@@ -1,0 +1,100 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/pagelayout.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/swap.js"></script>
+	
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		createHeader();
+	</script>
+	
+	SWAP Minima for wMinima on ETH<br>
+	<br>
+	<br>
+	
+	<div id="swapproceed"></div>
+	
+	<script type="text/javascript">
+		createFooter();
+	</script>
+	
+<script type="text/javascript">
+	
+	var USER_DETAILS = {};
+	
+	//How much Native Minima are we swapping..
+	var sendamount 	= MDS.form.getParams("amount");
+	
+	var reqamount 		= 0;
+	var reqpublickey 	= "0x00";
+	
+	//Start a native swap..
+	function proceed(){
+		
+		//Send Minima to the HTLC..
+		startNativeSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
+			if(resp.status){
+				alert("Swap started!");
+				
+				//Ok - lets jump to the next page..
+				location.href="swap.html?uid="+MDS.minidappuid;
+				
+			}else{
+				alert(resp.error);
+			}
+		});
+	}
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		
+		//Do initialisation
+		if(msg.event == "inited"){
+			getUserDetails(function(userdets){
+				USER_DETAILS=userdets;
+				
+				//Search for a User in the OrderBook..
+				//..
+				
+				//Found! - calculate request amount with FEE and public key of swapper
+				reqamount 	 =	sendamount-1;
+				reqpublickey = "0xFF";
+				
+				//Now set
+				swapproceed.innerHTML="Have found a match!<br><br>You send "+sendamount
+									+" Minima and receive "+reqamount+" wMinima on ETH<br><br>"
+									+"<button onclick='proceed();'>PROCEED</button><br><br><br>"
+									+"You <b>MUST</b> have some ETH to collect the wMinima..";
+				
+			});
+		}
+	});
+
+</script>
+
+</body>
+
+</html>

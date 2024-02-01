@@ -37,12 +37,17 @@ function depositNativeMinima(userdets, amount, callback){
 	});
 }
 
-function sendFromNativeWallet(userdets, amount, address, callback){
+function sendFromNativeWallet(userdets, amount, address, state, callback){
+	
+	//The state ius a JSON of the state
+	var statestr = JSON.stringify(state);
+	
 	//Send that amount to his address
 	MDS.cmd("send amount:"+amount
 			+" address:"+address
 			+" fromaddress:"+userdets.minimaaddress.mxaddress
 			+" signkey:"+userdets.minimapublickey
+			+" state:"+statestr
 			+" tokenid:0x00", function(resp){
 		callback(resp);				
 	});

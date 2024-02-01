@@ -29,7 +29,7 @@ function createDB(callback){
 function createSecretHash(callback){
 	
 	//First create a random 32 byte
-	MDS.cmd("random",function(random){
+	MDS.cmd("random type:sha2",function(random){
 		
 		var secret 	= random.response.random;
 		var hash 	= random.response.hashed;
@@ -57,7 +57,7 @@ function getSecretFromHash(hash, callback){
 }
 
 function checkSecret(secret, hash, callback){
-	var cmd = "runscript script:\"LET hash=SHA3("+secret+")\"";
+	var cmd = "runscript script:\"LET hash=SHA2("+secret+")\"";
 	MDS.cmd(cmd,function(resp){
 		//Get the value
 		var hashed = resp.response.variables.hash;

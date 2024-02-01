@@ -75,11 +75,18 @@ function broadcastMyOrderBook(callback){
 	});
 }
 
+
+
 //Main message handler..
 MDS.init(function(msg){
 	
 	//Do initialisation
 	if(msg.event == "inited"){
+		
+		//Set Up the HTLC contract script
+		setUpHTLCScript(function(resp){
+			//MDS.log("HTLC : "+JSON.stringify(resp));
+		});	
 			
 		//Set up the DB
 		//..
@@ -97,6 +104,10 @@ MDS.init(function(msg){
 	}else if(msg.event == "MDS_TIMER_10SECONDS"){
 		//Check if your order book has changed..
 		checkMyOrderBook();
+	
+	}else if(msg.event == "MDS_TIMER_60SECONDS"){
+		//Check expired coins
+		checkTimeLockMinimaHTLC(function(expired){});
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		//Always publish your book every hour
