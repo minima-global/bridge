@@ -149,36 +149,44 @@ function checkCanCollectCoin(coin, callback){
 			
 		}else{
 			
-			//Have we sent the OTHER side txn to get them to reveal the secret..
-			haveSentCounterPartyTxn(hash,function(sent){
-				if(!sent){
+			//Did we start this 
+			haveStartedCounterPartySwap(hash,function(started){
+				
+				//If we didn't start it.. check if we will respond..
+				if(!started){
 					
-					//Check the details are valid!.. FEES etc.. 
-					//..
-					
-					//Send the ETH counter TXN - to make him reveal the secret
-					//..
-					
-					//FOR NOW..use Minima..
-					var state = {};
-					state[0]  = userdets.minimapublickey;
-					state[1]  = requestamount;
-					state[2]  = "0x00000001"; // wMinima on ETH
-					state[3]  = timelock;
-					state[4]  = swappublickey;
-					state[5]  = secret;
-					 
-					//And send from the native wallet..
-					sendFromNativeWallet(userdets,amount,HTLC_ADDRESS,state,function(resp){
-						callback(resp);	
-					});	
-					
-					//It's sent..
-					sentCounterPartyTxn(hash,function(){
-						if(callback){
-							callback();
+					//Have we sent the OTHER side txn to get them to reveal the secret..
+					haveSentCounterPartyTxn(hash,function(sent){
+						if(!sent){
+							
+							//Check the details are valid!.. FEES etc.. 
+							//..
+							
+							//Send the ETH counter TXN - to make him reveal the secret
+							//..
+							
+							//FOR NOW..use Minima..
+							var state = {};
+							state[0]  = userdets.minimapublickey;
+							state[1]  = requestamount;
+							state[2]  = "0x00000001"; // wMinima on ETH
+							state[3]  = timelock;
+							state[4]  = swappublickey;
+							state[5]  = secret;
+							 
+							//And send from the native wallet..
+							//sendFromNativeWallet(userdets,amount,HTLC_ADDRESS,state,function(resp){
+							//	callback(resp);	
+							//});	
+							
+							//It's sent..
+							sentCounterPartyTxn(hash,function(){
+								if(callback){
+									callback();
+								}
+							});	
 						}
-					});	
+					});			
 				}
 			});
 		}

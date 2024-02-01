@@ -111,20 +111,48 @@ function checkSecret(secret, hash, callback){
 /**
  * Counterparty events..
  */
+function startedCounterPartySwap(hash,callback){
+	_insertCounterPartyEvent(hash,"HTLC_STARTED",function(resp){
+		if(callback){
+			callback(resp);
+		}
+	});
+}
+
+function haveStartedCounterPartySwap(hash,callback){
+	_checkCounterPartyEvent(hash,"HTLC_STARTED",function(resp){
+		callback(resp);
+	});
+}
+
 function sentCounterPartyTxn(hash,callback){
+	_insertCounterPartyEvent(hash,"CPTXN_SENT",function(resp){
+		if(callback){
+			callback(resp);
+		}
+	});
+}
+
+function haveSentCounterPartyTxn(hash, callback){
+	_checkCounterPartyEvent(hash,"CPTXN_SENT",function(resp){
+		callback(resp);
+	});
+}
+
+function _insertCounterPartyEvent(hash,event,callback){
 	
 	//the date
 	var recdate = new Date();
 	
 	//Insert into DB
-	var sql = "INSERT INTO counterparty(hash,event,eventdate) VALUES ('"+hash+"','CPTXN_SENT',"+recdate.getTime()+")";
+	var sql = "INSERT INTO counterparty(hash,event,eventdate) VALUES ('"+hash+"','"+event+"',"+recdate.getTime()+")";
 	MDS.sql(sql,function(msg){
 		callback(msg);
 	});
 }
 
-function haveSentCounterPartyTxn(hash, callback){
-	MDS.sql("SELECT * FROM counterparty WHERE hash='"+hash+"' AND event='CPTXN_SENT'", function(sqlmsg){
+function _checkCounterPartyEvent(hash,event,callback){
+	MDS.sql("SELECT * FROM counterparty WHERE hash='"+hash+"' AND event='"+event+"'", function(sqlmsg){
 		callback(sqlmsg.rows.length>0);
 	});
 }

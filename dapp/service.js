@@ -8,10 +8,14 @@ MDS.load("./js/orderbook.js");
 MDS.load("./js/balance.js");
 MDS.load("./js/sql.js");
 MDS.load("./js/swap.js");
+MDS.load("./js/orderbookutil.js");
 
 //The USER details..
 var USER_DETAILS 	= {};
 var myoldorderbook 	= JSON.stringify(getEmptyOrderBook());
+
+//Are we providing liquidity
+var IS_LIQUIDITY = false;
 
 //Check YOUR orderBook details..
 function checkMyOrderBook(callback){
@@ -27,10 +31,14 @@ function checkMyOrderBook(callback){
 			MDS.log("My Order book changed..");
 			
 			//Get his balance..
-			broadcastMyOrderBook(function(sendvalid){
+			broadcastMyOrderBook(USER_DETAILS,function(sendvalid){
 				
 				//Success send..?
 				if(sendvalid){
+					
+					//Are we liquiduty - update on balance change
+					IS_LIQUIDITY = (myorderbook.nativeenable || myorderbook.wrappedenable);
+					
 					//Store for later
 					myoldorderbook = newbook;	
 				}
@@ -47,54 +55,22 @@ function checkMyOrderBook(callback){
 	});
 }
 
-function broadcastMyOrderBook(callback){
-	//My Order book
-	getMyOrderBook(function(myorderbook){
-		
-		//Get his balance..
-		getAllBalances(USER_DETAILS,function(balances){
-			
-			var orderbookmsg = {};
-			orderbookmsg.publickey 	= USER_DETAILS.minimapublickey;
-			orderbookmsg.orderbook 	= myorderbook;
-			orderbookmsg.balance 	= balances;
-		
-			//Send a message to the network..
-			MDS.log("Sending my orderbook to network.. "+JSON.stringify(orderbookmsg));
-			sendOrderBook(USER_DETAILS,orderbookmsg,function(resp){
-				if(!resp.status){
-					MDS.log("ERROR sending order book "+JSON.stringify(resp));
-					if(callback){
-						callback(false);
-					}
-				}else{
-					if(callback){
-						callback(true);
-					}		
-				}
-			});
-		});
-	});
-}
-
-
-
 //Main message handler..
 MDS.init(function(msg){
 	
 	//Do initialisation
 	if(msg.event == "inited"){
 		
-		//Set Up the HTLC contract script
-		setUpHTLCScript(function(resp){});	
-			
-		//Set up the DB
-		createDB(function(res){});
-		
 		//Get the main user details.. thesew don't change..
 		getUserDetails(function(userdets){
 			//Get User Details..
 			USER_DETAILS=userdets;
+			
+			//Set Up the HTLC contract script
+			setUpHTLCScript(function(resp){});	
+				
+			//Set up the DB
+			createDB(function(res){});
 				
 			//Check if your order book is blank..
 			checkMyOrderBook(function(){
@@ -112,6 +88,6 @@ MDS.init(function(msg){
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		//Always publish your book every hour
-		broadcastMyOrderBook();
+		broadcastMyOrderBook(USER_DETAILS);
 	}	
 });
