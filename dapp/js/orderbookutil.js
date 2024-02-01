@@ -23,8 +23,8 @@ function broadcastMyOrderBook(userdets,callback){
 	getOrderBookBalance(userdets,function(orderbook){
 		
 		//Send a message to the network..
-		MDS.log("Sending my orderbook to network.. "+JSON.stringify(orderbookmsg));
-		sendOrderBook(userdets,orderbookmsg,function(resp){
+		MDS.log("Sending my orderbook to network.. "+JSON.stringify(orderbook));
+		sendOrderBook(userdets,orderbook,function(resp){
 			if(!resp.status){
 				MDS.log("ERROR sending order book "+JSON.stringify(resp));
 				if(callback){

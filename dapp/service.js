@@ -13,6 +13,7 @@ MDS.load("./js/orderbookutil.js");
 //The USER details..
 var USER_DETAILS 	= {};
 var myoldorderbook 	= JSON.stringify(getEmptyOrderBook());
+var myoldbalance 	= {};
 
 //Are we providing liquidity
 var IS_LIQUIDITY = false;
@@ -48,6 +49,25 @@ function checkMyOrderBook(callback){
 				}	
 			});
 		}else{
+			
+			//Are we providing liquidity - if so check balance
+			if(IS_LIQUIDITY){
+				
+				//Check the balances..
+				getAllBalances(userdets,function(currentbalances){
+					
+					var oldstr = JSON.stringify(myoldbalance);
+					var newstr = JSON.stringify(currentbalances);
+					
+					if(oldstr != newstr){
+						
+					}
+				}); 
+				
+				
+			}
+			
+			
 			if(callback){
 				callback();
 			}
@@ -74,7 +94,13 @@ MDS.init(function(msg){
 				
 			//Check if your order book is blank..
 			checkMyOrderBook(function(){
-				MDS.log("Bridge Service inited..");	
+				
+				//And store the balances
+				getAllBalances(userdets,function(currentbalances){
+					myoldbalance = currentbalances;
+				
+					MDS.log("Bridge Service inited..");	
+				});	
 			});
 		});
 		
