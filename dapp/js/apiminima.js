@@ -38,6 +38,7 @@ function sendMinima(userdets, amount, address, state, callback){
 	
 	//Send that amount to his address
 	MDS.cmd("send amount:"+amount
+	  		+" mine:true"
 			+" address:"+address
 			+" fromaddress:"+userdets.minimaaddress.mxaddress
 			+" signkey:"+userdets.minimapublickey
@@ -145,7 +146,7 @@ function checkExpiredMinimaHTLC(userdets, callback){
 							}	
 						}
 					}catch(e){
-						MDS.log("ERROR parsing expired coin : "+JSON.stringify(coin));
+						MDS.log("ERROR parsing expired coin : "+JSON.stringify(coin)+" "+e);
 					}
 				}
 				

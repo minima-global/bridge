@@ -1,5 +1,5 @@
 
-var TOKEN_ID_TEST ="0x2120C39F3A81DDB7A463840A3ED141AF66153DC89AC879C1D0BF621C5BB8A8D7";
+var TOKEN_ID_TEST ="0xF5CFEC47B652DEA8E62C444107FA5CC91F122F47E3DDA14F0561E17450E59856";
 
 /**
  * Get the balance of your Minima Coins
@@ -56,6 +56,7 @@ function sendETH(userdets, amount, address, state, callback){
 	
 	//Send that amount to his address
 	MDS.cmd("send amount:"+amount
+			+" mine:true"
 			+" address:"+address
 			+" fromaddress:"+userdets.minimaaddress.mxaddress
 			+" signkey:"+userdets.minimapublickey
@@ -197,7 +198,7 @@ function _collectExpiredETHCoin(userdets,coin,callback){
 /**
  * Check if there are any SWAP coins
  */
-function checkETHSwapHTLC(callback){
+function checkETHSwapHTLC(userdets, callback){
 	
 	//First search coins
 	var cmd = "coins tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
@@ -213,8 +214,8 @@ function checkETHSwapHTLC(callback){
 				var coin=resp.response[i];
 				try{
 					//Are we the Counterparty..
-					if(coin.state[4] == USER_DETAILS.minimapublickey){
-						_checkCanCollectETHCoin(coin);		
+					if(coin.state[4] == userdets.minimapublickey){
+						_checkCanCollectETHCoin(userdets, coin, function(swapcoins){});		
 					}
 				}catch(e){
 					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
@@ -224,7 +225,9 @@ function checkETHSwapHTLC(callback){
 	});
 }
 
-function _checkCanCollectETHCoin(coin, callback){
+function _checkCanCollectETHCoin(userdets, coin, callback){
+	
+	MDS.log("CHECK ETH SWAP.. "+JSON.stringify(coin));
 	
 	//What is the hash of the secret
 	var hash = coin.state[5];
@@ -232,51 +235,10 @@ function _checkCanCollectETHCoin(coin, callback){
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
 		if(secret != null){
+			
 			//We know the secret! - Collect this coin..
-			MDS.log("Can Collect HTLC coin as we know secret!!");
+			MDS.log("Can Collect Minima HTLC coin as we know secret!!" +JSON.stringify(coin));
 			
-		}else{
-			
-			//Did we start this 
-			haveStartedCounterPartySwap(hash,function(started){
-				
-				//If we didn't start it.. check if we will respond..
-				if(!started){
-					
-					//Have we sent the OTHER side txn to get them to reveal the secret..
-					haveSentCounterPartyTxn(hash,function(sent){
-						if(!sent){
-							
-							//Check the details are valid!.. FEES etc.. 
-							//..
-							
-							//Send the ETH counter TXN - to make him reveal the secret
-							//..
-							
-							//FOR NOW..use Minima..
-							var state = {};
-							state[0]  = userdets.minimapublickey;
-							state[1]  = requestamount;
-							state[2]  = "0x00000001"; // wMinima on ETH
-							state[3]  = timelock;
-							state[4]  = swappublickey;
-							state[5]  = secret;
-							 
-							//And send from the native wallet..
-							//sendFromNativeWallet(userdets,amount,HTLC_ADDRESS,state,function(resp){
-							//	callback(resp);	
-							//});	
-							
-							//It's sent..
-							sentCounterPartyTxn(hash,function(){
-								if(callback){
-									callback();
-								}
-							});	
-						}
-					});			
-				}
-			});
 		}
 	});
 }
