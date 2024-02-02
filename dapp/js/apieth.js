@@ -280,7 +280,6 @@ function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
 	
 	//Run it.. 
 	MDS.cmd(cmd,function(resp){
-		//MDS.log(JSON.stringify(resp));
 		
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){

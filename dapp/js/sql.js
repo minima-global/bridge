@@ -84,18 +84,24 @@ function insertSecret(secret,hash,callback){
 			checkSecret(secret,hash,function(valid){
 				if(!valid){
 					MDS.log("Attempt to add invalid secret.. ");
-					callback(false);
+					if(callback){
+						callback(false);	
+					}
 				}else{
 					
 					//Insert into the DB
 					var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
 					MDS.sql(sql,function(msg){
-						callback(true);
+						if(callback){
+							callback(true);	
+						}
 					});
 				}
 			});	
 		}else{
-			callback(true);
+			if(callback){
+				callback(true);	
+			}
 		}
 	});
 }

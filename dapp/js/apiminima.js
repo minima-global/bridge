@@ -134,7 +134,7 @@ function checkExpiredMinimaHTLC(userdets, callback){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
-								MDS.log("Timelock Collect Expired Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								MDS.log("Timelock Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 								
 								//Add to our list
 								expired.push(coin);
@@ -142,11 +142,11 @@ function checkExpiredMinimaHTLC(userdets, callback){
 								//Collect the coin
 								_collectExpiredCoin(userdets,coin,function(){});
 							}else{
-								MDS.log("Timelock CANNOT YET Collect Expired Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 							}	
 						}
 					}catch(e){
-						MDS.log("ERROR parsing expired coin : "+JSON.stringify(coin)+" "+e);
+						MDS.log("ERROR parsing Minima expired coin : "+JSON.stringify(coin)+" "+e);
 					}
 				}
 				
@@ -325,20 +325,40 @@ function _checkCanSwapCoin(userdets, coin, callback){
 	*/
 }
 
-function collectMinimaHTLCCoin(userdets, coin, callback){
+function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 	
 	//Random txn ID
 	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
 	
 	//Create a txn to collect this coin..
+	var finalamount = +coin.amount - 0.0001;
+			
 	var cmd = "txncreate id:"+txnid+";"
+	
+			//Add the HTLC coin..
 			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
-			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+coin.tokenamount+" address:"+userdets.minimaaddress.mxaddress+";"
+			
+			//Add an output to the notify coin address.. MUST be FIRST! @INPUT
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:0xFFEEDD9999;"
+			
+			//Send the coin back to me..
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+finalamount+" address:"+userdets.minimaaddress.mxaddress+";"
+			
+			//Set the correct state vars.. the secret etc..
+			+"txnstate id:"+txnid+" port:100 value:\""+secret+"\";"
+			+"txnstate id:"+txnid+" port:101 value:\""+hash+"\";"
+			+"txnstate id:"+txnid+" port:102 value:\"["+coin.state[0]+"]\";"
+			+"txnstate id:"+txnid+" port:103 value:\"["+coin.state[4]+"]\";"
+			
+			//Sign it..
 			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
+			
+			//AND POST!
 			+"txnpost id:"+txnid+" auto:true txndelete:true;";
 	
 	//Run it.. 
 	MDS.cmd(cmd,function(resp){
+		
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
 			if(callback){
@@ -347,3 +367,4 @@ function collectMinimaHTLCCoin(userdets, coin, callback){
 		});
 	});
 }
+

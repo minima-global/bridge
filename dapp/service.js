@@ -29,6 +29,9 @@ MDS.init(function(msg){
 			
 			//Set Up the HTLC contract script
 			setUpHTLCScript(function(resp){});	
+			
+			//We want to be notified of Coin Events
+			MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY);
 				
 			//Set up the DB
 			createDB(function(res){});
@@ -61,5 +64,37 @@ MDS.init(function(msg){
 		
 		//Always publish your book every hour
 		createAndSendOrderBook(USER_DETAILS);
+	
+	}else if(msg.event == "NOTIFYCOIN"){
+		
+		//Is it relevant to Bridge
+		if(msg.data.address ==  COIN_NOTIFY){
+			
+			//Is it relevant to us!
+			MDS.log("NOTIFYCOIN : "+JSON.stringify(msg.data));
+			
+			//Get the coin
+			var coin = msg.data;
+			
+			//Get the Relevant users..
+			var owner 		 = coin.state[102];
+			var counterparty = coin.state[103];
+			var weare 		 = "["+USER_DETAILS.minimapublickey+"]" 
+			
+			//Are we either..
+			if(owner==weare || counterparty==weare){
+				
+				//Get the secret and hash
+				var secret 	= coin.state[100];
+				var hash 	= coin.state[101];
+				
+				//Is it relevant to us!
+				MDS.log("NEW SECRET : "+secret+" : "+hash);
+			
+				//Put the secret and hash in the db
+				insertSecret(secret,hash);
+			}			
+		}
+		
 	}	
 });
