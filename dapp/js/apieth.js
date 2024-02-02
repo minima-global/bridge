@@ -239,6 +239,49 @@ function _checkCanCollectETHCoin(userdets, coin, callback){
 			//We know the secret! - Collect this coin..
 			MDS.log("Can Collect Minima HTLC coin as we know secret!!" +JSON.stringify(coin));
 			
+			//Collect the Minimam coin..
+			_collectETHHTLCCoin(userdets, coin, function(collect){
+				
+			});
 		}
 	});
 }
+
+function _collectETHHTLCCoin(userdets, coin, callback){
+	
+	//Random txn ID
+	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
+	
+	//Create a txn to collect this coin..
+	var cmd = "txncreate id:"+txnid+";"
+	
+			//Add the HTLC coin..
+			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
+			
+			//Send the coin back to me..
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+coin.tokenamount+" address:"+userdets.minimaaddress.mxaddress+";"
+			
+			//Also add an output to the notify coin address..
+			//..
+			
+			//Set the correct state vars.. the secret etc..
+			//..
+			
+			//Sign it..
+			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
+			
+			//AND POST!
+			+"txnpost id:"+txnid+" auto:true txndelete:true;";
+	
+	//Run it.. 
+	MDS.cmd(cmd,function(resp){
+		//always delete whatever happens
+		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			if(callback){
+				callback(resp);
+			}
+		});
+	});
+}
+
+

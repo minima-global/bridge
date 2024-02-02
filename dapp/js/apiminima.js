@@ -324,3 +324,26 @@ function _checkCanSwapCoin(userdets, coin, callback){
 	});
 	*/
 }
+
+function collectMinimaHTLCCoin(userdets, coin, callback){
+	
+	//Random txn ID
+	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
+	
+	//Create a txn to collect this coin..
+	var cmd = "txncreate id:"+txnid+";"
+			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+coin.tokenamount+" address:"+userdets.minimaaddress.mxaddress+";"
+			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
+			+"txnpost id:"+txnid+" auto:true txndelete:true;";
+	
+	//Run it.. 
+	MDS.cmd(cmd,function(resp){
+		//always delete whatever happens
+		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			if(callback){
+				callback(resp);
+			}
+		});
+	});
+}
