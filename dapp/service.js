@@ -33,8 +33,7 @@ MDS.init(function(msg){
 			//Set up the DB
 			createDB(function(res){});
 			
-			//HACK
-			//createAndSendOrderBook(USER_DETAILS);
+			//Check at startup..
 			checkNeedPublishOrderBook(USER_DETAILS);
 		
 			//Inited..	
@@ -44,10 +43,16 @@ MDS.init(function(msg){
 	}else if(msg.event == "MDS_TIMER_60SECONDS"){
 		
 		//Check expired Minima coins
-		checkExpiredMinimaHTLC(function(expired){});
+		checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
 		
 		//Check expired Wrappped Minima
-		checkExpiredETHHTLC(function(expired){});
+		checkExpiredETHHTLC(USER_DETAILS, function(expiredeth){});
+		
+		//Now check Minima for SWAPS
+		checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
+		
+		//Check ETH for SWAPS
+		//..
 		
 		//Check if my orderbook has changed..
 		checkNeedPublishOrderBook(USER_DETAILS);

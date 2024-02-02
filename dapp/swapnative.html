@@ -21,7 +21,9 @@
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/sql.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
-	<script type="text/javascript" src="./js/swap.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
+	<script type="text/javascript" src="./js/apieth.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
 	
 </head>
 
@@ -55,7 +57,7 @@
 	function proceed(){
 		
 		//Send Minima to the HTLC..
-		startNativeSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
+		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
 			if(resp.status){
 				alert("Swap started!");
 				

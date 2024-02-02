@@ -86,7 +86,7 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 	getCurrentBlock(function(block){
 		
 		//How long do we wait..
-		var timelock = +block+10;
+		var timelock = +block+20;
 		
 		//Create a secret
 		createSecretHash(function(hash){
@@ -118,7 +118,7 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 /**
  * Check if there are any coins in the HTLC that have expired..
  */
-function checkExpiredETHHTLC(callback){
+function checkExpiredETHHTLC(userdets, callback){
 	
 	//First search coins
 	var cmd = "coins tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
@@ -143,7 +143,7 @@ function checkExpiredETHHTLC(callback){
 					var coin=resp.response[i];
 					try{
 						//Are we the Owner..
-						if(coin.state[0] == USER_DETAILS.minimapublickey){
+						if(coin.state[0] == userdets.minimapublickey){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
@@ -153,7 +153,7 @@ function checkExpiredETHHTLC(callback){
 								expired.push(coin);
 								
 								//Collect the coin
-								_collectExpiredETHCoin(USER_DETAILS, coin, function(){});
+								_collectExpiredETHCoin(userdets, coin, function(){});
 							}else{
 								MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
 							}	
@@ -200,7 +200,7 @@ function _collectExpiredETHCoin(userdets,coin,callback){
 function checkETHSwapHTLC(callback){
 	
 	//First search coins
-	var cmd = "coins simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	var cmd = "coins tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
 		//How many coins..
@@ -214,10 +214,10 @@ function checkETHSwapHTLC(callback){
 				try{
 					//Are we the Counterparty..
 					if(coin.state[4] == USER_DETAILS.minimapublickey){
-						_checkCanCollectCoin(coin);		
+						_checkCanCollectETHCoin(coin);		
 					}
 				}catch(e){
-					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin));
+					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 				}
 			}
 		}

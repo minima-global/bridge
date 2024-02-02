@@ -68,7 +68,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 	getCurrentBlock(function(block){
 		
 		//How long do we wait..
-		var timelock = +block+10;
+		var timelock = +block+20;
 		
 		//Create a secret
 		createSecretHash(function(hash){
@@ -78,7 +78,11 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 			state[1]  = requestamount;
 			state[2]  = "0x00000001"; // wMinima on ETH
 			state[3]  = timelock;
-			state[4]  = swappublickey;
+			
+			//FOR NOW..
+			//state[4]  = swappublickey;
+			state[4]  = userdets.minimapublickey;
+			
 			state[5]  = hash;
 			 
 			//And send from the native wallet..
@@ -100,7 +104,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 /**
  * Check if there are any coins in the HTLC that have expired..
  */
-function checkExpiredMinimaHTLC(callback){
+function checkExpiredMinimaHTLC(userdets, callback){
 	
 	//First search coins
 	var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
@@ -125,7 +129,7 @@ function checkExpiredMinimaHTLC(callback){
 					var coin=resp.response[i];
 					try{
 						//Are we the Owner..
-						if(coin.state[0] == USER_DETAILS.minimapublickey){
+						if(coin.state[0] == userdets.minimapublickey){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
@@ -135,7 +139,7 @@ function checkExpiredMinimaHTLC(callback){
 								expired.push(coin);
 								
 								//Collect the coin
-								_collectExpiredCoin(USER_DETAILS,coin,function(){});
+								_collectExpiredCoin(userdets,coin,function(){});
 							}else{
 								MDS.log("Timelock CANNOT YET Collect Expired Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 							}	
@@ -177,12 +181,12 @@ function _collectExpiredCoin(userdets,coin,callback){
 }
 
 /**
- * Check if there are any SWAP coins
+ * Check if there are any SWAP coins available on MINIMA
  */
-function checkMinimaSwapHTLC(callback){
+function checkMinimaSwapHTLC(userdets, callback){
 	
 	//First search coins
-	var cmd = "coins simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
 		//How many coins..
@@ -196,23 +200,71 @@ function checkMinimaSwapHTLC(callback){
 				try{
 					//Are we the Counterparty..
 					if(coin.state[4] == USER_DETAILS.minimapublickey){
-						_checkCanCollectCoin(coin);		
+						_checkCanSwapCoin(userdets, coin, function(res){});		
 					}
 				}catch(e){
-					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin));
+					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 				}
 			}
 		}
 	});
 }
 
-function _checkCanCollectCoin(coin, callback){
+function _checkCanSwapCoin(userdets, coin, callback){
+	
+	MDS.log("CHECK Minima SWAP.. "+JSON.stringify(coin));
 	
 	//What is the hash of the secret
 	var hash = coin.state[5];
 	
+	//HACK
+	//Have we sent the OTHER side txn to get them to reveal the secret..
+	haveSentCounterPartyTxn(hash,function(sent){
+		if(!sent){
+			
+			//Check the details are valid!.. FEES etc.. 
+			//..
+			
+			//Send the ETH counter TXN - to make him reveal the secret
+			var countertimelock = +coin.state[3] - 5;
+			var reqamount 		= coin.state[1];
+			
+			var state = {};
+			state[0]  = userdets.minimapublickey;
+			state[1]  = coin.amount;
+			state[2]  = "0x00"; // wMinima on ETH
+			state[3]  = countertimelock;
+			state[4]  = coin.state[0];
+			state[5]  = hash;
+			
+			MDS.log("Send counterparty txn! state:"+JSON.stringify(state));
+			 
+			//And send from the native wallet..
+			sendETH(userdets, reqamount, HTLC_ADDRESS, state, function(resp){
+				
+				//If success put in DB
+				if(resp.status){
+					MDS.log("SENT!")
+					sentCounterPartyTxn(hash,function(){
+						callback(resp);	
+					});
+				}else{
+					MDS.log("FAIL! "+JSON.stringify(resp));
+					
+					callback(resp);	
+				}	
+			});
+		}else{
+			
+			//Counter txn sent.. see if we should collect
+			
+		}
+	});
+	
+	return;
+	
 	//Do we know the secret..
-	getSecretFromHash(hash, function(secret){
+	/*getSecretFromHash(hash, function(secret){
 		if(secret != null){
 			//We know the secret! - Collect this coin..
 			MDS.log("Can Collect HTLC coin as we know secret!!");
@@ -235,19 +287,27 @@ function _checkCanCollectCoin(coin, callback){
 							//Send the ETH counter TXN - to make him reveal the secret
 							//..
 							
-							//FOR NOW..use Minima..
 							var state = {};
 							state[0]  = userdets.minimapublickey;
 							state[1]  = requestamount;
 							state[2]  = "0x00000001"; // wMinima on ETH
 							state[3]  = timelock;
 							state[4]  = swappublickey;
-							state[5]  = secret;
+							state[5]  = hash;
 							 
 							//And send from the native wallet..
-							//sendFromNativeWallet(userdets,amount,HTLC_ADDRESS,state,function(resp){
-							//	callback(resp);	
-							//});	
+							sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
+								
+								//If success put in DB
+								if(resp.status){
+									startedCounterPartySwap(hash,function(){
+										callback(resp);	
+									});
+								}else{
+									callback(resp);	
+								}	
+							});
+							
 							
 							//It's sent..
 							sentCounterPartyTxn(hash,function(){
@@ -261,4 +321,5 @@ function _checkCanCollectCoin(coin, callback){
 			});
 		}
 	});
+	*/
 }
