@@ -1,5 +1,5 @@
 
-var TOKEN_ID_TEST ="0xF5CFEC47B652DEA8E62C444107FA5CC91F122F47E3DDA14F0561E17450E59856";
+var TOKEN_ID_TEST ="0x9E205D98AC4B44BCBA477AB53A9898EDA1F7E6962A6CE2C7364A3004FD0C556B";
 
 /**
  * Get the balance of your Minima Coins
@@ -240,48 +240,57 @@ function _checkCanCollectETHCoin(userdets, coin, callback){
 			MDS.log("Can Collect Minima HTLC coin as we know secret!!" +JSON.stringify(coin));
 			
 			//Collect the Minimam coin..
-			_collectETHHTLCCoin(userdets, coin, function(collect){
+			_collectETHHTLCCoin(userdets, hash, secret, coin, function(collect){
 				
 			});
 		}
 	});
 }
 
-function _collectETHHTLCCoin(userdets, coin, callback){
+function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
 	
 	//Random txn ID
 	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
 	
 	//Create a txn to collect this coin..
+	var finalamount = +coin.tokenamount - 0.0001;
+			
 	var cmd = "txncreate id:"+txnid+";"
 	
 			//Add the HTLC coin..
 			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
 			
 			//Send the coin back to me..
-			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+coin.tokenamount+" address:"+userdets.minimaaddress.mxaddress+";"
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+finalamount+" address:"+userdets.minimaaddress.mxaddress+";"
 			
 			//Also add an output to the notify coin address..
-			//..
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:0xFFEEDD9999;"
 			
 			//Set the correct state vars.. the secret etc..
-			//..
+			+"txnstate id:"+txnid+" port:100 value:\""+secret+"\";"
+			+"txnstate id:"+txnid+" port:101 value:\""+hash+"\";"
+			+"txnstate id:"+txnid+" port:102 value:\"["+coin.state[0]+"]\";"
+			+"txnstate id:"+txnid+" port:103 value:\"["+coin.state[4]+"]\";";
 			
 			//Sign it..
-			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
+			//+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";";
 			
 			//AND POST!
-			+"txnpost id:"+txnid+" auto:true txndelete:true;";
+			//+"txnpost id:"+txnid+" auto:true txndelete:true;";
 	
-	//Run it.. 
-	MDS.cmd(cmd,function(resp){
-		//always delete whatever happens
-		MDS.cmd("txndelete id:"+txnid,function(delresp){
-			if(callback){
-				callback(resp);
-			}
-		});
-	});
+			MDS.log("Collect ETH : "+cmd);
+	
+			//Run it.. 
+			//MDS.cmd(cmd,function(resp){
+				//MDS.log(JSON.stringify(resp));
+				
+				//always delete whatever happens
+				/*MDS.cmd("txndelete id:"+txnid,function(delresp){
+					if(callback){
+						callback(resp);
+					}
+				});*/
+			//});
 }
 
 
