@@ -147,7 +147,7 @@ function checkExpiredETHHTLC(callback){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
-								MDS.log("Timelock Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								MDS.log("Timelock Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
 								
 								//Add to our list
 								expired.push(coin);
@@ -155,7 +155,7 @@ function checkExpiredETHHTLC(callback){
 								//Collect the coin
 								_collectExpiredETHCoin(USER_DETAILS, coin, function(){});
 							}else{
-								MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
 							}	
 						}
 					}catch(e){

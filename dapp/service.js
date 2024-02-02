@@ -4,14 +4,14 @@ MDS.load("./js/puresha1.js");
 MDS.load("./js/jslib.js");
 MDS.load("./js/scripts.js");
 MDS.load("./js/auth.js");
-MDS.load("./js/orderbook.js");
-MDS.load("./js/balance.js");
 MDS.load("./js/sql.js");
+MDS.load("./js/orderbook.js");
 MDS.load("./js/orderbookutil.js");
 
 //API files for Minima and ETH
 MDS.load("./js/apiminima.js");
 MDS.load("./js/apieth.js");
+MDS.load("./js/balance.js");
 
 //The USER details..
 var USER_DETAILS 	= {};

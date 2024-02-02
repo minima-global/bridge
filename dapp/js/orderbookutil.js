@@ -93,7 +93,6 @@ function checkNeedPublishOrderBook(userdets,callback){
 			//Are we providing liquidity
 			}else if(currentorderbook.nativeenable || currentorderbook.wrappedenable){
 				//Check balances for all - use rounded values to ignore the publish messages
-				
 				if( currentbalances.minima.rounded != myoldbalance.minima.rounded ||
 					currentbalances.eth.rounded != myoldbalance.eth.rounded){
 					MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
