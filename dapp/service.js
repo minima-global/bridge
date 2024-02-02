@@ -74,7 +74,7 @@ MDS.init(function(msg){
 			MDS.log("NOTIFYCOIN : "+JSON.stringify(msg.data));
 			
 			//Get the coin
-			var coin = msg.data;
+			var coin = msg.data.coin;
 			
 			//Get the Relevant users..
 			var owner 		 = coin.state[102];
