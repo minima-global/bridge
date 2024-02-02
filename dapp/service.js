@@ -7,8 +7,11 @@ MDS.load("./js/auth.js");
 MDS.load("./js/orderbook.js");
 MDS.load("./js/balance.js");
 MDS.load("./js/sql.js");
-MDS.load("./js/swap.js");
 MDS.load("./js/orderbookutil.js");
+
+//API files for Minima and ETH
+MDS.load("./js/apiminima.js");
+MDS.load("./js/apieth.js");
 
 //The USER details..
 var USER_DETAILS 	= {};
@@ -38,10 +41,13 @@ MDS.init(function(msg){
 			MDS.log("Bridge Service inited..");
 		});
 		
-	}else if(msg.event == "MDS_TIMER_10SECONDS"){
+	}else if(msg.event == "MDS_TIMER_60SECONDS"){
 		
-		//Check expired coins
-		//checkTimeLockMinimaHTLC(function(expired){});
+		//Check expired Minima coins
+		checkExpiredMinimaHTLC(function(expired){});
+		
+		//Check expired Wrappped Minima
+		checkExpiredETHHTLC(function(expired){});
 		
 		//Check if my orderbook has changed..
 		checkNeedPublishOrderBook(USER_DETAILS);

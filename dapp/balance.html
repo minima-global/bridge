@@ -19,6 +19,8 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
+	<script type="text/javascript" src="./js/apieth.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
 	
 </head>
@@ -35,17 +37,19 @@
 		<tr>
 			<td>Native Minima : </td>
 			<td><div id=nativeminimabalance>0</div></td>
-			<td>&nbsp;&nbsp;<button onclick="deposit();">DEPOSIT</button></td>
-			<td>&nbsp;&nbsp;<button onclick="withdraw();">WITHDRAW</button></td>
+			<td>&nbsp;&nbsp;<button onclick="depositMinima();">DEPOSIT MINIMA</button></td>
+			<td>&nbsp;&nbsp;<button onclick="withdrawMinima();">WITHDRAW MINIMA</button></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
-		<tr>
+	<!--<tr>
 			<td>ETH : </td>
 			<td><div id=ethbalance>0</div></td>
-		</tr>
+		</tr>-->	
 		<tr>
 			<td>wMinima : </td>
 			<td><div id=wminimabalance>0</div></td>
+			<td>&nbsp;&nbsp;<button onclick="depositETH();">DEPOSIT WMINIMA</button></td>
+			<td>&nbsp;&nbsp;<button onclick="withdrawETH();">WITHDRAW WMINIMA</button></td>
 		</tr>
 	</table>
 	<br><br>
@@ -64,14 +68,14 @@
 		getAllBalances(USER_DETAILS,function(balances){
 			
 			//Set the Minima...
-			nativeminimabalance.innerHTML = balances.nativeminima.total;	
+			nativeminimabalance.innerHTML = balances.minima.total;	
 			
 			//Fill in ETH details..
-			//..
+			wminimabalance.innerHTML = balances.eth.total;
 		});	
 	}
 	
-	function deposit(){
+	function depositMinima(){
 		var amount = prompt("How much Minima do you want to send to the Bridge Wallet ?","0");
 		if(amount == null){return;}
 		if(!checkIsPositiveNumber(amount)){
@@ -89,7 +93,7 @@
 		});
 	}
 	
-	function withdraw(){
+	function withdrawMinima(){
 		var amount = prompt("How much Minima do you want to withdraw from the Bridge Wallet ?","0");
 		if(amount == null){return;}
 		if(!checkIsPositiveNumber(amount)){
@@ -102,7 +106,48 @@
 			var address = getaddr.response.miniaddress;
 			
 			//And send from the native wallet.. no state vars
-			sendFromNativeWallet(USER_DETAILS,amount,address,{},function(resp){
+			sendMinima(USER_DETAILS,amount,address,{},function(resp){
+				if(resp.status){
+					alert("Funds withdrawn to main wallet!");
+				}else{
+					alert(resp.error);
+				}
+			});
+		});
+	}
+	
+	function depositETH(){
+		var amount = prompt("How much wMinima do you want to send to the Bridge Wallet ?","0");
+		if(amount == null){return;}
+		if(!checkIsPositiveNumber(amount)){
+			alert("Must be a valid number greater than zero.. "+amount);
+			return;
+		}
+		
+		//Send that amount to his address
+		depositWrappedMinima(USER_DETAILS, amount, function(resp){
+			if(resp.status){
+				alert("Funds Sent!");
+			}else{
+				alert(resp.error);
+			}
+		});
+	}
+	
+	function withdrawETH(){
+		var amount = prompt("How much wMinima do you want to withdraw from the Bridge Wallet ?","0");
+		if(amount == null){return;}
+		if(!checkIsPositiveNumber(amount)){
+			alert("Must be a valid number greater than zero.. "+amount);
+			return;
+		}
+			
+		//Get an address
+		MDS.cmd("getaddress",function(getaddr){
+			var address = getaddr.response.miniaddress;
+			
+			//And send from the native wallet.. no state vars
+			sendETH(USER_DETAILS,amount,address,{},function(resp){
 				if(resp.status){
 					alert("Funds withdrawn to main wallet!");
 				}else{

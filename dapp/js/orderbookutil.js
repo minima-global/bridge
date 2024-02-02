@@ -31,6 +31,8 @@ var myoldbalance	= {};
  */
 function createAndSendOrderBook(userdets, callback){
 	
+	MDS.log("Regular hourly orderbook update..");
+				
 	//Get order book and balance..
 	getMyOrderBook(function(currentorderbook){
 		getAllBalances(userdets,function(currentbalances){
@@ -48,6 +50,10 @@ function createAndSendOrderBook(userdets, callback){
 				if(sendvalid){
 					myoldorderbook  = currentorderbook;
 					myoldbalance	= currentbalances;
+				}else{
+					
+					//Wipe the order book so the timer check sends again..
+					myoldorderbook 	= getEmptyOrderBook();
 				}
 				
 				if(callback){
@@ -87,7 +93,9 @@ function checkNeedPublishOrderBook(userdets,callback){
 			//Are we providing liquidity
 			}else if(currentorderbook.nativeenable || currentorderbook.wrappedenable){
 				//Check balances for all - use rounded values to ignore the publish messages
-				if(currentbalances.nativeminima.rounded != myoldbalance.nativeminima.rounded){
+				
+				if( currentbalances.minima.rounded != myoldbalance.minima.rounded ||
+					currentbalances.eth.rounded != myoldbalance.eth.rounded){
 					MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
 					publishbook = true;
 				}
