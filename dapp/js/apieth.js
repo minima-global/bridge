@@ -260,37 +260,35 @@ function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
 			//Add the HTLC coin..
 			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
 			
+			//Add an output to the notify coin address.. MUST be FIRST! @INPUT
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:0xFFEEDD9999;"
+			
 			//Send the coin back to me..
 			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+finalamount+" address:"+userdets.minimaaddress.mxaddress+";"
-			
-			//Also add an output to the notify coin address..
-			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:0xFFEEDD9999;"
 			
 			//Set the correct state vars.. the secret etc..
 			+"txnstate id:"+txnid+" port:100 value:\""+secret+"\";"
 			+"txnstate id:"+txnid+" port:101 value:\""+hash+"\";"
 			+"txnstate id:"+txnid+" port:102 value:\"["+coin.state[0]+"]\";"
-			+"txnstate id:"+txnid+" port:103 value:\"["+coin.state[4]+"]\";";
+			+"txnstate id:"+txnid+" port:103 value:\"["+coin.state[4]+"]\";"
 			
 			//Sign it..
-			//+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";";
+			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
 			
 			//AND POST!
-			//+"txnpost id:"+txnid+" auto:true txndelete:true;";
+			+"txnpost id:"+txnid+" auto:true txndelete:true;";
 	
-			MDS.log("Collect ETH : "+cmd);
-	
-			//Run it.. 
-			//MDS.cmd(cmd,function(resp){
-				//MDS.log(JSON.stringify(resp));
-				
-				//always delete whatever happens
-				/*MDS.cmd("txndelete id:"+txnid,function(delresp){
-					if(callback){
-						callback(resp);
-					}
-				});*/
-			//});
+	//Run it.. 
+	MDS.cmd(cmd,function(resp){
+		//MDS.log(JSON.stringify(resp));
+		
+		//always delete whatever happens
+		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			if(callback){
+				callback(resp);
+			}
+		});
+	});
 }
 
 
