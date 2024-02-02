@@ -60,17 +60,11 @@
 	
 	var USER_DETAILS = {};
 	
-	var haveunconfirmed = false;
-	
 	function refresh(){
 		getAllBalances(USER_DETAILS,function(balances){
-			if(balances.nativeminima.unconfirmed != 0){
-				haveunconfirmed = true;
-				nativeminimabalance.innerHTML = balances.nativeminima.confirmed+" (unconfirmed:"+balances.nativeminima.unconfirmed+")";	
-			}else{
-				haveunconfirmed = false;
-				nativeminimabalance.innerHTML = balances.nativeminima.confirmed;
-			}
+			
+			//Set the Minima...
+			nativeminimabalance.innerHTML = balances.nativeminima.total;	
 			
 			//Fill in ETH details..
 			//..
@@ -131,10 +125,6 @@
 			
 		}else if(msg.event == "NEWBALANCE"){
 			refresh();
-		}else if(msg.event == "MDS_TIMER_60SECONDS"){
-			if(haveunconfirmed){
-				refresh();	
-			}
 		}
 	});
 

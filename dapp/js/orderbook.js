@@ -187,10 +187,18 @@ function getUniqueRecords(validrecords){
 function setMyOrderBook(nativeenable, nativefee, wrappedenable, wrappedfee, callback){
 	
 	var orderbook = {};
+	
 	orderbook.nativeenable 	= nativeenable;
-	orderbook.nativefee 	= nativefee;
+	orderbook.nativefee 	= Math.floor(+nativefee);
+	if(!nativeenable || orderbook.nativefee<=-100){
+		orderbook.nativefee = 0;	
+	}
+	
 	orderbook.wrappedenable	= wrappedenable;
-	orderbook.wrappedfee	= wrappedfee;
+	orderbook.wrappedfee	= Math.floor(+wrappedfee);
+	if(!wrappedenable || orderbook.wrappedfee<=-100){
+		orderbook.wrappedfee = 0;	
+	}
 	
 	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
 		if(callback){

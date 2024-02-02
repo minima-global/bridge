@@ -1,7 +1,25 @@
 
 function getNativeBalance(userdetails,callback){
-	MDS.cmd("balance address:"+userdetails.minimaaddress.mxaddress,function(resp){
-		callback(resp.response[0]);
+	MDS.cmd("balance address:"+userdetails.minimaaddress.mxaddress,function(balresp){
+		
+		var confirmed 	= balresp.response[0].confirmed;
+		var unconfirmed = balresp.response[0].unconfirmed;
+		
+		//Add the confirmed and unconfirmed
+		var add = "runscript script:\"LET total="+confirmed+"+"+unconfirmed
+				 +" LET roundedtotal=FLOOR(total)\"";
+			
+		MDS.cmd(add,function(resp){
+			//Round..
+			var minimabalance = {};
+			minimabalance.confirmed		= confirmed;
+			minimabalance.unconfirmed	= unconfirmed;
+			minimabalance.total 		= resp.response.variables.total;
+			minimabalance.rounded 		= resp.response.variables.roundedtotal;
+			
+			//Send this..
+			callback(minimabalance);		
+		});
 	});
 }
 
