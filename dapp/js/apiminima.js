@@ -77,13 +77,9 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 			var state = {};
 			state[0]  = userdets.minimapublickey;
 			state[1]  = requestamount;
-			state[2]  = "0x00000001"; // wMinima on ETH
+			state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]"; // wMinima on ETH
 			state[3]  = timelock;
-			
-			//FOR NOW..
-			//state[4]  = swappublickey;
-			state[4]  = userdets.minimapublickey;
-			
+			state[4]  = swappublickey;
 			state[5]  = hash;
 			 
 			//And send from the native wallet..
@@ -142,11 +138,11 @@ function checkExpiredMinimaHTLC(userdets, callback){
 								//Collect the coin
 								_collectExpiredCoin(userdets,coin,function(){});
 							}else{
-								MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 							}	
 						}
 					}catch(e){
-						MDS.log("ERROR parsing Minima expired coin : "+JSON.stringify(coin)+" "+e);
+						MDS.log("ERROR (checkExpiredMinimaHTLC) parsing Minima expired coin : "+JSON.stringify(coin)+" "+e);
 					}
 				}
 				
@@ -204,7 +200,7 @@ function checkMinimaSwapHTLC(userdets, callback){
 						_checkCanSwapCoin(userdets, coin, function(res){});		
 					}
 				}catch(e){
-					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
+					MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 				}
 			}
 		}
@@ -213,116 +209,40 @@ function checkMinimaSwapHTLC(userdets, callback){
 
 function _checkCanSwapCoin(userdets, coin, callback){
 	
-	MDS.log("CHECK Minima SWAP.. "+JSON.stringify(coin));
-	
 	//What is the hash of the secret
 	var hash = coin.state[5];
 	
-	//HACK
-	//Have we sent the OTHER side txn to get them to reveal the secret..
-	haveSentCounterPartyTxn(hash,function(sent){
-		if(!sent){
-			
-			//Check the details are valid!.. FEES etc.. 
-			//..
-			
-			//Send the ETH counter TXN - to make him reveal the secret
-			var countertimelock = +coin.state[3] - 5;
-			var reqamount 		= coin.state[1];
-			
-			var state = {};
-			state[0]  = userdets.minimapublickey;
-			state[1]  = coin.amount;
-			state[2]  = "0x00"; // wMinima on ETH
-			state[3]  = countertimelock;
-			state[4]  = coin.state[0];
-			state[5]  = hash;
-			
-			MDS.log("Send counterparty txn! state:"+JSON.stringify(state));
-			 
-			//And send from the native wallet..
-			sendETH(userdets, reqamount, HTLC_ADDRESS, state, function(resp){
-				
-				//If success put in DB
-				if(resp.status){
-					MDS.log("SENT!")
-					sentCounterPartyTxn(hash,function(){
-						callback(resp);	
-					});
-				}else{
-					MDS.log("FAIL! "+JSON.stringify(resp));
-					
-					callback(resp);	
-				}	
-			});
-		}else{
-			
-			//Counter txn sent.. see if we should collect
-			
-		}
-	});
-	
-	return;
-	
 	//Do we know the secret..
-	/*getSecretFromHash(hash, function(secret){
+	getSecretFromHash(hash, function(secret){
 		if(secret != null){
 			//We know the secret! - Collect this coin..
-			MDS.log("Can Collect HTLC coin as we know secret!!");
+			MDS.log("Can Collect Minima HTLC coin as we know secret!!");
+			
+			_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){
+				if(callback){
+					callback(resp);
+				}
+			});
 			
 		}else{
-			
-			//Did we start this 
-			haveStartedCounterPartySwap(hash,function(started){
-				
-				//If we didn't start it.. check if we will respond..
-				if(!started){
 					
-					//Have we sent the OTHER side txn to get them to reveal the secret..
-					haveSentCounterPartyTxn(hash,function(sent){
-						if(!sent){
-							
-							//Check the details are valid!.. FEES etc.. 
-							//..
-							
-							//Send the ETH counter TXN - to make him reveal the secret
-							//..
-							
-							var state = {};
-							state[0]  = userdets.minimapublickey;
-							state[1]  = requestamount;
-							state[2]  = "0x00000001"; // wMinima on ETH
-							state[3]  = timelock;
-							state[4]  = swappublickey;
-							state[5]  = hash;
-							 
-							//And send from the native wallet..
-							sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
-								
-								//If success put in DB
-								if(resp.status){
-									startedCounterPartySwap(hash,function(){
-										callback(resp);	
-									});
-								}else{
-									callback(resp);	
-								}	
-							});
-							
-							
-							//It's sent..
-							sentCounterPartyTxn(hash,function(){
-								if(callback){
-									callback();
-								}
-							});	
+			//Have we sent the OTHER side txn to get them to reveal the secret..
+			haveSentCounterPartyTxn(hash,function(sent){
+				if(!sent){
+					
+					//Check the details are valid!.. FEES etc.. 
+					//..
+					
+					//Send the ETH counter TXN - to make him reveal the secret
+					sendCounterPartyMinimaTxn(userdets,coin,function(resp){
+						if(callback){
+							callback(resp);
 						}
-					});			
+					});
 				}
 			});
 		}
-	});
-	*/
+	});	
 }
 
 function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
@@ -365,6 +285,38 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 				callback(resp);
 			}
 		});
+	});
+}
+
+function sendCounterPartyMinimaTxn(userdets, coin, callback){
+	
+	//Send the ETH counter TXN - to make him reveal the secret
+	var countertimelock = +coin.state[3] - 5;
+	var reqamount 		= coin.state[1];
+	var hash 			= coin.state[5];
+	
+	var state = {};
+	state[0]  = userdets.minimapublickey;
+	state[1]  = coin.amount;
+	state[2]  = "[MINIMA:0x00]"; // wMinima on ETH
+	state[3]  = countertimelock;
+	state[4]  = coin.state[0];
+	state[5]  = hash;
+	
+	MDS.log("Send ETH counterparty txn! state:"+JSON.stringify(state));
+	 
+	//And send from the native wallet..
+	sendETH(userdets, reqamount, HTLC_ADDRESS, state, function(resp){
+		
+		//If success put in DB
+		if(resp.status){
+			sentCounterPartyTxn(hash,function(){
+				callback(resp);	
+			});
+		}else{
+			MDS.log("FAIL! "+JSON.stringify(resp));
+			callback(resp);	
+		}	
 	});
 }
 

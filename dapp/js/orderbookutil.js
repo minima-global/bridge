@@ -31,10 +31,20 @@ var myoldbalance	= {};
  */
 function createAndSendOrderBook(userdets, callback){
 	
-	MDS.log("Regular hourly orderbook update..");
-				
 	//Get order book and balance..
 	getMyOrderBook(function(currentorderbook){
+		
+		//Do we need to send..
+		if(!currentorderbook.nativeenable && !currentorderbook.wrappedenable){
+			//no need..
+			if(callback){
+				callback(false);	
+			}
+			return;	
+		}
+		
+		MDS.log("Regular hourly orderbook update..");
+		
 		getAllBalances(userdets,function(currentbalances){
 				
 			//Create the complete book

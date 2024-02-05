@@ -78,12 +78,12 @@ function getSecretFromHash(hash, callback){
 function insertSecret(secret,hash,callback){
 	
 	//do we already have it..
-	getSecretFromHash(hash,function(secret){
-		if(secret == null){
+	getSecretFromHash(hash,function(getsecret){
+		if(getsecret == null){
 			//Check is Valid..
 			checkSecret(secret,hash,function(valid){
 				if(!valid){
-					MDS.log("Attempt to add invalid secret.. ");
+					MDS.log("ERROR : Attempt to add invalid secret! secret:"+secret+" hash:"+hash);
 					if(callback){
 						callback(false);	
 					}
@@ -100,7 +100,7 @@ function insertSecret(secret,hash,callback){
 			});	
 		}else{
 			if(callback){
-				callback(true);	
+				callback(false);	
 			}
 		}
 	});

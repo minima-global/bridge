@@ -64,7 +64,11 @@
 				location.href="swap.html?uid="+MDS.minidappuid;
 				
 			}else{
-				alert(resp.error);
+				if(resp.error){
+					alert(resp.error);	
+				}else{
+					alert(resp.message);	
+				}
 			}
 		});
 	}
@@ -82,7 +86,7 @@
 				
 				//Found! - calculate request amount with FEE and public key of swapper
 				reqamount 	 =	sendamount-1;
-				reqpublickey = "0xFF";
+				reqpublickey = "0xA196DF4F292E15F7EF8A812C2A2B6CD1020A1A02524296E5BDC1C312E2DB257F";
 				
 				//Now set
 				swapproceed.innerHTML="Have found a match!<br><br>You send "+sendamount

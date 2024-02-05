@@ -71,7 +71,7 @@ MDS.init(function(msg){
 		if(msg.data.address ==  COIN_NOTIFY){
 			
 			//Is it relevant to us!
-			MDS.log("NOTIFYCOIN : "+JSON.stringify(msg.data));
+			//MDS.log("NOTIFYCOIN : "+JSON.stringify(msg.data));
 			
 			//Get the coin
 			var coin = msg.data.coin;
@@ -87,14 +87,14 @@ MDS.init(function(msg){
 				//Get the secret and hash
 				var secret 	= coin.state[100];
 				var hash 	= coin.state[101];
-				
-				//Is it relevant to us!
-				MDS.log("NEW SECRET : "+secret+" : "+hash);
 			
 				//Put the secret and hash in the db
-				insertSecret(secret,hash);
+				insertSecret(secret,hash,function(added){
+					if(added){
+						MDS.log("NEW SECRET : "+secret+" : "+hash);		
+					}
+				});
 			}			
 		}
-		
 	}	
 });

@@ -95,7 +95,7 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 			var state = {};
 			state[0]  = userdets.minimapublickey;
 			state[1]  = requestamount;
-			state[2]  = "0x00"; // Minima TokenID
+			state[2]  = "[MINIMA:0x00]"; // Minima TokenID
 			state[3]  = timelock;
 			state[4]  = swappublickey;
 			state[5]  = hash;
@@ -156,11 +156,11 @@ function checkExpiredETHHTLC(userdets, callback){
 								//Collect the coin
 								_collectExpiredETHCoin(userdets, coin, function(){});
 							}else{
-								MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
+								//MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
 							}	
 						}
 					}catch(e){
-						MDS.log("ERROR parsing expired coin : "+JSON.stringify(coin)+" "+e);
+						MDS.log("ERROR (checkExpiredETHHTLC) parsing expired coin : "+JSON.stringify(coin)+" "+e);
 					}
 				}
 				
@@ -218,7 +218,7 @@ function checkETHSwapHTLC(userdets, callback){
 						_checkCanCollectETHCoin(userdets, coin, function(swapcoins){});		
 					}
 				}catch(e){
-					MDS.log("ERROR parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
+					MDS.log("ERROR (checkETHSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 				}
 			}
 		}
@@ -227,7 +227,7 @@ function checkETHSwapHTLC(userdets, callback){
 
 function _checkCanCollectETHCoin(userdets, coin, callback){
 	
-	MDS.log("CHECK ETH SWAP.. "+JSON.stringify(coin));
+	//MDS.log("CHECK ETH SWAP.. "+JSON.stringify(coin));
 	
 	//What is the hash of the secret
 	var hash = coin.state[5];
@@ -235,13 +235,31 @@ function _checkCanCollectETHCoin(userdets, coin, callback){
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
 		if(secret != null){
-			
 			//We know the secret! - Collect this coin..
-			MDS.log("Can Collect Minima HTLC coin as we know secret!!" +JSON.stringify(coin));
+			MDS.log("Can Collect ETH HTLC coin as we know secret!!");
 			
-			//Collect the Minimam coin..
-			_collectETHHTLCCoin(userdets, hash, secret, coin, function(collect){
-				
+			_collectETHHTLCCoin(userdets, hash, secret, coin, function(resp){
+				if(callback){
+					callback(resp);
+				}
+			});
+			
+		}else{
+					
+			//Have we sent the OTHER side txn to get them to reveal the secret..
+			haveSentCounterPartyTxn(hash,function(sent){
+				if(!sent){
+					
+					//Check the details are valid!.. FEES etc.. 
+					//..
+					
+					//Send the ETH counter TXN - to make him reveal the secret
+					sendCounterPartyETHTxn(userdets,coin,function(resp){
+						if(callback){
+							callback(resp);
+						}
+					});
+				}
 			});
 		}
 	});
@@ -290,4 +308,34 @@ function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
 	});
 }
 
-
+function sendCounterPartyETHTxn(userdets, coin, callback){
+	
+	//Send the ETH counter TXN - to make him reveal the secret
+	var countertimelock = +coin.state[3] - 5;
+	var reqamount 		= coin.state[1];
+	var hash 			= coin.state[5];
+	
+	var state = {};
+	state[0]  = userdets.minimapublickey;
+	state[1]  = coin.tokenamount;
+	state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]";
+	state[3]  = countertimelock;
+	state[4]  = coin.state[0];
+	state[5]  = hash;
+	
+	MDS.log("Send Minima counterparty txn! state:"+JSON.stringify(state));
+	 
+	//And send from the native wallet..
+	sendMinima(userdets, reqamount, HTLC_ADDRESS, state, function(resp){
+		
+		//If success put in DB
+		if(resp.status){
+			sentCounterPartyTxn(hash,function(){
+				callback(resp);	
+			});
+		}else{
+			MDS.log("FAIL! "+JSON.stringify(resp));
+			callback(resp);	
+		}	
+	});
+}
