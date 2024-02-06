@@ -58,6 +58,11 @@
 			<td>FEE as % :</td>
 			<td><input type=text id=wrappedfee placeholder=5 /></td>
 		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td>Minimum order :</td>
+			<td><input type=text id=minimumorder placeholder=1000 /></td>
+		</tr>
 	</table>
 	<br>
 	<br>
@@ -97,8 +102,14 @@
 			wrappedfeeamt 	= 0;
 		}
 		
+		var minorder = minimumorder.value;
+		if(!checkIsPositiveNumber(minorder)){
+			alert("You must specify a valid Minimum order");
+			return;
+		}
+		
 		//Store this..
-		setMyOrderBook(nativeenable,nativefeeamt, wrappedenable, wrappedfeeamt, function(dets){
+		setMyOrderBook(nativeenable,nativefeeamt, wrappedenable, wrappedfeeamt, minorder, function(dets){
 			
 			//Set details as may have been set to ZERO
 			setOrderBookDetails();
@@ -111,12 +122,14 @@
 	function setOrderBookDetails(){
 		//Get the details..
 		getMyOrderBook(function(orderbook){
+			MDS.log(JSON.stringify(orderbook));
 			
 			//Set GUI
 			usenativeminima.checked = orderbook.nativeenable;
 			nativefee.value			= orderbook.nativefee;
 			usewminima.checked		= orderbook.wrappedenable;
 			wrappedfee.value		= orderbook.wrappedfee;
+			minimumorder.value		= orderbook.minimum;
 		});
 	}
 	

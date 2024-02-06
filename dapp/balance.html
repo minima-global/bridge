@@ -68,10 +68,15 @@
 		getAllBalances(USER_DETAILS,function(balances){
 			
 			//Set the Minima...
-			nativeminimabalance.innerHTML = balances.minima.total;	
-			
+			if(balances.minima.unconfirmed != "0"){
+				nativeminimabalance.innerHTML = balances.minima.confirmed+" (unconfirmed:"+balances.minima.unconfirmed+")";	
+			}else{
+				nativeminimabalance.innerHTML = balances.minima.confirmed;
+			}
+				
 			//Fill in ETH details..
-			wminimabalance.innerHTML = balances.eth.total;
+			wminimabalance.innerHTML = balances.eth.confirmed;
+			
 		});	
 	}
 	

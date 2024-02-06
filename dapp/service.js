@@ -82,7 +82,7 @@ MDS.init(function(msg){
 			var weare 		 = "["+USER_DETAILS.minimapublickey+"]" 
 			
 			//Are we either..
-			if(owner==weare || counterparty==weare){
+			if(weare==owner || weare==counterparty){
 				
 				//Get the secret and hash
 				var secret 	= coin.state[100];
@@ -91,7 +91,7 @@ MDS.init(function(msg){
 				//Put the secret and hash in the db
 				insertSecret(secret,hash,function(added){
 					if(added){
-						MDS.log("NEW SECRET : "+secret+" : "+hash);		
+						MDS.log("NEW SECRET for hash "+hash);		
 					}
 				});
 			}			

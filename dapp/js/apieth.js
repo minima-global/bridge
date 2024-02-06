@@ -1,5 +1,5 @@
 
-var TOKEN_ID_TEST ="0x9E205D98AC4B44BCBA477AB53A9898EDA1F7E6962A6CE2C7364A3004FD0C556B";
+var TOKEN_ID_TEST ="0xAA2414B10902022418E837E36FB909257A21915FE1DD839208C2037034369E7C";
 
 /**
  * Get the balance of your Minima Coins
@@ -12,10 +12,9 @@ function getETHBalance(userdetails,callback){
 			
 			//Create balance object
 			var ethbalance 			= {};
-			ethbalance.confirmed	= 0;
-			ethbalance.unconfirmed	= 0;
+			ethbalance.confirmed 	= 0;
+			ethbalance.unconfirmed 	= 0;
 			ethbalance.total 		= 0;
-			ethbalance.rounded 		= 0;
 			ethbalance.coins		= 0;
 			
 			//Send this..
@@ -27,17 +26,16 @@ function getETHBalance(userdetails,callback){
 			
 			//Add the confirmed and unconfirmed
 			var add = "runscript script:\"LET total="+confirmed+"+"+unconfirmed
-					 +" LET roundedtotal=FLOOR(total)\"";
+				 	+" LET roundedtotal=FLOOR(total)\"";
 				
 			MDS.cmd(add,function(resp){
 				
 				//Create balance object
 				var ethbalance 			= {};
-				ethbalance.confirmed	= confirmed;
-				ethbalance.unconfirmed	= unconfirmed;
-				ethbalance.total 		= resp.response.variables.total;
-				ethbalance.rounded 		= resp.response.variables.roundedtotal;
-				ethbalance.coins		= balresp.response[0].coins;
+				ethbalance.confirmed 	= confirmed;
+				ethbalance.unconfirmed 	= unconfirmed;
+				ethbalance.total 		= +resp.response.variables.roundedtotal;
+				ethbalance.coins		= +balresp.response[0].coins;
 				
 				//Send this..
 				callback(ethbalance);		

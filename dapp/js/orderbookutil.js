@@ -64,6 +64,7 @@ function createAndSendOrderBook(userdets, callback){
 					
 					//Wipe the order book so the timer check sends again..
 					myoldorderbook 	= getEmptyOrderBook();
+					myoldbalance	= {};
 				}
 				
 				if(callback){
@@ -73,7 +74,6 @@ function createAndSendOrderBook(userdets, callback){
 		});
 	});
 }
-
 
 function checkNeedPublishOrderBook(userdets,callback){
 	
@@ -103,8 +103,8 @@ function checkNeedPublishOrderBook(userdets,callback){
 			//Are we providing liquidity
 			}else if(currentorderbook.nativeenable || currentorderbook.wrappedenable){
 				//Check balances for all - use rounded values to ignore the publish messages
-				if( currentbalances.minima.rounded != myoldbalance.minima.rounded ||
-					currentbalances.eth.rounded != myoldbalance.eth.rounded){
+				if( currentbalances.minima.total != myoldbalance.minima.total ||
+					currentbalances.eth.total != myoldbalance.eth.total){
 					MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
 					publishbook = true;
 				}
@@ -126,6 +126,11 @@ function checkNeedPublishOrderBook(userdets,callback){
 					if(sendvalid){
 						myoldorderbook  = currentorderbook;
 						myoldbalance	= currentbalances;
+					}else{
+						
+						//Wipe so send again..
+						myoldorderbook 	= getEmptyOrderBook();
+						myoldbalance	= {};
 					}
 					
 					if(callback){
@@ -138,5 +143,126 @@ function checkNeedPublishOrderBook(userdets,callback){
 				}
 			}				
 		});
+	});
+}
+
+function getCompleteOrderBookTotals(completeorderbook,callback){
+	
+	var result = {};
+	
+	//How many valid books are there
+	result.totalbooks 		= 0;
+	result.minimum 			= 1000000000;
+	
+	result.minima 			= {};
+	result.minima.total 	= 0;
+	result.minima.maximum 	= 0;
+	
+	result.wminima 			= {};
+	result.wminima.total 	= 0;
+	result.wminima.maximum 	= 0;
+	
+	var len = completeorderbook.length;
+	for(var i=0;i<len;i++){
+		
+		var userorderbook 	= completeorderbook[i];
+		
+		var orderbk			= userorderbook.data.orderbook;
+		if(orderbk.nativeenable || orderbk.wrappedenable){
+			result.totalbooks++;
+		}
+		
+		if(+orderbk.minimum < +result.minimum){
+			result.minimum = +orderbk.minimum; 
+		}
+		
+		var userbalance = userorderbook.data.balance;
+		if(orderbk.nativeenable){
+			//get the available Minima..
+			result.minima.total += +userbalance.minima.total;
+			
+			//Check Maximum
+			if(+userbalance.minima.total > result.minima.maximum){
+				result.minima.maximum = +userbalance.minima.total;
+			}
+		}
+		
+		if(orderbk.wrappedenable){
+			//get the available Minima..
+			result.wminima.total += +userbalance.eth.total;
+			
+			//Check Maximum
+			if(+userbalance.eth.total > result.wminima.maximum){
+				result.wminima.maximum = +userbalance.eth.total;
+			}
+		}
+	}
+	
+	callback(result);
+}
+
+//I have AMOUNT of TOKEN to swap.. find the best order
+function searchOrderBook(token, amount, callback){
+	
+	//Get the complete order book
+	getCompleteOrderBook(function(completeorderbook){
+		
+		var validorders = [];
+		var currentfee 	= 1000000;
+		
+		//Cycle through the orders
+		var len = completeorderbook.length;
+		for(var i=0;i<len;i++){
+			
+			var data 		= completeorderbook[i].data;
+			var orderbook 	= data.orderbook;
+			var balance 	= data.balance;
+			
+			//Which side of the trade are we checking..
+			if(amount >= orderbook.minimum){
+				if(token == "minima" && orderbook.wrappedenable && balance.eth.total >= amount){
+					
+					//Check fee..
+					if(+orderbook.wrappedfee == currentfee){
+						//Same fee just add..
+						validorders.push(data);
+							
+					}else if(+orderbook.wrappedfee < currentfee){
+						//NEW lowest fee..
+						validorders = [];
+						currentfee	= +orderbook.wrappedfee;
+						validorders.push(data);
+					}
+					
+				}else if(token == "wminima" && orderbook.nativeenable && balance.minima.total >= amount){
+					
+					//Check fee..
+					if(+orderbook.nativefee == currentfee){
+						//Same fee just add..
+						validorders.push(data);
+							
+					}else if(+orderbook.nativefee < currentfee){
+						//NEW lowest fee..
+						validorders = [];
+						currentfee	= +orderbook.nativefee;
+						validorders.push(data);
+					}
+				}
+			}
+		}
+		
+		//Any at all found ?
+		if(validorders.length == 0){
+			callback(false,{});
+			return;
+		}
+		
+		//MDS.log("Found valid orders : "+validorders.length);
+		
+		//Pick a random one..
+		var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
+
+		//Send it back..
+		callback(true,finalorder);
 	});
 }

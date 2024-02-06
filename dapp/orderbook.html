@@ -22,6 +22,7 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/orderbookutil.js"></script>
 	
 </head>
 
@@ -34,6 +35,9 @@
 	Complete order book for Bridge<br>
 	<br>
 	<pre style="text-align:left;width:200;" id=completeorderbook></pre>
+	
+	<br>
+	<table style="maxwidth:800;" id=ordertable></table>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -49,16 +53,17 @@
 		//Load the complete order book..
 		getCompleteOrderBook(function(orderbook){
 			
-			var totalorder = orderbook.length;
-			
-			//Show with pretty graphics..
-			completeorderbook.innerHTML = "TOTAL:"+totalorder
-			+"<br><br>"
-			+JSON.stringify(orderbook,null,2);
-			
+			var totalorder = getCompleteOrderBookTotals(orderbook,function(res){
+				
+				var data = JSON.stringify(res,null,2)+"<br><br>"+JSON.stringify(orderbook,null,2);
+				//var data = JSON.stringify(res,null,2);
+				
+				//Show with pretty graphics..
+				completeorderbook.innerHTML = data;
+			});
 		});
-		
 	}
+	
 	
 	//Main message handler..
 	MDS.init(function(msg){
@@ -66,6 +71,10 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			loadCompleteOrderBook();
+			
+			searchOrderBook("wminima",20,function(found,chosen){
+				MDS.log("CHOSEN:"+JSON.stringify(chosen));
+			});
 		}
 	});
 

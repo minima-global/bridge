@@ -16,11 +16,10 @@ function getMinimaBalance(userdetails,callback){
 			
 			//Create balance object
 			var minimabalance = {};
-			minimabalance.confirmed		= confirmed;
-			minimabalance.unconfirmed	= unconfirmed;
-			minimabalance.total 		= resp.response.variables.total;
-			minimabalance.rounded 		= resp.response.variables.roundedtotal;
-			minimabalance.coins			= balresp.response[0].coins;
+			minimabalance.confirmed 	= confirmed;
+			minimabalance.unconfirmed 	= unconfirmed;
+			minimabalance.total 		= +resp.response.variables.roundedtotal;
+			minimabalance.coins			= +balresp.response[0].coins;
 			
 			//Send this..
 			callback(minimabalance);		

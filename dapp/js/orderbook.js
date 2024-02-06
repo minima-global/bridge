@@ -43,12 +43,26 @@ function sendOrderBook(userdetails, objson, callback){
 		
 		//Send from the bridge wallet..
 		var sendfrom = "fromaddress:"+userdetails.minimaaddress.mxaddress+" signkey:"+userdetails.minimapublickey;
-		
 		var func = "send "+sendfrom+" amount:0.0000000001 address:"+BRIDGEORDERBBOK+" state:"+JSON.stringify(state);
 			
 		MDS.cmd(func,function(resp){
-			if(callback){
-				callback(resp);
+			
+			//Did it work ?
+			if(!resp.status){
+				
+				//Try sending from the m,ain account..
+				var func = "send amount:0.0000000001 address:"+BRIDGEORDERBBOK+" state:"+JSON.stringify(state);
+				MDS.cmd(func,function(respmain){
+					MDS.log("Send orderbook from Bridge account failed.. trying main account..");
+					if(callback){
+						callback(respmain);
+					}	
+				});
+				
+			}else{
+				if(callback){
+					callback(resp);
+				}	
 			}		
 		});	
 	});
@@ -80,7 +94,7 @@ function getCompleteOrderBook(callback){
 function _getAllOrderCoins(callback){
 	
 	//Search for coins..
-	var search = "coins simplestate:true address:"+BRIDGEORDERBBOK;
+	var search = "coins depth:512 simplestate:true address:"+BRIDGEORDERBBOK;
 	
 	//Run it..
 	MDS.cmd(search,function(resp){
@@ -167,7 +181,7 @@ function getUniqueRecords(validrecords){
 			    var orderstr = decodeStringFromDB(record.data);
 			
 				//Convert to a JSON
-				ob.orderbook = JSON.parse(orderstr);
+				ob.data = JSON.parse(orderstr);
 				
 				//Add it to our list
 				orderbook.push(ob);
@@ -184,20 +198,25 @@ function getUniqueRecords(validrecords){
 	return orderbook;
 }
 
-function setMyOrderBook(nativeenable, nativefee, wrappedenable, wrappedfee, callback){
+function setMyOrderBook(nativeenable, nativefee, wrappedenable, wrappedfee, minimumorder, callback){
 	
 	var orderbook = {};
 	
 	orderbook.nativeenable 	= nativeenable;
-	orderbook.nativefee 	= Math.floor(+nativefee);
+	orderbook.nativefee 	= +Number.parseFloat(nativefee).toFixed(2);
 	if(!nativeenable || orderbook.nativefee<=-100){
 		orderbook.nativefee = 0;	
 	}
 	
 	orderbook.wrappedenable	= wrappedenable;
-	orderbook.wrappedfee	= Math.floor(+wrappedfee);
+	orderbook.wrappedfee	= +Number.parseFloat(wrappedfee).toFixed(2);
 	if(!wrappedenable || orderbook.wrappedfee<=-100){
 		orderbook.wrappedfee = 0;	
+	}
+	
+	orderbook.minimum = Math.floor(+minimumorder);
+	if(!nativeenable && !wrappedenable){
+		orderbook.minimum = 0;
 	}
 	
 	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
@@ -227,5 +246,6 @@ function getEmptyOrderBook(){
 	orderbook.nativefee 	= 0;
 	orderbook.wrappedenable	= false;
 	orderbook.wrappedfee	= 0;
+	orderbook.minimum		= 0;
 	return orderbook;
 }
