@@ -202,7 +202,7 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 }
 
 //I have AMOUNT of TOKEN to swap.. find the best order
-function searchOrderBook(token, amount, callback){
+function searchOrderBook(token, amount, ignoreme, callback){
 	
 	//Get the complete order book
 	getCompleteOrderBook(function(completeorderbook){
@@ -215,37 +215,40 @@ function searchOrderBook(token, amount, callback){
 		for(var i=0;i<len;i++){
 			
 			var data 		= completeorderbook[i].data;
+			var user		= data.publickey;
 			var orderbook 	= data.orderbook;
 			var balance 	= data.balance;
 			
 			//Which side of the trade are we checking..
-			if(amount >= orderbook.minimum){
-				if(token == "minima" && orderbook.wrappedenable && balance.eth.total >= amount){
-					
-					//Check fee..
-					if(+orderbook.wrappedfee == currentfee){
-						//Same fee just add..
-						validorders.push(data);
-							
-					}else if(+orderbook.wrappedfee < currentfee){
-						//NEW lowest fee..
-						validorders = [];
-						currentfee	= +orderbook.wrappedfee;
-						validorders.push(data);
-					}
-					
-				}else if(token == "wminima" && orderbook.nativeenable && balance.minima.total >= amount){
-					
-					//Check fee..
-					if(+orderbook.nativefee == currentfee){
-						//Same fee just add..
-						validorders.push(data);
-							
-					}else if(+orderbook.nativefee < currentfee){
-						//NEW lowest fee..
-						validorders = [];
-						currentfee	= +orderbook.nativefee;
-						validorders.push(data);
+			if(user != ignoreme){
+				if(amount >= orderbook.minimum){
+					if(token == "minima" && orderbook.wrappedenable && balance.eth.total >= amount){
+						
+						//Check fee..
+						if(+orderbook.wrappedfee == currentfee){
+							//Same fee just add..
+							validorders.push(data);
+								
+						}else if(+orderbook.wrappedfee < currentfee){
+							//NEW lowest fee..
+							validorders = [];
+							currentfee	= +orderbook.wrappedfee;
+							validorders.push(data);
+						}
+						
+					}else if(token == "wminima" && orderbook.nativeenable && balance.minima.total >= amount){
+						
+						//Check fee..
+						if(+orderbook.nativefee == currentfee){
+							//Same fee just add..
+							validorders.push(data);
+								
+						}else if(+orderbook.nativefee < currentfee){
+							//NEW lowest fee..
+							validorders = [];
+							currentfee	= +orderbook.nativefee;
+							validorders.push(data);
+						}
 					}
 				}
 			}
@@ -265,4 +268,20 @@ function searchOrderBook(token, amount, callback){
 		//Send it back..
 		callback(true,finalorder);
 	});
+}
+
+function calculateRequiredAmount(token,amount,order){
+	
+	//What is the fee..
+	var fee = 0;
+	if(token == "minima"){
+		fee = toFixedNumber(order.orderbook.nativefee);
+	}else{
+		fee = toFixedNumber(order.orderbook.wrappedfee);
+	}
+	
+	var feeamount 	= +amount * (fee / 100);
+	
+	//Calculate the amount of wMinima.. 
+	return toFixedNumber(+sendamount - feeamount);
 }

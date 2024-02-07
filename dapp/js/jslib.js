@@ -49,11 +49,15 @@ function checkIsPositiveNumber(val){
 		return false
 	}
 	
-	return (val>0);
+	return (+val>0);
 }
 
 function randomInteger(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function toFixedNumber(number){
+	return +Number.parseFloat(number).toFixed(2);
 }
 
 //Get the current block

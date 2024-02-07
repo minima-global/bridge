@@ -15,16 +15,20 @@
 	<link rel="icon" type="image/x-icon" href="favicon.ico">
 	
 	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/puresha1.js"></script>
 	<script type="text/javascript" src="./js/pagelayout.js"></script>
-	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
+	
+	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/sql.js"></script>
-	<script type="text/javascript" src="./js/balance.js"></script>
+	
 	<script type="text/javascript" src="./js/apiminima.js"></script>
 	<script type="text/javascript" src="./js/apieth.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
 	
+	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/orderbookutil.js"></script>
 </head>
 
 <body>
@@ -45,12 +49,10 @@
 	
 <script type="text/javascript">
 	
-	MDS.log("USER : 1");
-	
 	var USER_DETAILS = {};
 	
 	//How much Native Minima are we swapping..
-	var sendamount 	= MDS.form.getParams("amount");
+	var sendamount 	= toFixedNumber(MDS.form.getParams("amount"));
 	
 	var reqamount 		= 0;
 	var reqpublickey 	= "0x00";
@@ -58,6 +60,9 @@
 	//Start a native swap..
 	function proceed(){
 		
+		//Disable the button
+		proceedbutton.diabled=true;
+			
 		//Send Minima to the HTLC..
 		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
 			if(resp.status){
@@ -68,6 +73,9 @@
 				
 			}else{
 				alert(resp.error);
+				
+				//Disable the button
+				proceedbutton.diabled=false;
 			}
 		});
 	}
@@ -81,18 +89,28 @@
 				USER_DETAILS=userdets;
 				
 				//Search for a User in the OrderBook..
-				//..
-				
-				//Found! - calculate request amount with FEE and public key of swapper
-				reqamount 	 =	sendamount-1;
-				reqpublickey = "0xA196DF4F292E15F7EF8A812C2A2B6CD1020A1A02524296E5BDC1C312E2DB257F";
-				
-				//Now set
-				swapproceed.innerHTML="Have found a match!<br><br>You send "+sendamount
-									+" Minima and receive "+reqamount+" wMinima on ETH<br><br>"
-									+"<button onclick='proceed();'>PROCEED</button><br><br><br>"
-									+"You <b>MUST</b> have some ETH to collect the wMinima..";
-				
+				searchOrderBook("minima",sendamount,USER_DETAILS.minimapublickey,function(found,order){
+					
+					if(!found){
+						swapproceed.innerHTML="No match found for "+sendamount+" Minima..";
+					}else{
+						
+						//Get the details..
+						swapproceed.innerHTML=JSON.stringify(order,null,2);
+						
+						//Who is this?
+						reqpublickey = order.publickey;		
+						
+						//What is the amount.. we are requesting WMINIMA
+						var reqamount = calculateRequiredAmount("wminima",sendamount,order);
+						
+						//Set the details..
+						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>You send "+sendamount
+												+" Minima and receive "+reqamount+" wMinima on ETH<br><br>"
+												+"<button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
+												+"You <b>MUST</b> have some ETH to collect the wMinima..";					
+					}
+				});
 			});
 		}
 	});

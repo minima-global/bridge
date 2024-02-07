@@ -50,7 +50,7 @@ function sendOrderBook(userdetails, objson, callback){
 			//Did it work ?
 			if(!resp.status){
 				
-				//Try sending from the m,ain account..
+				//Hmm.. Try sending from the main account..
 				var func = "send amount:0.0000000001 address:"+BRIDGEORDERBBOK+" state:"+JSON.stringify(state);
 				MDS.cmd(func,function(respmain){
 					MDS.log("Send orderbook from Bridge account failed.. trying main account..");

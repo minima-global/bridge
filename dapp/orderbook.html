@@ -71,10 +71,6 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			loadCompleteOrderBook();
-			
-			searchOrderBook("wminima",20,function(found,chosen){
-				MDS.log("CHOSEN:"+JSON.stringify(chosen));
-			});
 		}
 	});
 

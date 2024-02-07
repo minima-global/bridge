@@ -63,20 +63,31 @@
 <script type="text/javascript">
 	
 	var USER_DETAILS = {};
+	var balanceunconfirmed = false;
+	
 	
 	function refresh(){
 		getAllBalances(USER_DETAILS,function(balances){
 			
 			//Set the Minima...
+			var balunconf = false;
 			if(balances.minima.unconfirmed != "0"){
 				nativeminimabalance.innerHTML = balances.minima.confirmed+" (unconfirmed:"+balances.minima.unconfirmed+")";	
+				balunconf = true;
 			}else{
 				nativeminimabalance.innerHTML = balances.minima.confirmed;
 			}
 				
 			//Fill in ETH details..
-			wminimabalance.innerHTML = balances.eth.confirmed;
+			if(balances.eth.unconfirmed != "0"){
+				wminimabalance.innerHTML = balances.eth.confirmed+" (unconfirmed:"+balances.eth.unconfirmed+")";	
+				balunconf = true;
+			}else{
+				wminimabalance.innerHTML = balances.eth.confirmed;
+			}
 			
+			//Any unconfirmed.. ?
+			balanceunconfirmed = balunconf;	
 		});	
 	}
 	
@@ -175,6 +186,12 @@
 			
 		}else if(msg.event == "NEWBALANCE"){
 			refresh();
+		
+		}else if(msg.event == "MDS_TIMER_60SECONDS"){
+			//Kepp doing this every 60 secs until there are no unconfirmed.. 
+			if(balanceunconfirmed){
+				refresh();
+			}
 		}
 	});
 
