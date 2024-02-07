@@ -92,14 +92,16 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 			
 			var state = {};
 			state[0]  = userdets.minimapublickey;
-			state[1]  = requestamount;
+			state[1]  = ""+requestamount;
 			state[2]  = "[MINIMA:0x00]"; // Minima TokenID
 			state[3]  = timelock;
 			state[4]  = swappublickey;
 			state[5]  = hash;
 			 
+			MDS.log("Start wMinima->Minima SWAP "+JSON.stringify(state));
+			
 			//And send from the native wallet..
-			sendETH(userdets,amount,HTLC_ADDRESS,state,function(resp){
+			sendETH(userdets,Math.floor(amount),HTLC_ADDRESS,state,function(resp){
 				
 				//If success put in DB
 				if(resp.status){
@@ -144,7 +146,7 @@ function checkExpiredETHHTLC(userdets, callback){
 						//Are we the Owner..
 						if(coin.state[0] == userdets.minimapublickey){
 							//Check if we can collect it..
-							var timelock=+coin.state[3];
+							var timelock=+coin.state[3]+2;
 							if(block>timelock){
 								MDS.log("Timelock Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
 								
@@ -249,12 +251,29 @@ function _checkCanCollectETHCoin(userdets, coin, callback){
 				if(!sent){
 					
 					//Check the details are valid!.. FEES etc.. 
-					//..
+					var sendamount 		= +coin.tokenamount; 
+					var requestamount 	= +coin.state[1];
 					
-					//Send the ETH counter TXN - to make him reveal the secret
-					sendCounterPartyETHTxn(userdets,coin,function(resp){
-						if(callback){
-							callback(resp);
+					getMyOrderBook(function(myorderbook){
+						
+						//Are we enablked for these swaps..
+						if(myorderbook.nativeenable){
+							
+							//Calculate how much we should send back..
+							var calcamount = calculateRequiredAmount("minima",sendamount,myorderbook);
+							if(calcamount >= requestamount){
+							
+								//Send the ETH counter TXN - to make him reveal the secret
+								_sendCounterPartyETHTxn(userdets,coin,function(resp){
+									if(callback){
+										callback(resp);
+									}
+								});		
+							}else{
+								MDS.log("Invalid request amount for wMinima SWAP sentwminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
+							}	
+						}else{
+							MDS.log("Invalid request for Minima swap - not enabled");
 						}
 					});
 				}
@@ -306,7 +325,7 @@ function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
 	});
 }
 
-function sendCounterPartyETHTxn(userdets, coin, callback){
+function _sendCounterPartyETHTxn(userdets, coin, callback){
 	
 	//Send the ETH counter TXN - to make him reveal the secret
 	var countertimelock = +coin.state[3] - 5;

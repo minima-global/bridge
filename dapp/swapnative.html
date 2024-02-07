@@ -61,7 +61,7 @@
 	function proceed(){
 		
 		//Disable the button
-		proceedbutton.diabled=true;
+		proceedbutton.disabled=true;
 			
 		//Send Minima to the HTLC..
 		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
@@ -72,10 +72,14 @@
 				location.href="swap.html?uid="+MDS.minidappuid;
 				
 			}else{
-				alert(resp.error);
+				if(resp.error){
+					alert(resp.error);	
+				}else{
+					alert(resp.message);
+				}
 				
 				//Disable the button
-				proceedbutton.diabled=false;
+				proceedbutton.disabled=false;
 			}
 		});
 	}
@@ -102,7 +106,7 @@
 						reqpublickey = order.publickey;		
 						
 						//What is the amount.. we are requesting WMINIMA
-						var reqamount = calculateRequiredAmount("wminima",sendamount,order);
+						reqamount = calculateRequiredAmount("wminima",sendamount,order.orderbook);
 						
 						//Set the details..
 						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>You send "+sendamount

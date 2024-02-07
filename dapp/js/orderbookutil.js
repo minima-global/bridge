@@ -152,7 +152,8 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 	
 	//How many valid books are there
 	result.totalbooks 		= 0;
-	result.minimum 			= 1000000000;
+	result.minimumminima	= 1000000000;
+	result.minimumwminima	= 1000000000;
 	
 	result.minima 			= {};
 	result.minima.total 	= 0;
@@ -172,10 +173,6 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 			result.totalbooks++;
 		}
 		
-		if(+orderbk.minimum < +result.minimum){
-			result.minimum = +orderbk.minimum; 
-		}
-		
 		var userbalance = userorderbook.data.balance;
 		if(orderbk.nativeenable){
 			//get the available Minima..
@@ -184,6 +181,10 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 			//Check Maximum
 			if(+userbalance.minima.total > result.minima.maximum){
 				result.minima.maximum = +userbalance.minima.total;
+			}
+			
+			if(+orderbk.minimum < +result.minimumminima){
+				result.minimumminima = +orderbk.minimum; 
 			}
 		}
 		
@@ -194,6 +195,10 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 			//Check Maximum
 			if(+userbalance.eth.total > result.wminima.maximum){
 				result.wminima.maximum = +userbalance.eth.total;
+			}
+			
+			if(+orderbk.minimum < +result.minimumwminima){
+				result.minimumwminima = +orderbk.minimum; 
 			}
 		}
 	}
@@ -270,18 +275,18 @@ function searchOrderBook(token, amount, ignoreme, callback){
 	});
 }
 
-function calculateRequiredAmount(token,amount,order){
+function calculateRequiredAmount(token,amount,orderbook){
 	
 	//What is the fee..
 	var fee = 0;
 	if(token == "minima"){
-		fee = toFixedNumber(order.orderbook.nativefee);
+		fee = toFixedNumber(orderbook.nativefee);
 	}else{
-		fee = toFixedNumber(order.orderbook.wrappedfee);
+		fee = toFixedNumber(orderbook.wrappedfee);
 	}
 	
-	var feeamount 	= +amount * (fee / 100);
+	var feeamount = +amount * (fee / 100);
 	
 	//Calculate the amount of wMinima.. 
-	return toFixedNumber(+sendamount - feeamount);
+	return toFixedNumber(+amount - feeamount);
 }

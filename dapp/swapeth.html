@@ -62,10 +62,10 @@
 	function proceed(){
 		
 		//Disable the button
-		proceedbutton.diabled=true;
+		proceedbutton.disabled=true;
 			
 		//Send Minima to the HTLC..
-		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
+		startETHSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
 			if(resp.status){
 				alert("Swap started!");
 				
@@ -73,10 +73,14 @@
 				location.href="swap.html?uid="+MDS.minidappuid;
 				
 			}else{
-				alert(resp.error);
+				if(resp.error){
+					alert(resp.error);	
+				}else{
+					alert(resp.message);
+				}
 				
 				//Disable the button
-				proceedbutton.diabled=false;
+				proceedbutton.disabled=false;
 			}
 		});
 	}
@@ -103,7 +107,7 @@
 						reqpublickey = order.publickey;		
 						
 						//What is the amount.. we are requesting MINIMA
-						var reqamount = calculateRequiredAmount("minima",sendamount,order);
+						reqamount = calculateRequiredAmount("minima",sendamount,order.orderbook);
 						
 						//Set the details..
 						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>You send "+sendamount

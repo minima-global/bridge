@@ -62,8 +62,11 @@
 			return;
 		}
 		
+		//Round..
+		var sndamt = Math.floor(amount);
+		
 		//Ok - lets jump to the next page..
-		location.href="swapnative.html?uid="+MDS.minidappuid+"&amount="+amount;
+		location.href="swapnative.html?uid="+MDS.minidappuid+"&amount="+sndamt;
 	}
 	
 	//Start a native swap..
@@ -74,8 +77,11 @@
 			return;
 		}
 		
+		//Round..
+		var sndamt = Math.floor(amount);
+		
 		//Ok - lets jump to the next page..
-		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+amount;
+		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+sndamt;
 	}
 	
 	//Main message handler..
