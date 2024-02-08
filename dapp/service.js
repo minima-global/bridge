@@ -28,7 +28,7 @@ MDS.init(function(msg){
 			USER_DETAILS=userdets;
 			
 			//Set Up the HTLC contract script
-			setUpHTLCScript(function(resp){});	
+			setUpHTLCScript(USER_DETAILS, function(resp){});	
 			
 			//We want to be notified of Coin Events
 			MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY);

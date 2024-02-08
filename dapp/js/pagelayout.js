@@ -11,13 +11,14 @@ function createHeader(){
 	"<center><h2>Bridge</h2>"+
 	"<table>"+	
 	"<tr>"+
-	"		<table width=800 border=1>"+
+	"		<table style='border-spacing:10;'>"+
 	"			<tr>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='index.html?uid="+uid+"'\">HOME</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='balance.html?uid="+uid+"'\">BALANCE</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='swap.html?uid="+uid+"'\">SWAP</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='liquidity.html?uid="+uid+"'\">LIQUIDITY</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='orderbook.html?uid="+uid+"'\">ORDERBOOK</button></td>"+
+	"				<td class=buttonlinks><button onclick=\"location.href='history.html?uid="+uid+"'\">HISTORY</button></td>"+
 	"			</tr>"+
 	"		</table>"+
 	"	</td>"+

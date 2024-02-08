@@ -1,5 +1,5 @@
 
-var TOKEN_ID_TEST ="0x3D5F96ABD4FF87A9727F8EAEA6980528680CADD4A7E9312857D963F4FBCC8746";
+var TOKEN_ID_TEST ="0xDFF369B5C25D75C769E13186CF83B4940EB1473FC9F766F6D6C4114B88D027E0";
 
 /**
  * Get the balance of your Minima Coins
@@ -72,6 +72,9 @@ function depositWrappedMinima(userdets, amount, callback){
 	MDS.cmd("send amount:"+amount
 			+" address:"+userdets.minimaaddress.mxaddress
 			+" tokenid:"+TOKEN_ID_TEST+" split:10",function(resp){
+		if(resp.status){
+			logDeposit("wminima",amount);	
+		}
 		callback(resp);			
 	});
 }
@@ -122,7 +125,7 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 function checkExpiredETHHTLC(userdets, callback){
 	
 	//First search coins
-	var cmd = "coins tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	var cmd = "coins coinage:2 tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
 		//How many coins..
@@ -146,7 +149,7 @@ function checkExpiredETHHTLC(userdets, callback){
 						//Are we the Owner..
 						if(coin.state[0] == userdets.minimapublickey){
 							//Check if we can collect it..
-							var timelock=+coin.state[3]+2;
+							var timelock=+coin.state[3];
 							if(block>timelock){
 								MDS.log("Timelock Collect Expired ETH Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.tokenamount);
 								
@@ -188,6 +191,10 @@ function _collectExpiredETHCoin(userdets,coin,callback){
 	MDS.cmd(cmd,function(resp){
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			
+			//Log it..	
+			collectExpiredHTLC(coin.state[5],"wminima",coin.tokenamount);
+			
 			if(callback){
 				callback(resp);
 			}
@@ -201,7 +208,7 @@ function _collectExpiredETHCoin(userdets,coin,callback){
 function checkETHSwapHTLC(userdets, callback){
 	
 	//First search coins
-	var cmd = "coins tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	var cmd = "coins coinage:2 tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
 		//How many coins..
@@ -318,6 +325,10 @@ function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
 		
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			
+			//Log it..	
+			collectHTLC(coin.state[5],"wminima",finalamount+"");
+			
 			if(callback){
 				callback(resp);
 			}

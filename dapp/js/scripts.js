@@ -9,10 +9,16 @@ var HTLC_ADDRESS 	= "MxG083ZTKH1P85DJNRWA1T59FWG8DQG4743GUN3UK3V2JUDMWG1T5S8T9N4
 //The Coin Notifications
 var COIN_NOTIFY		= "0xFFEEDD9999"
 
-function setUpHTLCScript(callback){
+function setUpHTLCScript(userdets, callback){
+	
+	//Main HTLC script
 	MDS.cmd("newscript script:\""+HTLC_CONTRACT+"\" trackall:false",function(resp){
-		if(callback){
-			callback(resp);
-		}
+		
+		//Now setup the User account..
+		MDS.cmd("newscript trackall:true script:\""+USER_DETAILS.minimaaddress.script+"\"",function(resp2){
+			if(callback){
+				callback();
+			}	
+		});
 	});
 }

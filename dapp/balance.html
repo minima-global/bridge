@@ -19,6 +19,7 @@
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
 	<script type="text/javascript" src="./js/apiminima.js"></script>
 	<script type="text/javascript" src="./js/apieth.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
@@ -125,6 +126,7 @@
 			sendMinima(USER_DETAILS,amount,address,{},function(resp){
 				if(resp.status){
 					alert("Funds withdrawn to main wallet!");
+					logWithdraw("minima",amount);
 				}else{
 					alert(resp.error);
 				}
@@ -166,6 +168,7 @@
 			sendETH(USER_DETAILS,amount,address,{},function(resp){
 				if(resp.status){
 					alert("Funds withdrawn to main wallet!");
+					logWithdraw("wminima",amount);
 				}else{
 					alert(resp.error);
 				}

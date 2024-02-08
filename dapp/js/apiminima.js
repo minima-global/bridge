@@ -55,6 +55,9 @@ function depositNativeMinima(userdets, amount, callback){
 	MDS.cmd("send amount:"+amount
 			+" address:"+userdets.minimaaddress.mxaddress
 			+" tokenid:0x00 split:10",function(resp){
+		if(resp.status){
+			logDeposit("minima",amount);	
+		}
 		callback(resp);			
 	});
 }
@@ -105,7 +108,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 function checkExpiredMinimaHTLC(userdets, callback){
 	
 	//First search coins
-	var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
 		//How many coins..
@@ -129,7 +132,7 @@ function checkExpiredMinimaHTLC(userdets, callback){
 						//Are we the Owner..
 						if(coin.state[0] == userdets.minimapublickey){
 							//Check if we can collect it..
-							var timelock=+coin.state[3]+2;
+							var timelock=+coin.state[3];
 							if(block>timelock){
 								MDS.log("Timelock Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 								
@@ -171,6 +174,10 @@ function _collectExpiredCoin(userdets,coin,callback){
 	MDS.cmd(cmd,function(resp){
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			
+			//Log it..	
+			collectExpiredHTLC(coin.state[5],"minima",coin.amount);
+			
 			if(callback){
 				callback(resp);
 			}
@@ -184,27 +191,38 @@ function _collectExpiredCoin(userdets,coin,callback){
 function checkMinimaSwapHTLC(userdets, callback){
 	
 	//First search coins
-	var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
-		//How many coins..
-		var len=resp.response.length;
-		if(len>0){
+		//Coins found..
+		getCurrentBlock(function(blockstr){
 			
-			//Now cycle through the coins..
-			for(var i=0;i<len;i++){
-				//Get the coin
-				var coin=resp.response[i];
-				try{
-					//Are we the Counterparty..
-					if(coin.state[4] == USER_DETAILS.minimapublickey){
-						_checkCanSwapCoin(userdets, coin, function(res){});		
+			//Convert to a number
+			var block = +blockstr;
+		
+			//How many coins..
+			var len=resp.response.length;
+			if(len>0){
+				
+				//Now cycle through the coins..
+				for(var i=0;i<len;i++){
+					//Get the coin
+					var coin=resp.response[i];
+					
+					//Is it old enough..
+					if(+coin.created>block){
+						try{
+							//Are we the Counterparty..
+							if(coin.state[4] == USER_DETAILS.minimapublickey){
+								_checkCanSwapCoin(userdets, coin, function(res){});		
+							}
+						}catch(e){
+							MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
+						}	
 					}
-				}catch(e){
-					MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 				}
 			}
-		}
+		});
 	});
 }
 
@@ -242,7 +260,6 @@ function _checkCanSwapCoin(userdets, coin, callback){
 						
 							//Calculate how much we should send back..
 							var calcamount = calculateRequiredAmount("wminima",sendamount,myorderbook);
-							
 							if(calcamount >= requestamount){
 								
 								//Send the ETH counter TXN - to make him reveal the secret
@@ -302,6 +319,10 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 		
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
+			
+			//Log it..	
+			collectHTLC(coin.state[5],"minima",finalamount+"");
+			
 			if(callback){
 				callback(resp);
 			}

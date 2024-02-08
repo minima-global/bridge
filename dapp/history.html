@@ -29,10 +29,9 @@
 		createHeader();
 	</script>
 	
-	Welcome to Bridge.<br>
+	Full History
 	<br>
-	Here you can Swap native Minima for wMinima on ETH.<br>
-	<br>
+	<pre style="text-align:left;max-width:500;" id=historytable></pre>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -48,10 +47,12 @@
 		
 		//Do initialisation
 		if(msg.event == "inited"){
-			/*getUserDetails(function(userdets){
-				USER_DETAILS=userdets;
-				MDS.log(JSON.stringify(USER_DETAILS));
-			});*/
+			
+			getAllEvents(function(res){
+				
+				historytable.innerHTML = JSON.stringify(res,null,2);
+				
+			});
 		}
 	});
 
