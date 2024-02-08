@@ -356,7 +356,7 @@ function _sendCounterPartyETHTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(resp.status){
-			sentCounterPartyTxn(hash,function(){
+			sentCounterPartyTxn(hash,"minima",reqamount,function(){
 				callback(resp);	
 			});
 		}else{

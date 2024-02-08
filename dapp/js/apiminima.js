@@ -342,7 +342,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(resp.status){
-			sentCounterPartyTxn(hash,function(){
+			sentCounterPartyTxn(hash,"wminima",reqamount,function(){
 				callback(resp);	
 			});
 		}else{
