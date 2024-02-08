@@ -71,7 +71,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 	getCurrentBlock(function(block){
 		
 		//How long do we wait..
-		var timelock = +block+20;
+		var timelock = +block+30;
 		
 		//Create a secret
 		createSecretHash(function(hash){
@@ -91,7 +91,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 				
 				//If success put in DB
 				if(resp.status){
-					startedCounterPartySwap(hash,function(){
+					startedCounterPartySwap(hash,"minima",amount,function(){
 						callback(resp);	
 					});
 				}else{
@@ -194,35 +194,20 @@ function checkMinimaSwapHTLC(userdets, callback){
 	var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
-		//Coins found..
-		getCurrentBlock(function(blockstr){
+		//How many coins..
+		var len=resp.response.length;
+		for(var i=0;i<len;i++){
 			
-			//Convert to a number
-			var block = +blockstr;
-		
-			//How many coins..
-			var len=resp.response.length;
-			if(len>0){
-				
-				//Now cycle through the coins..
-				for(var i=0;i<len;i++){
-					//Get the coin
-					var coin=resp.response[i];
-					
-					//Is it old enough..
-					if(+coin.created>block){
-						try{
-							//Are we the Counterparty..
-							if(coin.state[4] == USER_DETAILS.minimapublickey){
-								_checkCanSwapCoin(userdets, coin, function(res){});		
-							}
-						}catch(e){
-							MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
-						}	
-					}
+			//Get the coin
+			var coin=resp.response[i];
+			try{
+				if(coin.state[4] == USER_DETAILS.minimapublickey){
+					_checkCanSwapCoin(userdets, coin, function(res){});		
 				}
-			}
-		});
+			}catch(e){
+				MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
+			}	
+		}
 	});
 }
 
@@ -247,7 +232,12 @@ function _checkCanSwapCoin(userdets, coin, callback){
 					
 			//Have we sent the OTHER side txn to get them to reveal the secret..
 			haveSentCounterPartyTxn(hash,function(sent){
+				
+				//Only send it once..
 				if(!sent){
+					
+					//Check the timelock!
+					//..
 					
 					//Check the details are valid!.. FEES etc.. 
 					getMyOrderBook(function(myorderbook){
@@ -270,7 +260,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 								});
 								
 							}else{
-								MDS.log("Invalid request amount for Minima SWAP sentminima:"+sendamount+" requestedwminima:"+requestamount+" actual:"+calcamount)
+								MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedwminima:"+requestamount+" actual:"+calcamount)
 							}	
 							
 						}else{
@@ -333,7 +323,7 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	
 	//Send the ETH counter TXN - to make him reveal the secret
-	var countertimelock = +coin.state[3] - 5;
+	var countertimelock = +coin.state[3] - 10;
 	var reqamount 		= coin.state[1];
 	var hash 			= coin.state[5];
 	
