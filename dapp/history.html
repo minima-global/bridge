@@ -29,9 +29,11 @@
 		createHeader();
 	</script>
 	
-	Full History
+	History<br>
 	<br>
-	<pre style="text-align:left;max-width:500;" id=historytable></pre>
+	<button onclick="wipeHistory();">WIPE HISTORY</button><br>
+	<br>
+	<table border=1 id=histtable></table>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -42,18 +44,69 @@
 	
 	var USER_DETAILS = {};
 	
+	var hid = MDS.form.getParams("hashid");
+	
+	function striptags(text){
+		return text.replace(/<\/?[^>]+(>|$)/g, "");
+	}
+	
+	function wipeHistory(){
+		if(confirm("Are you sure you want to wipe your swap history ?")){
+			wipeAllEvents(function(){
+				location.href="history.html?uid="+MDS.minidappuid;
+			});
+		}
+	}
+	
+	function createTable(rows){
+		
+		//Wipe Table
+		histtable.innerHTML = "";
+		
+		var len = rows.length;
+		for(var i=0;i<len;i++){
+			var row = rows[i];
+			
+			var trow = histtable.insertRow();
+			trow.insertCell(0).innerHTML = row.ID;
+			
+			//The Hash..
+			var val = striptags(row.HASH.substring(0,10))+"..";
+			var hash = "<a href='history.html?uid="+MDS.minidappuid+"&hashid="+row.HASH+"'>"+val+"</a>";
+			trow.insertCell(1).innerHTML = hash;
+			
+			trow.insertCell(2).innerHTML = row.EVENT;
+			trow.insertCell(3).innerHTML = row.TOKEN;
+			trow.insertCell(4).innerHTML = row.AMOUNT;
+			
+			//Create a date object
+			var dd = new Date(+row.EVENTDATE);
+			trow.insertCell(5).innerHTML = dd.toString();
+		}
+	}
+	
+	function updateHistory(){
+		//One or all..
+		if(hid){
+			getSingleEvent(hid,function(res){
+				createTable(res);
+			});
+		}else{
+			getAllEvents(function(res){
+				createTable(res);
+			});	
+		}
+	}
+	
 	//Main message handler..
 	MDS.init(function(msg){
 		
 		//Do initialisation
 		if(msg.event == "inited"){
-			
-			getAllEvents(function(res){
-				
-				historytable.innerHTML = JSON.stringify(res,null,2);
-				
-			});
-		}
+			updateHistory();	
+		}else if(msg.event == "NEWBALANCE"){
+			updateHistory();	
+		} 
 	});
 
 </script>

@@ -54,7 +54,6 @@ function sendETH(userdets, amount, address, state, callback){
 	
 	//Send that amount to his address
 	MDS.cmd("send amount:"+amount
-			+" mine:true"
 			+" address:"+address
 			+" fromaddress:"+userdets.minimaaddress.mxaddress
 			+" signkey:"+userdets.minimapublickey

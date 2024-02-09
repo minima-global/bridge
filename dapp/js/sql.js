@@ -170,6 +170,20 @@ function getAllEvents(callback){
 	});
 }
 
+function getSingleEvent(hash,callback){
+	MDS.sql("SELECT * FROM counterparty WHERE hash='"+hash+"' ORDER BY id", function(sqlmsg){
+		callback(sqlmsg.rows);
+	});
+}
+
+function wipeAllEvents(callback){
+	MDS.sql("DELETE FROM counterparty WHERE eventdate>0", function(sqlmsg){
+		if(callback){
+			callback(sqlmsg);	
+		}
+	});
+}
+
 function _insertCounterPartyEvent(hash,token,amount,event,callback){
 	
 	//the date
