@@ -53,7 +53,7 @@
 	var USER_DETAILS = {};
 	
 	//How much Native Minima are we swapping..
-	var sendamount 	= MDS.form.getParams("amount");
+	var sendamount 	= toFixedNumber(MDS.form.getParams("amount"));
 	
 	var reqamount 		= 0;
 	var reqpublickey 	= "0x00";

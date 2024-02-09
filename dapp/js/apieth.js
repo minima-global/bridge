@@ -103,7 +103,7 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 			MDS.log("Start wMinima->Minima SWAP "+JSON.stringify(state));
 			
 			//And send from the native wallet..
-			sendETH(userdets,Math.floor(amount),HTLC_ADDRESS,state,function(resp){
+			sendETH(userdets,amount,HTLC_ADDRESS,state,function(resp){
 				
 				//If success put in DB
 				if(resp.status){

@@ -63,7 +63,7 @@
 		}
 		
 		//Round..
-		var sndamt = Math.floor(amount);
+		var sndamt = toFixedNumber(amount);
 		
 		//Ok - lets jump to the next page..
 		location.href="swapnative.html?uid="+MDS.minidappuid+"&amount="+sndamt;
@@ -78,7 +78,7 @@
 		}
 		
 		//Round..
-		var sndamt = Math.floor(amount);
+		var sndamt = toFixedNumber(amount);
 		
 		//Ok - lets jump to the next page..
 		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+sndamt;

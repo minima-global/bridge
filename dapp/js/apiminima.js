@@ -86,7 +86,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 			MDS.log("Start Minima->wMinima SWAP "+JSON.stringify(state));
 			 
 			//And send from the native wallet..
-			sendMinima(userdets,Math.floor(amount),HTLC_ADDRESS,state,function(resp){
+			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
 				
 				//If success put in DB
 				if(resp.status){
