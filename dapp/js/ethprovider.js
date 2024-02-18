@@ -706,7 +706,6 @@ function getEthereumBalance(ofAddress) {
 }
 
 function getWrappedBalance(ofAddress) {
-  const contractABI = JSON.stringify(ABIs[CURRENT_NETWORK].abi);
   const contractAddress = ABIs[CURRENT_NETWORK].address;
   const payload = {
     jsonrpc: "2.0",
@@ -743,44 +742,53 @@ function getWrappedBalance(ofAddress) {
 // The ability to check the timelock of an ETH HTLC and to collect it.
 /**
  *
- * @param {string} blocksAgo This will have to be hexified
+ * @param {string} blocksAgo How many blocks from current block ?
  * @param {keccak256} makersPublicKey This will be the indexed Minima Public Key of the Maker (We can make this anything unique which then we know what to look for)
  * @returns
  */
-function getTimeLockForHTLC(blocksAgo, makersPublicKey) {
-  getCurrentBlock().then(function (currentBlock) {
-    MDS.log("currentBlock :" + currentBlock);
-    const block = currentBlock - blocksAgo;
-    MDS.log("block : " + block);
-    const payload = {
-      jsonrpc: "2.0",
-      method: "eth_getLogs",
-      params: [
-        {
-          address: HTLC_CONTRACT_ADDRESSES["erc20"][CURRENT_NETWORK],
-          topics: [
-            "0x31a346f672cf5073bda81a99e0a28aff2bfe8c2db87d462bb2f4c114476a46ee",
-          ],
-          fromBlock: "0x" + block.toString(16),
-          toBlock: "latest",
-        },
-      ],
-      id: 1,
-    };
+function getTimeLockForHTLC(blocksAgo, contractId) {
+  return new Promise((resolve, reject) => {
+    getCurrentBlock().then(function (currentBlock) {
+      MDS.log("currentBlock :" + currentBlock);
+      const block = currentBlock - blocksAgo;
+      MDS.log("block : " + block);
+      const payload = {
+        jsonrpc: "2.0",
+        method: "eth_getLogs",
+        params: [
+          {
+            address: HTLC_CONTRACT_ADDRESSES["erc20"][CURRENT_NETWORK],
+            topics: [
+              "0x31a346f672cf5073bda81a99e0a28aff2bfe8c2db87d462bb2f4c114476a46ee", // Method of newContract
+              contractId, // Contract ID is indexed on the newContract event
+            ],
+            fromBlock: "0x" + block.toString(16),
+            toBlock: "latest",
+          },
+        ],
+        id: 1,
+      };
 
-    return new Promise((resolve) => {
       MDS.net.POST(
         NETWORKS[CURRENT_NETWORK],
         JSON.stringify(payload),
         function (resp) {
-          MDS.log(JSON.stringify(resp));
-          // const balance = JSON.parse(resp.response).result;
+          const relevantContract = JSON.parse(resp.response).result;
+          if (!relevantContract) {
+            reject("Contract not found...");
+          }
+          // Here we decode the data from the logs.
 
-          // Using normal Maths loses precision, may need to use
-          // BigNumber.js for this.
-          // const number = parseInt(balance) / Math.pow(10, 18);
+          // index_topic_1 bytes32 contractId, index_topic_2 address sender, index_topic_3 address receiver, address tokenContract, uint256 amount, bytes32 hashlock, uint256 timelock
+          // We only list the non-indexed type fields, since they aren't part of the data
+          const tx = ethers.utils.defaultAbiCoder.decode(
+            ["address", "uint256", "bytes32", "address"],
+            relevantContract[0].data
+          );
 
-          // resolve(number);
+          // ["0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF",{"_hex":"0x1f5718987664b4800000"},"0x156994558198d5d38feea302f470632ab4a8bdb01c409e661f93fa4874943c5b",{"_hex":"0x65b2953f"}]
+
+          resolve(tx);
         }
       );
     });
@@ -808,9 +816,68 @@ function getCurrentBlock() {
 // The ability to check for HTLC relevant to me.. so I can send the Minima HTLC.
 
 // The ability to collect an ETH HTLC with a secret.. AND for the other user to also know the secret..
+// The ability to check the timelock of an ETH HTLC and to collect it.
+/**
+ *
+ * @param {string} blocksAgo How many blocks from current block ?
+ * @param {keccak256} contractId This will be the indexed ContractId of the creator
+ * @returns
+ */
+function getSecretForHTLC(blocksAgo, contractId) {
+  getCurrentBlock().then(function (currentBlock) {
+    MDS.log("currentBlock :" + currentBlock);
+    const block = currentBlock - blocksAgo;
+    MDS.log("block : " + block);
+    const payload = {
+      jsonrpc: "2.0",
+      method: "eth_getLogs",
+      params: [
+        {
+          address: HTLC_CONTRACT_ADDRESSES["erc20"][CURRENT_NETWORK],
+          topics: [
+            "0x15a71365fee30a355046c80d10aab98a49c3558b2272658d6c551733203e9bbe", // Withdrawal Event
+            contractId, // contractId is indexed so will return right contract for us
+          ],
+          fromBlock: "0x" + block.toString(16), // from block Zero.. can probably set this to higher, when contract created?
+          toBlock: "latest",
+        },
+      ],
+      id: 1,
+    };
+
+    return new Promise((resolve) => {
+      MDS.net.POST(
+        NETWORKS[CURRENT_NETWORK],
+        JSON.stringify(payload),
+        function (resp) {
+          const relevantContract = JSON.parse(resp.response).result;
+          if (!relevantContract) {
+            reject("Contract not found...");
+          }
+          // Here we decode the data from the logs.
+          /**
+           * SINCE WITHDRAW EVENT ON CURRENT HTLC ERC20 HAS NO UNINDEXED TYPE FIELDS
+           * THEN YOU WILL NOT GET ANY DATA BACK
+           * WE WILL NEED TO ADD THE PREIMAGE IN THIS EMITTED EVENT SO THEN THE OTHER USER CAN SEE IT
+           * THEN USE IT ON MINIMA
+           *
+           */
+          // Once we get the right deployeed contract, then we should have the preimage on the event emitted!
+          const tx = ethers.utils.defaultAbiCoder.decode(
+            ["address"],
+            relevantContract[0].data
+          );
+          resolve(tx);
+        }
+      );
+    });
+  });
+}
 
 // Utility functions
 function decodeParameterDataFromTransaction(data) {
+  const interf = new ethers.utils.ABI();
+
   return new Promise((resolve) => {
     const params = ethers.utils.defaultAbiCoder.decode(["uint256", data]);
     MDS.log(JSON.stringify(params));

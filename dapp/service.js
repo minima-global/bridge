@@ -79,21 +79,29 @@ MDS.init(function (msg) {
   if (msg.event == "inited") {
     getEthereumBalance("0x5534fF8d19EBF33D8e57C552f88d3A5dEE4fb669").then(
       (ethBalance) => {
-        MDS.log(
-          "EthBalance : " +
-            ethBalance
-        );
+        MDS.log("EthBalance : " + ethBalance);
       }
     );
 
     getWrappedBalance("0x5534fF8d19EBF33D8e57C552f88d3A5dEE4fb669").then(
       (wrappedBalance) => {
-        MDS.log(
-          "wrappedBalance : " +
-            wrappedBalance
-        );
+        MDS.log("wrappedBalance : " + wrappedBalance);
       }
     );
+
+
+    getTimeLockForHTLC(
+      1000000,
+      "0x395f92568a17ee80b7d98f3894297ba89d1fac97adf305da08cb6dfc5a0e10a2"
+    )
+      .then(function (data) {
+        // ["0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF",{"_hex":"0x1f5718987664b4800000"},"0x156994558198d5d38feea302f470632ab4a8bdb01c409e661f93fa4874943c5b",{"_hex":"0x65b2953f"}]
+        MDS.log(data);
+      })
+      .catch((err) => {
+        MDS.log(JSON.stringify(err));
+      });
+
     //Set up the DB
     //..
 
