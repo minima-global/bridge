@@ -96,7 +96,9 @@ MDS.init(function (msg) {
     )
       .then(function (data) {
         // ["0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF",{"_hex":"0x1f5718987664b4800000"},"0x156994558198d5d38feea302f470632ab4a8bdb01c409e661f93fa4874943c5b",{"_hex":"0x65b2953f"}]
-        MDS.log(data);
+        
+        
+        MDS.log("timelock : " + parseInt(data[3]));
       })
       .catch((err) => {
         MDS.log(JSON.stringify(err));

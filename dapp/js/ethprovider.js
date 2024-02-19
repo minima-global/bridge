@@ -784,10 +784,10 @@ function getTimeLockForHTLC(blocksAgo, contractId) {
           const tx = ethers.utils.defaultAbiCoder.decode(
             ["address", "uint256", "bytes32", "address"],
             relevantContract[0].data
-          );
+          );          
 
           // ["0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF",{"_hex":"0x1f5718987664b4800000"},"0x156994558198d5d38feea302f470632ab4a8bdb01c409e661f93fa4874943c5b",{"_hex":"0x65b2953f"}]
-
+            
           resolve(tx);
         }
       );
@@ -861,6 +861,25 @@ function getSecretForHTLC(blocksAgo, contractId) {
            * WE WILL NEED TO ADD THE PREIMAGE IN THIS EMITTED EVENT SO THEN THE OTHER USER CAN SEE IT
            * THEN USE IT ON MINIMA
            *
+           */
+          /**
+           * function withdraw(bytes32 _contractId, bytes32 _preimage)
+                external
+                contractExists(_contractId)
+                hashlockMatches(_contractId, _preimage)
+                withdrawable(_contractId)
+                returns (bool)
+            {
+                LockContract storage c = contracts[_contractId];
+                c.preimage = _preimage;
+                c.withdrawn = true;
+                IERC20(c.tokenContract).safeTransfer(c.receiver, c.amount);
+                emit HTLCERC20Withdraw(_contractId, _preimage);
+                return true;
+            }
+
+            * event HTLCERC20Withdraw(bytes32 indexed contractId, bytes32 _preimage);
+
            */
           // Once we get the right deployeed contract, then we should have the preimage on the event emitted!
           const tx = ethers.utils.defaultAbiCoder.decode(
