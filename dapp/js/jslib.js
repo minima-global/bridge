@@ -59,10 +59,3 @@ function randomInteger(min, max) {
 function toFixedNumber(number){
 	return +Number.parseFloat(number).toFixed(2);
 }
-
-//Get the current block
-function getCurrentBlock(callback){
-	MDS.cmd("block",function(resp){
-		callback(resp.response.block);
-	});
-}

@@ -8,6 +8,8 @@ function signData(publickey,data, callback){
 }
 
 function verifyData(publickey,data,signature, callback){
+	MDS.log("Verify Ordder Book Sig : "+publickey);
+	
 	MDS.cmd("maxverify data:"+data+" publickey:"+publickey+" signature:"+signature,function(ver){
 		if(ver.status){
 			if(ver.response.valid){
@@ -76,6 +78,8 @@ function getCompleteOrderBook(callback){
 		//All the valid signed records
 		var validsignedrecords = [];
 		
+		MDS.log("Check order book valid sigs : "+allrecords.length);
+		
 		//Now check all the signatures..
 		_checkValidSigs(0,allrecords,validsignedrecords,function(){
 			
@@ -124,6 +128,20 @@ function _getAllOrderCoins(callback){
 	});
 }
 
+//Do not check previously chjecked Signatures..
+var PREV_VALID_SIG = [];
+function makeCompleteSigData(publickey,data,signature){
+	return	publickey+data+signature+"";
+}
+
+function addValidSig(publickey,data,signature){
+	PREV_VALID_SIG.push(makeCompleteSigData(publickey,data,signature));
+}
+
+function isPrevValidSig(publickey,data,signature){
+	return 	PREV_VALID_SIG.includes(makeCompleteSigData(publickey,data,signature));
+}
+
 function _checkValidSigs(counter,allrecords,correctrecords,callback){
 	
 	//How many records in all
@@ -135,19 +153,37 @@ function _checkValidSigs(counter,allrecords,correctrecords,callback){
 		//Get the record
 		var record = allrecords[counter];
 		
-		//Check it..
-		verifyData(record.publickey,record.datahash,record.signature,function(isvalid){
+		//Has it already been checked
+		if(isPrevValidSig(record.publickey,record.datahash,record.signature)){
 			
-			//Is it valid..
-			if(isvalid){
-				correctrecords.push(record);
-			}else{
-				MDS.log("Invalid signature for record.. publickey:"+record.publickey);
-			}
+			//Add to the records
+			correctrecords.push(record);
 			
 			//And continue scanning..
 			_checkValidSigs(counter+1,allrecords,correctrecords,callback);
-		});
+			
+		}else{
+			//Check it..
+			verifyData(record.publickey,record.datahash,record.signature,function(isvalid){
+				
+				//Is it valid..
+				if(isvalid){
+					
+					//Add to previous
+					addValidSig(record.publickey,record.datahash,record.signature);
+					
+					//Add to correct records..
+					correctrecords.push(record);
+					
+				}else{
+					MDS.log("Invalid signature for record.. publickey:"+record.publickey);
+				}
+				
+				//And continue scanning..
+				_checkValidSigs(counter+1,allrecords,correctrecords,callback);
+			});	
+		}
+		
 	}else{
 		//All scanned..
 		callback();

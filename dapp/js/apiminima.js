@@ -1,5 +1,14 @@
 
 /**
+ * Get the current Minima block
+ */
+function getCurrentMinimaBlock(callback){
+	MDS.cmd("block",function(resp){
+		callback(resp.response.block);
+	});
+}
+
+/**
  * Get the balance of your Minima Coins
  */
 function getMinimaBalance(userdetails,callback){
@@ -67,7 +76,7 @@ function depositNativeMinima(userdets, amount, callback){
 function startMinimaSwap(userdets, amount, requestamount, swappublickey, callback){
 	
 	//Get the current block
-	getCurrentBlock(function(block){
+	getCurrentMinimaBlock(function(block){
 		
 		//How long do we wait..
 		var timelock = +block+30;
@@ -115,7 +124,7 @@ function checkExpiredMinimaHTLC(userdets, callback){
 		if(len>0){
 			
 			//Coins found..
-			getCurrentBlock(function(blockstr){
+			getCurrentMinimaBlock(function(blockstr){
 				
 				//Convert to a number
 				var block = +blockstr;

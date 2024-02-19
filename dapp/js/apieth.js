@@ -1,5 +1,14 @@
 
-var TOKEN_ID_TEST ="0xDFF369B5C25D75C769E13186CF83B4940EB1473FC9F766F6D6C4114B88D027E0";
+var TOKEN_ID_TEST ="0xCE5A488C87EE12E6DC6040D7472645DA171BDA5D1198E0E8C892CCB8F5F5CCA0";
+
+/**
+ * Get the current ETH block
+ */
+function getCurrentETHBlock(callback){
+	MDS.cmd("block",function(resp){
+		callback(resp.response.block);
+	});
+}
 
 /**
  * Get the balance of your Minima Coins
@@ -84,7 +93,7 @@ function depositWrappedMinima(userdets, amount, callback){
 function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 	
 	//Get the current block
-	getCurrentBlock(function(block){
+	getCurrentETHBlock(function(block){
 		
 		//How long do we wait..
 		var timelock = +block+30;
@@ -132,7 +141,7 @@ function checkExpiredETHHTLC(userdets, callback){
 		if(len>0){
 			
 			//Coins found..
-			getCurrentBlock(function(blockstr){
+			getCurrentETHBlock(function(blockstr){
 				
 				//Convert to a number
 				var block = +blockstr;
