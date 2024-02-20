@@ -128,18 +128,26 @@ function _getAllOrderCoins(callback){
 	});
 }
 
-//Do not check previously chjecked Signatures..
+//Do not check previously checked Signatures..
 var PREV_VALID_SIG = [];
-function makeCompleteSigData(publickey,data,signature){
+function _makeCompleteSigData(publickey,data,signature){
 	return	publickey+data+signature+"";
 }
 
-function addValidSig(publickey,data,signature){
-	PREV_VALID_SIG.push(makeCompleteSigData(publickey,data,signature));
+function _addValidSig(publickey,data,signature){
+	PREV_VALID_SIG.push(_makeCompleteSigData(publickey,data,signature));
 }
 
-function isPrevValidSig(publickey,data,signature){
-	return 	PREV_VALID_SIG.includes(makeCompleteSigData(publickey,data,signature));
+function _isPrevValidSig(publickey,data,signature){
+	return 	PREV_VALID_SIG.includes(_makeCompleteSigData(publickey,data,signature));
+}
+
+function getSizePreviousValidSigs(){
+	return PREV_VALID_SIG.length;
+}
+
+function clearPreviousValidSigs(){
+	PREV_VALID_SIG = [];
 }
 
 function _checkValidSigs(counter,allrecords,correctrecords,callback){
@@ -154,7 +162,7 @@ function _checkValidSigs(counter,allrecords,correctrecords,callback){
 		var record = allrecords[counter];
 		
 		//Has it already been checked
-		if(isPrevValidSig(record.publickey,record.datahash,record.signature)){
+		if(_isPrevValidSig(record.publickey,record.datahash,record.signature)){
 			
 			//Add to the records
 			correctrecords.push(record);
@@ -170,7 +178,7 @@ function _checkValidSigs(counter,allrecords,correctrecords,callback){
 				if(isvalid){
 					
 					//Add to previous
-					addValidSig(record.publickey,record.datahash,record.signature);
+					_addValidSig(record.publickey,record.datahash,record.signature);
 					
 					//Add to correct records..
 					correctrecords.push(record);
