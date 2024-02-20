@@ -39,6 +39,9 @@
 	
 	<button onclick="tester();">TEST ETH</button>
 	
+	<br><br>
+	<button onclick="deploy();">DEPLOYED</button>
+	
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -47,6 +50,19 @@
 <script type="text/javascript">
 	
 	var USER_DETAILS = {};
+	
+	function deploy(){
+		
+		MDS.log("Test deployed contract..!");
+		
+		balanceCall("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(ethresp){
+			MDS.log(JSON.stringify(ethresp));
+		});
+		
+		//var val =getWrappedBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
+		//MDS.log(val);
+		
+	}
 	
 	function tester(){
 		

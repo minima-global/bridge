@@ -72,6 +72,67 @@ function createRAWTxn(toaddress, nonce, ethamount){
 }	
 
 /**
+ * Create a RAW unsigned Transaction
+ */
+function balanceCall(toaddress, callback){
+	
+	var address = toaddress.slice(2).toLowerCase();
+	const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+    const payload = {
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [
+          {
+            to: contractAddress,
+            data: "0x70a08231000000000000000000000000"+address
+          },
+          "latest",
+        ],
+        id: 1,
+      };
+	
+	//Run it..
+	runEthCommand(payload,function(ethresp){
+		callback(ethresp.result);
+	});	
+}	
+
+function getWrappedBalance(ofAddress) {
+
+	var address = ofAddress.slice(2).toLowerCase();
+	const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
+      const payload = {
+        jsonrpc: "2.0",
+        method: "eth_call",
+        params: [
+          {
+            to: contractAddress,
+            data: "0x70a08231000000000000000000000000"+address
+          },
+          "latest",
+        ],
+        id: 1,
+      };
+    
+      return new Promise((resolve) => {
+        MDS.net.POST(
+          "http://127.0.0.1:8545",
+          JSON.stringify(payload),
+          function (resp) {
+            const balance = JSON.parse(resp.response).result;
+    
+            // Using normal Maths loses precision, may need to use
+            // BigNumber.js for this.
+            const number = parseInt(balance) / Math.pow(10, 18);
+    
+            resolve(number);
+          }
+        );
+      });
+    }
+
+
+/**
  * Send a RAW Signed transaction
  */
 function sendRAWSignedTxn(signedtxn,callback){
