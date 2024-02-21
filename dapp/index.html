@@ -24,6 +24,8 @@
 	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	
+	<script type="text/javascript" src="./abi/tokenabi.js"></script>
+	
 </head>
 
 <body>
@@ -42,6 +44,9 @@
 	<br><br>
 	<button onclick="deploy();">DEPLOYED</button>
 	
+	<br><br>
+	<button onclick="transfer();">TOKEN TRANSFER</button>
+	
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -51,71 +56,110 @@
 	
 	var USER_DETAILS = {};
 	
+	//ETH Wallet
+	var privateKey 	= "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+	var myEthWallet = new ethers.Wallet(privateKey);
+	
+	function myTokenBalanceCall(toaddress, callback){
+		
+		//Get ETH valid address
+		var address = toaddress.toLowerCase();
+		if(address.startsWith("0x")){
+			address = address.slice(2)
+		}
+		
+		//What is the Token Contract address
+		const contractAddress = "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0";
+		
+		//Calculate the function Data Param
+		var iface = new ethers.utils.Interface(TOKEN_ABI.abi);
+		
+		//Calling 'function balanceOf(address account)'
+		var functiondata = iface.functions.balanceOf.encode([ address ]);
+		
+		//Run this
+		ethCallCommand(contractAddress,functiondata,function(ethresp){
+			callback(ethresp);	
+		});
+	}
+	
+	function myTokenTransferCall(toaddress, amount, callback){
+		
+		//What is the Token Contract address
+		const contractAddress = "0xa51c1fc2f0d1a1b8494ed1fe312d7c3a78ed91c0";
+		
+		//Get ETH valid address
+		var address = toaddress.toLowerCase();
+		if(address.startsWith("0x")){
+			address = address.slice(2)
+		}
+		
+		//Calculate the function Data Param
+		var iface = new ethers.utils.Interface(TOKEN_ABI.abi);
+		
+		//Calling 'function balanceOf(address account)'
+		var functiondata = iface.functions.transfer.encode([ address, amount ]);
+		
+		//Get the nonce..
+		getTransactionCount(myEthWallet.address,function(txncount){
+				
+			//This is the nonce..
+			var nonce = parseInt(txncount,16);
+			
+			//Now create the RAW txn..
+			var transaction = createRAWContractCallTxn(contractAddress, functiondata, nonce);
+			
+			//NOW SIGN..
+			postTransaction(myEthWallet, transaction, function(ethresp){
+				MDS.log(JSON.stringify(ethresp));
+			});    	
+		});
+	}
+	
+	//ethers.utils.parseEther("1.0")
+	
 	function deploy(){
 		
-		MDS.log("Test deployed contract..!");
+		myTokenBalanceCall("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(ethresp){
+			MDS.log("Balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266:"+JSON.stringify(ethresp));
 		
-		balanceCall("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(ethresp){
-			MDS.log(JSON.stringify(ethresp));
+			myTokenBalanceCall("0x70997970C51812dc3A010C7d01b50e0d17dc79C8",function(ethresp){
+				MDS.log("Balance 0x70997970C51812dc3A010C7d01b50e0d17dc79C8:"+JSON.stringify(ethresp));
+			
+			});	
 		});
+	}
+	
+	function transfer(){
 		
-		//var val =getWrappedBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
-		//MDS.log(val);
-		
+		myTokenTransferCall("0x70997970C51812dc3A010C7d01b50e0d17dc79C8","1",function(ethresp){
+			MDS.log("Transfer:"+JSON.stringify(ethresp));
+		});
 	}
 	
 	function tester(){
 		
-		MDS.log("Testing ETH functions..");
-		
-		//let provider = ethers.getDefaultProvider();
-
-		getCurrentBlock(function(res){
-			MDS.log("Block:"+res);	
+		// Get the current Nonce..
+		getRequiredNonce(myEthWallet.address, function(nonce){
+				
+			//And now send 1 ETH
+			sendETH(myEthWallet, "0x70997970C51812dc3A010C7d01b50e0d17dc79C8", 2, nonce, function(ethresp){
+				
+				getWeiBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(ethresp){
+					//Convert to ETH
+					var ethvalue = ethers.utils.formatEther(ethresp);
+					MDS.log("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266:"+ethvalue);
+				});
+				
+				getWeiBalance("0x70997970C51812dc3A010C7d01b50e0d17dc79C8",function(ethresp){
+					//Convert to ETH
+					var ethvalue = ethers.utils.formatEther(ethresp);
+					MDS.log("0x70997970C51812dc3A010C7d01b50e0d17dc79C8:"+ethvalue);
+				});
+			});
 		});
 		
 		
-		MDS.log("Start create Wallet..");
-
-		//let privateKey = "0x0123456789012345678901234567890123456789012345678901234567890123";
-		let privateKey = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-		let wallet = new ethers.Wallet(privateKey);
-
-		MDS.log("Wallet created! "+wallet.address);
-		
-		//MDS.log(ethers.utils.parseEther("10.0"));
-		
-		getTransactionCount(wallet.address,function(txncount){
-			
-			//This is the nonce..
-			var nonce = parseInt(txncount,16);
-			MDS.log("Nonce:"+nonce);
-			
-			var txn 		= createRAWTxn("0x70997970C51812dc3A010C7d01b50e0d17dc79C8", nonce, "1");
-			var signPromise = wallet.sign(txn);
-
-			signPromise.then((signedTransaction) => {
-			    MDS.log("Signed Txn:"+signedTransaction);
-			    
-			    //Now send!
-			    sendRAWSignedTxn(signedTransaction,function(ethresp){
-			    	MDS.log("sendRAWSignedTxn:"+JSON.stringify(ethresp));
-			    	
-			    	getWeiBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(ethresp){
-						//Convert to ETH
-						var ethvalue = ethers.utils.formatEther(ethresp);
-						MDS.log("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266:"+ethvalue);
-					});
-					
-					getWeiBalance("0x70997970C51812dc3A010C7d01b50e0d17dc79C8",function(ethresp){
-						//Convert to ETH
-						var ethvalue = ethers.utils.formatEther(ethresp);
-						MDS.log("0x70997970C51812dc3A010C7d01b50e0d17dc79C8:"+ethvalue);
-					});
-					
-			    });
-			});		
-		});
 	}
 	
 	//Main message handler..

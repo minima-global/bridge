@@ -1,14 +1,31 @@
 
+var ETH_RPC_HOST = "http://127.0.0.1:8545/";
+
 /**
  * Run an ETH command  
  */
 function runEthCommand(payload, callback){
-	MDS.net.POST("http://127.0.0.1:8545/",JSON.stringify(payload),function (resp) {
+	MDS.net.POST(ETH_RPC_HOST,JSON.stringify(payload),function (resp) {
 	 	//MDS.log(resp.response);
 	 	callback(JSON.parse(resp.response));
 	});
 }
 
+/**
+ * run an eth_call READ ONLY command
+ */
+function ethCallCommand(contractAddress, functionData, callback){
+		
+	const payload = {jsonrpc: "2.0",method: "eth_call",
+			params: [{to: contractAddress,data:functionData},"latest"],
+			id: 1};
+		
+	//Run it..
+	runEthCommand(payload,function(ethresp){
+		callback(ethresp);
+	});
+}
+	
 /**
  * Get the current block
  */
@@ -53,10 +70,17 @@ function getTransactionCount(address, callback) {
 	});
 }
 
+function getRequiredNonce(address, callback) {
+	getTransactionCount(address, function(txncount){
+		var nonce = parseInt(txncount,16);	
+		callback(nonce);
+	});
+}
+
 /**
- * Create a RAW unsigned Transaction
+ * Create a RAW unsigned Simple ETH Send Transaction
  */
-function createRAWTxn(toaddress, nonce, ethamount){
+function createRAWSendTxn(toaddress, nonce, ethamount){
 	
 	var transaction = {
     	nonce: nonce,
@@ -64,73 +88,26 @@ function createRAWTxn(toaddress, nonce, ethamount){
     	gasPrice: ethers.utils.bigNumberify("20000000000"),
     	to: toaddress,
     	value: ethers.utils.parseEther(ethamount),
-    	data: "0x"
-		//chainId: ethers.utils.getNetwork('homestead').chainId
+	};
+	
+	return transaction;	
+}
+
+/**
+ * Create a RAW unsigned Contract Call Transaction
+ */
+function createRAWContractCallTxn(contractAddress, functionData, nonce){
+	
+	var transaction = {
+    	nonce: nonce,
+    	gasLimit: 100000,
+    	gasPrice: ethers.utils.bigNumberify("20000000000"),
+    	to: contractAddress,
+    	data:functionData
 	};
 	
 	return transaction;	
 }	
-
-/**
- * Create a RAW unsigned Transaction
- */
-function balanceCall(toaddress, callback){
-	
-	var address = toaddress.slice(2).toLowerCase();
-	const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
-    const payload = {
-        jsonrpc: "2.0",
-        method: "eth_call",
-        params: [
-          {
-            to: contractAddress,
-            data: "0x70a08231000000000000000000000000"+address
-          },
-          "latest",
-        ],
-        id: 1,
-      };
-	
-	//Run it..
-	runEthCommand(payload,function(ethresp){
-		callback(ethresp.result);
-	});	
-}	
-
-function getWrappedBalance(ofAddress) {
-
-	var address = ofAddress.slice(2).toLowerCase();
-	const contractAddress = "0xB7f8BC63BbcaD18155201308C8f3540b07f84F5e";
-      const payload = {
-        jsonrpc: "2.0",
-        method: "eth_call",
-        params: [
-          {
-            to: contractAddress,
-            data: "0x70a08231000000000000000000000000"+address
-          },
-          "latest",
-        ],
-        id: 1,
-      };
-    
-      return new Promise((resolve) => {
-        MDS.net.POST(
-          "http://127.0.0.1:8545",
-          JSON.stringify(payload),
-          function (resp) {
-            const balance = JSON.parse(resp.response).result;
-    
-            // Using normal Maths loses precision, may need to use
-            // BigNumber.js for this.
-            const number = parseInt(balance) / Math.pow(10, 18);
-    
-            resolve(number);
-          }
-        );
-      });
-    }
-
 
 /**
  * Send a RAW Signed transaction
@@ -148,3 +125,31 @@ function sendRAWSignedTxn(signedtxn,callback){
 	});
 }
 
+/**
+ * Sign and Send a RAW transaction
+ */
+function postTransaction(wallet, unsignedtransaction, callback){
+	
+	var signPromise = wallet.sign(unsignedtransaction);
+	signPromise.then((signedTransaction) => {
+	    
+	    //Now send!
+	    sendRAWSignedTxn(signedTransaction,function(ethresp){
+	    	callback(ethresp);
+	    });
+	});
+}
+
+/**
+ * Send ETH function
+ */
+function sendETH(wallet, toaddress, amount,  nonce, callback){
+	
+	//Create a RAW txn
+	var txn = createRAWSendTxn(toaddress.toLowerCase(), nonce, amount+"");
+	
+	//And now sign and Post It..
+	postTransaction(wallet, txn, function(ethresp){
+		callback(ethresp);
+	});
+}
