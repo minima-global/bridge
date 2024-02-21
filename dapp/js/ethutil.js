@@ -1,5 +1,18 @@
 
+/**
+ * The RPC HOST
+ */
 var ETH_RPC_HOST = "http://127.0.0.1:8545/";
+
+/**
+ * The wMinima ABI interfaces
+ */
+var wMinimaInterfaceABI = new ethers.utils.Interface(WMINIMA_ABI.abi);
+
+/**
+ * wMinima Contract Address
+ */
+var wMinimaContractAddress = "0x95401dc811bb5740090279ba06cfa8fcf6113778";
 
 /**
  * Run an ETH command  
@@ -43,7 +56,7 @@ function getCurrentBlock(callback) {
 /**
  * Get the current balance of an address
  */
-function getWeiBalance(address, callback) {
+function getETHWeiBalance(address, callback) {
 	
 	//Set the function
 	var payload = {"jsonrpc":"2.0", "method":"eth_getBalance",
@@ -151,5 +164,25 @@ function sendETH(wallet, toaddress, amount,  nonce, callback){
 	//And now sign and Post It..
 	postTransaction(wallet, txn, function(ethresp){
 		callback(ethresp);
+	});
+}
+
+/**
+ * Get ERC20 Balance
+ */
+function getERC20Balance(address, callback){
+	
+	//Get ETH valid address
+	var addr = address.toLowerCase();
+	if(addr.startsWith("0x")){
+		addr = addr.slice(2)
+	}
+	
+	//Get the function data
+	var functiondata = wMinimaInterfaceABI.functions.balanceOf.encode([ address ]);
+	
+	//Run this
+	ethCallCommand(wMinimaContractAddress,functiondata,function(ethresp){
+		callback(ethresp);	
 	});
 }
