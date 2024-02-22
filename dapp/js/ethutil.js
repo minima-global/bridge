@@ -5,16 +5,6 @@
 var ETH_RPC_HOST = "http://127.0.0.1:8545/";
 
 /**
- * The wMinima ABI interfaces
- */
-var wMinimaInterfaceABI = new ethers.utils.Interface(WMINIMA_ABI.abi);
-
-/**
- * wMinima Contract Address
- */
-var wMinimaContractAddress = "0x95401dc811bb5740090279ba06cfa8fcf6113778";
-
-/**
  * the Main ETH Wallet used 
  */
 var MAIN_WALLET = null;
@@ -33,7 +23,7 @@ function initialiseETH(privatekey, callback){
 	MAIN_WALLET = new ethers.Wallet(privateKey);
 	
 	//And now set up the nonce..
-	setNonceAuto(MAIN_WALLET.address,function(){
+	setNonceAuto(function(){
 		MDS.log("ETH Wallet setup : "+MAIN_WALLET.address+" nonce:"+NONCE_TRACK);
 		
 		if(callback){
@@ -45,10 +35,10 @@ function initialiseETH(privatekey, callback){
 /**
  * Auto-set the NONCE
  */
-function setNonceAuto(address,callback){
+function setNonceAuto(callback){
 	
 	//Get the nonce..
-	getTransactionCount(address,function(txncount){
+	getTransactionCount(MAIN_WALLET.address,function(txncount){
 				
 		//This is the nonce..
 		NONCE_TRACK = parseInt(txncount,16);
@@ -66,7 +56,13 @@ function setNonceAuto(address,callback){
 function runEthCommand(payload, callback){
 	MDS.net.POST(ETH_RPC_HOST,JSON.stringify(payload),function (resp) {
 	 	//MDS.log(resp.response);
-	 	callback(JSON.parse(resp.response));
+	 	
+		//Did it work..?
+		if(!resp.status){
+			MDS.log("ERROR running network command : "+JSON.stringify(resp));
+		}
+	
+		callback(JSON.parse(resp.response));
 	});
 }
 
@@ -222,51 +218,4 @@ function sendETH(toaddress, amount, callback){
 	postTransaction(txn, function(ethresp){
 		callback(ethresp);
 	});
-}
-
-/**
- * Get ERC20 Balance
- */
-function getWMinimaBalance(address, callback){
-	
-	//Get ETH valid address
-	var addr = address.toLowerCase();
-	if(addr.startsWith("0x")){
-		addr = addr.slice(2)
-	}
-	
-	//Get the function data
-	var functiondata = wMinimaInterfaceABI.functions.balanceOf.encode([ address ]);
-	
-	//Run this
-	ethCallCommand(wMinimaContractAddress,functiondata,function(ethresp){
-		var bal = ethers.utils.formatEther(ethresp.result);
-		callback(bal);	
-	});
-}
-
-/**
- * Send wMinima ERC20
- */
-function sendWMinima(toaddress, amount, callback){
-	
-	//Get ETH valid address
-	var addr = toaddress.toLowerCase();
-	if(addr.startsWith("0x")){
-		addr = addr.slice(2)
-	}
-	
-	//The actual amount - wMinima has 18 decimla places..
-	var sendamount = ethers.utils.parseUnits(""+amount,18);
-	
-	//Get the function data
-	var functiondata = wMinimaInterfaceABI.functions.transfer.encode([addr ,sendamount]);
-	
-	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(wMinimaContractAddress, functiondata);
-	
-	//NOW SIGN..
-	postTransaction(transaction, function(ethresp){
-		callback(ethresp);
-	}); 
 }
