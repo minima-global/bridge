@@ -54,3 +54,55 @@ function sendWMinima(toaddress, amount, callback){
 		callback(ethresp);
 	}); 
 }
+
+/**
+ * Approve a Contract to touch your wMinima
+ */
+function erc20Approve(contractaddress, amount, callback){
+	
+	//Get ETH valid address
+	var addr = contractaddress.toLowerCase();
+	if(addr.startsWith("0x")){
+		addr = addr.slice(2)
+	}
+	
+	//The actual amount - wMinima has 18 decimla places..
+	var sendamount = ethers.utils.parseUnits(""+amount,18);
+	
+	//Get the function data
+	var functiondata = wMinimaInterfaceABI.functions.approve.encode([addr, sendamount]);
+	
+	//Now create the RAW txn..
+	var transaction = createRAWContractCallTxn(wMinimaContractAddress, functiondata);
+	
+	//NOW SIGN..
+	postTransaction(transaction, function(ethresp){
+		callback(ethresp);
+	}); 
+}
+
+/**
+ * What is the allowance for this Owner on Contract
+ */
+function erc20Allowance(owner, contractaddress, callback){
+	
+	//Get ETH valid address
+	var own = owner.toLowerCase();
+	if(own.startsWith("0x")){
+		own = own.slice(2)
+	}
+	
+	var addr = contractaddress.toLowerCase();
+	if(addr.startsWith("0x")){
+		addr = addr.slice(2)
+	}
+	
+	//Get the function data
+	var functiondata = wMinimaInterfaceABI.functions.allowance.encode([own, addr]);
+	
+	//Run this as a READ command
+	ethCallCommand(wMinimaContractAddress,functiondata,function(ethresp){
+		var bal = ethers.utils.formatEther(ethresp.result);
+		callback(bal);	
+	}); 
+}

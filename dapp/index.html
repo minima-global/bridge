@@ -23,11 +23,12 @@
 	
 	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
 	
-	<script type="text/javascript" src="./abi/tokenabi.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
 	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
 	
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	
 </head>
 
@@ -42,10 +43,13 @@
 	Here you can Swap native Minima for wMinima on ETH.<br>
 	<br>
 	
-	<button onclick="tester();">TEST ETH</button>
+	<button onclick="balance();">BALANCE</button>
 	
 	<br><br>
-	<button onclick="deploy();">DEPLOYED</button>
+	<button onclick="deploy();">DEPLOY HTLC</button>
+	
+	<br><br>
+	<button onclick="collect();">COLLECT HTLC</button>
 	
 	<br><br>
 	<button onclick="transfer();">TOKEN TRANSFER</button>
@@ -65,11 +69,53 @@
 	//MDS.log("TEST1:"+ethers.utils.formatEther(100));
 	//MDS.log("TEST2:"+ethers.utils.parseUnits("100",18));
 	
-	function deploy(){
-		//Get my balance..
-		getWMinimaBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(balance){
-			MDS.log("wMinima bal : "+balance);
+	function balance(){
+		
+		getETHBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(balance){
+			MDS.log("ETH:0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266:"+balance);
 		});
+		
+		getWMinimaBalance("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(balance){
+			MDS.log("WMINIMA:0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266:"+balance);
+		});
+		
+		getWMinimaBalance("0x70997970C51812dc3A010C7d01b50e0d17dc79C8",function(balance){
+			MDS.log("WMINIMA:0x70997970C51812dc3A010C7d01b50e0d17dc79C8:"+balance);
+		});
+				
+		getETHBalance("0x70997970C51812dc3A010C7d01b50e0d17dc79C8",function(balance){
+			MDS.log("ETH:0x70997970C51812dc3A010C7d01b50e0d17dc79C8:"+balance);
+		});	
+	}
+	
+	function deploy(){
+		
+		//First approve an amount
+		/*erc20Approve(HTLCContractAddress,101,function(etthresp){
+			MDS.log(JSON.stringify(etthresp));
+		});*/
+		
+		//First approve an amount
+		erc20Allowance(MAIN_WALLET.address, HTLCContractAddress,function(allowance){
+			MDS.log("ERC20 allowance:"+allowance);
+		});
+		
+		/*startHTLCSwap(
+				"0x70997970C51812dc3A010C7d01b50e0d17dc79C8", // Receiver
+				"0x6D8C1CCA521621AC46CBC9CBB8F1D11EC59055EED170A37E2298DAEA9797B464", // Secret
+				1708609160 + 1000, //Timelock
+				wMinimaContractAddress, //ERC20 Address
+				10, // Amount
+				function(ethresp){
+			MDS.log(JSON.stringify(ethresp));	
+		});*/
+		
+	}
+	
+	function collect(){
+		
+		
+		
 	}
 	
 	function getLogs(){
@@ -135,6 +181,8 @@
 			});
 		});
 	}
+	
+	
 	
 	function tester(){
 		
