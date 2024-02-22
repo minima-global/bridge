@@ -38,10 +38,10 @@ function initialiseETH(privatekey, callback){
 function setNonceAuto(callback){
 	
 	//Get the nonce..
-	getTransactionCount(MAIN_WALLET.address,function(txncount){
+	getRequiredNonce(MAIN_WALLET.address,function(nonce){
 				
 		//This is the nonce..
-		NONCE_TRACK = parseInt(txncount,16);
+		NONCE_TRACK = nonce;
 		
 		//And send back..
 		if(callback){
@@ -163,7 +163,7 @@ function createRAWContractCallTxn(contractAddress, functionData){
 	
 	var transaction = {
     	nonce: NONCE_TRACK,
-    	gasLimit: 100000,
+    	gasLimit: 1000000,
     	gasPrice: ethers.utils.bigNumberify("20000000000"),
     	to: contractAddress,
     	data:functionData
