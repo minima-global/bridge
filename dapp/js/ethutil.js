@@ -33,6 +33,13 @@ function initialiseETH(privatekey, callback){
 }
 
 /**
+ * Return your main public key
+ */
+function getETHERUMPublicKey(){
+	return MAIN_WALLET.address;
+}
+
+/**
  * Auto-set the NONCE
  */
 function setNonceAuto(callback){
@@ -98,7 +105,7 @@ function getCurrentBlock(callback) {
 /**
  * Get the current balance of an address
  */
-function getETHWeiBalance(address, callback) {
+function getETHEREUMWeiBalance(address, callback) {
 	
 	//Set the function
 	var payload = {"jsonrpc":"2.0", "method":"eth_getBalance",
@@ -110,8 +117,8 @@ function getETHWeiBalance(address, callback) {
 	});
 }
 
-function getETHBalance(address, callback) {
-	getETHWeiBalance(address,function(ethresp){
+function getETHEREUMBalance(callback) {
+	getETHEREUMWeiBalance(MAIN_WALLET.address,function(ethresp){
 		//Convert to ETH
 		var ethvalue = ethers.utils.formatEther(ethresp);
 		callback(ethvalue);

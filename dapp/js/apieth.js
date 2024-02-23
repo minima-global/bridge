@@ -14,7 +14,15 @@ function getCurrentETHBlock(callback){
  * Get the balance of your Minima Coins
  */
 function getETHBalance(userdetails,callback){
-	MDS.cmd("balance tokenid:"+TOKEN_ID_TEST+" address:"+userdetails.minimaaddress.mxaddress,function(balresp){
+	
+	getETHEREUMBalance(function(balance){
+		//Create balance object
+		var ethbalance 			= {};
+		ethbalance.confirmed 	= balance;
+		callback(ethbalance);	
+	});
+			
+	/*MDS.cmd("balance tokenid:"+TOKEN_ID_TEST+" address:"+userdetails.minimaaddress.mxaddress,function(balresp){
 		
 		//Do we have ANY..
 		if(balresp.response.length == 0){
@@ -50,7 +58,7 @@ function getETHBalance(userdetails,callback){
 				callback(ethbalance);		
 			});	
 		}
-	});
+	});*/
 }
 
 /**

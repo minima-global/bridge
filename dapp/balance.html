@@ -23,6 +23,12 @@
 	<script type="text/javascript" src="./js/apiminima.js"></script>
 	<script type="text/javascript" src="./js/apieth.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	
 </head>
 
@@ -176,15 +182,24 @@
 		});
 	}
 	
+	//ETH Wallet
+	var privateKey 	= "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+	
 	//Main message handler..
 	MDS.init(function(msg){
 		
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			getUserDetails(function(userdets){
-				USER_DETAILS=userdets;
-				refresh();
+			//Init the ETH subsystem..
+			initialiseETH(privateKey,function(){
+				
+				getUserDetails(function(userdets){
+					USER_DETAILS=userdets;
+					MDS.log(JSON.stringify(USER_DETAILS,null,2));
+					
+					refresh();
+				});
 			});
 			
 		}else if(msg.event == "NEWBALANCE"){

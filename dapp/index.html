@@ -202,12 +202,16 @@
 		if(msg.event == "inited"){
 			
 			//Init the ETH subsystem..
-			initialiseETH(privateKey);
+			initialiseETH(privateKey,function(){
+				
+				/*getUserDetails(function(userdets){
+					USER_DETAILS=userdets;
+					MDS.log(JSON.stringify(USER_DETAILS));
+				});*/
+				
+			});
 			
-			/*getUserDetails(function(userdets){
-				USER_DETAILS=userdets;
-				MDS.log(JSON.stringify(USER_DETAILS));
-			});*/
+			
 		}
 	});
 
