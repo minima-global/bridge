@@ -123,7 +123,7 @@ contract HTLC {
         futureTimelock(_timelock)
         returns (bytes32 contractId)
     {
-        contractId = sha256(
+        /*contractId = sha256(
             abi.encodePacked(
                 msg.sender,
                 _receiver,
@@ -132,14 +132,20 @@ contract HTLC {
                 _hashlock,
                 _timelock
             )
-        );
-
-        if (haveContract(contractId))
-            revert("Contract already exists");
+        );*/
+        
+        //Contract ID is the hash of the hashlock - so EVERYONE MUST use a different hashlock.. or it's insecure
+        contractId = sha256(abi.encodePacked(_hashlock));
 		
+		//Has that hashlock already been used..
+        if (haveContract(contractId)){
+        	revert("Contract already exists");
+        }
+        
 		//Transfer the funds to this contract
         IERC20(_tokenContract).safeTransferFrom(msg.sender, address(this), _amount);
 
+		//Create a LOCK Object with all the required details
         contracts[contractId] = LockContract(
             msg.sender,
             _receiver,
@@ -151,10 +157,8 @@ contract HTLC {
             false,
             0x0
         );
-
-		//console.log("NEW HTLC Contract for %s", _amount);
-		//console.logBytes32(contractId);
-
+	
+		//Emit an EVENT
         emit HTLCERC20New(
             contractId,
             msg.sender,
@@ -225,7 +229,6 @@ contract HTLC {
             c.preimage
         );
     }
-
 
     function haveContract(bytes32 _contractId)
         internal

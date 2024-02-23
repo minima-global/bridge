@@ -6,7 +6,7 @@ var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 /**
  * wMinima Contract Address
  */
-var HTLCContractAddress = "0x21df544947ba3e8b3c32561399e88b52dc8b2823";
+var HTLCContractAddress = "0xbec49fa140acaa83533fb00a2bb19bddd0290f25";
 
 /**
  * Get the current unix time in secs
@@ -85,7 +85,7 @@ function refundHTLCSwap(contractId, callback){
 /**
  * Get the NEWCONTRACT logs of any HTLC which you own
  */
-function getHTLCContractAsOwner(callback){
+function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
 	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
@@ -93,8 +93,8 @@ function getHTLCContractAsOwner(callback){
 	//Get all the New Contracts that you OWN 
 	var params = [
 					{
-						fromBlock:"0x10",
-					 	toBlock:"latest",
+						fromBlock:fomBlockHEX+"",
+					 	toBlock:toBlockHEX+"",
 					 	
 						topics:[
 								//Use the function SHA address, and your pub key in the index filter	
@@ -133,9 +133,9 @@ function getHTLCContractAsOwner(callback){
 }
 
 /**
- * Get the NEWCONTRACT logs of any HTLC which are the RECEIVER
+ * Get the NEWCONTRACT logs of any HTLC which you are the RECEIVER
  */
-function getHTLCContractAsReceiver(callback){
+function getHTLCContractAsReceiver(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
 	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
@@ -143,8 +143,8 @@ function getHTLCContractAsReceiver(callback){
 	//Get all the New Contracts that you OWN 
 	var params = [
 					{
-						fromBlock:"0x10",
-					 	toBlock:"latest",
+						fromBlock:fomBlockHEX+"",
+					 	toBlock:toBlockHEX+"",
 					 	
 						topics:[
 								//Use the function SHA address, and your pub key in the index filter	
@@ -211,7 +211,7 @@ function parseHTLCContractData(logdata){
 	return newcontract;
 }
 
-function getHTLCContractWithdrawLogs(callback){
+function getHTLCContractWithdrawLogs(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
 	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
@@ -219,8 +219,8 @@ function getHTLCContractWithdrawLogs(callback){
 	//Get all the New Contracts that you OWN 
 	var params = [
 					{
-						fromBlock:"0x10",
-					 	toBlock:"latest",
+						fromBlock:fomBlockHEX+"",
+					 	toBlock:toBlockHEX+"",
 					 	
 						//The withdraw function sha address
 						topics:["0xae1c384441b246473ee31fdf0bd4cc25284d0cdb2c5258ada6b84b4550b9c058"],

@@ -219,3 +219,18 @@ function sendETH(toaddress, amount, callback){
 		callback(ethresp);
 	});
 }
+
+/**
+ * Check transaction confirmation 
+ */
+function checkETHTransaction(txnhash, callback){
+	
+	//Set the function
+	var payload = {"jsonrpc":"2.0", "method":"eth_getTransactionByHash",
+			"params": [txnhash], "id": 1};
+	  
+	//Run it..
+	runEthCommand(payload,function(ethresp){
+		callback(ethresp);
+	});
+}

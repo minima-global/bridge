@@ -20,9 +20,12 @@
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/sql.js"></script>
+	
 	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	
 	<script type="text/javascript" src="./abi/htlcabi.js"></script>
 	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
@@ -103,13 +106,6 @@
     function approve(){
     	erc20Approve(HTLCContractAddress,"max",function(etthresp){
 			MDS.log(JSON.stringify(etthresp));
-			
-			var txnhash = etthresp.result;
-			
-			checkETHTransaction("0x0088e23564307b7c87d167fd3875da01d3f6e9d8b449e732e8c4b8a357183349", function(check){
-				MDS.log(JSON.stringify(check,null,2));
-			});
-			
     	});
     }
     
@@ -129,7 +125,7 @@
 	
 	function collect(){
 		//Try and withdraw
-		withdrawHTLCSwap("0x00832DFCD6CA12BEA5F9767BB2527A04DCC5A9E669A707CDE99F0F601F26641E",
+		withdrawHTLCSwap("0xDE86C9872858F60ACF00767D9FF2B92199122564B97F54A8459D059744B9BE39",
 						"0xDDDC4D311A00B8C32CCFC7F7C2C1BF61EC86D855D3EB79CEB89D6A466848A754",function(resp){
 			MDS.log(JSON.stringify(resp));
 		});
