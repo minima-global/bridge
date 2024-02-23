@@ -46,13 +46,25 @@
 	<button onclick="balance();">BALANCE</button>
 	
 	<br><br>
+	<button onclick="approve();">APPROVE</button>
+	
+	<br><br>
 	<button onclick="deploy();">DEPLOY HTLC</button>
 	
 	<br><br>
 	<button onclick="collect();">COLLECT HTLC</button>
 	
 	<br><br>
-	<button onclick="htlclogs();">HTLC LOGS</button>
+	<button onclick="refund();">REFUND HTLC</button>
+	
+	<br><br>
+	<button onclick="htlclogs();">HTLC LOGS OWNER</button>
+	
+	<br><br>
+	<button onclick="htlclogsrec();">HTLC LOGS RECEIVER</button>
+	
+	<br><br>
+	<button onclick="htlclogswithdraw();">HTLC LOGS WITHDRAW</button>
 	
 	<br><br>
 	<button onclick="transfer();">TOKEN TRANSFER</button>
@@ -68,9 +80,6 @@
 	
 	//ETH Wallet
 	var privateKey 	= "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
-	
-	//MDS.log("TEST1:"+ethers.utils.formatEther(100));
-	//MDS.log("TEST2:"+ethers.utils.parseUnits("100",18));
 	
 	function balance(){
 		
@@ -94,95 +103,57 @@
 	//"random":"0xDDDC4D311A00B8C32CCFC7F7C2C1BF61EC86D855D3EB79CEB89D6A466848A754",
     //"hashed":"0x0FF477438D14963C7E30E6C7B8908D8DF782CEB728536204F3A83697F116D09D",
     
+    function approve(){
+    	erc20Approve(HTLCContractAddress,"max",function(etthresp){
+			MDS.log(JSON.stringify(etthresp));
+    	});
+    }
+    
 	function deploy(){
 		
-		//First approve an amount
-		erc20Approve(HTLCContractAddress,10,function(etthresp){
-			MDS.log(JSON.stringify(etthresp));
-			
-			startHTLCSwap(
-					"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Receiver
-					"0x0FF477438D14963C7E30E6C7B8908D8DF782CEB728536204F3A83697F116D09D", // Secret
-					1708609160 + 100000, //Timelock
-					wMinimaContractAddress, //ERC20 Address
-					9, // Amount
-					function(ethresp){
-				MDS.log(JSON.stringify(ethresp));	
-			});
-			
+		startHTLCSwap(
+				"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Receiver
+				"0x0FF477438D14963C7E30E6C7B8908D8DF782CEB728536204F3A83697F116D09D", // Secret
+				getCurrentUnixTime() + 5, //Timelock
+				wMinimaContractAddress, //ERC20 Address
+				1, // Amount
+				function(ethresp){
+			MDS.log(JSON.stringify(ethresp));	
 		});
-		
-		//First approve an amount
-		/*erc20Allowance(MAIN_WALLET.address, HTLCContractAddress,function(allowance){
-			MDS.log("ERC20 allowance:"+allowance);
-		});*/
 		
 	}
 	
 	function collect(){
-		
 		//Try and withdraw
-		withdrawHTLCSwap("0xbdb5259972cb747323ae5e8557c2c5954fcaf38573d68cc0f926d2875dc9fe4d",
+		withdrawHTLCSwap("0xDE86C9872858F60ACF00767D9FF2B92199122564B97F54A8459D059744B9BE39",
 						"0xDDDC4D311A00B8C32CCFC7F7C2C1BF61EC86D855D3EB79CEB89D6A466848A754",function(resp){
 			MDS.log(JSON.stringify(resp));
 		});
-
+	}
+	
+	function refund(){
+		//Try and refund
+		refundHTLCSwap("0xD23F9CC01BB95CB319684B30AA66859523D80A70EC42D5ACCE44C3277E727C40",function(resp){
+			MDS.log(JSON.stringify(resp));
+		});
 	}
 	
 	function htlclogs(){
-		getHTLCContractYouOwn(function(ethresp){
+		getHTLCContractAsOwner(function(ethresp){
 			MDS.log(JSON.stringify(ethresp,null,2));
 		});	
 	}
 	
-	function getLogs(){
-		
-		/*myTokenBalanceCall("0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",function(ethresp){
-			MDS.log("Balance 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266:"+JSON.stringify(ethresp));
-		
-			myTokenBalanceCall("0x70997970C51812dc3A010C7d01b50e0d17dc79C8",function(ethresp){
-				MDS.log("Balance 0x70997970C51812dc3A010C7d01b50e0d17dc79C8:"+JSON.stringify(ethresp));
-			
-			});	
-		});*/
-		
-		//Get all transfer events..
-		var params = [
-						{
-							fromBlock:"0x10",
-						 	toBlock:"latest",
-						 	topics:["0xddf252ad1be2c89b69c2b068fc378daa952ba7f163c4a11628f55a4df523b3ef"],
-						 	address:contractAddress
-						}
-					];
-		//var params = [{"address":contractAddress}];
-		var payload = {"jsonrpc":"2.0", "method":"eth_getLogs",
-				"params": params, "id": 1};
-		  
-		//Run it..
-		runEthCommand(payload,function(ethresp){
+	function htlclogsrec(){
+		getHTLCContractAsReceiver(function(ethresp){
 			MDS.log(JSON.stringify(ethresp,null,2));
-			
-			var len = ethresp.result.length;
-			for(var i=0;i<len;i++){
-				
-				var ev = ethresp.result[i];
-				
-				//Decode..
-				var block   = parseInt(ev.blockNumber,16);
-				var from 	= "0x"+ev.topics[1].substring(26);
-				var to 		= "0x"+ev.topics[2].substring(26);
-				
-				//Decode the data
-				//var abidecode = new ethers.utils.AbiCoder();
-				var abidecode = ethers.utils.defaultAbiCoder; 
-				var tamt = abidecode.decode(["uint256"],ev.data);
-				
-				//var amount  = parseInt(ev.data,16);
-				
-				MDS.log("Block:"+block+" transfer from:"+from+" to:"+to+" amount:"+tamt);	
-			}
-		});
+		});	
+	}
+	
+	function htlclogswithdraw(){
+		getHTLCContractWithdrawLogs(function(ethresp){
+			MDS.log(JSON.stringify(ethresp,null,2));
+		});	
 	}
 	
 	function transfer(){

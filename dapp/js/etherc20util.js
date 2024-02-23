@@ -67,7 +67,13 @@ function erc20Approve(contractaddress, amount, callback){
 	}
 	
 	//The actual amount - wMinima has 18 decimla places..
-	var sendamount = ethers.utils.parseUnits(""+amount,18);
+	var sendamount = "0";
+	if(amount == "max"){
+		//2^256 -1
+		sendamount = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+	}else{
+		sendamount = ethers.utils.parseUnits(""+amount,18);
+	}
 	
 	//Get the function data
 	var functiondata = wMinimaInterfaceABI.functions.approve.encode([addr, sendamount]);
