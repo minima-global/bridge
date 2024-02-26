@@ -12,10 +12,14 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 		
 		//Start the swap..
 		startETHHTLCSwap(swappublickey, hashlock, timelock, wMinimaContractAddress, amount, function(ethresp){
-			MDS.log("START ETH SWAP :"+JSON.stringify(ethresp));
-			callback(ethresp);
+			if(ethresp.status){
+				startedCounterPartySwap(hashlock, "wminima", amount,function(){
+					callback(ethresp);		
+				});	
+			}else{
+				callback(ethresp);
+			}
 		});
-		
 	});
 }
 
@@ -26,7 +30,7 @@ function checkExpiredETHHTLC(callback){
 	
 	//Find all the logs..
 	getHTLCContractAsOwner("0x10","latest",function(ethresp){
-		MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
+		//MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
 		
 		var timenow = getCurrentUnixTime(); 
 		var len 	= ethresp.length;
@@ -53,14 +57,11 @@ function checkExpiredETHHTLC(callback){
 							
 							//Collect the coin
 							_collectExpiredETHCoin(htlclog, function(){});		
-							
 						}
 					});
-					
 				}else{
-					MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" timenow:"+timenow+" amount:"+htlclog.amount);
+					//MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" timenow:"+timenow+" amount:"+htlclog.amount);
 				}
-				
 			}catch(e){
 				MDS.log("ERROR (checkExpiredETHHTLC) parsing expired coin : "+JSON.stringify(htlclog)+" "+e);
 			}
