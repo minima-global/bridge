@@ -20,6 +20,12 @@
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	
 </head>
 
@@ -139,11 +145,13 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			getUserDetails(function(userdets){
-				USER_DETAILS=userdets;
-				//MDS.log(JSON.stringify(USER_DETAILS));
-				
-				setOrderBookDetails();
+			//Init ETH
+			initETHSubSystem(function(){
+				getUserDetails(function(userdets){
+					USER_DETAILS=userdets;
+					
+					setOrderBookDetails();
+				});
 			});
 		}
 	});

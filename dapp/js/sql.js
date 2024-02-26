@@ -148,6 +148,12 @@ function collectExpiredHTLC(hash, token, amount, callback){
 	});
 }
 
+function haveCollectExpiredHTLC(hash, callback){
+	_checkCounterPartyEvent(hash,"CPTXN_EXPIRED",function(resp){
+		callback(resp);
+	});
+}
+
 function logDeposit(token,amount, callback){
 	_insertCounterPartyEvent("0x00",token,amount,"CPTXN_DEPOSIT",function(resp){
 		if(callback){

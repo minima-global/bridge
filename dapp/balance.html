@@ -48,18 +48,49 @@
 			<td>&nbsp;&nbsp;<button onclick="withdrawMinima();">WITHDRAW MINIMA</button></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
-	<!--<tr>
+		<tr>
+			<td>ETH ADDRESS : </td>
+			<td colspan=3><div id=myethaddress>0</div></td>
+		</tr>
+		<tr>
 			<td>ETH : </td>
-			<td><div id=ethbalance>0</div></td>
-		</tr>-->	
+			<td colspan=3><div id=ethbalance>0</div></td>
+		</tr>	
 		<tr>
 			<td>wMinima : </td>
-			<td><div id=wminimabalance>0</div></td>
-			<td>&nbsp;&nbsp;<button onclick="depositETH();">DEPOSIT WMINIMA</button></td>
-			<td>&nbsp;&nbsp;<button onclick="withdrawETH();">WITHDRAW WMINIMA</button></td>
+			<td colspan=3><div id=wminimabalance>0</div></td>
 		</tr>
 	</table>
+	<br>
+	<br>
+	
+	WITHDRAW ETH
+	<table>
+		<tr>
+			<td>ADDRESS : </td>
+			<td><input type=text id=ethaddress></td>
+		</tr>
+		<tr>
+			<td>AMOUNT : </td>
+			<td><input type=text id=ethamount></td>
+		</tr>
+		<tr><td colspan=2><button onclick="sendETH();">SEND ETH</button></td></tr>
+	</table>
 	<br><br>
+	WITHDRAW WMINIMA
+	<table>
+		<tr>
+			<td>ADDRESS : </td>
+			<td><input type=text id=wminimaaddress></td>
+		</tr>
+		<tr>
+			<td>AMOUNT : </td>
+			<td><input type=text id=wminimaamount></td>
+		</tr>
+		<tr><td colspan=2><button onclick="sendWMinima();">SEND WMINIMA</button></td></tr>
+	</table>
+	<br><br>
+
 	<button onclick="refresh();">REFRESH</button>
 	
 	<script type="text/javascript">
@@ -71,7 +102,6 @@
 	
 	var USER_DETAILS = {};
 	var balanceunconfirmed = false;
-	
 	
 	function refresh(){
 		getAllBalances(USER_DETAILS,function(balances){
@@ -86,12 +116,9 @@
 			}
 				
 			//Fill in ETH details..
-			if(balances.eth.unconfirmed != "0"){
-				wminimabalance.innerHTML = balances.eth.confirmed+" (unconfirmed:"+balances.eth.unconfirmed+")";	
-				balunconf = true;
-			}else{
-				wminimabalance.innerHTML = balances.eth.confirmed;
-			}
+			myethaddress.innerHTML	 = getETHERUMAddress(); 
+			ethbalance.innerHTML 	 = balances.eth;
+			wminimabalance.innerHTML = balances.wminima;
 			
 			//Any unconfirmed.. ?
 			balanceunconfirmed = balunconf;	
@@ -141,49 +168,36 @@
 	}
 	
 	function depositETH(){
-		var amount = prompt("How much wMinima do you want to send to the Bridge Wallet ?","0");
-		if(amount == null){return;}
-		if(!checkIsPositiveNumber(amount)){
-			alert("Must be a valid number greater than zero.. "+amount);
-			return;
-		}
+		alert("Send ETH to "+getETHERUMAddress());
+	}
+	
+	function sendETH(){
+		var amount 	= ethamount.value;
+		var address = ethaddress.value;
 		
-		//Send that amount to his address
-		depositWrappedMinima(USER_DETAILS, amount, function(resp){
-			if(resp.status){
-				alert("Funds Sent!");
-			}else{
-				alert(resp.error);
-			}
-		});
-	}
-	
-	function withdrawETH(){
-		var amount = prompt("How much wMinima do you want to withdraw from the Bridge Wallet ?","0");
-		if(amount == null){return;}
-		if(!checkIsPositiveNumber(amount)){
-			alert("Must be a valid number greater than zero.. "+amount);
-			return;
-		}
-			
-		//Get an address
-		MDS.cmd("getaddress",function(getaddr){
-			var address = getaddr.response.miniaddress;
-			
-			//And send from the native wallet.. no state vars
-			sendETH(USER_DETAILS,amount,address,{},function(resp){
-				if(resp.status){
-					alert("Funds withdrawn to main wallet!");
-					logWithdraw("wminima",amount);
-				}else{
-					alert(resp.error);
-				}
+		//Send it..
+		if(confirm("Send "+amount+" ETH to "+address+" ?")){
+			sendETHEREUMGetNonce(address, amount, function(ethresp){
+				alert(JSON.stringify(ethresp));
 			});
-		});
+		}
 	}
 	
-	//ETH Wallet
-	var privateKey 	= "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+	function depositWMinima(){
+		alert("Send wMinima ERC20 to "+getETHERUMAddress());
+	}
+	
+	function sendWMinima(){
+		var amount 	= wminimaamount.value;
+		var address = wminimaaddress.value;
+		
+		//Send it..
+		if(confirm("Send "+amount+" wMinima to "+address+" ?")){
+			sendWMinimaERC20GetNonce(address, amount, function(ethresp){
+				alert(JSON.stringify(ethresp));
+			});
+		}
+	}
 	
 	//Main message handler..
 	MDS.init(function(msg){
@@ -191,9 +205,8 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init the ETH subsystem..
-			initialiseETH(privateKey,function(){
-				
+			//Init ETH
+			initETHSubSystem(function(){
 				getUserDetails(function(userdets){
 					USER_DETAILS=userdets;
 					MDS.log(JSON.stringify(USER_DETAILS,null,2));

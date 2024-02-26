@@ -13,6 +13,18 @@ MDS.load("./js/apiminima.js");
 MDS.load("./js/apieth.js");
 MDS.load("./js/balance.js");
 
+MDS.load("./js/ethers-4.0.31.min.js");
+MDS.load("./abi/htlcabi.js");
+MDS.load("./abi/wminimaabi.js");
+MDS.load("./js/ethutil.js");
+MDS.load("./js/etherc20util.js");
+MDS.load("./js/ethhtlcutil.js");
+
+MDS.load("./js/ethjs-signer.js");
+
+//const signjs = require('ethjs-signer').sign;
+
+				
 //The USER details..
 var USER_DETAILS 	= {};
 
@@ -22,43 +34,60 @@ MDS.init(function(msg){
 	//Do initialisation
 	if(msg.event == "inited"){
 		
-		//Get the main user details.. thesew don't change..
-		getUserDetails(function(userdets){
-			//Get User Details..
-			USER_DETAILS=userdets;
+		MDS.log("Start Bridge Init..");
 			
-			//Set Up the HTLC contract script
-			setUpHTLCScript(USER_DETAILS, function(resp){});	
+		//Init ETH
+		initETHSubSystem(function(){
 			
-			//We want to be notified of Coin Events
-			MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY);
+			//Get the main user details.. thesew don't change..
+			getUserDetails(function(userdets){
 				
-			//Set up the DB
-			createDB(function(res){});
-			
-			//Check at startup..
-			checkNeedPublishOrderBook(USER_DETAILS);
-		
-			//Inited..	
-			MDS.log("Bridge Service inited..");
+				//Get User Details..
+				USER_DETAILS=userdets;
+				
+				//Set Up the HTLC contract script
+				setUpHTLCScript(USER_DETAILS, function(resp){});	
+				
+				//We want to be notified of Coin Events
+				MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY);
+					
+				//Set up the DB
+				createDB(function(res){});
+				
+				//Check at startup..
+				checkNeedPublishOrderBook(USER_DETAILS);
+						
+				//Approve using wMinima from the HTLC contract
+				//erc20Approve(HTLCContractAddress,"max",function(etthresp){
+					
+					//Inited..	
+					MDS.log("Bridge Service inited..");
+				//});
+			});	
 		});
-		
+				
 	}else if(msg.event == "MDS_TIMER_60SECONDS"){
 		
-		//Check expired Minima coins
-		checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
+		//return;
 		
-		//Check expired Wrappped Minima
-		checkExpiredETHHTLC(USER_DETAILS, function(expiredeth){});
-		
-		//Now check Minima for SWAPS
-		checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
-		
-		//Check ETH for SWAPS
-		checkETHSwapHTLC(USER_DETAILS,function(ethswaps){});
-		
-		//Check if my orderbook has changed..
-		checkNeedPublishOrderBook(USER_DETAILS);
+		//Auto set the Nonce..
+		setNonceAuto(function(){
+			
+			//Check expired Minima coins
+			//checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
+			
+			//Check expired Wrappped Minima
+			checkExpiredETHHTLC(function(expiredeth){});
+			
+			//Now check Minima for SWAPS
+			//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
+			
+			//Check ETH for SWAPS
+			//checkETHSwapHTLC(USER_DETAILS,function(ethswaps){});
+			
+			//Check if my orderbook has changed..
+			//checkNeedPublishOrderBook(USER_DETAILS);	
+		});
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		

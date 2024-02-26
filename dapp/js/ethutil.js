@@ -10,6 +10,10 @@ var ETH_RPC_HOST = "http://127.0.0.1:8545/";
 var MAIN_WALLET = null;
 
 /**
+ * Private Key
+ */
+var PRIVATE_KEY = "";
+/**
  * Keep track of the nonce..
  */
 var NONCE_TRACK = 0;
@@ -17,10 +21,11 @@ var NONCE_TRACK = 0;
 /**
  * Initialise the ETH subsystem
  */
-function initialiseETH(privatekey, callback){
+function initialiseETH(private, callback){
 	
 	//Create a wallet..
-	MAIN_WALLET = new ethers.Wallet(privateKey);
+	PRIVATE_KEY = private;
+	MAIN_WALLET = new ethers.Wallet(PRIVATE_KEY);
 	
 	//And now set up the nonce..
 	setNonceAuto(function(){
@@ -35,8 +40,8 @@ function initialiseETH(privatekey, callback){
 /**
  * Return your main public key
  */
-function getETHERUMPublicKey(){
-	return MAIN_WALLET.address;
+function getETHERUMAddress(){
+	return "0x"+MAIN_WALLET.address.slice(2).toUpperCase();
 }
 
 /**
@@ -91,7 +96,7 @@ function ethCallCommand(contractAddress, functionData, callback){
 /**
  * Get the current block
  */
-function getCurrentBlock(callback) {
+function getCurrentETHBlock(callback) {
 	
 	//Set the function
 	var payload = {"jsonrpc":"2.0", "method":"eth_blockNumber","params": [], "id": 1};
@@ -150,14 +155,20 @@ function getRequiredNonce(address, callback) {
 /**
  * Create a RAW unsigned Simple ETH Send Transaction
  */
-function createRAWSendTxn(toaddress, ethamount){
+function createRAWSendTxn(toaddress, ethamount, nonce){
+	
+	//Did we specify a nonce..
+	var usenonce = NONCE_TRACK;
+	if(nonce){
+		usenonce = nonce;
+	}
 	
 	var transaction = {
-    	nonce: NONCE_TRACK,
+    	nonce: usenonce,
     	gasLimit: 21000,
     	gasPrice: ethers.utils.bigNumberify("20000000000"),
     	to: toaddress,
-    	value: ethers.utils.parseEther(ethamount),
+    	value: ethers.utils.parseEther(ethamount+""),
 	};
 	
 	return transaction;	
@@ -166,10 +177,16 @@ function createRAWSendTxn(toaddress, ethamount){
 /**
  * Create a RAW unsigned Contract Call Transaction
  */
-function createRAWContractCallTxn(contractAddress, functionData){
+function createRAWContractCallTxn(contractAddress, functionData, nonce){
+	
+	//Did we specify a nonce..
+	var usenonce = NONCE_TRACK;
+	if(nonce){
+		usenonce = nonce;
+	}
 	
 	var transaction = {
-    	nonce: NONCE_TRACK,
+    	nonce: usenonce,
     	gasLimit: 1000000,
     	gasPrice: ethers.utils.bigNumberify("20000000000"),
     	to: contractAddress,
@@ -203,27 +220,51 @@ function sendRAWSignedTxn(signedtxn,callback){
  */
 function postTransaction(unsignedtransaction, callback){
 	
-	var signPromise = MAIN_WALLET.sign(unsignedtransaction);
+	//Create the signature
+	var signedTransaction  = ethSigner.sign(unsignedtransaction,PRIVATE_KEY);
+	
+	//Now send!
+    sendRAWSignedTxn(signedTransaction,function(ethresp){
+		callback(ethresp);
+    });
+	
+	/*var signPromise = MAIN_WALLET.sign(unsignedtransaction);
 	signPromise.then((signedTransaction) => {
-	    
+	    MDS.log("Transaction Signed : "+signedTransaction);
 	    //Now send!
 	    sendRAWSignedTxn(signedTransaction,function(ethresp){
-	    	callback(ethresp);
+			MDS.log("Transaction SENT : "+JSON.stringify(ethresp));
+			callback(ethresp);
 	    });
-	});
+	});*/
 }
 
 /**
  * Send ETH function
  */
-function sendETH(toaddress, amount, callback){
+function sendETHEREUM(toaddress, amount, callback){
 	
 	//Create a RAW txn
-	var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"");
+	var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"", NONCE_TRACK);
 	
 	//And now sign and Post It..
 	postTransaction(txn, function(ethresp){
 		callback(ethresp);
+	});
+}
+
+function sendETHEREUMGetNonce(toaddress, amount, callback){
+	
+	//Get the current nonce..
+	getRequiredNonce(MAIN_WALLET.address,function(nonce){
+		
+		//Create a RAW txn
+		var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"", nonce);
+		
+		//And now sign and Post It..
+		postTransaction(txn, function(ethresp){
+			callback(ethresp);
+		});	
 	});
 }
 

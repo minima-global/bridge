@@ -23,6 +23,12 @@
 	<script type="text/javascript" src="./js/apiminima.js"></script>
 	<script type="text/javascript" src="./js/apieth.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	
 </head>
 
@@ -87,9 +93,12 @@
 	//Main message handler..
 	MDS.init(function(msg){
 		if(msg.event == "inited"){
-			getUserDetails(function(userdets){
-				USER_DETAILS=userdets;
-				//MDS.log(JSON.stringify(USER_DETAILS));
+			
+			//Init ETH
+			initETHSubSystem(function(){
+				getUserDetails(function(userdets){
+					USER_DETAILS=userdets;
+				});
 			});
 		}
 	});

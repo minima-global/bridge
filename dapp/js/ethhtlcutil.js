@@ -19,7 +19,7 @@ function getCurrentUnixTime(){
 /**
  * Start an HTLC
  */
-function startHTLCSwap(swappubkey, hashlock, timelock, erc20address, amount, callback){
+function startETHHTLCSwap(swappubkey, hashlock, timelock, erc20address, amount, callback){
 	
 	//Get ETH valid address
 	var rec 	= swappubkey.toLowerCase();
@@ -68,7 +68,7 @@ function withdrawHTLCSwap(contractId, secret, callback){
 function refundHTLCSwap(contractId, callback){
 	
 	//Get ETH valid address
-	var contr 	= contractId.toLowerCase();
+	var contr = contractId.toLowerCase();
 	
 	//Get the function data
 	var functiondata = HTLCInterfaceABI.functions.refund.encode([contr]);

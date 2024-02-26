@@ -34,10 +34,28 @@ function getUserDetails(callback){
 		
 			_getUserMaximaPublicKey(function(max){
 				userdetails.maximapublickey=max;
+				
+				//Get the ETH Wallet address
+				userdetails.ethaddress = getETHERUMAddress();
 					
 				//Send the details
 				callback(userdetails);
 			});	
+		});
+	});
+}
+
+function initETHSubSystem(callback){
+	
+	//First get the Private key.. WRITE function
+	MDS.cmd("seedrandom modifier:ethbridge",function(resp){
+		
+		//The private key is based off the seed - so the same when you resync 
+		var privateKey = resp.response.seedrandom;
+		
+		//Init the ETH subsystem..
+		initialiseETH(privateKey,function(){
+			callback(getETHERUMAddress());
 		});
 	});
 }

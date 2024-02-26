@@ -8,13 +8,19 @@ function getAllBalances(userdetails,callback){
 		var balance 			= {};
 		balance.minima 	= minimabal;
 		
-		getETHBalance(userdetails,function(ethbal){
+		getETHEREUMBalance(function(ethbal){
 			
 			//Get wrapped and ETH
 			balance.eth	= ethbal;
-		
-			//And return the results..
-			callback(balance);	
+			
+			//Get the Wrapped Minima balance
+			getWMinimaBalance(function(wminbal){
+				//Get wrapped and ETH
+				balance.wminima	= wminbal;
+				
+				//And return the results..
+				callback(balance);
+			});	
 		});
 	});
 }

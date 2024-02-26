@@ -11,16 +11,10 @@ var wMinimaContractAddress = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
 /**
  * Get ERC20 Balance
  */
-function getWMinimaBalance(address, callback){
-	
-	//Get ETH valid address
-	var addr = address.toLowerCase();
-	if(addr.startsWith("0x")){
-		addr = addr.slice(2)
-	}
+function getWMinimaBalance(callback){
 	
 	//Get the function data
-	var functiondata = wMinimaInterfaceABI.functions.balanceOf.encode([ address ]);
+	var functiondata = wMinimaInterfaceABI.functions.balanceOf.encode([ MAIN_WALLET.address ]);
 	
 	//Run this
 	ethCallCommand(wMinimaContractAddress,functiondata,function(ethresp){
@@ -32,7 +26,7 @@ function getWMinimaBalance(address, callback){
 /**
  * Send wMinima ERC20
  */
-function sendWMinima(toaddress, amount, callback){
+function sendWMinimaERC20(toaddress, amount, callback){
 	
 	//Get ETH valid address
 	var addr = toaddress.toLowerCase();
@@ -52,6 +46,33 @@ function sendWMinima(toaddress, amount, callback){
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
 		callback(ethresp);
+	}); 
+}
+
+function sendWMinimaERC20GetNonce(toaddress, amount, callback){
+	
+	//Get the current nonce..
+	getRequiredNonce(MAIN_WALLET.address,function(nonce){
+		
+		//Get ETH valid address
+		var addr = toaddress.toLowerCase();
+		if(addr.startsWith("0x")){
+			addr = addr.slice(2)
+		}
+		
+		//The actual amount - wMinima has 18 decimla places..
+		var sendamount = ethers.utils.parseUnits(""+amount,18);
+		
+		//Get the function data
+		var functiondata = wMinimaInterfaceABI.functions.transfer.encode([addr ,sendamount]);
+		
+		//Now create the RAW txn..
+		var transaction = createRAWContractCallTxn(wMinimaContractAddress, functiondata, nonce);
+		
+		//NOW SIGN..
+		postTransaction(transaction, function(ethresp){
+			callback(ethresp);
+		});
 	}); 
 }
 
