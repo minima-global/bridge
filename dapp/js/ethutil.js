@@ -50,7 +50,7 @@ function getETHERUMAddress(){
 function setNonceAuto(callback){
 	
 	//Get the nonce..
-	getRequiredNonce(MAIN_WALLET.address,function(nonce){
+	getRequiredNonce(function(nonce){
 				
 		//This is the nonce..
 		NONCE_TRACK = nonce;
@@ -68,13 +68,28 @@ function setNonceAuto(callback){
 function runEthCommand(payload, callback){
 	MDS.net.POST(ETH_RPC_HOST,JSON.stringify(payload),function (resp) {
 	 	//MDS.log(resp.response);
-	 	
+	
+		var ethresp 	= {};
+		ethresp.status 	= resp.status; 	
+	
 		//Did it work..?
 		if(!resp.status){
-			MDS.log("ERROR running network command : "+JSON.stringify(resp));
+			MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
+			ethresp.error = resp.error;
+		}else{
+			
+			var ethreturned = JSON.parse(resp.response);
+			if(ethreturned.error){
+				MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
+				ethresp.status 	= false;
+				ethresp.error 	= ethreturned.error;
+			}else{
+				ethresp.result = ethreturned.result;
+			}
 		}
-	
-		callback(JSON.parse(resp.response));
+		
+		//Send this back..
+		callback(ethresp);
 	});
 }
 
@@ -83,7 +98,7 @@ function runEthCommand(payload, callback){
  */
 function ethCallCommand(contractAddress, functionData, callback){
 		
-	const payload = {jsonrpc: "2.0",method: "eth_call",
+	var payload = {jsonrpc: "2.0",method: "eth_call",
 			params: [{to: contractAddress,data:functionData},"latest"],
 			id: 1};
 		
@@ -133,22 +148,21 @@ function getETHEREUMBalance(callback) {
 /**
  * Get the Nonce for an address
  */
-function getTransactionCount(address, callback) {
+function getRequiredNonce(callback) {
 	
 	//Set the function
 	var payload = {"jsonrpc":"2.0", "method":"eth_getTransactionCount",
-			"params": [address,"latest"], "id": 1};
+			"params": [MAIN_WALLET.address,"latest"], "id": 1};
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
-		callback(ethresp.result);
-	});
-}
-
-function getRequiredNonce(address, callback) {
-	getTransactionCount(address, function(txncount){
-		var nonce = parseInt(txncount,16);	
-		callback(nonce);
+		
+		if(ethresp.status){
+			var nonce = parseInt(ethresp.result,16);	
+			callback(nonce);	
+		}else{
+			callback(-1);
+		}
 	});
 }	
 
@@ -206,11 +220,15 @@ function sendRAWSignedTxn(signedtxn,callback){
 			"params": [signedtxn], 
 			"id": 1};
 	
-	//The NONCE MUST be incremnented..
-	NONCE_TRACK++;
-	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		
+		//Wa it a success
+		if(ethresp.status){
+			//The NONCE MUST be incremented..
+			NONCE_TRACK++;		
+		}
+		
 		callback(ethresp);
 	});
 }
@@ -256,13 +274,19 @@ function sendETHEREUM(toaddress, amount, callback){
 function sendETHEREUMGetNonce(toaddress, amount, callback){
 	
 	//Get the current nonce..
-	getRequiredNonce(MAIN_WALLET.address,function(nonce){
+	getRequiredNonce(function(nonce){
 		
 		//Create a RAW txn
 		var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"", nonce);
 		
 		//And now sign and Post It..
 		postTransaction(txn, function(ethresp){
+			
+			//Store the nonce..
+			if(ethresp.status){
+				NONCE_TRACK = nonce+1;
+			}
+			
 			callback(ethresp);
 		});	
 	});

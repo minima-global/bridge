@@ -46,23 +46,22 @@ MDS.init(function(msg){
 				USER_DETAILS=userdets;
 				
 				//Set Up the HTLC contract script
-				setUpHTLCScript(USER_DETAILS, function(resp){});	
-				
-				//We want to be notified of Coin Events
-				MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY);
+				setUpHTLCScript(USER_DETAILS, function(resp){
 					
-				//Set up the DB
-				createDB(function(res){});
-				
-				//Check at startup..
-				checkNeedPublishOrderBook(USER_DETAILS);
+					//We want to be notified of Coin Events
+					MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY, function(){
 						
-				//Approve using wMinima from the HTLC contract
-				//erc20Approve(HTLCContractAddress,"max",function(etthresp){
-					
-					//Inited..	
-					MDS.log("Bridge Service inited..");
-				//});
+						//Set up the DB
+						createDB(function(res){
+							
+							//Check at startup..
+							checkNeedPublishOrderBook(USER_DETAILS);
+									
+							//Inited..	
+							MDS.log("Bridge Service inited..");	
+						});	
+					});	
+				});	
 			});	
 		});
 				
