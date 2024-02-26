@@ -78,12 +78,15 @@ function _collectExpiredETHCoin(htlclog,callback){
 	refundHTLCSwap(htlclog.contractid,function(resp){
 		
 		//Did it work ?
-		if(true){
+		if(resp.status){
+			
+			//We have now collected this - don't try again
 			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, function(){
 				if(callback){
 					callback(resp);	
 				}	
 			});	
+			
 		}else{
 			if(callback){
 				callback(resp);	
