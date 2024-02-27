@@ -179,7 +179,6 @@ function _checkCanCollectETHCoin(htlclog, callback){
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
 		if(secret != null){
-			//We know the secret! - Collect this coin..
 			
 			//Check the value..
 			getReqamountFromHash(hash,function(reqamount){
