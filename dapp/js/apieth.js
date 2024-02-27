@@ -81,7 +81,7 @@ function checkExpiredETHHTLC(callback){
 
 function _collectExpiredETHCoin(htlclog,callback){
 	
-	//What is the conytact
+	//What is the contract ID
 	var contid = htlclog.contractid;
 	
 	//Make sure we can collect it..
@@ -147,39 +147,30 @@ function checkETHSwapHTLC(callback){
 			//Get the HTLC log
 			var htlclog=ethresp[i];
 			
-			canCollect(htlclog.contractid,function(){});	
+			try{
+				//Have we already collected..
+				haveCollectHTLC(htlclog.hashlock,function(collected){
+					if(!collected){
+						//Try and collect
+						_checkCanCollectETHCoin(htlclog,function(){});
+					}
+				});
+				
+			}catch(e){
+				MDS.log("ERROR (checkETHSwapHTLC) parsing HTLC coin : "+JSON.stringify(htlclog)+" "+e);
+			}	
+		}
+		
+		if(callback){
+			callback(expired);
 		}
 	});
-	
-	//First search coins
-	/*var cmd = "coins coinage:2 tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
-	MDS.cmd(cmd,function(resp){
-		
-		//How many coins..
-		var len=resp.response.length;
-		for(var i=0;i<len;i++){
-			
-			//Get the coin
-			var coin=resp.response[i];
-			try{
-				//Are we the Counterparty..
-				if(coin.state[4] == userdets.minimapublickey){
-					_checkCanCollectETHCoin(userdets, coin, function(swapcoins){});		
-				}
-			}catch(e){
-				MDS.log("ERROR (checkETHSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
-			}
-		}
-	
-	});*/
 }
 
-function _checkCanCollectETHCoin(userdets, coin, callback){
-	
-	//MDS.log("CHECK ETH SWAP.. "+JSON.stringify(coin));
+function _checkCanCollectETHCoin(htlclog, callback){
 	
 	//What is the hash of the secret
-	var hash = coin.state[5];
+	var hash = htlclog.hashlock;
 	
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
@@ -187,13 +178,17 @@ function _checkCanCollectETHCoin(userdets, coin, callback){
 			//We know the secret! - Collect this coin..
 			MDS.log("Can Collect ETH HTLC coin as we know secret!!");
 			
-			_collectETHHTLCCoin(userdets, hash, secret, coin, function(resp){
+			_collectETHHTLCCoin(htlclog, hash, secret, function(resp){
 				if(callback){
 					callback(resp);
 				}
 			});
 			
 		}else{
+			
+			callback();
+			
+			return;
 					
 			//Have we sent the OTHER side txn to get them to reveal the secret..
 			haveSentCounterPartyTxn(hash,function(sent){
@@ -231,50 +226,51 @@ function _checkCanCollectETHCoin(userdets, coin, callback){
 	});
 }
 
-function _collectETHHTLCCoin(userdets, hash, secret, coin, callback){
+function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 	
-	//Random txn ID
-	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
+	//What is the contract ID
+	var contid = htlclog.contractid;
 	
-	//Create a txn to collect this coin..
-	var finalamount = +coin.tokenamount - 0.0001;
-			
-	var cmd = "txncreate id:"+txnid+";"
-	
-			//Add the HTLC coin..
-			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
-			
-			//Add an output to the notify coin address.. MUST be FIRST! @INPUT
-			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:0xFFEEDD9999;"
-			
-			//Send the coin back to me..
-			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+finalamount+" address:"+userdets.minimaaddress.mxaddress+";"
-			
-			//Set the correct state vars.. the secret etc..
-			+"txnstate id:"+txnid+" port:100 value:\""+secret+"\";"
-			+"txnstate id:"+txnid+" port:101 value:\""+hash+"\";"
-			+"txnstate id:"+txnid+" port:102 value:\"["+coin.state[0]+"]\";"
-			+"txnstate id:"+txnid+" port:103 value:\"["+coin.state[4]+"]\";"
-			
-			//Sign it..
-			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
-			
-			//AND POST!
-			+"txnpost id:"+txnid+" auto:true txndelete:true;";
-	
-	//Run it.. 
-	MDS.cmd(cmd,function(resp){
+	//Make sure we can collect it..
+	canCollect(contid, function(canc){
 		
-		//always delete whatever happens
-		MDS.cmd("txndelete id:"+txnid,function(delresp){
+		if(canc){
 			
-			//Log it..	
-			collectHTLC(coin.state[5],"wminima",finalamount+"");
+			//Try and collect with the secret!
+			withdrawHTLCSwap(contid, secret, function(resp){
+				
+				//Did it work ?
+				if(resp.status){
+					//We have now collected this - don't try again
+					collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, resp.result, function(){
+						callback(resp);		
+					});	
+				}else{
+					
+					//Didn't work..
+					MDS.log("HTLC withdraw failed : "+resp.error.message);
+					
+					//What is the error
+					if( resp.error.message.includes("withdrawable: already ") || 
+						resp.error.message.includes("withdrawable: not ")){
+								
+						//Already collected - don't try again..
+						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xEE", function(){
+							callback(resp);		
+						});			
+					}else{
+						callback(resp);	
+					}	
+				}
+			});		
+		}else{
 			
-			if(callback){
-				callback(resp);
-			}
-		});
+			//Already collected - don't try again..
+			MDS.log("Trying to withdraw already collected HTLC : "+JSON.stringify(htlclog));
+			collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xEE", function(sqlresp){
+				callback();		
+			});	
+		}
 	});
 }
 

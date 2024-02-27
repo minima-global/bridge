@@ -184,11 +184,17 @@ function haveSentCounterPartyTxn(hash, callback){
 	});
 }
 
-function collectHTLC(hash, token, amount, txnhash,callback){
+function collectHTLC(hash, token, amount, txnhash, callback){
 	_insertCounterPartyEvent(hash,token,amount,"CPTXN_COLLECT",txnhash,function(resp){
 		if(callback){
 			callback(resp);
 		}
+	});
+}
+
+function haveCollectHTLC(hash, callback){
+	_checkCounterPartyEvent(hash,"CPTXN_COLLECT",function(resp){
+		callback(resp);
 	});
 }
 

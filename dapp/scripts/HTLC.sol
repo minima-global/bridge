@@ -243,7 +243,7 @@ contract HTLC {
         view
         returns (bool collectible)
     {
-    	collectible = !contracts[_contractId].withdrawn && !contracts[_contractId].refunded);
+    	collectible = !contracts[_contractId].withdrawn && !contracts[_contractId].refunded;
     }
 
 }

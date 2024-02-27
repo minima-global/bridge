@@ -116,7 +116,7 @@
 			startETHSwap(
 					getETHERUMAddress(), // Receiver
 					1, // Amount
-					2, // Request Amount
+					1, // Request Amount
 					function(ethresp){
 				MDS.log(JSON.stringify(ethresp));	
 			});	
@@ -210,12 +210,6 @@
 				getUserDetails(function(userdets){
 					USER_DETAILS=userdets;
 					MDS.log(JSON.stringify(USER_DETAILS,null,2));
-				});
-				
-				//CHeck 
-				
-				canCollect("0x676BBC38DACEA6A4DCAB77EDBD76900A9C6EF2E7BF6D27EC0151E23C214FF87B",function(ethresp){
-					MDS.log("CAN COLLECT : "+JSON.stringify(ethresp,null,2));
 				});
 			});
 		}

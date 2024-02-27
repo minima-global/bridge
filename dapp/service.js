@@ -76,13 +76,13 @@ MDS.init(function(msg){
 			//checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
 			
 			//Check expired Wrappped Minima
-			checkExpiredETHHTLC(function(expiredeth){});
+			//checkExpiredETHHTLC(function(expiredeth){});
 			
 			//Now check Minima for SWAPS
 			//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
 			
 			//Check ETH for SWAPS
-			//checkETHSwapHTLC(function(ethswaps){});
+			checkETHSwapHTLC(function(ethswaps){});
 			
 			//Check if my orderbook has changed..
 			//checkNeedPublishOrderBook(USER_DETAILS);	
