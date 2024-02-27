@@ -119,7 +119,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 		}else{
 			
 			//Already collected - don't try again..
-			MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
+			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
 			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
 				callback();		
 			});	
