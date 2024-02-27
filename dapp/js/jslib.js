@@ -59,3 +59,13 @@ function randomInteger(min, max) {
 function toFixedNumber(number){
 	return +Number.parseFloat(number).toFixed(2);
 }
+
+function getDateString(dateobj){
+	var year 	= dateobj.getFullYear();
+	var month 	= dateobj.getMonth()+1;
+	var day 	= dateobj.getDate();
+	var hour	= dateobj.getHours();
+	var mins	= dateobj.getMinutes();
+	
+	return day+"/"+month+"/"+year+" "+hour+":"+mins;
+}

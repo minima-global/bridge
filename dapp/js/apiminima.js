@@ -46,6 +46,7 @@ function sendMinima(userdets, amount, address, state, callback){
 	
 	//Send that amount to his address
 	MDS.cmd("send amount:"+amount
+			+" mine:true"
 	  		+" address:"+address
 			+" fromaddress:"+userdets.minimaaddress.mxaddress
 			+" signkey:"+userdets.minimapublickey
@@ -79,7 +80,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 	getCurrentMinimaBlock(function(block){
 		
 		//How long do we wait..
-		var timelock = +block+30;
+		var timelock = +block+10;
 		
 		//Create a secret
 		createSecretHash(function(hash){
@@ -91,16 +92,20 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 			state[3]  = timelock;
 			state[4]  = swappublickey;
 			state[5]  = hash;
-	
-			MDS.log("Start Minima->wMinima SWAP "+JSON.stringify(state));
-			 
+	 
 			//And send from the native wallet..
 			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
 				
 				//If success put in DB
 				if(resp.status){
-					startedCounterPartySwap(hash,"minima",amount,function(){
-						callback(resp);	
+					
+					//Log it..
+					startedCounterPartySwap(hash,"minima",amount,response.txpowid,function(){
+						
+						//Insert these details so you know in future if right amount sent
+						insertNewHTLCContract(hash,requestamount,"wminima",function(){
+							callback(resp);	
+						});
 					});
 				}else{
 					callback(resp);	
@@ -142,15 +147,23 @@ function checkExpiredMinimaHTLC(userdets, callback){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
-								MDS.log("Timelock Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 								
-								//Add to our list
-								expired.push(coin);
+								//Have we already collected.. there should be no coin if we have..
+								//haveCollectExpiredHTLC(coin.state[5],function(collected){
+								//	if(!collected){
+										
+										MDS.log("Timelock Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+									
+										//Add to our list
+										expired.push(coin);
+										
+										//Collect the coin
+										_collectExpiredCoin(userdets,coin,function(){});	
+								//	}
+								//});
 								
-								//Collect the coin
-								_collectExpiredCoin(userdets,coin,function(){});
 							}else{
-								//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 							}	
 						}
 					}catch(e){
@@ -184,11 +197,9 @@ function _collectExpiredCoin(userdets,coin,callback){
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
 			
 			//Log it..	
-			collectExpiredHTLC(coin.state[5],"minima",coin.amount);
-			
-			if(callback){
+			collectExpiredHTLC(coin.state[5],"minima",coin.amount,"0x00",function(){
 				callback(resp);
-			}
+			});
 		});
 	});
 }

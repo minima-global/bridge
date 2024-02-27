@@ -82,7 +82,7 @@ MDS.init(function(msg){
 			//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
 			
 			//Check ETH for SWAPS
-			//checkETHSwapHTLC(USER_DETAILS,function(ethswaps){});
+			//checkETHSwapHTLC(function(ethswaps){});
 			
 			//Check if my orderbook has changed..
 			//checkNeedPublishOrderBook(USER_DETAILS);	

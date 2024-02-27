@@ -15,7 +15,8 @@ function createDB(callback){
 	var initsql = "CREATE TABLE IF NOT EXISTS `secrets` ( "
 				+"  `id` bigint auto_increment, "
 				+"  `secret` varchar(128) NOT NULL, "
-				+"  `hash` varchar(128) NOT NULL "
+				+"  `hash` varchar(128) NOT NULL, "
+				+"  `addeddate` bigint NOT NULL "
 				+" )";
 				
 	//Run this..
@@ -27,10 +28,26 @@ function createDB(callback){
 				+"  `event` varchar(128) NOT NULL, "
 				+"  `token` varchar(128) NOT NULL, "
 				+"  `amount` varchar(128) NOT NULL, "
+				+"  `txnhash` varchar(128) NOT NULL, "
 				+"  `eventdate` bigint NOT NULL "
 				+" )";
 		
 		MDS.sql(counterpartytxn,function(countermsg){
+			
+			var myhtlccontracts = "CREATE TABLE IF NOT EXISTS `myhtlc` ( "
+					+"  `id` bigint auto_increment, "
+					+"  `hash` varchar(128) NOT NULL, "
+					+"  `reqamount` varchar(128) NOT NULL, "
+					+"  `token` varchar(128) NOT NULL, "
+					+"  `eventdate` bigint NOT NULL "
+					+" )";
+			
+			MDS.sql(myhtlccontracts,function(htlcmsg){
+				if(callback){
+					callback(msg);
+				}	
+			});
+			
 			if(callback){
 				callback(msg);
 			}	
@@ -47,8 +64,7 @@ function createSecretHash(callback){
 		var hash 	= random.response.hashed;
 		
 		//Insert into DB
-		var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
-		MDS.sql(sql,function(msg){
+		insertSecret(secret,hash,function(){
 			callback(hash);
 		});
 	});
@@ -82,8 +98,12 @@ function insertSecret(secret,hash,callback){
 					}
 				}else{
 					
+					//the date
+					var recdate = new Date();
+	
 					//Insert into the DB
-					var sql = "INSERT INTO secrets(secret,hash) VALUES ('"+secret+"','"+hash+"')";
+					var sql = "INSERT INTO secrets(secret,hash,addeddate) "
+									+"VALUES ('"+secret+"','"+hash+"',"+recdate.getTime()+")";
 					MDS.sql(sql,function(msg){
 						if(callback){
 							callback(true);	
@@ -108,18 +128,50 @@ function checkSecret(secret, hash, callback){
 }
 
 /**
+ * When you create an HTLC how much are you expecting in return
+ */
+function getReqamountFromHash(hash, callback){
+	//Find a record
+	var sql = "SELECT * FROM myhtlc WHERE hash='"+hash+"' LIMIT 1";
+				
+	//Run this..
+	MDS.sql(sql,function(msg){
+		if(msg.count>0){
+			callback(msg.rows[0].SECRET);	
+		}else{
+			callback(null);
+		}
+	});
+}
+
+function insertNewHTLCContract(hashlock, reqamount, token, callback){
+	
+	//the date
+	var recdate = new Date();
+
+	//Insert into the DB
+	var sql = "INSERT INTO myhtlc(hash,reqamount,token,eventdate) "
+					+"VALUES ('"+hashlock+"','"+reqamount+"','"+token+"',"+recdate.getTime()+")";
+	MDS.sql(sql,function(msg){
+		if(callback){
+			callback(true);	
+		}
+	});
+}
+
+/**
  * Counterparty events..
  */
-function startedCounterPartySwap(hash,token,amount,callback){
-	_insertCounterPartyEvent(hash,token,amount,"HTLC_STARTED",function(resp){
+function startedCounterPartySwap(hash,token,amount,txnhash,callback){
+	_insertCounterPartyEvent(hash,token,amount,"HTLC_STARTED",txnhash,function(resp){
 		if(callback){
 			callback(resp);
 		}
 	});
 }
 
-function sentCounterPartyTxn(hash,token,amount,callback){
-	_insertCounterPartyEvent(hash,token,amount,"CPTXN_SENT",function(resp){
+function sentCounterPartyTxn(hash,token,amount,txnhash,callback){
+	_insertCounterPartyEvent(hash,token,amount,"CPTXN_SENT",txnhash,function(resp){
 		if(callback){
 			callback(resp);
 		}
@@ -132,16 +184,16 @@ function haveSentCounterPartyTxn(hash, callback){
 	});
 }
 
-function collectHTLC(hash, token, amount, callback){
-	_insertCounterPartyEvent(hash,token,amount,"CPTXN_COLLECT",function(resp){
+function collectHTLC(hash, token, amount, txnhash,callback){
+	_insertCounterPartyEvent(hash,token,amount,"CPTXN_COLLECT",txnhash,function(resp){
 		if(callback){
 			callback(resp);
 		}
 	});
 }
 
-function collectExpiredHTLC(hash, token, amount, callback){
-	_insertCounterPartyEvent(hash,token,amount,"CPTXN_EXPIRED",function(resp){
+function collectExpiredHTLC(hash, token, amount, txnhash,callback){
+	_insertCounterPartyEvent(hash,token,amount,"CPTXN_EXPIRED",txnhash,function(resp){
 		if(callback){
 			callback(resp);
 		}
@@ -154,16 +206,24 @@ function haveCollectExpiredHTLC(hash, callback){
 	});
 }
 
-function logDeposit(token,amount, callback){
-	_insertCounterPartyEvent("0x00",token,amount,"CPTXN_DEPOSIT",function(resp){
+function logDeposit(token,amount, txnhash,callback){
+	_insertCounterPartyEvent("0x00",token,amount,"CPTXN_DEPOSIT",txnhash,function(resp){
 		if(callback){
 			callback(resp);	
 		}
 	});
 }
 
-function logWithdraw(token, amount, callback){
-	_insertCounterPartyEvent("0x00",token,amount,"CPTXN_WITHDRAW",function(resp){
+function logWithdraw(token, amount, txnhash,callback){
+	_insertCounterPartyEvent("0x00",token,amount,"CPTXN_WITHDRAW",txnhash,function(resp){
+		if(callback){
+			callback(resp);	
+		}
+	});
+}
+
+function logApprove(txnhash,callback){
+	_insertCounterPartyEvent("0x00","wminima",0,"CPTXN_APPROVE",txnhash,function(resp){
 		if(callback){
 			callback(resp);	
 		}
@@ -190,14 +250,14 @@ function wipeAllEvents(callback){
 	});
 }
 
-function _insertCounterPartyEvent(hash,token,amount,event,callback){
+function _insertCounterPartyEvent(hash,token,amount,event,txnhash,callback){
 	
 	//the date
 	var recdate = new Date();
 	
 	//Insert into DB
-	var sql = "INSERT INTO counterparty(hash,event,token,amount,eventdate) "
-	+"VALUES ('"+hash+"','"+event+"','"+token+"','"+amount+"',"+recdate.getTime()+")";
+	var sql = "INSERT INTO counterparty(hash,event,token,amount,txnhash,eventdate) "
+	+"VALUES ('"+hash+"','"+event+"','"+token+"','"+amount+"','"+txnhash+"',"+recdate.getTime()+")";
 	MDS.sql(sql,function(msg){
 		callback(msg);
 	});

@@ -237,5 +237,13 @@ contract HTLC {
     {
         exists = (contracts[_contractId].sender != address(0));
     }
+    
+    function canCollect(bytes32 _contractId)
+        external
+        view
+        returns (bool collectible)
+    {
+    	collectible = !contracts[_contractId].withdrawn && !contracts[_contractId].refunded);
+    }
 
 }

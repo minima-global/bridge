@@ -28,6 +28,8 @@
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
+	<script type="text/javascript" src="./js/apieth.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
 </head>
 
 <body>
@@ -47,7 +49,7 @@
 	<button onclick="approve();">APPROVE</button>
 	
 	<br><br>
-	<button onclick="deploy();">DEPLOY HTLC</button>
+	<button onclick="deploy();">DEPLOY HTLC ETH</button> &nbsp; <button onclick="deployMinima();">DEPLOY HTLC MINIMA</button>
 	
 	<br><br>
 	<button onclick="collect();">COLLECT HTLC</button>
@@ -100,29 +102,31 @@
     
     function approve(){
     	erc20Approve(HTLCContractAddress,"max",function(etthresp){
-			MDS.log(JSON.stringify(etthresp));
+			MDS.log("erc20Approve:"+JSON.stringify(etthresp));
 			
-			var txnhash = etthresp.result;
-			
-			checkETHTransaction("0x0088e23564307b7c87d167fd3875da01d3f6e9d8b449e732e8c4b8a357183349", function(check){
+			/*var txnhash = etthresp.result;
+			checkETHTransaction(txnhash, function(check){
 				MDS.log(JSON.stringify(check,null,2));
-			});
-			
+			});*/
     	});
     }
     
 	function deploy(){
-		
-		startHTLCSwap(
-				"0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266", // Receiver
-				"0x0FF477438D14963C7E30E6C7B8908D8DF782CEB728536204F3A83697F116D09D", // Secret
-				getCurrentUnixTime() + 5, //Timelock
-				wMinimaContractAddress, //ERC20 Address
-				1, // Amount
-				function(ethresp){
-			MDS.log(JSON.stringify(ethresp));	
+		setNonceAuto(function(){
+			startETHSwap(
+					getETHERUMAddress(), // Receiver
+					1, // Amount
+					2, // Request Amount
+					function(ethresp){
+				MDS.log(JSON.stringify(ethresp));	
+			});	
 		});
-		
+	}
+	
+	function deployMinima(){
+		startMinimaSwap(USER_DETAILS, 1, 2, USER_DETAILS.minimapublickey, function(minresp){
+			MDS.log(JSON.stringify(minresp));
+		});
 	}
 	
 	function collect(){
@@ -199,10 +203,19 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
+			//wipeDB();
+			
 			//Init ETH
 			initETHSubSystem(function(){
 				getUserDetails(function(userdets){
 					USER_DETAILS=userdets;
+					MDS.log(JSON.stringify(USER_DETAILS,null,2));
+				});
+				
+				//CHeck 
+				
+				canCollect("0x676BBC38DACEA6A4DCAB77EDBD76900A9C6EF2E7BF6D27EC0151E23C214FF87B",function(ethresp){
+					MDS.log("CAN COLLECT : "+JSON.stringify(ethresp,null,2));
 				});
 			});
 		}

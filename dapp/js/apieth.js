@@ -2,10 +2,10 @@
 /**
  * Start a wMinima -> Minima SWAP
  */
-function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
+function startETHSwap(swappublickey, amount, requestamount, callback){
 	
-	//Add 5 mins..
-	var timelock = getCurrentUnixTime() + (60*5);
+	//Create Time Lock
+	var timelock = getCurrentUnixTime() + (60*2);
 	
 	//Create a secret
 	createSecretHash(function(hashlock){
@@ -13,8 +13,14 @@ function startETHSwap(userdets, amount, requestamount, swappublickey, callback){
 		//Start the swap..
 		startETHHTLCSwap(swappublickey, hashlock, timelock, wMinimaContractAddress, amount, function(ethresp){
 			if(ethresp.status){
-				startedCounterPartySwap(hashlock, "wminima", amount,function(){
-					callback(ethresp);		
+				
+				//Log it..
+				startedCounterPartySwap(hashlock, "wminima", amount, ethresp.result, function(){
+					
+					//Insert these details so you know in future if right amount sent
+					insertNewHTLCContract(hashlock,requestamount,"minima",function(){
+						callback(ethresp);	
+					});		
 				});	
 			}else{
 				callback(ethresp);
@@ -30,7 +36,7 @@ function checkExpiredETHHTLC(callback){
 	
 	//Find all the logs..
 	getHTLCContractAsOwner("0x10","latest",function(ethresp){
-		//MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
+		MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
 		
 		var timenow = getCurrentUnixTime(); 
 		var len 	= ethresp.length;
@@ -75,34 +81,78 @@ function checkExpiredETHHTLC(callback){
 
 function _collectExpiredETHCoin(htlclog,callback){
 	
-	//Try and refund
-	refundHTLCSwap(htlclog.contractid,function(resp){
+	//What is the conytact
+	var contid = htlclog.contractid;
+	
+	//Make sure we can collect it..
+	canCollect(contid, function(canc){
 		
-		//Did it work ?
-		if(resp.status){
+		if(canc){
 			
-			//We have now collected this - don't try again
-			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, function(){
-				if(callback){
-					callback(resp);	
-				}	
-			});	
-			
+			//Try and refund
+			refundHTLCSwap(contid,function(resp){
+				
+				//Did it work ?
+				if(resp.status){
+					//We have now collected this - don't try again
+					collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, resp.result, function(){
+						callback(resp);		
+					});	
+				}else{
+					
+					//Didn''t work..
+					MDS.log("HTLC refund failed : "+resp.error.message);
+					
+					//What is the error
+					if( resp.error.message.includes("refundable: already ") || 
+						resp.error.message.includes("refundable: not sender")){
+								
+						//Already collected - don't try again..
+						collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
+							callback(resp);		
+						});			
+					}else{
+						callback(resp);	
+					}	
+				}
+			});		
 		}else{
-			if(callback){
-				callback(resp);	
-			}
+			
+			//Already collected - don't try again..
+			MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
+			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
+				callback();		
+			});	
 		}
 	});
 }
 
+
+
 /**
  * Check if there are any SWAP coins
  */
-function checkETHSwapHTLC(userdets, callback){
+function checkETHSwapHTLC(callback){
+	
+	//Find all the logs..
+	getHTLCContractAsReceiver("0x10","latest",function(ethresp){
+		MDS.log("SEARCHING LOGS RECEIVER : "+JSON.stringify(ethresp,null,2));
+		
+		var timenow = getCurrentUnixTime(); 
+		var len 	= ethresp.length;
+		var expired = [];
+			
+		for(var i=0;i<len;i++){
+			
+			//Get the HTLC log
+			var htlclog=ethresp[i];
+			
+			canCollect(htlclog.contractid,function(){});	
+		}
+	});
 	
 	//First search coins
-	var cmd = "coins coinage:2 tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	/*var cmd = "coins coinage:2 tokenid:"+TOKEN_ID_TEST+" simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
 		//How many coins..
@@ -121,7 +171,7 @@ function checkETHSwapHTLC(userdets, callback){
 			}
 		}
 	
-	});
+	});*/
 }
 
 function _checkCanCollectETHCoin(userdets, coin, callback){

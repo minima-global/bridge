@@ -33,7 +33,7 @@
 	<br>
 	<button onclick="wipeHistory();">WIPE HISTORY</button><br>
 	<br>
-	<table style="border-spacing:5;" border=0 id=histtable></table>
+	<table style="border-spacing:5;" border=1 id=histtable></table>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -63,6 +63,15 @@
 		//Wipe Table
 		histtable.innerHTML = "";
 		
+		var thead = histtable.insertRow();
+		thead.insertCell(0).innerHTML = "ID";
+		thead.insertCell(1).innerHTML = "HASHLOCK";
+		thead.insertCell(2).innerHTML = "EVENT";
+		thead.insertCell(3).innerHTML = "TOKEN";
+		thead.insertCell(4).innerHTML = "AMOUNT";
+		thead.insertCell(5).innerHTML = "TXN_HASH";
+		thead.insertCell(6).innerHTML = "DATE";
+		
 		var len = rows.length;
 		for(var i=0;i<len;i++){
 			var row = rows[i];
@@ -78,10 +87,11 @@
 			trow.insertCell(2).innerHTML = row.EVENT;
 			trow.insertCell(3).innerHTML = row.TOKEN;
 			trow.insertCell(4).innerHTML = row.AMOUNT;
+			trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";
 			
 			//Create a date object
 			var dd = new Date(+row.EVENTDATE);
-			trow.insertCell(5).innerHTML = dd.toString();
+			trow.insertCell(6).innerHTML = getDateString(dd);
 		}
 	}
 	

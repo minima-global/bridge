@@ -104,7 +104,13 @@ function erc20Approve(contractaddress, amount, callback){
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
-		callback(ethresp);
+		if(ethresp.status){
+			logApprove(ethresp.result,function(){
+				callback(ethresp);	
+			});
+		}else{
+			callback(ethresp);	
+		}
 	}); 
 }
 

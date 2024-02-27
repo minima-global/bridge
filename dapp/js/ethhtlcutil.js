@@ -6,7 +6,7 @@ var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 /**
  * wMinima Contract Address
  */
-var HTLCContractAddress = "0xbec49fa140acaa83533fb00a2bb19bddd0290f25";
+var HTLCContractAddress = "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9";
 
 /**
  * Get the current unix time in secs
@@ -38,6 +38,26 @@ function startETHHTLCSwap(swappubkey, hashlock, timelock, erc20address, amount, 
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
 		callback(ethresp);
+	}); 
+}
+
+/**
+ * Can you collect an HTLC contract - not refunded or withdrawn..
+ */
+function canCollect(contractid, callback){
+	
+	//Get the function data
+	var functiondata = HTLCInterfaceABI.functions.canCollect.encode([contractid]);
+	
+	//Run this as a READ command
+	ethCallCommand(HTLCContractAddress,functiondata,function(ethresp){
+		if(ethresp.status){
+			var resulthex 	= ethers.utils.hexStripZeros(ethresp.result);
+			var ret 		= parseInt(resulthex,16);
+			callback(ret!=0);
+		}else{
+			callback(false);	
+		}
 	}); 
 }
 

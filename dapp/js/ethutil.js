@@ -69,22 +69,27 @@ function runEthCommand(payload, callback){
 	MDS.net.POST(ETH_RPC_HOST,JSON.stringify(payload),function (resp) {
 	 	//MDS.log(resp.response);
 	
-		var ethresp 	= {};
-		ethresp.status 	= resp.status; 	
+		var ethresp 			= {};
+		ethresp.networkstatus 	= resp.status;
+		ethresp.status 			= resp.status; 	
 	
 		//Did it work..?
 		if(!resp.status){
 			MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
-			ethresp.error = resp.error;
+			ethresp.error 		  = {};
+			ethresp.error.message = resp.error;
+			
 		}else{
 			
+			//Parse the returned result
 			var ethreturned = JSON.parse(resp.response);
 			if(ethreturned.error){
 				MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
 				ethresp.status 	= false;
 				ethresp.error 	= ethreturned.error;
 			}else{
-				ethresp.result = ethreturned.result;
+				ethresp.status 	= true;
+				ethresp.result 	= ethreturned.result;
 			}
 		}
 		
@@ -223,8 +228,8 @@ function sendRAWSignedTxn(signedtxn,callback){
 	//Run it..
 	runEthCommand(payload,function(ethresp){
 		
-		//Wa it a success
-		if(ethresp.status){
+		//Was it a success - as in we spoke to the ETH node..
+		if(ethresp.networkstatus){
 			//The NONCE MUST be incremented..
 			NONCE_TRACK++;		
 		}
