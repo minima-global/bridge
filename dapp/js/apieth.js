@@ -18,8 +18,8 @@ function startETHSwap(swappublickey, amount, requestamount, callback){
 				startedCounterPartySwap(hashlock, "wminima", amount, ethresp.result, function(){
 					
 					//Insert these details so you know in future if right amount sent
-					insertNewHTLCContract(hashlock,requestamount,"minima",function(){
-						callback(ethresp);	
+					insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
+						callback(ethresp);		
 					});		
 				});	
 			}else{
@@ -138,9 +138,9 @@ function checkETHSwapHTLC(callback){
 	getHTLCContractAsReceiver("0x10","latest",function(ethresp){
 		MDS.log("SEARCHING LOGS RECEIVER : "+JSON.stringify(ethresp,null,2));
 		
-		var timenow = getCurrentUnixTime(); 
-		var len 	= ethresp.length;
-		var expired = [];
+		var timenow 	= getCurrentUnixTime(); 
+		var len 		= ethresp.length;
+		var collectlist	= [];
 			
 		for(var i=0;i<len;i++){
 			
@@ -151,6 +151,10 @@ function checkETHSwapHTLC(callback){
 				//Have we already collected..
 				haveCollectHTLC(htlclog.hashlock,function(collected){
 					if(!collected){
+						
+						//Add to our list
+						collectlist.push(htlclog);
+						
 						//Try and collect
 						_checkCanCollectETHCoin(htlclog,function(){});
 					}
@@ -162,7 +166,7 @@ function checkETHSwapHTLC(callback){
 		}
 		
 		if(callback){
-			callback(expired);
+			callback(collectlist);
 		}
 	});
 }
@@ -176,12 +180,40 @@ function _checkCanCollectETHCoin(htlclog, callback){
 	getSecretFromHash(hash, function(secret){
 		if(secret != null){
 			//We know the secret! - Collect this coin..
-			MDS.log("Can Collect ETH HTLC coin as we know secret!!");
 			
-			_collectETHHTLCCoin(htlclog, hash, secret, function(resp){
-				if(callback){
-					callback(resp);
+			//Check the value..
+			getReqamountFromHash(hash,function(reqamount){
+				
+				//Check there is a value..
+				if(!reqamount){
+					
+					//Not found this HTLC.. hmm.. ERROR
+					MDS.log("ERROR : unknown HTLC : "+JSON.stringify(htlclog));
+					collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xDD", function(sqlresp){
+						callback();		
+					});	
+					
+					return;
 				}
+				
+				//Check is for the correct amount..
+				if(+reqamount.REQAMOUNT != +htlclog.amount){
+					
+					//Incorrect amount - do NOT reveal the secret
+					MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
+					collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){
+						callback();		
+					});	
+					
+					return;
+				}
+				
+				MDS.log("Can Collect ETH HTLC coin as we know secret!!");
+				_collectETHHTLCCoin(htlclog, hash, secret, function(resp){
+					if(callback){
+						callback(resp);
+					}
+				});	
 			});
 			
 		}else{

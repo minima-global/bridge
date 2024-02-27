@@ -137,7 +137,7 @@ function getReqamountFromHash(hash, callback){
 	//Run this..
 	MDS.sql(sql,function(msg){
 		if(msg.count>0){
-			callback(msg.rows[0].SECRET);	
+			callback(msg.rows[0]);	
 		}else{
 			callback(null);
 		}
@@ -154,7 +154,7 @@ function insertNewHTLCContract(hashlock, reqamount, token, callback){
 					+"VALUES ('"+hashlock+"','"+reqamount+"','"+token+"',"+recdate.getTime()+")";
 	MDS.sql(sql,function(msg){
 		if(callback){
-			callback(true);	
+			callback(msg);	
 		}
 	});
 }
