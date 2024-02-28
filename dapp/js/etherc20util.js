@@ -6,7 +6,7 @@ var wMinimaInterfaceABI = new ethers.utils.Interface(WMINIMA_ABI.abi);
 /**
  * wMinima Contract Address
  */
-var wMinimaContractAddress = "0xe7f1725e7734ce288f8367e1bb143e90bb3f0512";
+var wMinimaContractAddress = "0xE7F1725E7734CE288F8367E1BB143E90BB3F0512";
 
 /**
  * Get ERC20 Balance

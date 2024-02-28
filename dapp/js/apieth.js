@@ -12,7 +12,7 @@ var MIN_HTLC_TIMELOCK_SECS 	= 120;
 /**
  * Start a wMinima -> Minima SWAP
  */
-function startETHSwap(swappublickey, amount, requestamount, callback){
+function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
 	
 	//Create Time Lock
 	var timelock = getCurrentUnixTime() + MIN_HTLC_TIMELOCK_SECS;
@@ -21,7 +21,7 @@ function startETHSwap(swappublickey, amount, requestamount, callback){
 	createSecretHash(function(hashlock){
 		
 		//Start the swap..
-		setupETHHTLCSwap(swappublickey, hashlock, timelock, 
+		setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
 						wMinimaContractAddress, amount, requestamount, function(ethresp){
 			if(ethresp.status){
 				
@@ -266,6 +266,15 @@ function checkETHSwapHTLC(userdets, ethblock, callback){
 
 function _checkCanCollectETHCoin(userdets, htlclog, callback){
 	
+	//Check the token contract IS wMinima!
+	if(htlclog.tokencontract != wMinimaContractAddress){
+		MDS.log("NOT a wMinima ERC20 HTLC.. "+htlclog.tokencontract);
+		if(callback){
+			callback();
+		}	
+		return;
+	}
+	
 	//What is the hash of the secret
 	var hash = htlclog.hashlock;
 	
@@ -395,6 +404,12 @@ function _sendCounterPartyETHTxn(userdets, htlclog, callback){
 	var countertimelock = 100000;
 	var reqamount 		= htlclog.requestamount;
 	var hash 			= htlclog.hashlock;
+	
+	var state = createHTLCState(userdets.minimapublickey,   // Owner 
+								htlclog.owner,				//Receiver 
+								requestamount, 
+								timelock, 
+								hashlock)
 	
 	var state = {};
 	state[0]  = userdets.minimapublickey;

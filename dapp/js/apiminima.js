@@ -79,6 +79,21 @@ function depositNativeMinima(userdets, amount, callback){
 }
 
 /**
+ * Create the HTLC state required by a coin
+ */
+function createHTLCState(owner, receiver, requestamount, timelock, hashlock){
+	var state = {};
+	state[0]  = owner;
+	state[1]  = ""+requestamount;
+	state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]"; // wMinima on ETH
+	state[3]  = timelock;
+	state[4]  = receiver;
+	state[5]  = hashlock;
+	
+	return state;
+}
+
+/**
  * Start a Minima -> wMinima SWAP
  */
 function startMinimaSwap(userdets, amount, requestamount, swappublickey, callback){

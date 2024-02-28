@@ -6,7 +6,7 @@ var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 /**
  * wMinima Contract Address
  */
-var HTLCContractAddress = "0x5FC8d32690cc91D4c39d9d3abcBD16989F875707";
+var HTLCContractAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
 
 /**
  * Get the current unix time in secs
@@ -19,19 +19,18 @@ function getCurrentUnixTime(){
 /**
  * Start an HTLC
  */
-function startETHHTLCSwap(swappubkey, hashlock, timelock, erc20address, amount, requestamount,  callback){
+function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, erc20address, amount, requestamount,  callback){
 	
 	//Get ETH valid address
 	var rec 	= swappubkey.toLowerCase();
 	var ercaddr = erc20address.toLowerCase();
-	var sec 	= hashlock.toLowerCase();
 	
 	//The actual amount - wMinima has 18 decimla places..
 	var sendamount 	= ethers.utils.parseUnits(""+amount,18);
 	var reqamount   = ethers.utils.parseUnits(""+requestamount,18);
 	
 	//Get the function data
-	var functiondata = HTLCInterfaceABI.functions.newContract.encode([rec , sec, timelock, ercaddr, sendamount, reqamount]);
+	var functiondata = HTLCInterfaceABI.functions.newContract.encode([ownerminimakey, rec , hashlock, timelock, ercaddr, sendamount, reqamount]);
 	
 	//Now create the RAW txn..
 	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata);
@@ -146,7 +145,7 @@ function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 					 	
 						topics:[
 								//Use the function SHA address, and your pub key in the index filter	
-								"0xe1112233d6a5bc9bad993b4a9a3994fc2cb0c8bdbde576d7309e1cc9e7099f32",
+								"0x3f73c0feb321815d60eacb384dfe308b024ad83b4bbdeb521e4c6bdada5d387d",
 								// This is the contractID - we don't care
 								null, 
 								// This is the OWNER
@@ -196,7 +195,7 @@ function getHTLCContractAsReceiver(fomBlockHEX, toBlockHEX, callback){
 					 	
 						topics:[
 								//Use the function SHA address, and your pub key in the index filter	
-								"0xe1112233d6a5bc9bad993b4a9a3994fc2cb0c8bdbde576d7309e1cc9e7099f32",
+								"0x3f73c0feb321815d60eacb384dfe308b024ad83b4bbdeb521e4c6bdada5d387d",
 								// This is the contractID - we don't care
 								null, 
 								// This is your address and the OWNER - we don't care'
@@ -238,7 +237,7 @@ function parseHTLCContractData(logdata){
 	var contractid = logdata.topics[1]; 
 
 	//Decode the data
-	var datavars  = ethers.utils.defaultAbiCoder.decode(["uint256","uint256","bytes32","uint256"],logdata.data);
+	var datavars  = ethers.utils.defaultAbiCoder.decode(["bytes32","address","uint256","uint256","bytes32","uint256"],logdata.data);
 	
 	//Now create a complete object
 	var newcontract = {};
@@ -251,16 +250,17 @@ function parseHTLCContractData(logdata){
 	newcontract.receiver	= "0x"+(logdata.topics[3].substring(26).toUpperCase());
 	
 	//Now get the rest..
-	var weiamount 			= ""+parseInt(datavars[0]._hex,16);
+	newcontract.minimapublickey = "0x"+datavars[0].slice(2).toUpperCase();
+	newcontract.tokencontract	= "0x"+datavars[1].slice(2).toUpperCase();
+	
+	var weiamount 			= ""+parseInt(datavars[2]._hex,16);
 	newcontract.amount		= ethers.utils.formatEther(weiamount,18);
 	
-	var reqweiamount 			= ""+parseInt(datavars[1]._hex,16);
+	var reqweiamount 			= ""+parseInt(datavars[3]._hex,16);
 	newcontract.requestamount	= ethers.utils.formatEther(reqweiamount,18);
 	
-	var hashlock 			= datavars[2]+"";
-	newcontract.hashlock	= "0x"+hashlock.slice(2).toUpperCase();
-	 
-	newcontract.timelock 	= parseInt(datavars[3]._hex,16);
+	newcontract.hashlock	= "0x"+datavars[4].slice(2).toUpperCase();
+	newcontract.timelock 	= parseInt(datavars[5]._hex,16);
 	
 	return newcontract;
 }

@@ -35,7 +35,8 @@ contract HTLC {
         bytes32 indexed contractId,
         address indexed sender,
         address indexed receiver,
-        //address tokenContract,
+        address senderminima,
+        address tokenContract,
         uint256 amount,
         uint256 requestamount,
         bytes32 hashlock,
@@ -54,13 +55,12 @@ contract HTLC {
 
     struct LockContract {
         address sender;
+        address senderminima;
         address receiver;
         address tokenContract;
         uint256 amount;
         uint256 requestamount;
         bytes32 hashlock;
-        // locked UNTIL this time. Unit depends on consensus algorithm.
-        // PoA, PoA and IBFT all use seconds. But Quorum Raft uses nano-seconds
         uint256 timelock;
         bool withdrawn;
         bool refunded;
@@ -114,12 +114,14 @@ contract HTLC {
 
 
     function newContract(
+        address _senderminima,
         address _receiver,
         bytes32 _hashlock,
         uint256 _timelock,
         address _tokenContract,
         uint256 _amount,
         uint256 _requestamount
+        
     )
         external
         tokensTransferable(_tokenContract, msg.sender, _amount)
@@ -152,6 +154,7 @@ contract HTLC {
 		//Create a LOCK Object with all the required details
         contracts[contractId] = LockContract(
             msg.sender,
+            _senderminima,
             _receiver,
             _tokenContract,
             _amount,
@@ -164,17 +167,39 @@ contract HTLC {
         );
 	
 		//Emit an EVENT - Cannot add tokencontract address as Stack too deep
-        emit HTLCERC20New(
+        emitNewContract(contractId);
+        
+        /*emit HTLCERC20New(
             contractId,
             msg.sender,
             _receiver,
-            //_tokenContract,
+            _tokenContract,
             _amount,
             _requestamount,
             _hashlock,
             _timelock
-        );
+        );*/
     }
+
+	//Need a separate function as otherwise get error - Stack too deep..
+	function emitNewContract(bytes32 _contractId) internal {
+		
+		//Get the contract
+		LockContract storage c = contracts[_contractId];
+	
+		//Emit an EVENT
+        emit HTLCERC20New(
+            _contractId,
+            c.sender,
+            c.receiver,
+            c.senderminima,
+            c.tokenContract,
+            c.amount,
+            c.requestamount,
+            c.hashlock,
+            c.timelock
+        );
+	}
 
     function withdraw(bytes32 _contractId, bytes32 _preimage)
         external
@@ -190,7 +215,6 @@ contract HTLC {
         emit HTLCERC20Withdraw(_contractId, _preimage, c.hashlock);
         return true;
     }
-
 
     function refund(bytes32 _contractId)
         external
@@ -210,6 +234,7 @@ contract HTLC {
         view
         returns (
             address sender,
+            address senderminima,
             address receiver,
             address tokenContract,
             uint256 amount,
@@ -221,11 +246,18 @@ contract HTLC {
             bytes32 preimage
         )
     {
-        if (haveContract(_contractId) == false)
-            return (address(0), address(0), address(0), 0, 0, 0, 0, false, false, 0);
+    	//If no contract resturn 0 result..
+        if (haveContract(_contractId) == false){
+        	return (address(0), address(0), address(0), address(0), 0, 0, 0, 0, false, false, 0);
+        }
+            
+        //Get the contract
         LockContract storage c = contracts[_contractId];
+        
+        //Return the contract details
         return (
             c.sender,
+            c.senderminima,
             c.receiver,
             c.tokenContract,
             c.amount,
