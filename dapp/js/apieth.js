@@ -21,7 +21,7 @@ function startETHSwap(swappublickey, amount, requestamount, callback){
 	createSecretHash(function(hashlock){
 		
 		//Start the swap..
-		startETHHTLCSwap(swappublickey, hashlock, timelock, 
+		setupETHHTLCSwap(swappublickey, hashlock, timelock, 
 						wMinimaContractAddress, amount, requestamount, function(ethresp){
 			if(ethresp.status){
 				
@@ -214,7 +214,7 @@ function checkETHNewSecrets(currentethblock, callback){
 /**
  * Check if there are any SWAP coins
  */
-function checkETHSwapHTLC(ethblock, callback){
+function checkETHSwapHTLC(userdets, ethblock, callback){
 	
 	//CHeck all blocks in a range to the past
 	var startblock = ethblock - 500;
@@ -249,7 +249,7 @@ function checkETHSwapHTLC(ethblock, callback){
 						collectlist.push(htlclog);
 						
 						//Try and collect
-						_checkCanCollectETHCoin(htlclog,function(){});
+						_checkCanCollectETHCoin(userdets,htlclog,function(){});
 					}
 				});
 				
@@ -264,7 +264,7 @@ function checkETHSwapHTLC(ethblock, callback){
 	});
 }
 
-function _checkCanCollectETHCoin(htlclog, callback){
+function _checkCanCollectETHCoin(userdets, htlclog, callback){
 	
 	//What is the hash of the secret
 	var hash = htlclog.hashlock;
@@ -304,18 +304,14 @@ function _checkCanCollectETHCoin(htlclog, callback){
 			});
 			
 		}else{
-			
-			callback();
-			
-			return;
 					
 			//Have we sent the OTHER side txn to get them to reveal the secret..
 			haveSentCounterPartyTxn(hash,function(sent){
 				if(!sent){
 					
 					//Check the details are valid!.. FEES etc.. 
-					var sendamount 		= +coin.tokenamount; 
-					var requestamount 	= +coin.state[1];
+					var sendamount 		= +htlclog.amount; 
+					var requestamount 	= +htlclog.requestamount;
 					
 					getMyOrderBook(function(myorderbook){
 						
@@ -327,7 +323,7 @@ function _checkCanCollectETHCoin(htlclog, callback){
 							if(calcamount >= requestamount){
 							
 								//Send the ETH counter TXN - to make him reveal the secret
-								_sendCounterPartyETHTxn(userdets,coin,function(resp){
+								_sendCounterPartyETHTxn(userdets,htlclog,function(resp){
 									if(callback){
 										callback(resp);
 									}
@@ -393,19 +389,19 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 	});
 }
 
-function _sendCounterPartyETHTxn(userdets, coin, callback){
+function _sendCounterPartyETHTxn(userdets, htlclog, callback){
 	
-	//Send the ETH counter TXN - to make him reveal the secret
-	var countertimelock = +coin.state[3] - 10;
-	var reqamount 		= coin.state[1];
-	var hash 			= coin.state[5];
+	//Send the Minima counter TXN - to make him reveal the secret
+	var countertimelock = 100000;
+	var reqamount 		= htlclog.requestamount;
+	var hash 			= htlclog.hashlock;
 	
 	var state = {};
 	state[0]  = userdets.minimapublickey;
-	state[1]  = coin.tokenamount;
+	state[1]  = htlclog.amount;
 	state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]";
 	state[3]  = countertimelock;
-	state[4]  = coin.state[0];
+	state[4]  = htlclog.receiver;
 	state[5]  = hash;
 	
 	MDS.log("Send Minima counterparty txn! state:"+JSON.stringify(state));
@@ -415,7 +411,7 @@ function _sendCounterPartyETHTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(resp.status){
-			sentCounterPartyTxn(hash,"minima",reqamount,function(){
+			sentCounterPartyTxn(hash,"minima",reqamount,resp.response.txpowid,function(){
 				callback(resp);	
 			});
 		}else{

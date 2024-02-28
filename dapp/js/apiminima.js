@@ -375,32 +375,29 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	
 	//Send the ETH counter TXN - to make him reveal the secret
-	var countertimelock = +coin.state[3] - 10;
-	var reqamount 		= coin.state[1];
-	var hash 			= coin.state[5];
+	//var timelock 		= +coin.state[3] - 10;
 	
-	var state = {};
-	state[0]  = userdets.minimapublickey;
-	state[1]  = coin.amount;
-	state[2]  = "[MINIMA:0x00]"; // Native Minima
-	state[3]  = countertimelock;
-	state[4]  = coin.state[0];
-	state[5]  = hash;
+	var amount 			= coin.state[1];
+	var reqamount 		= coin.amount;
 	
-	MDS.log("Send ETH counterparty txn! state:"+JSON.stringify(state));
-	 
-	//And send from the native wallet..
-	sendETH(userdets, reqamount, HTLC_ADDRESS, state, function(resp){
+	var hashlock 		= coin.state[5];
+	var timelock 		= getCurrentUnixTime() + 300;
+	
+	var receiver		= coin.state[0];
+	
+	//Set up the next HTLC 
+	setupETHHTLCSwap(receiver, hashlock, timelock, 
+					wMinimaContractAddress, amount, reqamount, function(ethresp){
 		
 		//If success put in DB
-		if(resp.status){
-			sentCounterPartyTxn(hash,"wminima",reqamount,function(){
-				callback(resp);	
+		if(ethresp.status){
+			sentCounterPartyTxn(hash,"wminima",reqamount,ethresp.result,function(){
+				callback(ethresp);	
 			});
 		}else{
-			MDS.log("FAIL! "+JSON.stringify(resp));
-			callback(resp);	
-		}	
+			MDS.log("FAIL! "+JSON.stringify(ethresp));
+			callback(ethresp);	
+		}			
 	});
 }
 
