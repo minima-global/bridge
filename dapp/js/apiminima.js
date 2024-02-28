@@ -1,5 +1,12 @@
 
 /**
+ * Some vars 
+ */
+
+//The timelock in BLOCK that gets added
+var HTLC_TIMELOCK_BLOCKS = 10;
+
+/**
  * Get the current Minima block
  */
 function getCurrentMinimaBlock(callback){
@@ -80,7 +87,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 	getCurrentMinimaBlock(function(block){
 		
 		//How long do we wait..
-		var timelock = +block+10;
+		var timelock = +block+HTLC_TIMELOCK_BLOCKS;
 		
 		//Create a secret
 		createSecretHash(function(hash){
@@ -100,7 +107,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 				if(resp.status){
 					
 					//Log it..
-					startedCounterPartySwap(hash,"minima",amount,response.txpowid,function(){
+					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid,function(){
 						
 						//Insert these details so you know in future if right amount sent
 						insertNewHTLCContract(hash,requestamount,"wminima",function(){
@@ -227,6 +234,10 @@ function checkMinimaSwapHTLC(userdets, callback){
 				MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 			}	
 		}
+		
+		if(callback){
+			callback();
+		}
 	});
 }
 
@@ -238,13 +249,35 @@ function _checkCanSwapCoin(userdets, coin, callback){
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
 		if(secret != null){
-			//We know the secret! - Collect this coin..
-			MDS.log("Can Collect Minima HTLC coin as we know secret!!");
 			
-			_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){
-				if(callback){
-					callback(resp);
+			//Check the value..
+			getReqamountFromHash(hash,function(reqamount){
+				
+				//Check there is a value.. if NOT we did not start this HTLC
+				// SO - we must have checked the amount when we did the counterparty txn..
+				//AND then received the secret when they collected..
+				if(reqamount){
+					
+					//Check is for the correct amount.. Will accept MORE
+					if(+reqamount.REQAMOUNT > +coin.amount){
+						
+						//Incorrect amount - do NOT reveal the secret
+						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
+						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){
+							callback();		
+						});	
+						
+						return;
+					}
 				}
+				
+				//We can collect
+				MDS.log("Can Collect Minima HTLC coin as we know secret!!");
+				_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){
+					if(callback){
+						callback(resp);
+					}
+				});
 			});
 			
 		}else{
@@ -255,7 +288,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 				//Only send it once..
 				if(!sent){
 					
-					//Check the timelock!
+					//Check the timelock is in good time..
 					//..
 					
 					//Check the details are valid!.. FEES etc.. 

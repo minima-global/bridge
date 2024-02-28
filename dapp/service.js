@@ -75,7 +75,7 @@ MDS.init(function(msg){
 		//Get the current ETH block
 		var ethblock = 0;
 		getCurrentETHBlock(function(block){
-			MDS.log("Current ETH block : "+block);
+			//MDS.log("Current ETH block : "+block);
 			ethblock = block;
 		});
 		
@@ -83,19 +83,19 @@ MDS.init(function(msg){
 		setNonceAuto(function(){});
 			
 		//Check for new secrets
-		checkETHNewSecrets(ethblock,function(){});
+		//checkETHNewSecrets(ethblock,function(){});
 		
 		//Check expired Minima coins
 		//checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
 		
 		//Check expired Wrappped Minima
-		//checkExpiredETHHTLC(function(expiredeth){});
+		//checkExpiredETHHTLC(ethblock,function(expiredeth){});
 		
 		//Now check Minima for SWAPS
-		//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
+		checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
 		
 		//Check ETH for SWAPS
-		checkETHSwapHTLC(function(ethswaps){});
+		//checkETHSwapHTLC(ethblock, function(ethswaps){});
 		
 		//Check if my orderbook has changed..
 		//checkNeedPublishOrderBook(USER_DETAILS);	

@@ -1,11 +1,21 @@
 
 /**
+ * Some vars about the HTLC
+ */
+
+//Minimum block to check for events
+var MIN_HTLC_BLOCK 			= 16;
+
+//The timelock to add to the current time
+var MIN_HTLC_TIMELOCK_SECS 	= 120;
+
+/**
  * Start a wMinima -> Minima SWAP
  */
 function startETHSwap(swappublickey, amount, requestamount, callback){
 	
 	//Create Time Lock
-	var timelock = getCurrentUnixTime() + (60*2);
+	var timelock = getCurrentUnixTime() + MIN_HTLC_TIMELOCK_SECS;
 	
 	//Create a secret
 	createSecretHash(function(hashlock){
@@ -33,10 +43,21 @@ function startETHSwap(swappublickey, amount, requestamount, callback){
 /**
  * Check if there are any coins in the HTLC that have expired..
  */
-function checkExpiredETHHTLC(callback){
+function checkExpiredETHHTLC(ethblock, callback){
+	
+	//CHeck all blocks in a range to the past
+	var startblock = ethblock - 500;
+	if(startblock < MIN_HTLC_BLOCK){
+		startblock = MIN_HTLC_BLOCK;
+	}
+	var endblock = ethblock;
+	
+	//Convert to HEX..
+	var hexstart = "0x"+startblock.toString(16).toUpperCase();
+	var hexend   = "0x"+endblock.toString(16).toUpperCase(); 
 	
 	//Find all the logs..
-	getHTLCContractAsOwner("0x10","latest",function(ethresp){
+	getHTLCContractAsOwner(hexstart,hexend,function(ethresp){
 		MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
 		
 		var timenow = getCurrentUnixTime(); 
@@ -120,7 +141,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 		}else{
 			
 			//Already collected - don't try again..
-			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
+			MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
 			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
 				callback();		
 			});	
@@ -193,10 +214,21 @@ function checkETHNewSecrets(currentethblock, callback){
 /**
  * Check if there are any SWAP coins
  */
-function checkETHSwapHTLC(callback){
+function checkETHSwapHTLC(ethblock, callback){
+	
+	//CHeck all blocks in a range to the past
+	var startblock = ethblock - 500;
+	if(startblock < MIN_HTLC_BLOCK){
+		startblock = MIN_HTLC_BLOCK;
+	}
+	var endblock = ethblock;
+	
+	//Convert to HEX..
+	var hexstart = "0x"+startblock.toString(16).toUpperCase();
+	var hexend   = "0x"+endblock.toString(16).toUpperCase(); 
 	
 	//Find all the logs..
-	getHTLCContractAsReceiver("0x10","latest",function(ethresp){
+	getHTLCContractAsReceiver(hexstart,hexend,function(ethresp){
 		MDS.log("SEARCHING LOGS RECEIVER : "+JSON.stringify(ethresp,null,2));
 		
 		var timenow 	= getCurrentUnixTime(); 
