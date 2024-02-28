@@ -16,7 +16,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 *
 * Protocol:
 *
-*  1) newContract(receiver, hashlock, timelock, tokenContract, amount) - a
+*  1) newContract(receiver, hashlock, timelock, tokenContract, amount, requestamount) - a
 *      sender calls this to create a new HTLC on a given token (tokenContract)
 *       for a given amount. A 32 byte contract id is returned
 *  2) withdraw(contractId, preimage) - once the receiver knows the preimage of
@@ -35,8 +35,9 @@ contract HTLC {
         bytes32 indexed contractId,
         address indexed sender,
         address indexed receiver,
-        address tokenContract,
+        //address tokenContract,
         uint256 amount,
+        uint256 requestamount,
         bytes32 hashlock,
         uint256 timelock
     );
@@ -56,6 +57,7 @@ contract HTLC {
         address receiver;
         address tokenContract;
         uint256 amount;
+        uint256 requestamount;
         bytes32 hashlock;
         // locked UNTIL this time. Unit depends on consensus algorithm.
         // PoA, PoA and IBFT all use seconds. But Quorum Raft uses nano-seconds
@@ -116,7 +118,8 @@ contract HTLC {
         bytes32 _hashlock,
         uint256 _timelock,
         address _tokenContract,
-        uint256 _amount
+        uint256 _amount,
+        uint256 _requestamount
     )
         external
         tokensTransferable(_tokenContract, msg.sender, _amount)
@@ -129,6 +132,7 @@ contract HTLC {
                 _receiver,
                 _tokenContract,
                 _amount,
+                _requestamount,
                 _hashlock,
                 _timelock
             )
@@ -151,6 +155,7 @@ contract HTLC {
             _receiver,
             _tokenContract,
             _amount,
+            _requestamount,
             _hashlock,
             _timelock,
             false,
@@ -158,13 +163,14 @@ contract HTLC {
             0x0
         );
 	
-		//Emit an EVENT
+		//Emit an EVENT - Cannot add tokencontract address as Stack too deep
         emit HTLCERC20New(
             contractId,
             msg.sender,
             _receiver,
-            _tokenContract,
+            //_tokenContract,
             _amount,
+            _requestamount,
             _hashlock,
             _timelock
         );
@@ -207,6 +213,7 @@ contract HTLC {
             address receiver,
             address tokenContract,
             uint256 amount,
+            uint256 requestamount,
             bytes32 hashlock,
             uint256 timelock,
             bool withdrawn,
@@ -215,13 +222,14 @@ contract HTLC {
         )
     {
         if (haveContract(_contractId) == false)
-            return (address(0), address(0), address(0), 0, 0, 0, false, false, 0);
+            return (address(0), address(0), address(0), 0, 0, 0, 0, false, false, 0);
         LockContract storage c = contracts[_contractId];
         return (
             c.sender,
             c.receiver,
             c.tokenContract,
             c.amount,
+            c.requestamount,
             c.hashlock,
             c.timelock,
             c.withdrawn,

@@ -67,6 +67,9 @@
 	<button onclick="htlclogswithdraw();">HTLC LOGS WITHDRAW</button>
 	
 	<br><br>
+	<button onclick="htlcalllogs();">HTLC ALL LOGS</button>
+	
+	<br><br>
 	<button onclick="transfer();">TOKEN TRANSFER</button>
 	
 	<script type="text/javascript">
@@ -115,8 +118,8 @@
 		setNonceAuto(function(){
 			startETHSwap(
 					getETHERUMAddress(), // Receiver
-					1, // Amount
-					1, // Request Amount
+					"1.1", // Amount
+					"2.2", // Request Amount
 					function(ethresp){
 				MDS.log(JSON.stringify(ethresp));	
 			});	
@@ -141,6 +144,12 @@
 		//Try and refund
 		refundHTLCSwap("0xD23F9CC01BB95CB319684B30AA66859523D80A70EC42D5ACCE44C3277E727C40",function(resp){
 			MDS.log(JSON.stringify(resp));
+		});
+	}
+	
+	function htlcalllogs(){
+		getHTLCAllLogs("0x10","latest",function(ethresp){
+			MDS.log(JSON.stringify(ethresp,null,2));
 		});
 	}
 	

@@ -97,6 +97,7 @@ function insertSecret(secret,hash,callback){
 						callback(false);	
 					}
 				}else{
+					//MDS.log("Insert new secret : "+secret+" / "+hash);
 					
 					//the date
 					var recdate = new Date();

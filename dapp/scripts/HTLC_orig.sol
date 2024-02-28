@@ -4,7 +4,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 
 /* Remove this in final version */
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
  
 /**
 * @title Hashed Timelock Contracts (HTLCs) on Ethereum ERC20 tokens.
@@ -30,6 +30,7 @@ contract HTLC {
 
 	using SafeERC20 for IERC20;
 
+	//New HTLC contract
     event HTLCERC20New(
         bytes32 indexed contractId,
         address indexed sender,
@@ -39,7 +40,15 @@ contract HTLC {
         bytes32 hashlock,
         uint256 timelock
     );
-    event HTLCERC20Withdraw(bytes32 indexed contractId);
+    
+    //Withdraw WITH the secret
+    event HTLCERC20Withdraw(
+    	bytes32 indexed contractId,
+    	bytes32 indexed preimage,
+    	bytes32 indexed secret
+    );
+    
+    //Refund after the timeout has expired
     event HTLCERC20Refund(bytes32 indexed contractId);
 
     struct LockContract {
@@ -88,7 +97,7 @@ contract HTLC {
         // This check needs to be added if claims are allowed after timeout. That is, if the following timelock check is commented out
         require(contracts[_contractId].refunded == false, "withdrawable: already refunded");
         // if we want to disallow claim to be made after the timeout, uncomment the following line
-        // require(contracts[_contractId].timelock > now, "withdrawable: timelock time must be in the future");
+        // require(contracts[_contractId].timelock > block.timestamp, "withdrawable: timelock time must be in the future");
         _;
     }
     modifier refundable(bytes32 _contractId) {
@@ -114,7 +123,7 @@ contract HTLC {
         futureTimelock(_timelock)
         returns (bytes32 contractId)
     {
-        contractId = sha256(
+        /*contractId = sha256(
             abi.encodePacked(
                 msg.sender,
                 _receiver,
@@ -123,14 +132,20 @@ contract HTLC {
                 _hashlock,
                 _timelock
             )
-        );
-
-        if (haveContract(contractId))
-            revert("Contract already exists");
+        );*/
+        
+        //Contract ID is the hash of the hashlock - so EVERYONE MUST use a different hashlock.. or it's insecure
+        contractId = sha256(abi.encodePacked(_hashlock));
 		
+		//Has that hashlock already been used..
+        if (haveContract(contractId)){
+        	revert("Contract already exists");
+        }
+        
 		//Transfer the funds to this contract
         IERC20(_tokenContract).safeTransferFrom(msg.sender, address(this), _amount);
 
+		//Create a LOCK Object with all the required details
         contracts[contractId] = LockContract(
             msg.sender,
             _receiver,
@@ -142,10 +157,8 @@ contract HTLC {
             false,
             0x0
         );
-
-		console.log("NEW HTLC Contract for %s", _amount);
-		console.logBytes32(contractId);
-
+	
+		//Emit an EVENT
         emit HTLCERC20New(
             contractId,
             msg.sender,
@@ -168,7 +181,7 @@ contract HTLC {
         c.preimage = _preimage;
         c.withdrawn = true;
         IERC20(c.tokenContract).safeTransfer(c.receiver, c.amount);
-        emit HTLCERC20Withdraw(_contractId);
+        emit HTLCERC20Withdraw(_contractId, _preimage, c.hashlock);
         return true;
     }
 
@@ -217,13 +230,20 @@ contract HTLC {
         );
     }
 
-
     function haveContract(bytes32 _contractId)
         internal
         view
         returns (bool exists)
     {
         exists = (contracts[_contractId].sender != address(0));
+    }
+    
+    function canCollect(bytes32 _contractId)
+        external
+        view
+        returns (bool collectible)
+    {
+    	collectible = !contracts[_contractId].withdrawn && !contracts[_contractId].refunded;
     }
 
 }

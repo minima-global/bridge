@@ -69,24 +69,37 @@ MDS.init(function(msg){
 		
 		//return;
 		
-		//Auto set the Nonce..
-		setNonceAuto(function(){
-			
-			//Check expired Minima coins
-			//checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
-			
-			//Check expired Wrappped Minima
-			//checkExpiredETHHTLC(function(expiredeth){});
-			
-			//Now check Minima for SWAPS
-			//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
-			
-			//Check ETH for SWAPS
-			checkETHSwapHTLC(function(ethswaps){});
-			
-			//Check if my orderbook has changed..
-			//checkNeedPublishOrderBook(USER_DETAILS);	
+		//SERVICE.js runs function synchromously... as no HTTP call.. 
+		//so no need to to stack functions inside each other
+		
+		//Get the current ETH block
+		var ethblock = 0;
+		getCurrentETHBlock(function(block){
+			MDS.log("Current ETH block : "+block);
+			ethblock = block;
 		});
+		
+		//Auto set the Nonce..
+		setNonceAuto(function(){});
+			
+		//Check for new secrets
+		checkETHNewSecrets(ethblock,function(){});
+		
+		//Check expired Minima coins
+		//checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
+		
+		//Check expired Wrappped Minima
+		//checkExpiredETHHTLC(function(expiredeth){});
+		
+		//Now check Minima for SWAPS
+		//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
+		
+		//Check ETH for SWAPS
+		checkETHSwapHTLC(function(ethswaps){});
+		
+		//Check if my orderbook has changed..
+		//checkNeedPublishOrderBook(USER_DETAILS);	
+	
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		

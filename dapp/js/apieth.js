@@ -11,7 +11,8 @@ function startETHSwap(swappublickey, amount, requestamount, callback){
 	createSecretHash(function(hashlock){
 		
 		//Start the swap..
-		startETHHTLCSwap(swappublickey, hashlock, timelock, wMinimaContractAddress, amount, function(ethresp){
+		startETHHTLCSwap(swappublickey, hashlock, timelock, 
+						wMinimaContractAddress, amount, requestamount, function(ethresp){
 			if(ethresp.status){
 				
 				//Log it..
@@ -127,7 +128,67 @@ function _collectExpiredETHCoin(htlclog,callback){
 	});
 }
 
-
+/**
+ * Check for NEW secrets.. 
+ */
+var LAST_CHECKED_SECRET_BLOCK = -1;
+function checkETHNewSecrets(currentethblock, callback){
+	
+	//Are we on the saem block
+	if(LAST_CHECKED_SECRET_BLOCK == currentethblock){
+		if(callback){
+			callback();
+		}
+		return;
+	}
+	
+	//Only check from the last checked block onwards..
+	var startblock=10;
+	var endblock=0;
+	
+	if(LAST_CHECKED_SECRET_BLOCK == -1){
+		
+		//No checks done yet.. so start from way back..
+		startblock = currentethblock-10;
+		endblock   = currentethblock;
+	}else{
+		startblock = LAST_CHECKED_SECRET_BLOCK+1;
+		endblock	
+	}
+	
+	//Endblock should be a few blocks back.. incase of reorgs..
+	endblock					= currentethblock;
+	LAST_CHECKED_SECRET_BLOCK 	= endblock;
+	
+	//Check within bounds
+	if(startblock>endblock){
+		startblock = endblock;
+	}
+	
+	//Convert to HEX..
+	var hexstart = "0x"+startblock.toString(16).toUpperCase();
+	var hexend   = "0x"+endblock.toString(16).toUpperCase(); 
+	
+	//Get all the withdraw logs - that reveal a secret
+	getHTLCContractWithdrawLogs(hexstart,hexend,function(ethresp){
+		MDS.log("WITHDRAWS from "+hexstart+" to "+hexend+" "+JSON.stringify(ethresp,null,2));
+		
+		//Cycle through the secrets
+		var len 		= ethresp.length;
+		for(var i=0;i<len;i++){
+			
+			//Get the current log
+			var withdrawlog = ethresp[i];
+			
+			//Add this to our db of secrets..
+			insertSecret(withdrawlog.secret, withdrawlog.hashlock);
+		}
+		
+		if(callback){
+			callback();	
+		}
+	});
+}
 
 /**
  * Check if there are any SWAP coins
@@ -183,30 +244,25 @@ function _checkCanCollectETHCoin(htlclog, callback){
 			//Check the value..
 			getReqamountFromHash(hash,function(reqamount){
 				
-				//Check there is a value..
-				if(!reqamount){
+				//Check there is a value.. if NOT we did not start this HTLC
+				// SO - we must have checked the amount when we did the counterparty txn..
+				//AND then received the secret when they collected..
+				if(reqamount){
 					
-					//Not found this HTLC.. hmm.. ERROR
-					MDS.log("ERROR : unknown HTLC : "+JSON.stringify(htlclog));
-					collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xDD", function(sqlresp){
-						callback();		
-					});	
-					
-					return;
+					//Check is for the correct amount.. Will accept MORE
+					if(+reqamount.REQAMOUNT > +htlclog.amount){
+						
+						//Incorrect amount - do NOT reveal the secret
+						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
+						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){
+							callback();		
+						});	
+						
+						return;
+					}
 				}
 				
-				//Check is for the correct amount..
-				if(+reqamount.REQAMOUNT != +htlclog.amount){
-					
-					//Incorrect amount - do NOT reveal the secret
-					MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
-					collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){
-						callback();		
-					});	
-					
-					return;
-				}
-				
+				//We can collect
 				MDS.log("Can Collect ETH HTLC coin as we know secret!!");
 				_collectETHHTLCCoin(htlclog, hash, secret, function(resp){
 					if(callback){
