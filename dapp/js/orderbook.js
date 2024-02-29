@@ -8,8 +8,6 @@ function signData(publickey,data, callback){
 }
 
 function verifyData(publickey,data,signature, callback){
-	MDS.log("Verify Ordder Book Sig : "+publickey);
-	
 	MDS.cmd("maxverify data:"+data+" publickey:"+publickey+" signature:"+signature,function(ver){
 		if(ver.status){
 			if(ver.response.valid){

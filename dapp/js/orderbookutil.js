@@ -49,9 +49,10 @@ function createAndSendOrderBook(userdets, callback){
 				
 			//Create the complete book
 			var orderbookmsg = {};
-			orderbookmsg.publickey 	= userdets.minimapublickey;
-			orderbookmsg.orderbook 	= currentorderbook;
-			orderbookmsg.balance 	= currentbalances;
+			orderbookmsg.publickey 		= userdets.minimapublickey;
+			orderbookmsg.ethpublickey 	= userdets.ethaddress;
+			orderbookmsg.orderbook 		= currentorderbook;
+			orderbookmsg.balance 		= currentbalances;
 			
 			//Get his balance..
 			broadcastMyOrderBook(userdets, orderbookmsg, function(sendvalid){
@@ -115,9 +116,10 @@ function checkNeedPublishOrderBook(userdets,callback){
 				
 				//Create the complete book
 				var orderbookmsg = {};
-				orderbookmsg.publickey 	= userdets.minimapublickey;
-				orderbookmsg.orderbook 	= currentorderbook;
-				orderbookmsg.balance 	= currentbalances;
+				orderbookmsg.publickey 		= userdets.minimapublickey;
+				orderbookmsg.ethpublickey 	= userdets.ethaddress;
+				orderbookmsg.orderbook 		= currentorderbook;
+				orderbookmsg.balance 		= currentbalances;
 				
 				//Get his balance..
 				broadcastMyOrderBook(userdets, orderbookmsg, function(sendvalid){
@@ -227,7 +229,11 @@ function searchOrderBook(token, amount, ignoreme, callback){
 			//Which side of the trade are we checking..
 			if(user != ignoreme){
 				if(amount >= orderbook.minimum){
-					if(token == "minima" && orderbook.wrappedenable && balance.eth.total >= amount){
+					
+					if(	token == "minima" && 
+						orderbook.wrappedenable &&
+						+balance.eth > 0 && 
+						+balance.wminima >= amount){
 						
 						//Check fee..
 						if(+orderbook.wrappedfee == currentfee){
@@ -241,7 +247,9 @@ function searchOrderBook(token, amount, ignoreme, callback){
 							validorders.push(data);
 						}
 						
-					}else if(token == "wminima" && orderbook.nativeenable && balance.minima.total >= amount){
+					}else if(token == "wminima" && 
+							 orderbook.nativeenable && 
+						 	 +balance.minima.total >= amount){
 						
 						//Check fee..
 						if(+orderbook.nativefee == currentfee){

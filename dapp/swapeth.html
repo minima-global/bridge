@@ -18,25 +18,20 @@
 	<script type="text/javascript" src="./js/puresha1.js"></script>
 	<script type="text/javascript" src="./js/pagelayout.js"></script>
 	<script type="text/javascript" src="./js/jslib.js"></script>
-	
 	<script type="text/javascript" src="./js/scripts.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/sql.js"></script>
-	
 	<script type="text/javascript" src="./js/apiminima.js"></script>
 	<script type="text/javascript" src="./js/apieth.js"></script>
 	<script type="text/javascript" src="./js/balance.js"></script>
-	
 	<script type="text/javascript" src="./js/orderbook.js"></script>
 	<script type="text/javascript" src="./js/orderbookutil.js"></script>
-	
 	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
 	<script type="text/javascript" src="./abi/htlcabi.js"></script>
 	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
-	
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
 </head>
@@ -74,7 +69,7 @@
 		proceedbutton.disabled=true;
 			
 		//Send Minima to the HTLC..
-		startETHSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, function(resp){
+		startETHSwap(USER_DETAILS, reqpublickey, sendamount, reqamount, function(resp){
 			if(resp.status){
 				alert("Swap started!");
 				
@@ -112,23 +107,14 @@
 							swapproceed.innerHTML="No match found for "+sendamount+" wMinima..";
 						}else{
 							
-							//HACK 
-							
-							//Who is this? use the ETH address..
-							reqpublickey = USER_DETAILS.ethaddress;		
-							
-							//What is the amount.. we are requesting MINIMA
-							reqamount = 10;
-							
-							/*//Get the details..
+							//Get the details..
 							swapproceed.innerHTML=JSON.stringify(order,null,2);
 							
 							//Who is this?
-							reqpublickey = order.publickey;		
+							reqpublickey = order.ethpublickey;		
 							
 							//What is the amount.. we are requesting MINIMA
 							reqamount = calculateRequiredAmount("minima",sendamount,order.orderbook);
-							*/
 							
 							//Set the details..
 							swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>You send "+sendamount

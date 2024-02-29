@@ -58,7 +58,7 @@ function checkExpiredETHHTLC(ethblock, callback){
 	
 	//Find all the logs..
 	getHTLCContractAsOwner(hexstart,hexend,function(ethresp){
-		MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
+		//MDS.log("SEARCHING LOGS OWNER : "+JSON.stringify(ethresp,null,2));
 		
 		var timenow = getCurrentUnixTime(); 
 		var len 	= ethresp.length;
@@ -78,8 +78,6 @@ function checkExpiredETHHTLC(ethblock, callback){
 					haveCollectExpiredHTLC(htlclog.hashlock,function(collected){
 						if(!collected){
 							
-							MDS.log("Timelock Collect Expired ETH HTLC! timelock:"+timelock+" timenow:"+timenow+" amount:"+htlclog.amount);
-					
 							//Add to our list
 							expired.push(htlclog);
 							
@@ -111,6 +109,8 @@ function _collectExpiredETHCoin(htlclog,callback){
 		
 		if(canc){
 			
+			MDS.log("Timelock Collect Expired ETH HTLC! "+JSON.stringify(htlclog));
+			
 			//Try and refund
 			refundHTLCSwap(contid,function(resp){
 				
@@ -141,7 +141,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 		}else{
 			
 			//Already collected - don't try again..
-			MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
+			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
 			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
 				callback();		
 			});	
@@ -192,7 +192,7 @@ function checkETHNewSecrets(currentethblock, callback){
 	
 	//Get all the withdraw logs - that reveal a secret
 	getHTLCContractWithdrawLogs(hexstart,hexend,function(ethresp){
-		MDS.log("WITHDRAWS from "+hexstart+" to "+hexend+" "+JSON.stringify(ethresp,null,2));
+		//MDS.log("WITHDRAWS from "+hexstart+" to "+hexend+" "+JSON.stringify(ethresp,null,2));
 		
 		//Cycle through the secrets
 		var len 		= ethresp.length;
@@ -202,7 +202,11 @@ function checkETHNewSecrets(currentethblock, callback){
 			var withdrawlog = ethresp[i];
 			
 			//Add this to our db of secrets..
-			insertSecret(withdrawlog.secret, withdrawlog.hashlock);
+			insertSecret(withdrawlog.secret, withdrawlog.hashlock,function(added){
+				if(added){
+					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
+				}
+			});
 		}
 		
 		if(callback){
@@ -229,7 +233,7 @@ function checkETHSwapHTLC(userdets, ethblock, callback){
 	
 	//Find all the logs..
 	getHTLCContractAsReceiver(hexstart,hexend,function(ethresp){
-		MDS.log("SEARCHING LOGS RECEIVER : "+JSON.stringify(ethresp,null,2));
+		//MDS.log("SEARCHING LOGS RECEIVER : "+JSON.stringify(ethresp,null,2));
 		
 		var timenow 	= getCurrentUnixTime(); 
 		var len 		= ethresp.length;
@@ -304,7 +308,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, callback){
 				}
 				
 				//We can collect
-				MDS.log("Can Collect ETH HTLC coin as we know secret!!");
+				MDS.log("Can Collect ETH HTLC coin as we know secret for hash "+hash);
 				_collectETHHTLCCoin(htlclog, hash, secret, function(resp){
 					if(callback){
 						callback(resp);
@@ -325,11 +329,12 @@ function _checkCanCollectETHCoin(userdets, htlclog, callback){
 					getMyOrderBook(function(myorderbook){
 						
 						//Are we enablked for these swaps..
+						//MDS.log("SKIPPING ORDER BOOK CHECK FOR ETH SWAP!")
 						if(myorderbook.nativeenable){
 							
 							//Calculate how much we should send back..
 							var calcamount = calculateRequiredAmount("minima",sendamount,myorderbook);
-							if(calcamount >= requestamount){
+							if((calcamount >= requestamount)){
 							
 								//Send the ETH counter TXN - to make him reveal the secret
 								_sendCounterPartyETHTxn(userdets,htlclog,function(resp){
@@ -412,12 +417,12 @@ function _sendCounterPartyETHTxn(userdets, htlclog, callback){
 		//Create the state
 		var state = createHTLCState(userdets.minimapublickey,   
 									userdets.ethaddress, 
-									htlclog.owner,				 
+									htlclog.minimapublickey,				 
 									htlclog.requestamount, 
 									countertimelock, 
 									htlclog.hashlock)
 		
-		MDS.log("Send Minima counterparty txn! state:"+JSON.stringify(state));
+		MDS.log("Send counterparty Minima txn! hashlock:"+htlclog.hashlock);
 		 
 		//And send from the native wallet..
 		sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){

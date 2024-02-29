@@ -67,15 +67,12 @@ MDS.init(function(msg){
 				
 	}else if(msg.event == "MDS_TIMER_60SECONDS"){
 		
-		//return;
-		
 		//SERVICE.js runs function synchromously... as no HTTP call.. 
 		//so no need to to stack functions inside each other
 		
 		//Get the current ETH block
 		var ethblock = 0;
 		getCurrentETHBlock(function(block){
-			//MDS.log("Current ETH block : "+block);
 			ethblock = block;
 		});
 		
@@ -83,23 +80,22 @@ MDS.init(function(msg){
 		setNonceAuto(function(){});
 			
 		//Check for new secrets
-		//checkETHNewSecrets(ethblock,function(){});
+		checkETHNewSecrets(ethblock,function(){});
 		
 		//Check expired Minima coins
 		checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
 		
 		//Check expired Wrappped Minima
-		//checkExpiredETHHTLC(ethblock,function(expiredeth){});
+		checkExpiredETHHTLC(ethblock,function(expiredeth){});
 		
 		//Now check Minima for SWAPS
-		//checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
+		checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
 		
 		//Check ETH for SWAPS
-		//checkETHSwapHTLC(USER_DETAILS,ethblock, function(ethswaps){});
+		checkETHSwapHTLC(USER_DETAILS,ethblock, function(ethswaps){});
 		
 		//Check if my orderbook has changed..
-		//checkNeedPublishOrderBook(USER_DETAILS);	
-	
+		checkNeedPublishOrderBook(USER_DETAILS);	
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		
@@ -110,9 +106,6 @@ MDS.init(function(msg){
 		
 		//Is it relevant to Bridge
 		if(msg.data.address ==  COIN_NOTIFY){
-			
-			//Is it relevant to us!
-			//MDS.log("NOTIFYCOIN : "+JSON.stringify(msg.data));
 			
 			//Get the coin
 			var coin = msg.data.coin;
@@ -132,7 +125,7 @@ MDS.init(function(msg){
 				//Put the secret and hash in the db
 				insertSecret(secret,hash,function(added){
 					if(added){
-						MDS.log("NEW SECRET for hash "+hash);		
+						MDS.log("NEW SECRET from Minima for hash "+hash);		
 					}
 				});
 			}			

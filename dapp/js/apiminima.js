@@ -170,23 +170,18 @@ function checkExpiredMinimaHTLC(userdets, callback){
 							//Check if we can collect it..
 							var timelock=+coin.state[3];
 							if(block>timelock){
-								
-								//Have we already collected.. there should be no coin if we have..
-								//haveCollectExpiredHTLC(coin.state[5],function(collected){
-								//	if(!collected){
 										
-										MDS.log("Timelock Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+									MDS.log("Timelock Collect Expired Minima Coin! timelock:"
+												+timelock+" block:"+block+" amount:"+coin.amount+" hash:"+coin.state[5]);
+								
+									//Add to our list
+									expired.push(coin);
 									
-										//Add to our list
-										expired.push(coin);
-										
-										//Collect the coin
-										_collectExpiredCoin(userdets,coin,function(){});	
-								//	}
-								//});
-								
+									//Collect the coin
+									_collectExpiredCoin(userdets,coin,function(){});	
+							
 							}else{
-								MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+								//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 							}	
 						}
 					}catch(e){
@@ -299,7 +294,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 				}
 				
 				//We can collect
-				MDS.log("Can Collect Minima HTLC coin as we know secret!!");
+				MDS.log("Can Collect Minima HTLC coin as we know secret for hash "+hash);
 				_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){
 					if(callback){
 						callback(resp);
@@ -322,6 +317,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 					getMyOrderBook(function(myorderbook){
 						
 						//Are we enabled
+						//MDS.log("SKIPPING ORDER BOOK CHECK FOR MINIMA SWAP!")
 						if(myorderbook.wrappedenable){
 							//Check the details are valid!.. FEES etc.. 
 							var sendamount 		= +coin.amount; 
@@ -329,7 +325,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 						
 							//Calculate how much we should send back..
 							var calcamount = calculateRequiredAmount("wminima",sendamount,myorderbook);
-							if(calcamount >= requestamount){
+							if((calcamount >= requestamount)){
 								
 								//Send the ETH counter TXN - to make him reveal the secret
 								sendCounterPartyMinimaTxn(userdets,coin,function(resp){
@@ -416,6 +412,8 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	//The receiver is the ETH owner key
 	var receiver		= coin.state[6];
 	
+	MDS.log("Send counterparty ETH txn for hashlock:"+hashlock);
+	
 	//Set up the next HTLC 
 	setupETHHTLCSwap(	userdets.minimapublickey,
 						receiver, 
@@ -427,7 +425,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(ethresp.status){
-			sentCounterPartyTxn(hash,"wminima",reqamount,ethresp.result,function(){
+			sentCounterPartyTxn(hashlock,"wminima",reqamount,ethresp.result,function(){
 				callback(ethresp);	
 			});
 		}else{
