@@ -1,0 +1,180 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/puresha1.js"></script>
+	<script type="text/javascript" src="./js/pagelayout.js"></script>
+	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
+	<script type="text/javascript" src="./js/apieth.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/orderbookutil.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./js/htlcvars.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
+	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
+	
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		createHeader();
+	</script>
+	
+	Your Bridge OTC_UID :<br> 
+	<br>
+	<div id=mydetails style="font-size:11;"></div>
+	<br>
+	
+	Start OTC Swap :<br>
+	<br>
+	<table>
+		<tr>
+			<td>WITH OTC_UID : </td>
+			<td><input type=text id=otcuid></td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td>Amount Minima : </td>
+			<td><input type=text id=minimaamount></td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td>Request Amount wMinima: </td>
+			<td><input type=text id=requestamount></td>
+		</tr>
+		<tr><td>&nbsp;</td></tr>
+		<tr><td><button onclick="swapminima();">I WANT TO SWAP NATIVE MINIMA</button></td></tr>
+		
+	</table>
+	
+	<script type="text/javascript">
+		createFooter();
+	</script>
+	
+
+<script type="text/javascript">
+	
+	var USER_DETAILS = {};
+	
+	//Start a native swap..
+	function swapminima(){
+		var amount = minimaamount.value.trim();
+		if(!checkIsPositiveNumber(amount)){
+			alert("Amount must be a valid number greater than 0");
+			return;
+		}
+		
+		var reqamount = requestamount.value.trim();
+		if(!checkIsPositiveNumber(reqamount)){
+			alert("Requested Amount must be a valid number greater than 0");
+			return;
+		}
+		
+		//Round..
+		var sndamt = toFixedNumber(amount);
+		var reqamt = toFixedNumber(reqamount);
+		
+		//Ok - lets jump to the next page..
+		location.href="swapnativeotc.html?uid="+MDS.minidappuid
+						+"&amount="+sndamt
+						+"&reqamount="+reqamt
+						+"&otcuid="+otcuid.value;
+	}
+	
+	//Start a native swap..
+	function swapeth(){
+		var amount = ethamount.value.trim();
+		if(!checkIsPositiveNumber(amount)){
+			alert("Must be a valid number greater than 0");
+			return;
+		}
+		
+		//Round..
+		var sndamt = toFixedNumber(amount);
+		
+		//Ok - lets jump to the next page..
+		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+sndamt;
+	}
+	
+	/*function createTable(rows){
+		
+		//Wipe Table
+		histtable.innerHTML = "";
+		
+		var thead = histtable.insertRow();
+		thead.insertCell(0).innerHTML = "ID";
+		thead.insertCell(1).innerHTML = "HASHLOCK";
+		thead.insertCell(2).innerHTML = "EVENT";
+		thead.insertCell(3).innerHTML = "TOKEN";
+		thead.insertCell(4).innerHTML = "AMOUNT";
+		thead.insertCell(5).innerHTML = "TXN_HASH";
+		thead.insertCell(6).innerHTML = "DATE";
+		
+		var len = rows.length;
+		for(var i=0;i<len;i++){
+			var row = rows[i];
+			
+			var trow = histtable.insertRow();
+			trow.insertCell(0).innerHTML = row.ID;
+			
+			//The Hash..
+			var val = striptags(row.HASH.substring(0,10))+"..";
+			var hash = "<a href='history.html?uid="+MDS.minidappuid+"&hashid="+row.HASH+"'>"+val+"</a>";
+			trow.insertCell(1).innerHTML = hash;
+			
+			trow.insertCell(2).innerHTML = row.EVENT;
+			trow.insertCell(3).innerHTML = row.TOKEN;
+			trow.insertCell(4).innerHTML = row.AMOUNT;
+			trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";
+			
+			//Create a date object
+			var dd = new Date(+row.EVENTDATE);
+			trow.insertCell(6).innerHTML = getDateString(dd);
+		}
+	}*/
+	
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		
+		//Do initialisation
+		if(msg.event == "inited"){
+			
+			//Init ETH
+			initETHSubSystem(function(){
+				getUserDetails(function(userdets){
+					USER_DETAILS=userdets;
+					mydetails.innerHTML = "<b>"+userdets.otcuid+"</b>";
+				});
+			});		
+		} 
+	});
+
+</script>
+
+</body>
+
+</html>

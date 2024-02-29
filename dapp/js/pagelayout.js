@@ -18,6 +18,7 @@ function createHeader(){
 	"				<td class=buttonlinks><button onclick=\"location.href='swap.html?uid="+uid+"'\">SWAP</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='liquidity.html?uid="+uid+"'\">LIQUIDITY</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='orderbook.html?uid="+uid+"'\">ORDERBOOK</button></td>"+
+	"				<td class=buttonlinks><button onclick=\"location.href='otc.html?uid="+uid+"'\">OTC</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='history.html?uid="+uid+"'\">HISTORY</button></td>"+
 	"			</tr>"+
 	"		</table>"+

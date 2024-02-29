@@ -37,6 +37,9 @@ function getUserDetails(callback){
 				
 				//Get the ETH Wallet address
 				userdetails.ethaddress = getETHERUMAddress();
+				
+				//And your OTC UID
+				userdetails.otcuid = minpub;
 					
 				//Send the details
 				callback(userdetails);

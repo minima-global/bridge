@@ -43,41 +43,49 @@
 		createHeader();
 	</script>
 	
-	Welcome to Bridge.<br>
+	SWAP Minima for wMinima on ETH<br>
 	<br>
-	Here you can Swap native Minima for wMinima on ETH.<br>
 	<br>
-	<button onclick="approve();">APPROVE TRANSFERS</button><br>
-	<br>
-	<button onclick="alllogs();">VIEW ALL ETH LOGS</button><br>
-	<br>
-	<button onclick="allOwnerlogs();">VIEW ALL OWNER ETH LOGS</button><br>
-	<br>
+	
+	<div id="swapproceed"></div>
 	
 	<script type="text/javascript">
 		createFooter();
 	</script>
 	
-
 <script type="text/javascript">
 	
 	var USER_DETAILS = {};
 	
-	function approve(){
-		erc20Approve(HTLCContractAddress,"max",function(logs){
-			MDS.log(JSON.stringify(logs,null,2));
-		});
-	}
+	//How much Native Minima are we swapping..
+	var sendamount 		= toFixedNumber(MDS.form.getParams("amount"));
+	var reqamount 		= toFixedNumber(MDS.form.getParams("reqamount"));;
+	var reqpublickey 	= MDS.form.getParams("otcuid");
 	
-	function alllogs(){
-		getHTLCAllLogs("0x85","latest",function(logs){
-			MDS.log(JSON.stringify(logs,null,2));
-		});
-	}
-	
-	function allOwnerlogs(){
-		getHTLCContractAsOwner("0x85","latest",function(logs){
-			MDS.log(JSON.stringify(logs,null,2));
+	//Start a native swap..
+	function proceed(){
+		
+		//Disable the button
+		proceedbutton.disabled=true;
+			
+		//Send Minima to the HTLC..
+		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, true, function(resp){
+			if(resp.status){
+				alert("Swap started!");
+				
+				//Ok - lets jump to the next page..
+				location.href="otc.html?uid="+MDS.minidappuid;
+				
+			}else{
+				if(resp.error){
+					alert(resp.error);	
+				}else{
+					alert(resp.message);
+				}
+				
+				//Disable the button
+				proceedbutton.disabled=false;
+			}
 		});
 	}
 	
@@ -87,12 +95,19 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//wipeDB();
-			
 			//Init ETH
 			initETHSubSystem(function(){
+			
 				getUserDetails(function(userdets){
 					USER_DETAILS=userdets;
+					
+					//Set the details..
+					swapproceed.innerHTML=	"Swap with "+reqpublickey
+											+"<br><br>You send "+sendamount
+											+" Minima and receive "+reqamount+" wMinima on ETH<br><br>"
+											+"<button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
+											+"You <b>MUST</b> have some ETH to collect the wMinima..";					
+						
 				});
 			});
 		}

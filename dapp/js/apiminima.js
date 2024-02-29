@@ -46,7 +46,7 @@ function getMinimaBalance(userdetails,callback){
 }
 
 /**
- * Sendf funds from the Brideg Wallet 
+ * Send funds from the Brideg Wallet 
  */
 function sendMinima(userdets, amount, address, state, callback){
 	
@@ -83,7 +83,8 @@ function depositNativeMinima(userdets, amount, callback){
 /**
  * Create the HTLC state required by a coin
  */
-function createHTLCState(owner, ownerethkey, receiver, requestamount, timelock, hashlock){
+function createHTLCState(owner, ownerethkey, receiver, 
+							requestamount, timelock, hashlock, otc){
 	var state = {};
 	state[0]  = owner;
 	state[1]  = ""+requestamount;
@@ -92,6 +93,7 @@ function createHTLCState(owner, ownerethkey, receiver, requestamount, timelock, 
 	state[4]  = receiver;
 	state[5]  = hashlock;
 	state[6]  = ownerethkey;
+	state[7]  = otc;
 	
 	return state;
 }
@@ -99,7 +101,7 @@ function createHTLCState(owner, ownerethkey, receiver, requestamount, timelock, 
 /**
  * Start a Minima -> wMinima SWAP
  */
-function startMinimaSwap(userdets, amount, requestamount, swappublickey, callback){
+function startMinimaSwap(userdets, amount, requestamount, swappublickey, otc, callback){
 	
 	//Get the current block
 	getCurrentMinimaBlock(function(block){
@@ -116,7 +118,8 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 										swappublickey,
 										requestamount,
 										timelock,
-										hash);
+										hash,
+										otc);
 			
 			//And send from the native wallet..
 			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
@@ -288,6 +291,15 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 			});
 			
 		}else{
+			
+			//Is it an OTC deal..
+			/*if(coin.state[7]){
+				
+				//Needs to be OK'ed in the frontend
+				MDS.log("OTC DEAL FOUND.. leaving for now..");
+				callback();
+				return;
+			}*/
 					
 			//Have we sent the OTHER side txn to get them to reveal the secret..
 			haveSentCounterPartyTxn(hash,function(sent){

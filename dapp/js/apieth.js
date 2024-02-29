@@ -402,7 +402,8 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 								htlclog.minimapublickey,				 
 								htlclog.requestamount, 
 								countertimelock, 
-								htlclog.hashlock)
+								htlclog.hashlock, 
+								false)
 	
 	MDS.log("Send counterparty Minima txn! hashlock:"+htlclog.hashlock);
 	 

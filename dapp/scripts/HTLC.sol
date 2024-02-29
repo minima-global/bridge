@@ -35,12 +35,13 @@ contract HTLC {
         bytes32 indexed contractId,
         address indexed sender,
         address indexed receiver,
-        address senderminima,
+        bytes32 senderminima,
         address tokenContract,
         uint256 amount,
         uint256 requestamount,
         bytes32 hashlock,
-        uint256 timelock
+        uint256 timelock,
+        bool otcdeal
     );
     
     //Withdraw WITH the secret
@@ -55,7 +56,7 @@ contract HTLC {
 
     struct LockContract {
         address sender;
-        address senderminima;
+        bytes32 senderminima;
         address receiver;
         address tokenContract;
         uint256 amount;
@@ -65,6 +66,7 @@ contract HTLC {
         bool withdrawn;
         bool refunded;
         bytes32 preimage;
+        bool otc;
     }
 
     modifier tokensTransferable(address _token, address _sender, uint256 _amount) {
@@ -114,13 +116,14 @@ contract HTLC {
 
 
     function newContract(
-        address _senderminima,
+        bytes32 _senderminima,
         address _receiver,
         bytes32 _hashlock,
         uint256 _timelock,
         address _tokenContract,
         uint256 _amount,
-        uint256 _requestamount
+        uint256 _requestamount,
+        bool _otc
         
     )
         external
@@ -163,7 +166,8 @@ contract HTLC {
             _timelock,
             false,
             false,
-            0x0
+            0x0,
+            _otc
         );
 	
 		//Emit an EVENT - Cannot add tokencontract address as Stack too deep
@@ -197,7 +201,8 @@ contract HTLC {
             c.amount,
             c.requestamount,
             c.hashlock,
-            c.timelock
+            c.timelock,
+            c.otc
         );
 	}
 
@@ -234,7 +239,7 @@ contract HTLC {
         view
         returns (
             address sender,
-            address senderminima,
+            bytes32 senderminima,
             address receiver,
             address tokenContract,
             uint256 amount,
@@ -243,12 +248,13 @@ contract HTLC {
             uint256 timelock,
             bool withdrawn,
             bool refunded,
-            bytes32 preimage
+            bytes32 preimage,
+            bool otc
         )
     {
     	//If no contract resturn 0 result..
         if (haveContract(_contractId) == false){
-        	return (address(0), address(0), address(0), address(0), 0, 0, 0, 0, false, false, 0);
+        	return (address(0), 0, address(0), address(0), 0, 0, 0, 0, false, false, 0, false);
         }
             
         //Get the contract
@@ -266,7 +272,8 @@ contract HTLC {
             c.timelock,
             c.withdrawn,
             c.refunded,
-            c.preimage
+            c.preimage,
+            c.otc
         );
     }
 
