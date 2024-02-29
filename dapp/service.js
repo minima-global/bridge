@@ -13,6 +13,8 @@ MDS.load("./js/apiminima.js");
 MDS.load("./js/apieth.js");
 MDS.load("./js/balance.js");
 
+MDS.load("./js/htlcvars.js");
+
 MDS.load("./js/ethers-4.0.31.min.js");
 MDS.load("./abi/htlcabi.js");
 MDS.load("./abi/wminimaabi.js");

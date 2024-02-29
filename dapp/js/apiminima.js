@@ -1,18 +1,5 @@
 
 /**
- * Some vars 
- */
-
-//The timelock in BLOCK that gets added to the current block
-var HTLC_TIMELOCK_BLOCKS = 50;
-
-//The block time - different for TEST net
-var MINIMA_BLOCK_TIME = 20;
-
-//The minimum time difference to send counter party txn
-var MINIMUM_COUNTERPARTY_TIMELOCK = (HTLC_TIMELOCK_BLOCKS * MINIMA_BLOCK_TIME) / 2; 
-
-/**
  * Get the current Minima block
  */
 function getCurrentMinimaBlock(callback){
@@ -309,11 +296,11 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 				if(!sent){
 					
 					//Check the timelock is in good time..
-					var timelocktime 	= getTimeForBlock(block, timelock);
-					var ctime 			= getCurrentUnixTime();
-					var tdiff 			= timelocktime - ctime;
-					if(tdiff < MINIMUM_COUNTERPARTY_TIMELOCK){
-						MDS.log("TIMELOCK MINIMA TOO close to proceed.. not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
+					var tdiff = timelock-block;
+					if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK){
+						MDS.log("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK+" blocks) MINIMA TOO close to proceed.. "
+								+"not sending counterpartytxn.. timelock:"
+								+timelock+" currentblock:"+block+" hash:"+hash);
 						return;
 					}
 					
@@ -407,7 +394,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	var hashlock 		= coin.state[5];
 	
 	//Set some time in the future..
-	var timelock 		= getCurrentUnixTime() + (MINIMUM_COUNTERPARTY_TIMELOCK/2);
+	var timelock 		= getCurrentUnixTime() + HTLC_TIMELOCK_COUNTERPARTY_SECS;
 	
 	//The receiver is the ETH owner key
 	var receiver		= coin.state[6];

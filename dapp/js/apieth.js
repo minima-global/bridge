@@ -1,20 +1,5 @@
 
 /**
- * Some vars about the HTLC
- */
-
-//Minimum block to check for events
-var MIN_HTLC_BLOCK 			  = 16;
-
-//The timelock to add to the current time
-var HTLC_TIMELOCK_SECS 		  = 1000;
-
-//The minimum time to send a counterparty transaction
-var MIN_HTLC_TIMELOCK_COUNTER = HTLC_TIMELOCK_SECS / 2;
-
-var MINIMA_COUNTERPARTY_BLOCK_TIMELOCK = 10; 
-
-/**
  * Start a wMinima -> Minima SWAP
  */
 function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
@@ -322,8 +307,9 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					var timelocktime 	= htlclog.timelock;
 					var ctime 			= getCurrentUnixTime();
 					var tdiff 			= timelocktime - ctime;
-					if(tdiff < MIN_HTLC_TIMELOCK_COUNTER){
-						MDS.log("TIMELOCK ETH TOO close to proceed.. not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
+					if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_SECS_CHECK){
+						MDS.log("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_SECS_CHECK+" secs) ETH TOO close to proceed.."
+								+" not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
 						return;
 					}
 					
@@ -408,7 +394,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 
 	//Send the Minima counter TXN - to make him reveal the secret
-	var countertimelock = minimablock+MINIMA_COUNTERPARTY_BLOCK_TIMELOCK;
+	var countertimelock = minimablock + HTLC_TIMELOCK_COUNTERPARTY_BLOCKS;
 	
 	//Create the state
 	var state = createHTLCState(userdets.minimapublickey,   
