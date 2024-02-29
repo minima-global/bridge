@@ -21,9 +21,6 @@ MDS.load("./js/etherc20util.js");
 MDS.load("./js/ethhtlcutil.js");
 
 MDS.load("./js/ethjs-signer.js");
-
-//const signjs = require('ethjs-signer').sign;
-
 				
 //The USER details..
 var USER_DETAILS 	= {};
@@ -76,6 +73,12 @@ MDS.init(function(msg){
 			ethblock = block;
 		});
 		
+		//Get the current Minima block
+		var minimablock = 0;
+		getCurrentMinimaBlock(function(mblock){
+			minimablock = +mblock;
+		});
+		
 		//Auto set the Nonce..
 		setNonceAuto(function(){});
 			
@@ -83,16 +86,16 @@ MDS.init(function(msg){
 		checkETHNewSecrets(ethblock,function(){});
 		
 		//Check expired Minima coins
-		checkExpiredMinimaHTLC(USER_DETAILS, function(expiredminima){});
+		checkExpiredMinimaHTLC(USER_DETAILS, minimablock, function(expiredminima){});
 		
 		//Check expired Wrappped Minima
-		checkExpiredETHHTLC(ethblock,function(expiredeth){});
+		checkExpiredETHHTLC(ethblock, function(expiredeth){});
 		
 		//Now check Minima for SWAPS
-		checkMinimaSwapHTLC(USER_DETAILS,function(swaps){});
+		checkMinimaSwapHTLC(USER_DETAILS, minimablock, function(swaps){});
 		
 		//Check ETH for SWAPS
-		checkETHSwapHTLC(USER_DETAILS,ethblock, function(ethswaps){});
+		checkETHSwapHTLC(USER_DETAILS,ethblock, minimablock, function(ethswaps){});
 		
 		//Check if my orderbook has changed..
 		checkNeedPublishOrderBook(USER_DETAILS);	

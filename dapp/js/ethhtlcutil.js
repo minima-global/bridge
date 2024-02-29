@@ -9,14 +9,6 @@ var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 var HTLCContractAddress = "0x8A791620dd6260079BF849Dc5567aDC3F2FdC318";
 
 /**
- * Get the current unix time in secs
- */
-var TIME_1MINUTE_SECS = 60; 
-function getCurrentUnixTime(){
-	return Math.floor(new Date().getTime() / 1000);
-}
-
-/**
  * Start an HTLC
  */
 function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, erc20address, amount, requestamount,  callback){

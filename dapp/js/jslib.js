@@ -60,6 +60,10 @@ function toFixedNumber(number){
 	return +Number.parseFloat(number).toFixed(2);
 }
 
+function getCurrentUnixTime(){
+	return Math.floor(new Date().getTime() / 1000);
+}
+
 function getDateString(dateobj){
 	var year 	= dateobj.getFullYear();
 	var month 	= dateobj.getMonth()+1;

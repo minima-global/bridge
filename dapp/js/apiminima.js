@@ -3,8 +3,14 @@
  * Some vars 
  */
 
-//The timelock in BLOCK that gets added
-var HTLC_TIMELOCK_BLOCKS = 10;
+//The timelock in BLOCK that gets added to the current block
+var HTLC_TIMELOCK_BLOCKS = 50;
+
+//The block time - different for TEST net
+var MINIMA_BLOCK_TIME = 20;
+
+//The minimum time difference to send counter party txn
+var MINIMUM_COUNTERPARTY_TIMELOCK = (HTLC_TIMELOCK_BLOCKS * MINIMA_BLOCK_TIME) / 2; 
 
 /**
  * Get the current Minima block
@@ -13,6 +19,15 @@ function getCurrentMinimaBlock(callback){
 	MDS.cmd("block",function(resp){
 		callback(resp.response.block);
 	});
+}
+
+/**
+ * Get the time for a block in the future
+ */
+function getTimeForBlock(currentblock, futureblock){
+	var diff 	= futureblock - currentblock;
+	var ctime 	= getCurrentUnixTime();
+	return ctime + (diff*MINIMA_BLOCK_TIME); 
 }
 
 /**
@@ -141,58 +156,50 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 /**
  * Check if there are any coins in the HTLC that have expired..
  */
-function checkExpiredMinimaHTLC(userdets, callback){
+function checkExpiredMinimaHTLC(userdets, block, callback){
 	
 	//First search coins
 	var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
 		
+		//All expired.. 
+		var expired = [];
+			
 		//How many coins..
 		var len=resp.response.length;
-		if(len>0){
-			
-			//Coins found..
-			getCurrentMinimaBlock(function(blockstr){
-				
-				//Convert to a number
-				var block = +blockstr;
-				
-				//All expired.. 
-				var expired = [];
-				
-				//Now cycle through the coins..
-				for(var i=0;i<len;i++){
-					//Get the coin
-					var coin=resp.response[i];
-					try{
-						//Are we the Owner..
-						if(coin.state[0] == userdets.minimapublickey){
-							//Check if we can collect it..
-							var timelock=+coin.state[3];
-							if(block>timelock){
-										
-									MDS.log("Timelock Collect Expired Minima Coin! timelock:"
-												+timelock+" block:"+block+" amount:"+coin.amount+" hash:"+coin.state[5]);
+		
+		//Now cycle through the coins..
+		for(var i=0;i<len;i++){
+			//Get the coin
+			var coin=resp.response[i];
+			try{
+				//Are we the Owner..
+				if(coin.state[0] == userdets.minimapublickey){
+					//Check if we can collect it..
+					var timelock=+coin.state[3];
+					if(block>timelock){
 								
-									//Add to our list
-									expired.push(coin);
-									
-									//Collect the coin
-									_collectExpiredCoin(userdets,coin,function(){});	
+							MDS.log("Timelock Collect Expired Minima Coin! timelock:"
+										+timelock+" block:"+block+" amount:"+coin.amount+" hash:"+coin.state[5]);
+						
+							//Add to our list
+							expired.push(coin);
 							
-							}else{
-								//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
-							}	
-						}
-					}catch(e){
-						MDS.log("ERROR (checkExpiredMinimaHTLC) parsing Minima expired coin : "+JSON.stringify(coin)+" "+e);
-					}
+							//Collect the coin
+							_collectExpiredCoin(userdets,coin,function(){});	
+					
+					}else{
+						//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+					}	
 				}
-				
-				if(callback){
-					callback(expired);
-				}
-			});
+			}catch(e){
+				MDS.log("ERROR (checkExpiredMinimaHTLC) parsing Minima expired coin : "+JSON.stringify(coin)+" "+e);
+			}
+		}
+		
+		//And return data..	
+		if(callback){
+			callback(expired);
 		}
 	});
 }
@@ -225,7 +232,7 @@ function _collectExpiredCoin(userdets,coin,callback){
 /**
  * Check if there are any SWAP coins available on MINIMA
  */
-function checkMinimaSwapHTLC(userdets, callback){
+function checkMinimaSwapHTLC(userdets, block, callback){
 	
 	//First search coins
 	var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
@@ -239,7 +246,7 @@ function checkMinimaSwapHTLC(userdets, callback){
 			var coin=resp.response[i];
 			try{
 				if(coin.state[4] == USER_DETAILS.minimapublickey){
-					_checkCanSwapCoin(userdets, coin, function(res){});		
+					_checkCanSwapCoin(userdets, coin, block, function(res){});		
 				}
 			}catch(e){
 				MDS.log("ERROR (checkMinimaSwapHTLC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
@@ -252,21 +259,18 @@ function checkMinimaSwapHTLC(userdets, callback){
 	});
 }
 
-function _checkCanSwapCoin(userdets, coin, callback){
+function _checkCanSwapCoin(userdets, coin, block, callback){
 	
 	//Make sure is Minima..
 	if(coin.tokenid != "0x00"){
 		//Not Minima!..
 		MDS.log("NOT a Minima HTLC.. token:"+coin.tokenid);
-		if(callback){
-			callback();
-		}	
 		return;
-		
 	}
 	
 	//What is the hash of the secret
-	var hash = coin.state[5];
+	var hash 	 = coin.state[5];
+	var timelock = +coin.state[3];
 	
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
@@ -285,9 +289,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){
-							callback();		
-						});	
+						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){});	
 						
 						return;
 					}
@@ -295,11 +297,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 				
 				//We can collect
 				MDS.log("Can Collect Minima HTLC coin as we know secret for hash "+hash);
-				_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){
-					if(callback){
-						callback(resp);
-					}
-				});
+				_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){});
 			});
 			
 		}else{
@@ -311,7 +309,13 @@ function _checkCanSwapCoin(userdets, coin, callback){
 				if(!sent){
 					
 					//Check the timelock is in good time..
-					//..
+					var timelocktime 	= getTimeForBlock(block, timelock);
+					var ctime 			= getCurrentUnixTime();
+					var tdiff 			= timelocktime - ctime;
+					if(tdiff < MINIMUM_COUNTERPARTY_TIMELOCK){
+						MDS.log("TIMELOCK MINIMA TOO close to proceed.. not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
+						return;
+					}
 					
 					//Check the details are valid!.. FEES etc.. 
 					getMyOrderBook(function(myorderbook){
@@ -328,11 +332,7 @@ function _checkCanSwapCoin(userdets, coin, callback){
 							if((calcamount >= requestamount)){
 								
 								//Send the ETH counter TXN - to make him reveal the secret
-								sendCounterPartyMinimaTxn(userdets,coin,function(resp){
-									if(callback){
-										callback(resp);
-									}
-								});
+								sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
 								
 							}else{
 								MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedwminima:"+requestamount+" actual:"+calcamount)
@@ -407,7 +407,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	var hashlock 		= coin.state[5];
 	
 	//Set some time in the future..
-	var timelock 		= getCurrentUnixTime() + 300;
+	var timelock 		= getCurrentUnixTime() + (MINIMUM_COUNTERPARTY_TIMELOCK/2);
 	
 	//The receiver is the ETH owner key
 	var receiver		= coin.state[6];

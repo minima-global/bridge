@@ -4,10 +4,15 @@
  */
 
 //Minimum block to check for events
-var MIN_HTLC_BLOCK 			= 16;
+var MIN_HTLC_BLOCK 			  = 16;
 
 //The timelock to add to the current time
-var MIN_HTLC_TIMELOCK_SECS 	= 120;
+var HTLC_TIMELOCK_SECS 		  = 1000;
+
+//The minimum time to send a counterparty transaction
+var MIN_HTLC_TIMELOCK_COUNTER = HTLC_TIMELOCK_SECS / 2;
+
+var MINIMA_COUNTERPARTY_BLOCK_TIMELOCK = 10; 
 
 /**
  * Start a wMinima -> Minima SWAP
@@ -15,7 +20,7 @@ var MIN_HTLC_TIMELOCK_SECS 	= 120;
 function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
 	
 	//Create Time Lock
-	var timelock = getCurrentUnixTime() + MIN_HTLC_TIMELOCK_SECS;
+	var timelock = getCurrentUnixTime() + HTLC_TIMELOCK_SECS;
 	
 	//Create a secret
 	createSecretHash(function(hashlock){
@@ -218,7 +223,7 @@ function checkETHNewSecrets(currentethblock, callback){
 /**
  * Check if there are any SWAP coins
  */
-function checkETHSwapHTLC(userdets, ethblock, callback){
+function checkETHSwapHTLC(userdets, ethblock, minimablock, callback){
 	
 	//CHeck all blocks in a range to the past
 	var startblock = ethblock - 500;
@@ -253,7 +258,7 @@ function checkETHSwapHTLC(userdets, ethblock, callback){
 						collectlist.push(htlclog);
 						
 						//Try and collect
-						_checkCanCollectETHCoin(userdets,htlclog,function(){});
+						_checkCanCollectETHCoin(userdets,htlclog, minimablock, function(){});
 					}
 				});
 				
@@ -268,14 +273,11 @@ function checkETHSwapHTLC(userdets, ethblock, callback){
 	});
 }
 
-function _checkCanCollectETHCoin(userdets, htlclog, callback){
+function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 	
 	//Check the token contract IS wMinima!
 	if(htlclog.tokencontract != wMinimaContractAddress){
 		MDS.log("NOT a wMinima ERC20 HTLC.. "+htlclog.tokencontract);
-		if(callback){
-			callback();
-		}	
 		return;
 	}
 	
@@ -299,9 +301,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){
-							callback();		
-						});	
+						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){});	
 						
 						return;
 					}
@@ -309,11 +309,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, callback){
 				
 				//We can collect
 				MDS.log("Can Collect ETH HTLC coin as we know secret for hash "+hash);
-				_collectETHHTLCCoin(htlclog, hash, secret, function(resp){
-					if(callback){
-						callback(resp);
-					}
-				});	
+				_collectETHHTLCCoin(htlclog, hash, secret, function(resp){});	
 			});
 			
 		}else{
@@ -321,6 +317,15 @@ function _checkCanCollectETHCoin(userdets, htlclog, callback){
 			//Have we sent the OTHER side txn to get them to reveal the secret..
 			haveSentCounterPartyTxn(hash,function(sent){
 				if(!sent){
+					
+					//Check the timelock..
+					var timelocktime 	= htlclog.timelock;
+					var ctime 			= getCurrentUnixTime();
+					var tdiff 			= timelocktime - ctime;
+					if(tdiff < MIN_HTLC_TIMELOCK_COUNTER){
+						MDS.log("TIMELOCK ETH TOO close to proceed.. not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
+						return;
+					}
 					
 					//Check the details are valid!.. FEES etc.. 
 					var sendamount 		= +htlclog.amount; 
@@ -337,11 +342,8 @@ function _checkCanCollectETHCoin(userdets, htlclog, callback){
 							if((calcamount >= requestamount)){
 							
 								//Send the ETH counter TXN - to make him reveal the secret
-								_sendCounterPartyETHTxn(userdets,htlclog,function(resp){
-									if(callback){
-										callback(resp);
-									}
-								});		
+								_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
+										
 							}else{
 								MDS.log("Invalid request amount for wMinima SWAP sent wminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
 							}	
@@ -403,40 +405,32 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 	});
 }
 
-function _sendCounterPartyETHTxn(userdets, htlclog, callback){
+function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
+
+	//Send the Minima counter TXN - to make him reveal the secret
+	var countertimelock = minimablock+MINIMA_COUNTERPARTY_BLOCK_TIMELOCK;
 	
-	//Coins found..
-	getCurrentMinimaBlock(function(blockstr){
-		
-		//Convert to a number
-		var block = +blockstr;
+	//Create the state
+	var state = createHTLCState(userdets.minimapublickey,   
+								userdets.ethaddress, 
+								htlclog.minimapublickey,				 
+								htlclog.requestamount, 
+								countertimelock, 
+								htlclog.hashlock)
 	
-		//Send the Minima counter TXN - to make him reveal the secret
-		var countertimelock = block+10;
+	MDS.log("Send counterparty Minima txn! hashlock:"+htlclog.hashlock);
+	 
+	//And send from the native wallet..
+	sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){
 		
-		//Create the state
-		var state = createHTLCState(userdets.minimapublickey,   
-									userdets.ethaddress, 
-									htlclog.minimapublickey,				 
-									htlclog.requestamount, 
-									countertimelock, 
-									htlclog.hashlock)
-		
-		MDS.log("Send counterparty Minima txn! hashlock:"+htlclog.hashlock);
-		 
-		//And send from the native wallet..
-		sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){
-			
-			//If success put in DB
-			if(resp.status){
-				sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
-					callback(resp);	
-				});
-			}else{
-				MDS.log("FAIL! "+JSON.stringify(resp));
+		//If success put in DB
+		if(resp.status){
+			sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
 				callback(resp);	
-			}	
-		});
-		
+			});
+		}else{
+			MDS.log("FAIL! "+JSON.stringify(resp));
+			callback(resp);	
+		}	
 	});
 }
