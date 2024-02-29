@@ -400,38 +400,38 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 
 function _sendCounterPartyETHTxn(userdets, htlclog, callback){
 	
-	//Send the Minima counter TXN - to make him reveal the secret
-	var countertimelock = 100000;
-	var reqamount 		= htlclog.requestamount;
-	var hash 			= htlclog.hashlock;
-	
-	var state = createHTLCState(userdets.minimapublickey,   // Owner 
-								htlclog.owner,				//Receiver 
-								requestamount, 
-								timelock, 
-								hashlock)
-	
-	var state = {};
-	state[0]  = userdets.minimapublickey;
-	state[1]  = htlclog.amount;
-	state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]";
-	state[3]  = countertimelock;
-	state[4]  = htlclog.receiver;
-	state[5]  = hash;
-	
-	MDS.log("Send Minima counterparty txn! state:"+JSON.stringify(state));
-	 
-	//And send from the native wallet..
-	sendMinima(userdets, reqamount, HTLC_ADDRESS, state, function(resp){
+	//Coins found..
+	getCurrentMinimaBlock(function(blockstr){
 		
-		//If success put in DB
-		if(resp.status){
-			sentCounterPartyTxn(hash,"minima",reqamount,resp.response.txpowid,function(){
+		//Convert to a number
+		var block = +blockstr;
+	
+		//Send the Minima counter TXN - to make him reveal the secret
+		var countertimelock = block+10;
+		
+		//Create the state
+		var state = createHTLCState(userdets.minimapublickey,   
+									userdets.ethaddress, 
+									htlclog.owner,				 
+									htlclog.requestamount, 
+									countertimelock, 
+									htlclog.hashlock)
+		
+		MDS.log("Send Minima counterparty txn! state:"+JSON.stringify(state));
+		 
+		//And send from the native wallet..
+		sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){
+			
+			//If success put in DB
+			if(resp.status){
+				sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
+					callback(resp);	
+				});
+			}else{
+				MDS.log("FAIL! "+JSON.stringify(resp));
 				callback(resp);	
-			});
-		}else{
-			MDS.log("FAIL! "+JSON.stringify(resp));
-			callback(resp);	
-		}	
+			}	
+		});
+		
 	});
 }

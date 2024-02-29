@@ -81,7 +81,7 @@ function depositNativeMinima(userdets, amount, callback){
 /**
  * Create the HTLC state required by a coin
  */
-function createHTLCState(owner, receiver, requestamount, timelock, hashlock){
+function createHTLCState(owner, ownerethkey, receiver, requestamount, timelock, hashlock){
 	var state = {};
 	state[0]  = owner;
 	state[1]  = ""+requestamount;
@@ -89,6 +89,7 @@ function createHTLCState(owner, receiver, requestamount, timelock, hashlock){
 	state[3]  = timelock;
 	state[4]  = receiver;
 	state[5]  = hashlock;
+	state[6]  = ownerethkey;
 	
 	return state;
 }
@@ -107,14 +108,14 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, callbac
 		//Create a secret
 		createSecretHash(function(hash){
 			
-			var state = {};
-			state[0]  = userdets.minimapublickey;
-			state[1]  = ""+requestamount;
-			state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]"; // wMinima on ETH
-			state[3]  = timelock;
-			state[4]  = swappublickey;
-			state[5]  = hash;
-	 
+			//Create the required state vars
+			var state = createHTLCState(userdets.minimapublickey,
+										userdets.ethaddress,
+										swappublickey,
+										requestamount,
+										timelock,
+										hash);
+			
 			//And send from the native wallet..
 			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
 				
@@ -258,6 +259,17 @@ function checkMinimaSwapHTLC(userdets, callback){
 
 function _checkCanSwapCoin(userdets, coin, callback){
 	
+	//Make sure is Minima..
+	if(coin.tokenid != "0x00"){
+		//Not Minima!..
+		MDS.log("NOT a Minima HTLC.. token:"+coin.tokenid);
+		if(callback){
+			callback();
+		}	
+		return;
+		
+	}
+	
 	//What is the hash of the secret
 	var hash = coin.state[5];
 	
@@ -389,20 +401,29 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 
 function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	
-	//Send the ETH counter TXN - to make him reveal the secret
-	//var timelock 		= +coin.state[3] - 10;
-	
+	//requested amount
 	var amount 			= coin.state[1];
+	
+	//What do you expect.. not rerally needed
 	var reqamount 		= coin.amount;
 	
+	//The hashlock
 	var hashlock 		= coin.state[5];
+	
+	//Set some time in the future..
 	var timelock 		= getCurrentUnixTime() + 300;
 	
-	var receiver		= coin.state[0];
+	//The receiver is the ETH owner key
+	var receiver		= coin.state[6];
 	
 	//Set up the next HTLC 
-	setupETHHTLCSwap(receiver, hashlock, timelock, 
-					wMinimaContractAddress, amount, reqamount, function(ethresp){
+	setupETHHTLCSwap(	userdets.minimapublickey,
+						receiver, 
+					 	hashlock, 
+						timelock, 
+						wMinimaContractAddress, 
+						amount, 
+						reqamount, function(ethresp){
 		
 		//If success put in DB
 		if(ethresp.status){
