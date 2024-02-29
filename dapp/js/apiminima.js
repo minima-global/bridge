@@ -179,7 +179,7 @@ function checkExpiredMinimaHTLC(userdets, block, callback){
 							_collectExpiredCoin(userdets,coin,function(){});	
 					
 					}else{
-						//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+						MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 					}	
 				}
 			}catch(e){
