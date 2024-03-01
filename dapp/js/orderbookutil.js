@@ -81,6 +81,14 @@ function checkNeedPublishOrderBook(userdets,callback){
 	//First check if your orderbook has changed - default is empty
 	getMyOrderBook(function(currentorderbook){
 		
+		//Check if we are adding liquidity
+		if(!currentorderbook.nativeenable && !currentorderbook.wrappedenable){
+			if(callback){
+				callback(false);	
+			}
+			return;
+		}
+		
 		//Has it changed or not providing liquidity..
 		var oldbook = JSON.stringify(myoldorderbook);
 		var newbook = JSON.stringify(currentorderbook);
@@ -105,7 +113,7 @@ function checkNeedPublishOrderBook(userdets,callback){
 			}else if(currentorderbook.nativeenable || currentorderbook.wrappedenable){
 				//Check balances for all - use rounded values to ignore the publish messages
 				if( currentbalances.minima.total != myoldbalance.minima.total ||
-					currentbalances.eth.total != myoldbalance.eth.total){
+					currentbalances.wminima != myoldbalance.wminima){
 					MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
 					publishbook = true;
 				}

@@ -70,6 +70,10 @@
 		
 	</table>
 	
+	<br><br>
+	Current available OTC deals..
+	<table id=otctable></table>
+		
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -104,57 +108,86 @@
 						+"&otcuid="+otcuid.value;
 	}
 	
-	//Start a native swap..
-	function swapeth(){
-		var amount = ethamount.value.trim();
-		if(!checkIsPositiveNumber(amount)){
-			alert("Must be a valid number greater than 0");
-			return;
-		}
-		
-		//Round..
-		var sndamt = toFixedNumber(amount);
-		
-		//Ok - lets jump to the next page..
-		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+sndamt;
-	}
-	
-	/*function createTable(rows){
+	function showOTCDeals(){
 		
 		//Wipe Table
-		histtable.innerHTML = "";
+		otctable.innerHTML 	= "";
+		var trow 			= otctable.insertRow();
+		trow.insertCell(0).innerHTML = "FROM";
+		trow.insertCell(1).innerHTML = "MINIMA";
+		trow.insertCell(2).innerHTML = "REQUEST";
+		trow.insertCell(3).innerHTML = "ACTION";
 		
-		var thead = histtable.insertRow();
-		thead.insertCell(0).innerHTML = "ID";
-		thead.insertCell(1).innerHTML = "HASHLOCK";
-		thead.insertCell(2).innerHTML = "EVENT";
-		thead.insertCell(3).innerHTML = "TOKEN";
-		thead.insertCell(4).innerHTML = "AMOUNT";
-		thead.insertCell(5).innerHTML = "TXN_HASH";
-		thead.insertCell(6).innerHTML = "DATE";
-		
-		var len = rows.length;
-		for(var i=0;i<len;i++){
-			var row = rows[i];
+		//See if there any waiting..
+		checkForOTC(function(otcdeals){
 			
-			var trow = histtable.insertRow();
-			trow.insertCell(0).innerHTML = row.ID;
+			var len=otcdeals.length;
+			for(var i=0;i<len;i++){
+				
+				//Get the coin
+				var coin=otcdeals[i];
+				
+				var trow = otctable.insertRow();
+				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
+				trow.insertCell(1).innerHTML = coin.amount;
+				trow.insertCell(2).innerHTML = coin.state[1];
+				trow.insertCell(3).innerHTML = "<button onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";
+			}
+		});
+	}
+	
+	function acceptOTC(coinid){
+		if(confirm("You are about to accept coin:"+coinid)){
 			
-			//The Hash..
-			var val = striptags(row.HASH.substring(0,10))+"..";
-			var hash = "<a href='history.html?uid="+MDS.minidappuid+"&hashid="+row.HASH+"'>"+val+"</a>";
-			trow.insertCell(1).innerHTML = hash;
-			
-			trow.insertCell(2).innerHTML = row.EVENT;
-			trow.insertCell(3).innerHTML = row.TOKEN;
-			trow.insertCell(4).innerHTML = row.AMOUNT;
-			trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";
-			
-			//Create a date object
-			var dd = new Date(+row.EVENTDATE);
-			trow.insertCell(6).innerHTML = getDateString(dd);
+			//Get this coin..
+			MDS.cmd("coins coinid:"+coinid, function(resp){
+				
+				var coin = resp.response[0];
+				
+				//Get the current block
+				getCurrentMinimaBlock(function(block){
+					
+					//ASccept this OTC dfeal..
+					acceptOTCSwapCoin(USER_DETAILS, coin, block, function(res){
+						
+					});
+				});
+			});
 		}
-	}*/
+	}
+	
+	function checkForOTC(callback){
+		
+		//All the OTC deals..
+		var otcdeals = [];
+		
+		//First search coins
+		var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+		MDS.cmd(cmd,function(resp){
+			//MDS.log(JSON.stringify(resp));
+			
+			//How many coins..
+			var len=resp.response.length;
+			for(var i=0;i<len;i++){
+				
+				//Get the coin
+				var coin=resp.response[i];
+				try{
+					//Is it FOR you AND an OTC deal..
+					if(coin.state[4] == USER_DETAILS.minimapublickey && coin.state[7]=="TRUE"){
+						//OTC DEAL FOUND!
+						otcdeals.push(coin);		
+					}
+				}catch(e){
+					MDS.log("ERROR (checkForOTC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
+				}	
+			}
+			
+			if(callback){
+				callback(otcdeals);
+			}
+		});
+	}
 	
 	
 	//Main message handler..
@@ -168,8 +201,16 @@
 				getUserDetails(function(userdets){
 					USER_DETAILS=userdets;
 					mydetails.innerHTML = "<b>"+userdets.otcuid+"</b>";
+					
+					//Check for any OTC deals..
+					showOTCDeals();
 				});
 			});		
+		
+		}else if(msg.event == "NEWBLOCK"){
+			
+			//Check for any OTC deals..
+			showOTCDeals();
 		} 
 	});
 

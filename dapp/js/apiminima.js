@@ -4,7 +4,7 @@
  */
 function getCurrentMinimaBlock(callback){
 	MDS.cmd("block",function(resp){
-		callback(resp.response.block);
+		callback(+resp.response.block);
 	});
 }
 
@@ -258,6 +258,8 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 		return;
 	}
 	
+	//MDS.log("CHECK MINIMA COIN "+JSON>stringify(coin));
+	
 	//What is the hash of the secret
 	var hash 	 = coin.state[5];
 	var timelock = +coin.state[3];
@@ -293,13 +295,12 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 		}else{
 			
 			//Is it an OTC deal..
-			/*if(coin.state[7]){
-				
+			if(coin.state[7] == "TRUE"){
 				//Needs to be OK'ed in the frontend
-				MDS.log("OTC DEAL FOUND.. leaving for now..");
+				MDS.log("OTC DEAL FOUND.. ! leaving for now.."+JSON.stringify(coin));
 				callback();
 				return;
-			}*/
+			}
 					
 			//Have we sent the OTHER side txn to get them to reveal the secret..
 			haveSentCounterPartyTxn(hash,function(sent){
@@ -343,6 +344,44 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					});
 				}
 			});
+		}
+	});	
+}
+
+function acceptOTCSwapCoin(userdets, coin, block, callback){
+	
+	//Make sure is Minima..
+	if(coin.tokenid != "0x00"){
+		//Not Minima!..
+		MDS.log("NOT a Minima HTLC.. token:"+coin.tokenid);
+		callback(false);
+		return;
+	}
+	
+	//What is the hash of the secret
+	var hash 	 = coin.state[5];
+	var timelock = +coin.state[3];
+	
+	//Have we sent the OTHER side txn to get them to reveal the secret..
+	haveSentCounterPartyTxn(hash,function(sent){
+		
+		//Only send it once..
+		if(!sent){
+			
+			//Check the timelock is in good time..
+			var tdiff = timelock-block;
+			if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK){
+				MDS.log("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK+" blocks) MINIMA TOO close to proceed.. "
+						+"not sending counterpartytxn.. timelock:"
+						+timelock+" currentblock:"+block+" hash:"+hash);
+				callback(false);
+				return;
+			}
+			
+			//Send the ETH counter TXN - to make him reveal the secret
+			sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
+			
+			callback(true);
 		}
 	});	
 }
