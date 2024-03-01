@@ -6,7 +6,7 @@ var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 /**
  * wMinima Contract Address
  */
-var HTLCContractAddress = "0x"+("0B306BF915C4d645ff596e518fAf3F9669b97016".toUpperCase());
+var HTLCContractAddress = "0x"+("5FbDB2315678afecb367f032d93F642f64180aa3".toUpperCase());
 
 /**
  * Start an HTLC
@@ -283,6 +283,7 @@ function getHTLCContractWithdrawLogs(fomBlockHEX, toBlockHEX, callback){
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		//MDS.log("FROM:"+fomBlockHEX+" TO:"+toBlockHEX+" "+JSON.stringify(ethresp,null,2));
 		
 		//Complete list of contracts
 		var newcontracts = [];

@@ -297,7 +297,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 			//Is it an OTC deal..
 			if(coin.state[7] == "TRUE"){
 				//Needs to be OK'ed in the frontend
-				MDS.log("OTC DEAL FOUND.. ! leaving for now.."+JSON.stringify(coin));
+				//MDS.log("OTC DEAL FOUND.. ! leaving for now.."+JSON.stringify(coin));
 				callback();
 				return;
 			}
@@ -348,42 +348,59 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 	});	
 }
 
-function acceptOTCSwapCoin(userdets, coin, block, callback){
+/**
+ * Manually accept an OTC deal
+ */
+function acceptOTCSwapCoin(userdets, coinid, callback){
 	
-	//Make sure is Minima..
-	if(coin.tokenid != "0x00"){
-		//Not Minima!..
-		MDS.log("NOT a Minima HTLC.. token:"+coin.tokenid);
-		callback(false);
-		return;
-	}
-	
-	//What is the hash of the secret
-	var hash 	 = coin.state[5];
-	var timelock = +coin.state[3];
-	
-	//Have we sent the OTHER side txn to get them to reveal the secret..
-	haveSentCounterPartyTxn(hash,function(sent){
+	//Get this coin..
+	MDS.cmd("coins simplestate:true coinid:"+coinid, function(resp){
 		
-		//Only send it once..
-		if(!sent){
+		//Get the coin..
+		var coin = resp.response[0];
+		if(!coin){
+			callback(false,"Coin NOT found "+coinid);
+			return;
+		}
+		
+		//Get the current block
+		getCurrentMinimaBlock(function(block){
 			
-			//Check the timelock is in good time..
-			var tdiff = timelock-block;
-			if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK){
-				MDS.log("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK+" blocks) MINIMA TOO close to proceed.. "
-						+"not sending counterpartytxn.. timelock:"
-						+timelock+" currentblock:"+block+" hash:"+hash);
-				callback(false);
+			//Make sure is Minima..
+			if(coin.tokenid != "0x00"){
+				callback(false,"NOT a Minima HTLC.. token:"+coin.tokenid);
 				return;
 			}
 			
-			//Send the ETH counter TXN - to make him reveal the secret
-			sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
+			//What is the hash of the secret
+			var hash 	 =  coin.state[5];
+			var timelock = +coin.state[3];
 			
-			callback(true);
-		}
-	});	
+			//Have we sent the OTHER side txn to get them to reveal the secret..
+			haveSentCounterPartyTxn(hash,function(sent){
+				
+				//Only send it once..
+				if(!sent){
+					
+					//Check the timelock is in good time..
+					var tdiff = timelock-block;
+					if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK){
+						var error = ("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_BLOCKS_CHECK+" blocks) MINIMA TOO close to proceed.. "
+								+"not sending counterpartytxn.. timelock:"
+								+timelock+" currentblock:"+block+" hash:"+hash);
+						callback(false,error);
+					}else{
+						//Send the ETH counter TXN - to make him reveal the secret
+						sendCounterPartyMinimaTxn(userdets,coin,function(resp){
+							callback(resp.status,JSON.stringify(resp));	
+						});	
+					}
+				}else{
+					callback(false,"Allready sent counterparty txn..");	
+				}
+			});		
+		});
+	});
 }
 
 function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
@@ -415,16 +432,29 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
 			
 			//AND POST!
-			+"txnpost id:"+txnid+" auto:true txndelete:true;";
+			+"txnpost id:"+txnid+" mine:true auto:true txndelete:true;";
 	
 	//Run it.. 
 	MDS.cmd(cmd,function(resp){
 		
+		//Get the TxPowID
+		var status  = false;
+		var txpowid = "0x00";
+		if(resp.length==10){
+			var postcmd = resp[9];
+			status 		= postcmd.status;
+			if(status){
+				txpowid = postcmd.response.txpowid; 
+			}	
+		}
+		
 		//always delete whatever happens
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
 			
-			//Log it..	
-			collectHTLC(coin.state[5],"minima",finalamount+"");
+			//If success - Log it..
+			if(status){
+				collectHTLC(coin.state[5],"minima",finalamount+"",txpowid);	
+			}	
 			
 			if(callback){
 				callback(resp);
@@ -467,7 +497,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 				callback(ethresp);	
 			});
 		}else{
-			MDS.log("FAIL! "+JSON.stringify(ethresp));
+			MDS.log("FAIL Send counterparty ETH txn "+JSON.stringify(ethresp));
 			callback(ethresp);	
 		}			
 	});

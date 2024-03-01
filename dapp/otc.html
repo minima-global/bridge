@@ -121,11 +121,26 @@
 		//See if there any waiting..
 		checkForOTC(function(otcdeals){
 			
-			var len=otcdeals.length;
+			//Do the owner deals first
+			var len=otcdeals.owner.length;
 			for(var i=0;i<len;i++){
 				
 				//Get the coin
-				var coin=otcdeals[i];
+				var coin=otcdeals.owner.otcdeals[i];
+				
+				var trow = otctable.insertRow();
+				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
+				trow.insertCell(1).innerHTML = coin.amount;
+				trow.insertCell(2).innerHTML = coin.state[1];
+				trow.insertCell(3).innerHTML = "WAITING..";
+			}
+			
+			//Now the receiver
+			len=otcdeals.receiver.length;
+			for(var i=0;i<len;i++){
+				
+				//Get the coin
+				var coin=otcdeals.receiver.otcdeals[i];
 				
 				var trow = otctable.insertRow();
 				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
@@ -138,28 +153,19 @@
 	
 	function acceptOTC(coinid){
 		if(confirm("You are about to accept coin:"+coinid)){
-			
-			//Get this coin..
-			MDS.cmd("coins coinid:"+coinid, function(resp){
-				
-				var coin = resp.response[0];
-				
-				//Get the current block
-				getCurrentMinimaBlock(function(block){
-					
-					//ASccept this OTC dfeal..
-					acceptOTCSwapCoin(USER_DETAILS, coin, block, function(res){
-						
-					});
-				});
+			//Accept this OTC dfeal..
+			acceptOTCSwapCoin(USER_DETAILS, coinid, function(res,message){
+				MDS.log("OTC accept:"+res+" message:"+message);
 			});
-		}
+		}	
 	}
 	
 	function checkForOTC(callback){
 		
 		//All the OTC deals..
-		var otcdeals = [];
+		var otcdeals 		= {};
+		otcdeals.owner 		= [];
+		otcdeals.receiver 	= [];
 		
 		//First search coins
 		var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
@@ -173,11 +179,18 @@
 				//Get the coin
 				var coin=resp.response[i];
 				try{
-					//Is it FOR you AND an OTC deal..
-					if(coin.state[4] == USER_DETAILS.minimapublickey && coin.state[7]=="TRUE"){
-						//OTC DEAL FOUND!
-						otcdeals.push(coin);		
+					
+					//Is it OTC
+					if(coin.state[7]=="TRUE"){
+						
+						//Is it FOR you AND an OTC deal..
+						if(coin.state[4] == USER_DETAILS.minimapublickey){
+							otcdeals.receiver.push(coin);		
+						}else if(coin.state[0] == USER_DETAILS.minimapublickey){
+							otcdeals.owner.push(coin);
+						}
 					}
+					
 				}catch(e){
 					MDS.log("ERROR (checkForOTC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
 				}	

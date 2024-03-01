@@ -154,13 +154,16 @@ function checkETHNewSecrets(currentethblock, callback){
 	}
 	
 	//Only check from the last checked block onwards..
-	var startblock=10;
-	var endblock=0;
+	var startblock	= 0;
+	var endblock	= 0;
 	
 	if(LAST_CHECKED_SECRET_BLOCK == -1){
 		
 		//No checks done yet.. so start from way back..
-		startblock = currentethblock-10;
+		startblock = currentethblock-HTLC_SECRETS_BACKLOG_CHECK;
+		if(startblock<0){
+			startblock = 0;
+		}
 		endblock   = currentethblock;
 	}else{
 		startblock = LAST_CHECKED_SECRET_BLOCK+1;
