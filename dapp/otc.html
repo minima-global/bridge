@@ -126,7 +126,7 @@
 			for(var i=0;i<len;i++){
 				
 				//Get the coin
-				var coin=otcdeals.owner.otcdeals[i];
+				var coin=otcdeals.owner[i];
 				
 				var trow = otctable.insertRow();
 				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
@@ -140,7 +140,7 @@
 			for(var i=0;i<len;i++){
 				
 				//Get the coin
-				var coin=otcdeals.receiver.otcdeals[i];
+				var coin=otcdeals.receiver[i];
 				
 				var trow = otctable.insertRow();
 				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
@@ -155,7 +155,7 @@
 		if(confirm("You are about to accept coin:"+coinid)){
 			//Accept this OTC dfeal..
 			acceptOTCSwapCoin(USER_DETAILS, coinid, function(res,message){
-				MDS.log("OTC accept:"+res+" message:"+message);
+				alert("OTC accept:"+res+" message:"+message);
 			});
 		}	
 	}

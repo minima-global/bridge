@@ -46,11 +46,7 @@ function createDB(callback){
 				if(callback){
 					callback(msg);
 				}	
-			});
-			
-			if(callback){
-				callback(msg);
-			}	
+			});	
 		});
 	});
 }
