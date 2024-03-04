@@ -68,10 +68,21 @@
 		
 		//Disable the button
 		proceedbutton.disabled=true;
-			
+		
+		//Which token contract is it..
+		var contractaddress = "";
+		if(reqtoken.toLowerCase() == "wminima"){
+			contractaddress = wMinimaContractAddress;
+		}else if(reqtoken.toLowerCase() == "usdt"){
+			contractaddress = USDTContractAddress;
+		}else{
+			alert("Invalid token requested : "+reqtoken);
+			return;
+		}
+		
 		//Send Minima to the HTLC..
 		startMinimaSwap(USER_DETAILS, sendamount, reqamount,
-				"ETH:"+wMinimaContractAddress, reqpublickey, true, function(resp){
+				"ETH:"+contractaddress, reqpublickey, true, function(resp){
 			if(resp.status){
 				alert("Swap started!");
 				

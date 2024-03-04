@@ -510,8 +510,11 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	//requested amount
 	var amount 			= coin.state[1];
 	
-	//Requested token
-	var reqtoken 		= coin.state[2];
+	//Requested token - remove brackets and ETH:
+	var token 			= coin.state[2].substring(1,coin.state[2].length-1);
+	if(token.startsWith("ETH:")){
+		token = token.substring(4);
+	}
 	
 	//What do you expect.. not rerally needed
 	var reqamount 		= coin.amount;
@@ -532,7 +535,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 						receiver, 
 					 	hashlock, 
 						timelock, 
-						wMinimaContractAddress, 
+						token, 
 						amount, 
 						reqamount, function(ethresp){
 		
