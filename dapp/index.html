@@ -33,6 +33,7 @@
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
 	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
@@ -66,7 +67,9 @@
 	
 	function approve(){
 		wMinimaApprove(HTLCContractAddress,"max",function(logs){
-			MDS.log(JSON.stringify(logs,null,2));
+			USDTApprove(HTLCContractAddress,"max",function(logs){
+				
+			});
 		});
 	}
 	
