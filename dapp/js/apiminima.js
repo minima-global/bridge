@@ -99,6 +99,38 @@ function createHTLCState(owner, ownerethkey, receiver,
 }
 
 /**
+ * UTIL functions to get data from HTLC coins
+ */
+function getHTLCdata(coin,dataparam){
+	
+	if(dataparam == "owner"){
+		return coin.state[0];
+	}else if(dataparam == "ownereth"){
+		return coin.state[6];
+	}else if(dataparam == "receiver"){
+		return coin.state[4];
+	}else if(dataparam == "amount"){
+		return coin.amount;
+	}else if(dataparam == "requestamount"){
+		return +coin.state[1];
+	}else if(dataparam == "requesttoken"){
+		var token = coin.state[2].substring(1,coin.state[2].length-1);
+		if(token.startsWith("ETH:")){
+			token = token.substring(4);
+		}
+		return token;
+	}else if(dataparam == "hashlock"){
+		return coin.state[5];
+	}else if(dataparam == "timelock"){
+		return +coin.state[3];
+	}else if(dataparam == "otc"){
+		return coin.state[7] == "TRUE";
+	}
+	
+	return undefined;	
+}
+
+/**
  * Start a Minima -> wMinima SWAP
  */
 function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublickey, otc, callback){
