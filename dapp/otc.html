@@ -147,7 +147,12 @@
 				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
 				trow.insertCell(1).innerHTML = coin.amount;
 				trow.insertCell(2).innerHTML = coin.state[1];
-				trow.insertCell(3).innerHTML = "<button onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";
+				
+				if(+coin.age<2){
+					trow.insertCell(3).innerHTML = "Waiting to Confirm..";
+				}else{
+					trow.insertCell(3).innerHTML = "<button onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";	
+				}	
 			}
 		});
 	}
@@ -169,9 +174,8 @@
 		otcdeals.receiver 	= [];
 		
 		//First search coins
-		var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+		var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 		MDS.cmd(cmd,function(resp){
-			//MDS.log(JSON.stringify(resp));
 			
 			//How many coins..
 			var len=resp.response.length;
@@ -209,10 +213,6 @@
 		
 		//Do initialisation
 		if(msg.event == "inited"){
-			
-			//DEBUG INFO
-			var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;
-			MDS.log("OTCCHECK : "+cmd)
 			
 			//Init ETH
 			initETHSubSystem(function(){

@@ -88,7 +88,7 @@ function createHTLCState(owner, ownerethkey, receiver,
 	var state = {};
 	state[0]  = owner;
 	state[1]  = ""+requestamount;
-	state[2]  = "["+reqtoken+"]"; // wMinima on ETH
+	state[2]  = "["+reqtoken+"]"; 
 	state[3]  = timelock;
 	state[4]  = receiver;
 	state[5]  = hashlock;
@@ -497,7 +497,8 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(ethresp.status){
-			sentCounterPartyTxn(hashlock,"wminima",reqamount,ethresp.result,function(){
+			sentCounterPartyTxn(hashlock,"ETH:"+wMinimaContractAddress,
+								reqamount,ethresp.result,function(){
 				callback(ethresp);	
 			});
 		}else{

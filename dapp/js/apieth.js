@@ -16,7 +16,8 @@ function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
 			if(ethresp.status){
 				
 				//Log it..
-				startedCounterPartySwap(hashlock, "wminima", amount, ethresp.result, function(){
+				startedCounterPartySwap(hashlock, "ETH:"+wMinimaContractAddress, 
+							amount, ethresp.result, function(){
 					
 					//Insert these details so you know in future if right amount sent
 					insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
@@ -111,7 +112,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 				//Did it work ?
 				if(resp.status){
 					//We have now collected this - don't try again
-					collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, resp.result, function(){
+					collectExpiredHTLC(htlclog.hashlock, htlclog.token, htlclog.amount, resp.result, function(){
 						callback(resp);		
 					});	
 				}else{
@@ -124,7 +125,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 						resp.error.message.includes("refundable: not sender")){
 								
 						//Already collected - don't try again..
-						collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
+						collectExpiredHTLC(htlclog.hashlock, htlclog.token, htlclog.amount, "0xFF", function(){
 							callback(resp);		
 						});			
 					}else{
@@ -136,7 +137,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 			
 			//Already collected - don't try again..
 			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
-			collectExpiredHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xFF", function(){
+			collectExpiredHTLC(htlclog.hashlock, htlclog.token, htlclog.amount, "0xFF", function(){
 				callback();		
 			});	
 		}
@@ -204,7 +205,7 @@ function checkETHNewSecrets(currentethblock, callback){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
 					
 					//Put a log in db so no need to call ETH..
-					collectExpiredHTLC(withdrawlog.hashlock, "wminima", 0, "0x01", function(){});
+					collectExpiredHTLC(withdrawlog.hashlock, "ethcoin", 0, "0x01", function(){});
 					
 				}else{
 					
@@ -293,7 +294,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(htlclog.hashlock, reqamount.TOKEN, htlclog.amount, "0xCC", function(sqlresp){});	
 						return;
 					}
 					
@@ -306,7 +307,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					//Is it correct
 					if(htlclog.tokencontract != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(htlclog.hashlock, reqamount.TOKEN, htlclog.amount, "0xCC", function(sqlresp){});	
 						return;
 					}
 				}
@@ -378,7 +379,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 				//Did it work ?
 				if(resp.status){
 					//We have now collected this - don't try again
-					collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, resp.result, function(){
+					collectHTLC(htlclog.hashlock, htlclog.token, htlclog.amount, resp.result, function(){
 						callback(resp);		
 					});	
 				}else{
@@ -391,7 +392,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 						resp.error.message.includes("withdrawable: not ")){
 								
 						//Already collected - don't try again..
-						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xEE", function(){
+						collectHTLC(htlclog.hashlock, htlclog.token, htlclog.amount, "0xEE", function(){
 							callback(resp);		
 						});			
 					}else{
@@ -403,7 +404,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 			
 			//Already collected - don't try again..
 			MDS.log("Trying to withdraw already collected HTLC : "+JSON.stringify(htlclog));
-			collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xEE", function(sqlresp){
+			collectHTLC(htlclog.hashlock, htlclog.token, htlclog.amount, "0xEE", function(sqlresp){
 				callback();		
 			});	
 		}

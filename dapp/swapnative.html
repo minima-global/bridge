@@ -70,7 +70,9 @@
 		proceedbutton.disabled=true;
 			
 		//Send Minima to the HTLC..
-		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, false, function(resp){
+		startMinimaSwap(USER_DETAILS, sendamount, reqamount, 
+				"ETH:"+wMinimaContractAddress,reqpublickey, false, function(resp){
+					
 			if(resp.status){
 				alert("Swap started!");
 				
