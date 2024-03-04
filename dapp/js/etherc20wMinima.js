@@ -42,8 +42,8 @@ function wMinimaApprove(contractaddress, amount, callback){
 /**
  * What is the allowance for this Owner on Contract
  */
-function wMinimaAllowance(owner, contractaddress, callback){
-	erc20Allowance(wMinimaContractAddress, owner, contractaddress, function(ethresp){
+function wMinimaAllowance(contractaddress, callback){
+	erc20Allowance(wMinimaContractAddress, contractaddress, function(ethresp){
 		callback(ethresp);
 	}); 
 }

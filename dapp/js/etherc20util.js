@@ -4,17 +4,6 @@
 var ERC20InterfaceABI = new ethers.utils.Interface(ERC20_ABI);
 
 /**
- * The wMinima ABI interfaces
- */
-//var wMinimaInterfaceABI = new ethers.utils.Interface(WMINIMA_ABI.abi);
-var wMinimaInterfaceABI = new ethers.utils.Interface(ERC20_ABI);
-
-/**
- * wMinima Contract Address
- */
-var wMinimaContractAddress = "0x"+("e7f1725E7734CE288F8367e1Bb143E90bb3F0512".toUpperCase());
-
-/**
  * Get ERC20 Balance
  */
 function getERC20Balance(erc20contract, callback){
@@ -29,27 +18,10 @@ function getERC20Balance(erc20contract, callback){
 	});
 }
 
-function getWMinimaBalance(callback){
-	
-	//Run on the wMinima contract
-	getERC20Balance(wMinimaContractAddress, function(bal){
-		callback(bal);
-	});
-	
-	//Get the function data
-	/*var functiondata = wMinimaInterfaceABI.functions.balanceOf.encode([ MAIN_WALLET.address ]);
-	
-	//Run this
-	ethCallCommand(wMinimaContractAddress,functiondata,function(ethresp){
-		var bal = ethers.utils.formatEther(ethresp.result);
-		callback(bal);	
-	});*/
-}
-
 /**
- * Send wMinima ERC20
+ * Send ERC20
  */
-function sendWMinimaERC20(toaddress, amount, callback){
+function sendERC20(erc20contract, decimals, toaddress, amount, callback){
 	
 	//Get ETH valid address
 	var addr = toaddress.toLowerCase();
@@ -58,13 +30,13 @@ function sendWMinimaERC20(toaddress, amount, callback){
 	}
 	
 	//The actual amount - wMinima has 18 decimla places..
-	var sendamount = ethers.utils.parseUnits(""+amount,18);
+	var sendamount = ethers.utils.parseUnits(""+amount,decimals);
 	
 	//Get the function data
-	var functiondata = wMinimaInterfaceABI.functions.transfer.encode([addr ,sendamount]);
+	var functiondata = ERC20InterfaceABI.functions.transfer.encode([addr ,sendamount]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(wMinimaContractAddress, functiondata);
+	var transaction = createRAWContractCallTxn(erc20contract, functiondata);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
@@ -72,10 +44,13 @@ function sendWMinimaERC20(toaddress, amount, callback){
 	}); 
 }
 
-function sendWMinimaERC20GetNonce(toaddress, amount, callback){
+/**
+ * Get the current nonce and send 
+ */
+function sendERC20GetNonce(erc20contract, decimals, toaddress, amount, callback){
 	
 	//Get the current nonce..
-	getRequiredNonce(MAIN_WALLET.address,function(nonce){
+	getRequiredNonce(function(nonce){
 		
 		//Get ETH valid address
 		var addr = toaddress.toLowerCase();
@@ -84,13 +59,13 @@ function sendWMinimaERC20GetNonce(toaddress, amount, callback){
 		}
 		
 		//The actual amount - wMinima has 18 decimla places..
-		var sendamount = ethers.utils.parseUnits(""+amount,18);
+		var sendamount = ethers.utils.parseUnits(""+amount,decimals);
 		
 		//Get the function data
-		var functiondata = wMinimaInterfaceABI.functions.transfer.encode([addr ,sendamount]);
+		var functiondata = ERC20InterfaceABI.functions.transfer.encode([addr ,sendamount]);
 		
 		//Now create the RAW txn..
-		var transaction = createRAWContractCallTxn(wMinimaContractAddress, functiondata, nonce);
+		var transaction = createRAWContractCallTxn(erc20contract, functiondata, nonce);
 		
 		//NOW SIGN..
 		postTransaction(transaction, function(ethresp){
@@ -102,7 +77,7 @@ function sendWMinimaERC20GetNonce(toaddress, amount, callback){
 /**
  * Approve a Contract to touch your wMinima
  */
-function erc20Approve(contractaddress, amount, callback){
+function erc20Approve(erc20contract, decimals,  contractaddress, amount, callback){
 	
 	//Get ETH valid address
 	var addr = contractaddress.toLowerCase();
@@ -116,14 +91,14 @@ function erc20Approve(contractaddress, amount, callback){
 		//2^256 -1
 		sendamount = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
 	}else{
-		sendamount = ethers.utils.parseUnits(""+amount,18);
+		sendamount = ethers.utils.parseUnits(""+amount,decimals);
 	}
 	
 	//Get the function data
-	var functiondata = wMinimaInterfaceABI.functions.approve.encode([addr, sendamount]);
+	var functiondata = ERC20InterfaceABI.functions.approve.encode([addr, sendamount]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(wMinimaContractAddress, functiondata);
+	var transaction = createRAWContractCallTxn(erc20contract, functiondata);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
@@ -140,13 +115,7 @@ function erc20Approve(contractaddress, amount, callback){
 /**
  * What is the allowance for this Owner on Contract
  */
-function erc20Allowance(owner, contractaddress, callback){
-	
-	//Get ETH valid address
-	var own = owner.toLowerCase();
-	if(own.startsWith("0x")){
-		own = own.slice(2)
-	}
+function erc20Allowance(erc20contract, contractaddress, callback){
 	
 	var addr = contractaddress.toLowerCase();
 	if(addr.startsWith("0x")){
@@ -154,10 +123,10 @@ function erc20Allowance(owner, contractaddress, callback){
 	}
 	
 	//Get the function data
-	var functiondata = wMinimaInterfaceABI.functions.allowance.encode([own, addr]);
+	var functiondata = ERC20InterfaceABI.functions.allowance.encode([MAIN_WALLET.address, addr]);
 	
 	//Run this as a READ command
-	ethCallCommand(wMinimaContractAddress,functiondata,function(ethresp){
+	ethCallCommand(erc20contract,functiondata,function(ethresp){
 		var bal = ethers.utils.formatEther(ethresp.result);
 		callback(bal);	
 	}); 

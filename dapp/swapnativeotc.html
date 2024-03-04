@@ -29,12 +29,12 @@
 	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
 	<script type="text/javascript" src="./js/htlcvars.js"></script>
 	<script type="text/javascript" src="./abi/htlcabi.js"></script>
-	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	<script type="text/javascript" src="./abi/erc20abi.js"></script>
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
-	
 </head>
 
 <body>
@@ -69,7 +69,7 @@
 		proceedbutton.disabled=true;
 			
 		//Send Minima to the HTLC..
-		startMinimaSwap(USER_DETAILS, sendamount, reqamount, reqpublickey, true, function(resp){
+		startMinimaSwap(USER_DETAILS, sendamount, reqamount,"ETH:"+wMinimaContractAddress, reqpublickey, true, function(resp){
 			if(resp.status){
 				alert("Swap started!");
 				

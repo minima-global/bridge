@@ -84,11 +84,11 @@ function depositNativeMinima(userdets, amount, callback){
  * Create the HTLC state required by a coin
  */
 function createHTLCState(owner, ownerethkey, receiver, 
-							requestamount, timelock, hashlock, otc){
+							requestamount, reqtoken, timelock, hashlock, otc){
 	var state = {};
 	state[0]  = owner;
 	state[1]  = ""+requestamount;
-	state[2]  = "[ETH:0x669C01CAF0EDCAD7C2B8DC771474AD937A7CA4AF]"; // wMinima on ETH
+	state[2]  = "["+reqtoken+"]"; // wMinima on ETH
 	state[3]  = timelock;
 	state[4]  = receiver;
 	state[5]  = hashlock;
@@ -101,7 +101,7 @@ function createHTLCState(owner, ownerethkey, receiver,
 /**
  * Start a Minima -> wMinima SWAP
  */
-function startMinimaSwap(userdets, amount, requestamount, swappublickey, otc, callback){
+function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublickey, otc, callback){
 	
 	//Get the current block
 	getCurrentMinimaBlock(function(block){
@@ -117,6 +117,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, otc, ca
 										userdets.ethaddress,
 										swappublickey,
 										requestamount,
+										reqtoken,
 										timelock,
 										hash,
 										otc);
@@ -131,7 +132,7 @@ function startMinimaSwap(userdets, amount, requestamount, swappublickey, otc, ca
 					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid,function(){
 						
 						//Insert these details so you know in future if right amount sent
-						insertNewHTLCContract(hash,requestamount,"wminima",function(){
+						insertNewHTLCContract(hash,requestamount,reqtoken,function(){
 							callback(resp);	
 						});
 					});
@@ -258,8 +259,6 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 		return;
 	}
 	
-	//MDS.log("CHECK MINIMA COIN "+JSON>stringify(coin));
-	
 	//What is the hash of the secret
 	var hash 	 = coin.state[5];
 	var timelock = +coin.state[3];
@@ -269,7 +268,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 		if(secret != null){
 			
 			//Check the value..
-			getReqamountFromHash(hash,function(reqamount){
+			getRequestFromHash(hash,function(reqamount){
 				
 				//Check there is a value.. if NOT we did not start this HTLC
 				// SO - we must have checked the amount when we did the counterparty txn..
@@ -349,7 +348,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 }
 
 /**
- * Manually accept an OTC deal
+ * Manually accept an OTC deal - REDO NONCE as is from frontend..
  */
 function acceptOTCSwapCoin(userdets, coinid, callback){
 	
@@ -390,10 +389,15 @@ function acceptOTCSwapCoin(userdets, coinid, callback){
 								+timelock+" currentblock:"+block+" hash:"+hash);
 						callback(false,error);
 					}else{
-						//Send the ETH counter TXN - to make him reveal the secret
-						sendCounterPartyMinimaTxn(userdets,coin,function(resp){
-							callback(resp.status,JSON.stringify(resp));	
-						});	
+						
+						//REDO the nonce - as this is sent from the frontend
+						setNonceAuto(function(nonce){
+							//Send the ETH counter TXN - to make him reveal the secret
+							sendCounterPartyMinimaTxn(userdets,coin,function(resp){
+								callback(resp.status,JSON.stringify(resp));	
+							});	
+						});
+							
 					}
 				}else{
 					callback(false,"Allready sent counterparty txn..");	

@@ -29,9 +29,10 @@
 	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
 	<script type="text/javascript" src="./js/htlcvars.js"></script>
 	<script type="text/javascript" src="./abi/htlcabi.js"></script>
-	<script type="text/javascript" src="./abi/wminimaabi.js"></script>
+	<script type="text/javascript" src="./abi/erc20abi.js"></script>
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
@@ -64,7 +65,7 @@
 	var USER_DETAILS = {};
 	
 	function approve(){
-		erc20Approve(HTLCContractAddress,"max",function(logs){
+		wMinimaApprove(HTLCContractAddress,"max",function(logs){
 			MDS.log(JSON.stringify(logs,null,2));
 		});
 	}

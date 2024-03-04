@@ -127,7 +127,7 @@ function checkSecret(secret, hash, callback){
 /**
  * When you create an HTLC how much are you expecting in return
  */
-function getReqamountFromHash(hash, callback){
+function getRequestFromHash(hash, callback){
 	//Find a record
 	var sql = "SELECT * FROM myhtlc WHERE hash='"+hash+"' LIMIT 1";
 				

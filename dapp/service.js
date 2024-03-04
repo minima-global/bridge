@@ -13,17 +13,17 @@ MDS.load("./js/apiminima.js");
 MDS.load("./js/apieth.js");
 MDS.load("./js/balance.js");
 
-MDS.load("./js/htlcvars.js");
-
 MDS.load("./js/ethers-4.0.31.min.js");
 
 MDS.load("./abi/erc20abi.js");
+MDS.load("./js/etherc20util.js");
+MDS.load("./js/etherc20wMinima.js");
+
+MDS.load("./js/htlcvars.js");
 MDS.load("./abi/htlcabi.js");
-MDS.load("./abi/wminimaabi.js");
+MDS.load("./js/ethhtlcutil.js");
 
 MDS.load("./js/ethutil.js");
-MDS.load("./js/etherc20util.js");
-MDS.load("./js/ethhtlcutil.js");
 
 MDS.load("./js/ethjs-signer.js");
 				

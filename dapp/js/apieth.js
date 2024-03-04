@@ -76,7 +76,11 @@ function checkExpiredETHHTLC(ethblock, callback){
 						}
 					});
 				}else{
-					MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"+timelock+" timenow:"+timenow+" amount:"+htlclog.amount);
+					MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"
+								+timelock+" timenow:"
+								+timenow+" amount:"
+								+htlclog.amount
+								+" hash:"+htlclog.hashlock);
 				}
 			}catch(e){
 				MDS.log("ERROR (checkExpiredETHHTLC) parsing expired coin : "+JSON.stringify(htlclog)+" "+e);
@@ -188,7 +192,7 @@ function checkETHNewSecrets(currentethblock, callback){
 		//MDS.log("WITHDRAWS from "+hexstart+" to "+hexend+" "+JSON.stringify(ethresp,null,2));
 		
 		//Cycle through the secrets
-		var len 		= ethresp.length;
+		var len = ethresp.length;
 		for(var i=0;i<len;i++){
 			
 			//Get the current log
@@ -198,6 +202,12 @@ function checkETHNewSecrets(currentethblock, callback){
 			insertSecret(withdrawlog.secret, withdrawlog.hashlock,function(added){
 				if(added){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
+					
+					//Put a log in db so no need to call ETH..
+					collectExpiredHTLC(withdrawlog.hashlock, "wminima", 0, "0x01", function(){});
+					
+				}else{
+					
 				}
 			});
 		}
@@ -263,12 +273,6 @@ function checkETHSwapHTLC(userdets, ethblock, minimablock, callback){
 
 function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 	
-	//Check the token contract IS wMinima!
-	if(htlclog.tokencontract != wMinimaContractAddress){
-		MDS.log("NOT a wMinima ERC20 HTLC.. "+htlclog.tokencontract);
-		return;
-	}
-	
 	//What is the hash of the secret
 	var hash = htlclog.hashlock;
 	
@@ -277,7 +281,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 		if(secret != null){
 			
 			//Check the value..
-			getReqamountFromHash(hash,function(reqamount){
+			getRequestFromHash(hash,function(reqamount){
 				
 				//Check there is a value.. if NOT we did not start this HTLC
 				// SO - we must have checked the amount when we did the counterparty txn..
@@ -290,7 +294,19 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
 						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){});	
-						
+						return;
+					}
+					
+					//Check is the correct token..
+					var reqtoken = reqamount.TOKEN;
+					if(reqtoken.startsWith("ETH:")){
+						reqtoken = reqtoken.substring(4);
+					}
+					
+					//Is it correct
+					if(htlclog.tokencontract != reqtoken){
+						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(htlclog));
+						collectHTLC(htlclog.hashlock, "wminima", htlclog.amount, "0xCC", function(sqlresp){});	
 						return;
 					}
 				}
@@ -403,7 +419,8 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 	var state = createHTLCState(userdets.minimapublickey,   
 								userdets.ethaddress, 
 								htlclog.minimapublickey,				 
-								htlclog.requestamount, 
+								htlclog.requestamount,
+								"ETH:"+wMinimaContractAddress,
 								countertimelock, 
 								htlclog.hashlock, 
 								false)
