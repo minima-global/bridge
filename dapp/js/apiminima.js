@@ -259,9 +259,13 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 		return;
 	}
 	
-	//What is the hash of the secret
-	var hash 	 = coin.state[5];
-	var timelock = +coin.state[3];
+	//Details of thre HTLC
+	var hash 	 		= coin.state[5];
+	var timelock 		= +coin.state[3];
+	var token 			= coin.state[2].substring(1,coin.state[2].length-1);
+	if(token.startsWith("ETH:")){
+		token = token.substring(4);
+	}
 	
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
@@ -282,6 +286,19 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
 						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){});	
 						
+						return;
+					}
+					
+					//Check is the correct token..
+					var reqtoken = reqamount.TOKEN;
+					if(reqtoken.startsWith("ETH:")){
+						reqtoken = reqtoken.substring(4);
+					}
+					
+					//Is it correct
+					if(token != reqtoken){
+						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(coin));
+						collectHTLC(htlclog.hashlock, "minima", htlclog.amount, "0xCC", function(sqlresp){});	
 						return;
 					}
 				}
