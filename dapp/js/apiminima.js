@@ -348,12 +348,56 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 }
 
 /**
+ * Check for any OTC swap on the Minima Chain
+ */
+function checkForOTC(callback){
+		
+	//All the OTC deals..
+	var otcdeals 		= {};
+	otcdeals.owner 		= [];
+	otcdeals.receiver 	= [];
+	
+	//First search coins
+	var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
+	MDS.cmd(cmd,function(resp){
+		
+		//How many coins..
+		var len=resp.response.length;
+		for(var i=0;i<len;i++){
+			
+			//Get the coin
+			var coin=resp.response[i];
+			try{
+				
+				//Is it OTC
+				if(coin.state[7]=="TRUE"){
+					
+					//Is it FOR you AND an OTC deal..
+					if(coin.state[4] == USER_DETAILS.minimapublickey){
+						otcdeals.receiver.push(coin);		
+					}else if(coin.state[0] == USER_DETAILS.minimapublickey){
+						otcdeals.owner.push(coin);
+					}
+				}
+				
+			}catch(e){
+				MDS.log("ERROR (checkForOTC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
+			}	
+		}
+		
+		if(callback){
+			callback(otcdeals);
+		}
+	});
+}
+
+/**
  * Manually accept an OTC deal - REDO NONCE as is from frontend..
  */
 function acceptOTCSwapCoin(userdets, coinid, callback){
 	
 	//Get this coin..
-	MDS.cmd("coins simplestate:true coinid:"+coinid, function(resp){
+	MDS.cmd("coins tokenid:0x00 simplestate:true coinid:"+coinid, function(resp){
 		
 		//Get the coin..
 		var coin = resp.response[0];
@@ -364,12 +408,6 @@ function acceptOTCSwapCoin(userdets, coinid, callback){
 		
 		//Get the current block
 		getCurrentMinimaBlock(function(block){
-			
-			//Make sure is Minima..
-			if(coin.tokenid != "0x00"){
-				callback(false,"NOT a Minima HTLC.. token:"+coin.tokenid);
-				return;
-			}
 			
 			//What is the hash of the secret
 			var hash 	 =  coin.state[5];
@@ -471,6 +509,9 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	
 	//requested amount
 	var amount 			= coin.state[1];
+	
+	//Requested token
+	var reqtoken 		= coin.state[2];
 	
 	//What do you expect.. not rerally needed
 	var reqamount 		= coin.amount;

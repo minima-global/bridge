@@ -30,6 +30,7 @@
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
 	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
@@ -67,6 +68,10 @@
 			<td>wMinima : </td>
 			<td colspan=3><div id=wminimabalance>0</div></td>
 		</tr>
+		<tr>
+			<td>USDT : </td>
+			<td colspan=3><div id=usdtbalance>0</div></td>
+		</tr>
 	</table>
 	<br>
 	<br>
@@ -97,7 +102,20 @@
 		<tr><td colspan=2><button onclick="sendWMinima();">SEND WMINIMA</button></td></tr>
 	</table>
 	<br><br>
-
+	WITHDRAW USDT
+	<table>
+		<tr>
+			<td>ADDRESS : </td>
+			<td><input type=text id=usdtaddress></td>
+		</tr>
+		<tr>
+			<td>AMOUNT : </td>
+			<td><input type=text id=usdtamount></td>
+		</tr>
+		<tr><td colspan=2><button onclick="sendUSDT();">SEND USDT</button></td></tr>
+	</table>
+	<br><br>
+	
 	<button onclick="refresh();">REFRESH</button>
 	
 	<script type="text/javascript">
@@ -127,6 +145,11 @@
 			myethaddress.innerHTML	  = getETHERUMAddress(); 
 			ethbalance.innerHTML 	  = balances.eth;
 			wminimabalance.innerHTML  = balances.wminima;
+			
+			//AND usdt
+			getUSDTBalance(function(usdtbal){
+				usdtbalance.innerHTML = usdtbal;
+			});
 			
 			//Any unconfirmed.. ?
 			balanceunconfirmed = balunconf;	
@@ -202,6 +225,18 @@
 		//Send it..
 		if(confirm("Send "+amount+" wMinima to "+address+" ?")){
 			sendWMinimaERC20GetNonce(address, amount, function(ethresp){
+				alert(JSON.stringify(ethresp));
+			});
+		}
+	}
+	
+	function sendUSDT(){
+		var amount 	= usdtamount.value;
+		var address = usdtaddress.value;
+		
+		//Send it..
+		if(confirm("Send "+amount+" USDT to "+address+" ?")){
+			sendUSDTGetNonce(address, amount, function(ethresp){
 				alert(JSON.stringify(ethresp));
 			});
 		}

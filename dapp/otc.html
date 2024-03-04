@@ -33,6 +33,7 @@
 	<script type="text/javascript" src="./js/ethutil.js"></script>
 	<script type="text/javascript" src="./js/etherc20util.js"></script>
 	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
@@ -63,7 +64,16 @@
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td>Request Amount wMinima: </td>
+			<td>Request Token: </td>
+			<td>
+				<select name="tokentype" id="tokentypeid">
+				  <option value="wMinima">wMinima</option>
+				  <option value="USDT">USDT</option>
+				</select>
+			</td>
+		</tr>
+		<tr>
+			<td>Request Amount of Token: </td>
 			<td><input type=text id=requestamount></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
@@ -98,6 +108,9 @@
 			return;
 		}
 		
+		//Which coin..
+		var tokentype = tokentypeid.value;
+		
 		//Round..
 		var sndamt = toFixedNumber(amount);
 		var reqamt = toFixedNumber(reqamount);
@@ -106,6 +119,7 @@
 		location.href="swapnativeotc.html?uid="+MDS.minidappuid
 						+"&amount="+sndamt
 						+"&reqamount="+reqamt
+						+"&reqtoken="+tokentype
 						+"&otcuid="+otcuid.value;
 	}
 	
@@ -116,8 +130,9 @@
 		var trow 			= otctable.insertRow();
 		trow.insertCell(0).innerHTML = "FROM";
 		trow.insertCell(1).innerHTML = "MINIMA";
-		trow.insertCell(2).innerHTML = "REQUEST";
-		trow.insertCell(3).innerHTML = "ACTION";
+		trow.insertCell(2).innerHTML = "TOKEN";
+		trow.insertCell(3).innerHTML = "REQUEST";
+		trow.insertCell(4).innerHTML = "ACTION";
 		
 		//See if there any waiting..
 		checkForOTC(function(otcdeals){
@@ -129,11 +144,23 @@
 				//Get the coin
 				var coin=otcdeals.owner[i];
 				
+				var token = coin.state[2].substring(1,coin.state[2].length-1);
+				if(token.startsWith("ETH:")){
+					token = token.substring(4);
+				}
+				var tokenname = "UNKNOWN";
+				if(token == wMinimaContractAddress){
+					tokenname = "wMinima";
+				}else if(token == USDTContractAddress){
+					tokenname = "USDT";
+				}
+				
 				var trow = otctable.insertRow();
 				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
 				trow.insertCell(1).innerHTML = coin.amount;
-				trow.insertCell(2).innerHTML = coin.state[1];
-				trow.insertCell(3).innerHTML = "WAITING..";
+				trow.insertCell(2).innerHTML = tokenname;
+				trow.insertCell(3).innerHTML = coin.state[1];
+				trow.insertCell(4).innerHTML = "WAITING..";
 			}
 			
 			//Now the receiver
@@ -143,15 +170,27 @@
 				//Get the coin
 				var coin=otcdeals.receiver[i];
 				
+				var token = coin.state[2].substring(1,coin.state[2].length-1);
+				if(token.startsWith("ETH:")){
+					token = token.substring(4);
+				}
+				var tokenname = "UNKNOWN";
+				if(token == wMinimaContractAddress){
+					tokenname = "wMinima";
+				}else if(token == USDTContractAddress){
+					tokenname = "USDT";
+				}
+				
 				var trow = otctable.insertRow();
 				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
 				trow.insertCell(1).innerHTML = coin.amount;
-				trow.insertCell(2).innerHTML = coin.state[1];
+				trow.insertCell(2).innerHTML = tokenname;
+				trow.insertCell(3).innerHTML = coin.state[1];
 				
 				if(+coin.age<2){
-					trow.insertCell(3).innerHTML = "Waiting to Confirm..";
+					trow.insertCell(4).innerHTML = "Waiting to Confirm..";
 				}else{
-					trow.insertCell(3).innerHTML = "<button onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";	
+					trow.insertCell(4).innerHTML = "<button onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";	
 				}	
 			}
 		});
@@ -164,47 +203,6 @@
 				alert("OTC accept:"+res+" message:"+message);
 			});
 		}	
-	}
-	
-	function checkForOTC(callback){
-		
-		//All the OTC deals..
-		var otcdeals 		= {};
-		otcdeals.owner 		= [];
-		otcdeals.receiver 	= [];
-		
-		//First search coins
-		var cmd = "coins tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
-		MDS.cmd(cmd,function(resp){
-			
-			//How many coins..
-			var len=resp.response.length;
-			for(var i=0;i<len;i++){
-				
-				//Get the coin
-				var coin=resp.response[i];
-				try{
-					
-					//Is it OTC
-					if(coin.state[7]=="TRUE"){
-						
-						//Is it FOR you AND an OTC deal..
-						if(coin.state[4] == USER_DETAILS.minimapublickey){
-							otcdeals.receiver.push(coin);		
-						}else if(coin.state[0] == USER_DETAILS.minimapublickey){
-							otcdeals.owner.push(coin);
-						}
-					}
-					
-				}catch(e){
-					MDS.log("ERROR (checkForOTC) parsing HTLC coin : "+JSON.stringify(coin)+" "+e);
-				}	
-			}
-			
-			if(callback){
-				callback(otcdeals);
-			}
-		});
 	}
 	
 	
