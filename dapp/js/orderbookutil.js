@@ -106,7 +106,7 @@ function checkNeedPublishOrderBook(userdets,callback){
 			//Now do some some checking..
 			var publishbook = false;
 			if(oldbook != newbook){
-				MDS.log("OrderBook changed! old:"+oldbook+" new:"+newbook);
+				//MDS.log("OrderBook changed! old:"+oldbook+" new:"+newbook);
 				publishbook = true;	
 			
 			//Are we providing liquidity
@@ -114,7 +114,7 @@ function checkNeedPublishOrderBook(userdets,callback){
 				//Check balances for all - use rounded values to ignore the publish messages
 				if( currentbalances.minima.total != myoldbalance.minima.total ||
 					currentbalances.wminima != myoldbalance.wminima){
-					MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
+					//MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
 					publishbook = true;
 				}
 			}	

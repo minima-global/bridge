@@ -143,7 +143,7 @@ function getETHEREUMWeiBalance(address, callback) {
 }
 
 function getETHEREUMBalance(callback) {
-	getETHEREUMWeiBalance(MAIN_WALLET.address,function(ethresp){
+	getETHEREUMWeiBalance(getETHERUMAddress(),function(ethresp){
 		//Convert to ETH
 		var ethvalue = ethers.utils.formatEther(ethresp);
 		callback(ethvalue);
@@ -157,7 +157,7 @@ function getRequiredNonce(callback) {
 	
 	//Set the function
 	var payload = {"jsonrpc":"2.0", "method":"eth_getTransactionCount",
-			"params": [MAIN_WALLET.address,"latest"], "id": 1};
+			"params": [getETHERUMAddress(),"latest"], "id": 1};
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){

@@ -9,7 +9,7 @@ var ERC20InterfaceABI = new ethers.utils.Interface(ERC20_ABI);
 function getERC20Balance(erc20contract, callback){
 	
 	//Get the function data
-	var functiondata = ERC20InterfaceABI.functions.balanceOf.encode([ MAIN_WALLET.address ]);
+	var functiondata = ERC20InterfaceABI.functions.balanceOf.encode([ getETHERUMAddress() ]);
 	
 	//Run this
 	ethCallCommand(erc20contract,functiondata,function(ethresp){
@@ -123,7 +123,7 @@ function erc20Allowance(erc20contract, contractaddress, callback){
 	}
 	
 	//Get the function data
-	var functiondata = ERC20InterfaceABI.functions.allowance.encode([MAIN_WALLET.address, addr]);
+	var functiondata = ERC20InterfaceABI.functions.allowance.encode([getETHERUMAddress(), addr]);
 	
 	//Run this as a READ command
 	ethCallCommand(erc20contract,functiondata,function(ethresp){

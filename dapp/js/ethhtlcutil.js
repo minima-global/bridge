@@ -101,7 +101,7 @@ function refundHTLCSwap(contractId, callback){
 function getHTLCAllLogs(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
-	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
+	var addr = ethers.utils.hexZeroPad(getETHERUMAddress(), 32);
 	
 	//Get all the New Contracts that you OWN 
 	var params = [
@@ -128,7 +128,7 @@ function getHTLCAllLogs(fomBlockHEX, toBlockHEX, callback){
 function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
-	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
+	var addr = ethers.utils.hexZeroPad(getETHERUMAddress(), 32);
 	
 	//Get all the New Contracts that you OWN 
 	var params = [
@@ -178,7 +178,7 @@ function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 function getHTLCContractAsReceiver(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
-	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
+	var addr = ethers.utils.hexZeroPad(getETHERUMAddress(), 32);
 	
 	//Get all the New Contracts that you OWN 
 	var params = [
@@ -263,7 +263,7 @@ function parseHTLCContractData(logdata){
 function getHTLCContractWithdrawLogs(fomBlockHEX, toBlockHEX, callback){
 	
 	//Get your address - padded to fit the topics.
-	var addr = ethers.utils.hexZeroPad(MAIN_WALLET.address, 32);
+	var addr = ethers.utils.hexZeroPad(getETHERUMAddress(), 32);
 	
 	//Get all the New Contracts that you OWN 
 	var params = [
