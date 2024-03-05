@@ -49,7 +49,6 @@ function getUserDetails(callback){
 }
 
 function initETHSubSystem(callback){
-	
 	//First get the Private key.. WRITE function
 	MDS.cmd("seedrandom modifier:ethbridge",function(resp){
 		
@@ -60,5 +59,63 @@ function initETHSubSystem(callback){
 		initialiseETH(privateKey,function(){
 			callback(getETHERUMAddress());
 		});
+	});
+}
+
+function getBridgeUserDetails(callback){
+	
+}
+
+function isBridgeInited(callback){
+	//Have we generated the Userdetails yet
+	MDS.keypair.get("_initbridgesystems",function(init){
+		callback(init.status);
+	});
+}
+
+function initBridgeSystems(callback){
+	
+	//Have we generated the Userdetails yet
+	isBridgeInited(function(inited){
+		
+		//Have we created
+		if(!inited){
+			
+			MDS.log("Initialising base bridge systems..");
+			
+			//Init ETH
+			initETHSubSystem(function(ethaddress){
+				
+				//Now get the user details.. need ETH to havce started up
+				getUserDetails(function(userdets){
+					
+					//Do some basic startup work..
+					setUpHTLCScript(userdets, function(resp){
+						
+						//We want to be notified of Coin Events
+						MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY, function(){
+							
+							//Set up the DB
+							createDB(function(res){
+								
+								//And NOW - set init to TRUE
+								MDS.keypair.set("_initbridgesystems","true",function(dets){
+									callback(userdets);	
+								});
+							});	
+						});	
+					});		
+				});
+			});
+		}else{
+			
+			//Just do the normal
+			initETHSubSystem(function(ethaddress){
+				//Now get the user details.. need ETH to havce started up
+				getUserDetails(function(userdets){
+					callback(userdets);
+				});
+			});
+		}
 	});
 }

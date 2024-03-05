@@ -91,13 +91,25 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
+			//DEBUG TEST
 			//wipeDB();
 			
-			//Init ETH
-			initETHSubSystem(function(){
-				getUserDetails(function(userdets){
-					USER_DETAILS=userdets;
-				});
+			//Are we in write mode.
+			MDS.cmd("checkmode",function(moderesp){
+				
+				//MUST be in write mode..
+				if(!moderesp.response.writemode){
+					
+					//Jump to a special page
+					location.href="writemode.html?uid="+MDS.minidappuid;
+				}else{
+					
+					//Init Bridge Systems..
+					initBridgeSystems(function(userdets){
+						MDS.log(JSON.stringify(userdets));
+						USER_DETAILS=userdets;
+					});
+				}
 			});
 		}
 	});

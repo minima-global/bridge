@@ -30,44 +30,60 @@ MDS.load("./js/ethjs-signer.js");
 //The USER details..
 var USER_DETAILS 	= {};
 
+//Has the bridge been initialised - done in the frontend
+var BRIDGE_INITED = false;
+
+//Check and init the bridge - when you can
+function serviceCheckBridgeInited(){
+	
+	//Have we already done this..
+	if(BRIDGE_INITED){
+		return;
+	}
+	
+	//Are we inited..
+	isBridgeInited(function(inited){
+		BRIDGE_INITED = inited;
+		
+		//IF inited.. get the details..
+		if(BRIDGE_INITED){
+			
+			//Init ETH
+			initETHSubSystem(function(ethaddress){
+				//Now get the user details.. need ETH to havce started up
+				getUserDetails(function(userdets){
+					USER_DETAILS = userdets;
+				});
+			});	
+		}
+	});
+}
+
 //Main message handler..
 MDS.init(function(msg){
 	
 	//Do initialisation
 	if(msg.event == "inited"){
 		
-		MDS.log("Start Bridge Init..");
-			
-		//Init ETH
-		initETHSubSystem(function(){
-			
-			//Get the main user details.. thesew don't change..
-			getUserDetails(function(userdets){
-				
-				//Get User Details..
-				USER_DETAILS=userdets;
-				
-				//Set Up the HTLC contract script
-				setUpHTLCScript(USER_DETAILS, function(resp){
-					
-					//We want to be notified of Coin Events
-					MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY, function(){
-						
-						//Set up the DB
-						createDB(function(res){
-							
-							//Check at startup..
-							checkNeedPublishOrderBook(USER_DETAILS);
-									
-							//Inited..	
-							MDS.log("Bridge Service inited..");	
-						});	
-					});	
-				});	
-			});	
-		});
-				
-	}else if(msg.event == "MDS_TIMER_60SECONDS"){
+		MDS.log("Bridge Init start..");
+		
+		//Are we inited..
+		serviceCheckBridgeInited();
+		
+		MDS.log("Bridge Inited..");
+		
+		return;
+	}
+	
+	//Check the bridge has inited..
+	serviceCheckBridgeInited();
+	if(!BRIDGE_INITED){
+		MDS.log("BRIDGE NOT YET INITED:"+JSON.stringify(msg.event));
+		return;
+	}
+	
+	//NOW we can continue..
+	if(msg.event == "MDS_TIMER_60SECONDS"){
 		
 		//SERVICE.js runs function synchromously... as no HTTP call.. 
 		//so no need to to stack functions inside each other

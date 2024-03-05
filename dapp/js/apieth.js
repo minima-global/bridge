@@ -10,23 +10,27 @@ function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
 	//Create a secret
 	createSecretHash(function(hashlock){
 		
-		//Start the swap..
-		setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
-						wMinimaContractAddress, amount, requestamount, function(ethresp){
-			if(ethresp.status){
-				
-				//Log it..
-				startedCounterPartySwap(hashlock, "ETH:"+wMinimaContractAddress, 
-							amount, ethresp.result, function(){
+		//Need to set the nonce as this function called from the frontend
+		setNonceAuto(function(nonce){
+			
+			//Start the swap..
+			setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
+							wMinimaContractAddress, amount, requestamount, function(ethresp){
+				if(ethresp.status){
 					
-					//Insert these details so you know in future if right amount sent
-					insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
-						callback(ethresp);		
-					});		
-				});	
-			}else{
-				callback(ethresp);
-			}
+					//Log it..
+					startedCounterPartySwap(hashlock, "ETH:"+wMinimaContractAddress, 
+								amount, ethresp.result, function(){
+						
+						//Insert these details so you know in future if right amount sent
+						insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
+							callback(ethresp);		
+						});		
+					});	
+				}else{
+					callback(ethresp);
+				}
+			});	
 		});
 	});
 }
@@ -77,11 +81,11 @@ function checkExpiredETHHTLC(ethblock, callback){
 						}
 					});
 				}else{
-					MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"
+					/*MDS.log("Timelock CANNOT YET Collect Expired ETH Coin! timelock:"
 								+timelock+" timenow:"
 								+timenow+" amount:"
 								+htlclog.amount
-								+" hash:"+htlclog.hashlock);
+								+" hash:"+htlclog.hashlock);*/
 				}
 			}catch(e){
 				MDS.log("ERROR (checkExpiredETHHTLC) parsing expired coin : "+JSON.stringify(htlclog)+" "+e);
@@ -112,7 +116,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 				//Did it work ?
 				if(resp.status){
 					//We have now collected this - don't try again
-					collectExpiredHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, resp.result, function(){
+					collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, resp.result, function(){
 						callback(resp);		
 					});	
 				}else{
@@ -125,7 +129,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 						resp.error.message.includes("refundable: not sender")){
 								
 						//Already collected - don't try again..
-						collectExpiredHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xFF", function(){
+						collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "0xFF", function(){
 							callback(resp);		
 						});			
 					}else{
@@ -137,7 +141,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 			
 			//Already collected - don't try again..
 			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
-			collectExpiredHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xFF", function(){
+			collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "0xFF", function(){
 				callback();		
 			});	
 		}
@@ -205,10 +209,7 @@ function checkETHNewSecrets(currentethblock, callback){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
 					
 					//Put a log in db so no need to call ETH..
-					collectExpiredHTLC(withdrawlog.hashlock, "ethcoin", 0, "0x01", function(){});
-					
-				}else{
-					
+					collectExpiredHTLC(withdrawlog.hashlock, "withdrawn", 0, "0x01", function(){});
 				}
 			});
 		}
@@ -330,6 +331,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_SECS_CHECK){
 						MDS.log("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_SECS_CHECK+" secs) ETH TOO close to proceed.."
 								+" not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
+						collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xBB", function(sqlresp){});
 						return;
 					}
 					
@@ -352,9 +354,11 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 										
 							}else{
 								MDS.log("Invalid request amount for wMinima SWAP sent wminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
+								collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xAA", function(sqlresp){});
 							}	
 						}else{
 							MDS.log("Invalid request for Minima swap - not enabled");
+							collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xAA", function(sqlresp){});
 						}
 					});
 				}
@@ -422,7 +426,7 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 								userdets.ethaddress, 
 								htlclog.minimapublickey,				 
 								htlclog.requestamount,
-								"ETH:"+htlclog.tokencontract,
+								"minima", // MUST have been a minima request
 								countertimelock, 
 								htlclog.hashlock, 
 								false)

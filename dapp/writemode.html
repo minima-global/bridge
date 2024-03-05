@@ -1,0 +1,54 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+</head>
+
+<body>
+	
+	<center>
+	<br>
+	<h1>Bridge</h1>
+	<br>
+	You must be in <b>WRITE</b> mode to use Bridge..<br>
+	<br>
+	Please go back to the MiniHUB, set the dapp to <b>WRITE</b> mode, and reopen.. 
+	
+	</center>
+
+<script type="text/javascript">
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		
+		//Do initialisation
+		if(msg.event == "inited"){
+			
+			//wipeDB();
+			
+			//Init ETH
+			initETHSubSystem(function(){
+				getUserDetails(function(userdets){
+					USER_DETAILS=userdets;
+				});
+			});
+		}
+	});
+
+</script>
+
+</body>
+
+</html>

@@ -101,7 +101,7 @@ function createHTLCState(owner, ownerethkey, receiver,
 /**
  * UTIL functions to get data from HTLC coins
  */
-function getHTLCdata(coin,dataparam){
+function getCoinHTLCData(coin,dataparam){
 	
 	if(dataparam == "owner"){
 		return coin.state[0];
@@ -110,7 +110,7 @@ function getHTLCdata(coin,dataparam){
 	}else if(dataparam == "receiver"){
 		return coin.state[4];
 	}else if(dataparam == "amount"){
-		return coin.amount;
+		return +coin.amount;
 	}else if(dataparam == "requestamount"){
 		return +coin.state[1];
 	}else if(dataparam == "requesttoken"){
@@ -119,6 +119,20 @@ function getHTLCdata(coin,dataparam){
 			token = token.substring(4);
 		}
 		return token;
+	}else if(dataparam == "requesttokentype"){
+		
+		//First get the token
+		var token = getCoinHTLCData(coin,"requesttoken");
+		
+		//Now decipher to plain speak
+		if(token == wMinimaContractAddress){
+			return "wMinima";
+		}else if(token == USDTContractAddress){
+			return "USDT";
+		}
+		
+		return "UNKNOWN";
+		
 	}else if(dataparam == "hashlock"){
 		return coin.state[5];
 	}else if(dataparam == "timelock"){
@@ -203,7 +217,7 @@ function checkExpiredMinimaHTLC(userdets, block, callback){
 					if(block>timelock){
 								
 							MDS.log("Timelock Collect Expired Minima Coin! timelock:"
-										+timelock+" block:"+block+" amount:"+coin.amount+" hash:"+coin.state[5]);
+										+timelock+" block:"+block+" amount:"+coin.amount+" hash:"+getCoinHTLCData(coin,"hashlock"));
 						
 							//Add to our list
 							expired.push(coin);
@@ -212,7 +226,7 @@ function checkExpiredMinimaHTLC(userdets, block, callback){
 							_collectExpiredCoin(userdets,coin,function(){});	
 					
 					}else{
-						MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+						//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 					}	
 				}
 			}catch(e){
@@ -245,7 +259,7 @@ function _collectExpiredCoin(userdets,coin,callback){
 		MDS.cmd("txndelete id:"+txnid,function(delresp){
 			
 			//Log it..	
-			collectExpiredHTLC(coin.state[5],"minima",coin.amount,"0x00",function(){
+			collectExpiredHTLC(getCoinHTLCData(coin,"hashlock"),"minima",coin.amount,"0x00",function(){
 				callback(resp);
 			});
 		});
@@ -268,7 +282,7 @@ function checkMinimaSwapHTLC(userdets, block, callback){
 			//Get the coin
 			var coin=resp.response[i];
 			try{
-				if(coin.state[4] == USER_DETAILS.minimapublickey){
+				if(getCoinHTLCData(coin,"receiver") == USER_DETAILS.minimapublickey){
 					_checkCanSwapCoin(userdets, coin, block, function(res){});		
 				}
 			}catch(e){
@@ -292,12 +306,9 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 	}
 	
 	//Details of thre HTLC
-	var hash 	 		= coin.state[5];
-	var timelock 		= +coin.state[3];
-	var token 			= coin.state[2].substring(1,coin.state[2].length-1);
-	if(token.startsWith("ETH:")){
-		token = token.substring(4);
-	}
+	var hash 	 		= getCoinHTLCData(coin,"hashlock");
+	var timelock 		= getCoinHTLCData(coin,"timelock");
+	var token 			= getCoinHTLCData(coin,"requesttoken");
 	
 	//Do we know the secret..
 	getSecretFromHash(hash, function(secret){
@@ -330,7 +341,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Is it correct
 					if(token != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(coin));
-						collectHTLC(htlclog.hashlock, "minima", htlclog.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){});	
 						return;
 					}
 				}
@@ -422,7 +433,7 @@ function checkForOTC(callback){
 				if(coin.state[7]=="TRUE"){
 					
 					//Is it FOR you AND an OTC deal..
-					if(coin.state[4] == USER_DETAILS.minimapublickey){
+					if(getCoinHTLCData(coin,"receiver") == USER_DETAILS.minimapublickey){
 						otcdeals.receiver.push(coin);		
 					}else if(coin.state[0] == USER_DETAILS.minimapublickey){
 						otcdeals.owner.push(coin);
@@ -459,7 +470,7 @@ function acceptOTCSwapCoin(userdets, coinid, callback){
 		getCurrentMinimaBlock(function(block){
 			
 			//What is the hash of the secret
-			var hash 	 =  coin.state[5];
+			var hash 	 =  getCoinHTLCData(coin,"hashlock");
 			var timelock = +coin.state[3];
 			
 			//Have we sent the OTHER side txn to get them to reveal the secret..
@@ -517,7 +528,7 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			+"txnstate id:"+txnid+" port:100 value:\""+secret+"\";"
 			+"txnstate id:"+txnid+" port:101 value:\""+hash+"\";"
 			+"txnstate id:"+txnid+" port:102 value:\"["+coin.state[0]+"]\";"
-			+"txnstate id:"+txnid+" port:103 value:\"["+coin.state[4]+"]\";"
+			+"txnstate id:"+txnid+" port:103 value:\"["+getCoinHTLCData(coin,"receiver")+"]\";"
 			
 			//Sign it..
 			+"txnsign id:"+txnid+" publickey:"+userdets.minimapublickey+";"
@@ -544,7 +555,7 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			
 			//If success - Log it..
 			if(status){
-				collectHTLC(coin.state[5],"minima",finalamount+"",txpowid);	
+				collectHTLC(getCoinHTLCData(coin,"hashlock"),"minima",finalamount+"",txpowid);	
 			}	
 			
 			if(callback){
@@ -557,25 +568,22 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	
 	//requested amount
-	var amount 			= coin.state[1];
+	var amount = getCoinHTLCData(coin,"requestamount");
 	
 	//Requested token - remove brackets and ETH:
-	var token 			= coin.state[2].substring(1,coin.state[2].length-1);
-	if(token.startsWith("ETH:")){
-		token = token.substring(4);
-	}
+	var token = getCoinHTLCData(coin,"requesttoken");
 	
-	//What do you expect.. not rerally needed
-	var reqamount 		= coin.amount;
+	//What do you expect.. 
+	var reqamount = getCoinHTLCData(coin,"amount");
 	
 	//The hashlock
-	var hashlock 		= coin.state[5];
+	var hashlock = getCoinHTLCData(coin,"hashlock");
 	
 	//Set some time in the future..
-	var timelock 		= getCurrentUnixTime() + HTLC_TIMELOCK_COUNTERPARTY_SECS;
+	var timelock = getCurrentUnixTime() + HTLC_TIMELOCK_COUNTERPARTY_SECS;
 	
 	//The receiver is the ETH owner key
-	var receiver		= coin.state[6];
+	var receiver = getCoinHTLCData(coin,"ownereth");
 	
 	MDS.log("Send counterparty ETH txn for hashlock:"+hashlock);
 	
@@ -590,8 +598,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(ethresp.status){
-			sentCounterPartyTxn(hashlock,"ETH:"+wMinimaContractAddress,
-								reqamount,ethresp.result,function(){
+			sentCounterPartyTxn(hashlock,"ETH:"+token,reqamount,ethresp.result,function(){
 				callback(ethresp);	
 			});
 		}else{

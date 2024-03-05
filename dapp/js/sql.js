@@ -234,7 +234,7 @@ function logApprove(txnhash,callback){
 }
 
 function getAllEvents(callback){
-	MDS.sql("SELECT * FROM counterparty ORDER BY id", function(sqlmsg){
+	MDS.sql("SELECT * FROM counterparty ORDER BY id DESC", function(sqlmsg){
 		callback(sqlmsg.rows);
 	});
 }

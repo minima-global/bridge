@@ -15,7 +15,7 @@ function setUpHTLCScript(userdets, callback){
 	MDS.cmd("newscript script:\""+HTLC_CONTRACT+"\" trackall:false",function(resp){
 		
 		//Now setup the User account..
-		MDS.cmd("newscript trackall:true script:\""+USER_DETAILS.minimaaddress.script+"\"",function(resp2){
+		MDS.cmd("newscript trackall:true script:\""+userdets.minimaaddress.script+"\"",function(resp2){
 			if(callback){
 				callback();
 			}	

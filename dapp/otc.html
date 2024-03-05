@@ -145,28 +145,18 @@
 				//Get the coin
 				var coin=otcdeals.owner[i];
 				
-				var token = coin.state[2].substring(1,coin.state[2].length-1);
-				if(token.startsWith("ETH:")){
-					token = token.substring(4);
-				}
-				var tokenname = "UNKNOWN";
-				if(token == wMinimaContractAddress){
-					tokenname = "wMinima";
-				}else if(token == USDTContractAddress){
-					tokenname = "USDT";
-				}
-				
-				var timelock = +coin.state[3];
+				//How long left on the timelock
+				var timelock = getCoinHTLCData(coin,"timelock");
 				var lockdiff = timelock - currentblock;
 				if(lockdiff<0){
 					lockdiff = 0;
 				}
 				
 				var trow = otctable.insertRow();
-				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
-				trow.insertCell(1).innerHTML = coin.amount;
-				trow.insertCell(2).innerHTML = tokenname;
-				trow.insertCell(3).innerHTML = coin.state[1];
+				trow.insertCell(0).innerHTML = getCoinHTLCData(coin,"owner").substring(0,16)+"..";
+				trow.insertCell(1).innerHTML = getCoinHTLCData(coin,"amount");
+				trow.insertCell(2).innerHTML = getCoinHTLCData(coin,"requesttokentype");
+				trow.insertCell(3).innerHTML = getCoinHTLCData(coin,"requestamount");
 				trow.insertCell(4).innerHTML = lockdiff;
 				trow.insertCell(5).innerHTML = "LOCKED";
 			}
@@ -178,29 +168,18 @@
 				//Get the coin
 				var coin=otcdeals.receiver[i];
 				
-				var token = coin.state[2].substring(1,coin.state[2].length-1);
-				if(token.startsWith("ETH:")){
-					token = token.substring(4);
-				}
-				var tokenname = "UNKNOWN";
-				if(token == wMinimaContractAddress){
-					tokenname = "wMinima";
-				}else if(token == USDTContractAddress){
-					tokenname = "USDT";
-				}
-				
-				var timelock = +coin.state[3];
-				MDS.log("TIME:"+timelock+" cblock:"+currentblock);
+				//How long left on the timelock
+				var timelock = getCoinHTLCData(coin,"timelock");
 				var lockdiff = timelock - currentblock;
 				if(lockdiff<0){
 					lockdiff = 0;
 				}
 				
 				var trow = otctable.insertRow();
-				trow.insertCell(0).innerHTML = coin.state[0].substring(0,16)+"..";
-				trow.insertCell(1).innerHTML = coin.amount;
-				trow.insertCell(2).innerHTML = tokenname;
-				trow.insertCell(3).innerHTML = coin.state[1];
+				trow.insertCell(0).innerHTML = getCoinHTLCData(coin,"owner").substring(0,16)+"..";
+				trow.insertCell(1).innerHTML = getCoinHTLCData(coin,"amount");
+				trow.insertCell(2).innerHTML = getCoinHTLCData(coin,"requesttokentype");
+				trow.insertCell(3).innerHTML = getCoinHTLCData(coin,"requestamount");
 				trow.insertCell(4).innerHTML = lockdiff;
 				showReceiverButtonStatus(coin, trow.insertCell(5));
 			}
@@ -215,7 +194,7 @@
 		}else{
 			
 			//Have we sent the CounterParty TXN..
-			haveSentCounterPartyTxn(coin.state[5],function(sent){
+			haveSentCounterPartyTxn(getCoinHTLCData(coin,"hashlock"),function(sent){
 				
 				//Only send it once..
 				if(!sent){
