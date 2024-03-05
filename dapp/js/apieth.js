@@ -418,32 +418,45 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 
 function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 	
-	//Send the Minima counter TXN - to make him reveal the secret
-	var countertimelock = minimablock + HTLC_TIMELOCK_COUNTERPARTY_BLOCKS;
-	
-	//Create the state
-	var state = createHTLCState(userdets.minimapublickey,   
-								userdets.ethaddress, 
-								htlclog.minimapublickey,				 
-								htlclog.requestamount,
-								"minima", // MUST have been a minima request
-								countertimelock, 
-								htlclog.hashlock, 
-								false)
-	
-	MDS.log("Send counterparty Minima txn! hashlock:"+JSON.stringify(htlclog));
-	 
-	//And send from the native wallet..
-	sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){
+	//Check we can collect! - could be a reinstall..
+	canCollect(htlclog.contractid, function(canc){
 		
-		//If success put in DB
-		if(resp.status){
-			sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
-				callback(resp);	
-			});
+		if(canc){
+			
+			//Send the Minima counter TXN - to make him reveal the secret
+			var countertimelock = minimablock + HTLC_TIMELOCK_COUNTERPARTY_BLOCKS;
+			
+			//Create the state
+			var state = createHTLCState(userdets.minimapublickey,   
+										userdets.ethaddress, 
+										htlclog.minimapublickey,				 
+										htlclog.requestamount,
+										"minima", // MUST have been a minima request
+										countertimelock, 
+										htlclog.hashlock, 
+										false)
+			
+			MDS.log("Send counterparty Minima txn! hashlock:"+JSON.stringify(htlclog));
+			 
+			//And send from the native wallet..
+			sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){
+				
+				//If success put in DB
+				if(resp.status){
+					sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
+						callback(resp);	
+					});
+				}else{
+					MDS.log("FAIL! "+JSON.stringify(resp));
+					callback(resp);	
+				}	
+			});		
+			
 		}else{
-			MDS.log("FAIL! "+JSON.stringify(resp));
-			callback(resp);	
-		}	
+			MDS.log("ETH HTLC already collected..! "+htlclog.hashlock);
+			sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
+				//callback(resp);	
+			});
+		}
 	});
 }
