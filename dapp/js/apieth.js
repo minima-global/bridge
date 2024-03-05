@@ -453,7 +453,7 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 			});		
 			
 		}else{
-			MDS.log("ETH HTLC already collected..! "+htlclog.hashlock);
+			MDS.log("ETH HTLC already collected..no send counterparty! "+htlclog.hashlock);
 			sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
 				//callback(resp);	
 			});
