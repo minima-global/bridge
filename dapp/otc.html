@@ -82,7 +82,7 @@
 	</table>
 	
 	<br><br>
-	Current available OTC deals..
+	Current OTC deals..
 	<table id=otctable></table>
 		
 	<script type="text/javascript">
@@ -136,7 +136,7 @@
 		trow.insertCell(5).innerHTML = "ACTION";
 		
 		//See if there any waiting..
-		checkForOTC(function(otcdeals){
+		checkForCurrentSwaps(true, function(otcdeals){
 			
 			//Do the owner deals first
 			var len=otcdeals.owner.length;

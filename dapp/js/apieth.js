@@ -295,7 +295,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, reqamount.TOKEN, htlclog.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(htlclog.hashlock, reqamount.TOKEN, 0, "0xCC", function(sqlresp){});	
 						return;
 					}
 					
@@ -308,7 +308,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					//Is it correct
 					if(htlclog.tokencontract != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, reqamount.TOKEN, htlclog.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(htlclog.hashlock, reqamount.TOKEN, 0, "0xCC", function(sqlresp){});	
 						return;
 					}
 				}
@@ -331,7 +331,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					if(tdiff < HTLC_TIMELOCK_COUNTERPARTY_SECS_CHECK){
 						MDS.log("TIMELOCK ("+HTLC_TIMELOCK_COUNTERPARTY_SECS_CHECK+" secs) ETH TOO close to proceed.."
 								+" not sending counterpartytxn.. timelock:"+timelocktime+" currenttime:"+ctime+" hash:"+hash);
-						collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xBB", function(sqlresp){});
+						collectHTLC(htlclog.hashlock, htlclog.tokencontract, 0, "0xBB", function(sqlresp){});
 						return;
 					}
 					
@@ -354,11 +354,11 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 										
 							}else{
 								MDS.log("Invalid request amount for wMinima SWAP sent wminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
-								collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xAA", function(sqlresp){});
+								collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "0xAA", function(sqlresp){});
 							}	
 						}else{
 							MDS.log("Invalid request for Minima swap - not enabled");
-							collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xAA", function(sqlresp){});
+							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "0xAA", function(sqlresp){});
 						}
 					});
 				}
@@ -384,7 +384,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 				if(resp.status){
 					
 					//We have now collected this - don't try again
-					collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, resp.result, function(){
+					collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, resp.result, function(){
 						callback(resp);		
 					});	
 				}else{
@@ -397,7 +397,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 						resp.error.message.includes("withdrawable: not ")){
 								
 						//Already collected - don't try again..
-						collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xEE", function(){
+						collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "0xEE", function(){
 							callback(resp);		
 						});			
 					}else{
@@ -409,7 +409,7 @@ function _collectETHHTLCCoin(htlclog, hash, secret, callback){
 			
 			//Already collected - don't try again..
 			MDS.log("Trying to withdraw already collected HTLC : "+JSON.stringify(htlclog));
-			collectHTLC(htlclog.hashlock, htlclog.tokencontract, htlclog.amount, "0xEE", function(sqlresp){
+			collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "0xEE", function(sqlresp){
 				callback();		
 			});	
 		}

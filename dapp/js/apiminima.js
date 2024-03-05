@@ -327,7 +327,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(hash, "minima", 0, "0xCC", function(sqlresp){});	
 						
 						return;
 					}
@@ -341,7 +341,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Is it correct
 					if(token != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", coin.amount, "0xCC", function(sqlresp){});	
+						collectHTLC(hash, "minima", 0, "0xCC", function(sqlresp){});	
 						return;
 					}
 				}
@@ -410,7 +410,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 /**
  * Check for any OTC swap on the Minima Chain
  */
-function checkForOTC(callback){
+function checkForCurrentSwaps(wantotcdeals, callback){
 		
 	//All the OTC deals..
 	var otcdeals 		= {};
@@ -429,8 +429,11 @@ function checkForOTC(callback){
 			var coin=resp.response[i];
 			try{
 				
+				//What is the OTC state
+				var otcstate = getCoinHTLCData(coin,"otc");
+				
 				//Is it OTC
-				if(coin.state[7]=="TRUE"){
+				if((wantotcdeals && otcstate) || (!wantotcdeals && !otcstate)){
 					
 					//Is it FOR you AND an OTC deal..
 					if(getCoinHTLCData(coin,"receiver") == USER_DETAILS.minimapublickey){
