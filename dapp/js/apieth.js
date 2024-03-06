@@ -462,7 +462,7 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 										htlclog.hashlock, 
 										false)
 			
-			MDS.log("Send counterparty Minima txn! hashlock:"+JSON.stringify(htlclog));
+			MDS.log("Send counterparty Minima txn! hashlock:"+htlclog.hashlock);
 			 
 			//And send from the native wallet..
 			sendMinima(userdets, htlclog.requestamount, HTLC_ADDRESS, state, function(resp){

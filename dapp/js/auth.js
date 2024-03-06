@@ -93,7 +93,7 @@ function initBridgeSystems(callback){
 					setUpHTLCScript(userdets, function(resp){
 						
 						//We want to be notified of Coin Events
-						MDS.cmd("coinnotify action:add address:"+COIN_NOTIFY, function(){
+						setupCoinSecretEvents(function(notify){
 							
 							//Set up the DB
 							createDB(function(res){
@@ -103,7 +103,7 @@ function initBridgeSystems(callback){
 									callback(userdets);	
 								});
 							});	
-						});	
+						});
 					});		
 				});
 			});

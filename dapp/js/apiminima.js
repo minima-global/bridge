@@ -550,7 +550,7 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			+"txninput id:"+txnid+" coinid:"+coin.coinid+";"
 			
 			//Add an output to the notify coin address.. MUST be FIRST! @INPUT
-			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:0xFFEEDD9999;"
+			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:0.0001 address:"+COIN_SECRET_NOTIFY+";"
 			
 			//Send the coin back to me..
 			+"txnoutput id:"+txnid+" tokenid:"+coin.tokenid+" amount:"+finalamount+" address:"+userdets.minimaaddress.mxaddress+";"
@@ -602,7 +602,8 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	var amount = getCoinHTLCData(coin,"requestamount");
 	
 	//Requested token - remove brackets and ETH:
-	var token = getCoinHTLCData(coin,"requesttoken");
+	var token 		= getCoinHTLCData(coin,"requesttoken");
+	var tokentype 	= getCoinHTLCData(coin,"requesttokentype");
 	
 	//What do you expect.. 
 	var reqamount = getCoinHTLCData(coin,"amount");
@@ -616,7 +617,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	//The receiver is the ETH owner key
 	var receiver = getCoinHTLCData(coin,"ownereth");
 	
-	MDS.log("Send counterparty ETH txn for hashlock:"+hashlock);
+	MDS.log("Send counterparty ETH ("+tokentype+") txn for hashlock:"+hashlock);
 	
 	//Set up the next HTLC 
 	setupETHHTLCSwap(	userdets.minimapublickey,

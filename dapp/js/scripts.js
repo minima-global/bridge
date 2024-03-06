@@ -7,7 +7,7 @@ var HTLC_CONTRACT 	= "LET version=1.2 LET owner=PREVSTATE(0) LET requestamount=P
 var HTLC_ADDRESS 	= "MxG080CRJB1D4NHGRYGNF7Q52FK7023UM3FUUPVD1W1WCQZSA8MDQ25982N842G"
 
 //The Coin Notifications
-var COIN_NOTIFY		= "0xFFEEDD9999"
+var COIN_SECRET_NOTIFY		= "0xFFEEDD9999"
 
 function setUpHTLCScript(userdets, callback){
 	
@@ -20,5 +20,12 @@ function setUpHTLCScript(userdets, callback){
 				callback();
 			}	
 		});
+	});
+}
+
+function setupCoinSecretEvents(callback){
+	//We want to be notified of Coin Events that rveal the secret
+	MDS.cmd("coinnotify action:add address:"+COIN_SECRET_NOTIFY, function(resp){
+		callback(resp);
 	});
 }

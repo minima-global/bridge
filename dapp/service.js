@@ -71,6 +71,9 @@ MDS.init(function(msg){
 		//Are we inited..
 		serviceCheckBridgeInited();
 		
+		//We want to be notified of Coin Secret Events
+		setupCoinSecretEvents(function(notify){});
+						
 		MDS.log("Bridge Inited..");
 		
 		return;
@@ -131,6 +134,8 @@ MDS.init(function(msg){
 		
 		//Is it relevant to Bridge
 		if(msg.data.address ==  COIN_NOTIFY){
+			
+			MDS.log("COINNOTIFY : "+JSON.stringify(msg.data));
 			
 			//Get the coin
 			var coin = msg.data.coin;
