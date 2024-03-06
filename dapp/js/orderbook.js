@@ -240,46 +240,32 @@ function getUniqueRecords(validrecords){
 	return orderbook;
 }
 
-function setMyOrderBook(nativeenable, nativefee, wrappedenable, wrappedfee, minimumorder, callback){
-	
-	var orderbook = {};
-	
-	orderbook.nativeenable 	= nativeenable;
-	orderbook.nativefee 	= +Number.parseFloat(nativefee).toFixed(2);
-	if(!nativeenable || orderbook.nativefee<=-100 || orderbook.nativefee>=100){
-		orderbook.nativefee = 0;	
-	}
-	
-	orderbook.wrappedenable	= wrappedenable;
-	orderbook.wrappedfee	= +Number.parseFloat(wrappedfee).toFixed(2);
-	if(!wrappedenable || orderbook.wrappedfee<=-100 || orderbook.wrappedfee>=100){
-		orderbook.wrappedfee = 0;	
-	}
-	
-	orderbook.minimum = Math.floor(+minimumorder);
-	if(!nativeenable && !wrappedenable){
-		orderbook.minimum = 0;
-	}
-	
-	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
-		if(callback){
-			callback(setorder);
-		}
-	});
-}
-
-function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, callback){
+function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, 
+						  usdtenable, usdtbuy, usdtsell, callback){
 	
 	//Create an order book for this user
 	var orderbook 				= {};
+	
+	//wMinima
 	orderbook.wminima 			= {};
 	orderbook.wminima.enable 	= wrappedenable;
 	if(wrappedenable){
-		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
-		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);	
+		orderbook.wminima.buy 	= toFixedNumber(wrappedbuy);
+		orderbook.wminima.sell 	= toFixedNumber(wrappedsell);	
 	}else{
-		orderbook.wminima.buy 		= 0;
-		orderbook.wminima.sell 		= 0;
+		orderbook.wminima.buy 	= 0;
+		orderbook.wminima.sell 	= 0;
+	}
+	
+	//USDT
+	orderbook.usdt 				= {};
+	orderbook.usdt.enable 		= usdtenable;
+	if(usdtenable){
+		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
+		orderbook.usdt.sell 	= toFixedNumber(usdtsell);	
+	}else{
+		orderbook.usdt.buy 		= 0;
+		orderbook.usdt.sell 	= 0;
 	}
 	
 	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
@@ -310,6 +296,11 @@ function getEmptyOrderBook(){
 	orderbook.wminima.enable	= false;
 	orderbook.wminima.buy 		= 0;
 	orderbook.wminima.sell 		= 0;
+	
+	orderbook.usdt				= {};
+	orderbook.usdt.enable		= false;
+	orderbook.usdt.buy 			= 0;
+	orderbook.usdt.sell 		= 0;
 	
 	return orderbook;
 }

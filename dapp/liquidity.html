@@ -52,39 +52,10 @@
 	You <b>MUST</b> have some ETH to pay the fee for transferring wMinima / USDT<br>
 	<br>
 	
-	<!--  <table>
-		<tr>
-			<td colspan=2>
-				<input type=checkbox id=usenativeminima>
-				<label for=usenativeminima>Use my Bridge Wallet Native Minima</label>
-			</td>
-		</tr>
-		<tr>
-			<td>FEE as % :</td>
-			<td><input type=text id=nativefee placeholder=5 /></td>
-		</tr>
-		<tr><td>&nbsp;</td></tr>
-		<tr>
-			<td colspan=2>
-				<input type=checkbox id=usewminima>
-				<label for=usenativeminima>Use my Bridge Wallet wMinima</label>
-			</td>
-		</tr>
-		<tr>
-			<td>FEE as % :</td>
-			<td><input type=text id=wrappedfee placeholder=5 /></td>
-		</tr>
-		<tr><td>&nbsp;</td></tr>
-		<tr>
-			<td>Minimum order :</td>
-			<td><input type=text id=minimumorder placeholder=1000 /></td>
-		</tr>
-	</table> -->
-	
 	<br>
 	<b>WMINIMA POOL</b><br>
 	<input type=checkbox id=wrappedenableid>
-	<label for=enablewrapped>Enable Wrapped Minima Pool</label>
+	<label for=enablewrapped>Enable wMinima Pool</label>
 	<table>
 		<tr>
 			<td>BUY :</td>
@@ -96,20 +67,20 @@
 		</tr>
 	</table>
 	
-	<!--  <br><br>
+	<br>
 	<b>USDT POOL</b><br>
-	<input type=checkbox id=enablewrapped>
-	<label for=enablewrapped>Enable USDT Pool</label>
+	<input type=checkbox id=usdtenableid>
+	<label for=enableusdt>Enable USDT Pool</label>
 	<table>
 		<tr>
 			<td>BUY :</td>
-			<td><input type=text id=nativefee placeholder=5 /></td>
+			<td><input type=text id=usdtbuyid placeholder=0 /></td>
 		</tr>
 		<tr>
 			<td>SELL :</td>
-			<td><input type=text id=nativefee placeholder=5 /></td>
+			<td><input type=text id=usdtsellid placeholder=0 /></td>
 		</tr>
-	</table>-->
+	</table>
 	
 	<br>
 	Prices are in Native Minima
@@ -124,8 +95,6 @@
 	
 
 <script type="text/javascript">
-	
-	var USER_DETAILS = {};
 	
 	function updateorderbook(){
 		
@@ -149,8 +118,29 @@
 			wrappedsell = 0;
 		}
 		
+		//USDT
+		var usdtenable 	= usdtenableid.checked;
+		var usdtbuy 	= usdtbuyid.value.trim();
+		var usdtsell 	= usdtsellid.value.trim();
+		
+		if(usdtenable){
+			if(!checkIsPositiveNumber(usdtbuy)){
+				alert("You must specify a valid BUY for USDT : "+usdtbuy);
+				return;
+			}
+			
+			if(!checkIsPositiveNumber(usdtsell)){
+				alert("You must specify a valid SELL for USDT : "+usdtsell);
+				return;
+			}
+		}else{
+			usdtbuy  = 0;
+			usdtsell = 0;
+		}
+		
 		//Store this..
-		setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, function(dets){
+		setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, 
+						 usdtenable, usdtbuy, usdtsell,	function(dets){
 			
 			//Set details as may have been set to ZERO
 			setOrderBookDetails();
@@ -165,10 +155,15 @@
 		getMyOrderBook(function(orderbook){
 			MDS.log(JSON.stringify(orderbook));
 			
-			//Set GUI
+			//wMinima
 			wrappedenableid.checked = orderbook.wminima.enable;
 			wrappedbuyid.value		= orderbook.wminima.buy;
 			wrappedsellid.value		= orderbook.wminima.sell;
+			
+			//USDT
+			usdtenableid.checked 	= orderbook.usdt.enable;
+			usdtbuyid.value			= orderbook.usdt.buy;
+			usdtsellid.value		= orderbook.usdt.sell;
 		});
 	}
 	
@@ -178,13 +173,9 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init ETH
-			initETHSubSystem(function(){
-				getUserDetails(function(userdets){
-					USER_DETAILS=userdets;
-					
-					setOrderBookDetails();
-				});
+			//Init Bridge
+			initBridgeSystems(function(userdets){
+				setOrderBookDetails();
 			});
 		}
 	});

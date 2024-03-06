@@ -2,7 +2,7 @@
 /**
  * Start a wMinima -> Minima SWAP
  */
-function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
+function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamount, callback){
 	
 	//Create Time Lock
 	var timelock = getCurrentUnixTime() + HTLC_TIMELOCK_SECS;
@@ -15,11 +15,11 @@ function startETHSwap(userdets, swappublickey, amount, requestamount, callback){
 			
 			//Start the swap..
 			setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
-							wMinimaContractAddress, amount, requestamount, function(ethresp){
+							erc20contract, amount, requestamount, function(ethresp){
 				if(ethresp.status){
 					
 					//Log it..
-					startedCounterPartySwap(hashlock, "ETH:"+wMinimaContractAddress, 
+					startedCounterPartySwap(hashlock, "ETH:"+erc20contract, 
 								amount, ethresp.result, function(){
 						
 						//Insert these details so you know in future if right amount sent
@@ -338,27 +338,53 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					//Check the details are valid!.. FEES etc.. 
 					var sendamount 		= +htlclog.amount; 
 					var requestamount 	= +htlclog.requestamount;
+					var reqtoken 		= htlclog.tokencontract;
 					
 					getMyOrderBook(function(myorderbook){
 						
 						//Are we enablked for these swaps..
-						//MDS.log("SKIPPING ORDER BOOK CHECK FOR ETH SWAP!")
-						if(myorderbook.wminima.enable){
+						if(reqtoken == wMinimaContractAddress){
 							
-							//Calculate how much we should send back..
-							var calcamount = calculateSwapAmount("wminima","minima",sendamount,myorderbook);
-							if((calcamount >= requestamount)){
+							if(myorderbook.wminima.enable){
 							
-								//Send the ETH counter TXN - to make him reveal the secret
-								_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
-										
+								//Calculate how much we should send back..
+								var calcamount = calculateSwapAmount("wminima","minima",sendamount,myorderbook);
+								if((calcamount >= requestamount)){
+								
+									//Send the ETH counter TXN - to make him reveal the secret
+									_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
+											
+								}else{
+									MDS.log("Invalid request amount for wMinima SWAP sent wminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
+									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
+								}	
 							}else{
-								MDS.log("Invalid request amount for wMinima SWAP sent wminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
-								collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
-							}	
+								MDS.log("Invalid request for Minima swap - not enabled");
+								collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request - swap not enabled", function(sqlresp){});
+							}
+								
+						}else if(reqtoken == USDTContractAddress){
+							
+							if(myorderbook.usdt.enable){
+							
+								//Calculate how much we should send back..
+								var calcamount = calculateSwapAmount("usdt","minima",sendamount,myorderbook);
+								if((calcamount >= requestamount)){
+								
+									//Send the ETH counter TXN - to make him reveal the secret
+									_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
+											
+								}else{
+									MDS.log("Invalid request amount for USDT SWAP sent usdt:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
+									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
+								}	
+							}else{
+								MDS.log("Invalid request for Minima swap - not enabled");
+								collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request - swap not enabled", function(sqlresp){});
+							}
+							
 						}else{
-							MDS.log("Invalid request for Minima swap - not enabled");
-							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request - swap not enabled", function(sqlresp){});
+							MDS.log("Invalid request for swap - unknown token : "+reqtoken);
 						}
 					});
 				}

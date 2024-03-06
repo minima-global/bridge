@@ -45,18 +45,32 @@
 		createHeader();
 	</script>
 	
-	WMINMA POOL
+	<b>WMINIMA POOL</b>
 	<table border=0>
 		<tr>
 			<td>Amount : </td>
-			<td><input type=text id=minimaamount></td>
-			<td><button onclick="swapminima();">I WANT TO SWAP NATIVE MINIMA</button></td>
+			<td><input type=text id=minimaamountwminima></td>
+			<td><button onclick="swapminima('wminima');">I WANT TO SWAP NATIVE MINIMA</button></td>
 		</tr>
-		<tr><td>&nbsp;</td></tr>
 		<tr>
 			<td>Amount : </td>
-			<td><input type=text id=ethamount></td>
-			<td><button onclick="swapeth();">I WANT TO SWAP WRAPPED MINIMA</button></td>
+			<td><input type=text id=ethamountwminima></td>
+			<td><button onclick="swapeth('wminima');">I WANT TO SWAP WRAPPED MINIMA</button></td>
+		</tr>
+	</table>
+	
+	<br>
+	<b>USDT POOL</b>
+	<table border=0>
+		<tr>
+			<td>Amount : </td>
+			<td><input type=text id=minimaamountusdt></td>
+			<td><button onclick="swapminima('usdt');">I WANT TO SWAP NATIVE MINIMA</button></td>
+		</tr>
+		<tr>
+			<td>Amount : </td>
+			<td><input type=text id=ethamountusdt></td>
+			<td><button onclick="swapeth('usdt');">I WANT TO SWAP USDT</button></td>
 		</tr>
 	</table>
 	
@@ -69,8 +83,15 @@
 	var USER_DETAILS = {};
 	
 	//Start a native swap..
-	function swapminima(){
-		var amount = minimaamount.value.trim();
+	function swapminima(swaptoken){
+		
+		var amount = 0;
+		if(swaptoken == "wminima"){
+			amount = minimaamountwminima.value.trim();
+		}else{
+			amount = minimaamountusdt.value.trim();
+		}
+		
 		if(!checkIsPositiveNumber(amount)){
 			alert("Must be a valid number greater than 0");
 			return;
@@ -80,12 +101,19 @@
 		var sndamt = toFixedNumber(amount);
 		
 		//Ok - lets jump to the next page..
-		location.href="swapnative.html?uid="+MDS.minidappuid+"&amount="+sndamt;
+		location.href="swapnative.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken;
 	}
 	
 	//Start a native swap..
-	function swapeth(){
-		var amount = ethamount.value.trim();
+	function swapeth(swaptoken){
+		
+		var amount = 0;
+		if(swaptoken == "wminima"){
+			amount = ethamountwminima.value.trim();
+		}else{
+			amount = ethamountusdt.value.trim();
+		}
+		
 		if(!checkIsPositiveNumber(amount)){
 			alert("Must be a valid number greater than 0");
 			return;
@@ -95,18 +123,16 @@
 		var sndamt = toFixedNumber(amount);
 		
 		//Ok - lets jump to the next page..
-		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+sndamt;
+		location.href="swapeth.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken;
 	}
 	
 	//Main message handler..
 	MDS.init(function(msg){
 		if(msg.event == "inited"){
 			
-			//Init ETH
-			initETHSubSystem(function(){
-				getUserDetails(function(userdets){
-					USER_DETAILS=userdets;
-				});
+			//Init Bridge
+			initBridgeSystems(function(userdets){
+				USER_DETAILS=userdets;
 			});
 		}
 	});

@@ -379,26 +379,54 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Check the details are valid!.. FEES etc.. 
 					getMyOrderBook(function(myorderbook){
 						
-						//Are we enabled
-						//MDS.log("SKIPPING ORDER BOOK CHECK FOR MINIMA SWAP!")
-						if(myorderbook.wminima.enable){
-							//Check the details are valid!.. FEES etc.. 
-							var sendamount 		= +coin.amount; 
-							var requestamount 	= +coin.state[1];
-						
-							//Calculate how much we should send back..
-							var calcamount = calculateSwapAmount("minima","wminima",sendamount,myorderbook);
-							if((calcamount >= requestamount)){
-								
-								//Send the ETH counter TXN - to make him reveal the secret
-								sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
+						//Which token are we swapping for..
+						if(token == wMinimaContractAddress){
+							//Are we enabled
+							if(myorderbook.wminima.enable){
+								//Check the details are valid!.. FEES etc.. 
+								var sendamount 		= +coin.amount; 
+								var requestamount 	= +coin.state[1];
+							
+								//Calculate how much we should send back..
+								var calcamount = calculateSwapAmount("minima","wminima",sendamount,myorderbook);
+								if((calcamount >= requestamount)){
+									
+									//Send the ETH counter TXN - to make him reveal the secret
+									sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
+									
+								}else{
+									MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedwminima:"+requestamount+" actual:"+calcamount)
+								}	
 								
 							}else{
-								MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedwminima:"+requestamount+" actual:"+calcamount)
-							}	
+								MDS.log("Invalid request for wMinima swap - not enabled");
+							}
+								
+						}else if(token == USDTContractAddress){
 							
+							//Are we enabled
+							if(myorderbook.usdt.enable){
+								//Check the details are valid!.. FEES etc.. 
+								var sendamount 		= +coin.amount; 
+								var requestamount 	= +coin.state[1];
+							
+								//Calculate how much we should send back..
+								var calcamount = calculateSwapAmount("minima","usdt",sendamount,myorderbook);
+								if((calcamount >= requestamount)){
+									
+									//Send the ETH counter TXN - to make him reveal the secret
+									sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
+									
+								}else{
+									MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedusdt:"+requestamount+" actual:"+calcamount)
+								}	
+								
+							}else{
+								MDS.log("Invalid request for wMinima swap - not enabled");
+							}
+								
 						}else{
-							MDS.log("Invalid request for ETH swap - not enabled");
+							MDS.log("Invalid request for swap - unknown token : "+token);
 						}
 					});
 				}
@@ -435,7 +463,7 @@ function checkForCurrentSwaps(wantotcdeals, callback){
 				//Is it OTC
 				if((wantotcdeals && otcstate) || (!wantotcdeals && !otcstate)){
 					
-					//Is it FOR you AND an OTC deal..
+					//Are you owner or receiver..
 					if(getCoinHTLCData(coin,"receiver") == USER_DETAILS.minimapublickey){
 						otcdeals.receiver.push(coin);		
 					}else if(coin.state[0] == USER_DETAILS.minimapublickey){
