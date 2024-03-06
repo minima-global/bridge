@@ -327,7 +327,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", 0, "0xCC", function(sqlresp){});	
+						collectHTLC(hash, "minima", 0, "Incorrect amount", function(sqlresp){});	
 						
 						return;
 					}
@@ -341,7 +341,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Is it correct
 					if(token != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", 0, "0xCC", function(sqlresp){});	
+						collectHTLC(hash, "minima", 0, "Incorrect token", function(sqlresp){});	
 						return;
 					}
 				}
