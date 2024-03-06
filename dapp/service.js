@@ -133,9 +133,7 @@ MDS.init(function(msg){
 	}else if(msg.event == "NOTIFYCOIN"){
 		
 		//Is it relevant to Bridge
-		if(msg.data.address ==  COIN_NOTIFY){
-			
-			MDS.log("COINNOTIFY : "+JSON.stringify(msg.data));
+		if(msg.data.address ==  COIN_SECRET_NOTIFY){
 			
 			//Get the coin
 			var coin = msg.data.coin;
