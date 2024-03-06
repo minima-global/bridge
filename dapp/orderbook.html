@@ -51,18 +51,10 @@
 	var USER_DETAILS = {};
 	
 	function loadCompleteOrderBook(){
-		
 		//Load the complete order book..
 		getCompleteOrderBook(function(orderbook){
-			
-			var totalorder = getCompleteOrderBookTotals(orderbook,function(res){
-				
-				var data = JSON.stringify(res,null,2)+"<br><br>"+JSON.stringify(orderbook,null,2);
-				//var data = JSON.stringify(res,null,2);
-				
-				//Show with pretty graphics..
-				completeorderbook.innerHTML = data;
-			});
+			//Show with pretty graphics..
+			completeorderbook.innerHTML = JSON.stringify(orderbook,null,2);
 		});
 	}
 	

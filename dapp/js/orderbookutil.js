@@ -81,18 +81,10 @@ function checkNeedPublishOrderBook(userdets,callback){
 	//First check if your orderbook has changed - default is empty
 	getMyOrderBook(function(currentorderbook){
 		
-		//Check if we are adding liquidity
-		if(!currentorderbook.nativeenable && !currentorderbook.wrappedenable){
-			if(callback){
-				callback(false);	
-			}
-			return;
-		}
-		
 		//Has it changed or not providing liquidity..
 		var oldbook = JSON.stringify(myoldorderbook);
 		var newbook = JSON.stringify(currentorderbook);
-		if((oldbook==newbook) && !currentorderbook.nativeenable && !currentorderbook.wrappedenable){
+		if((oldbook==newbook) && !currentorderbook.wminima.enable){
 			//No change.. no need to check any further..
 			if(callback){
 				callback(false);	
@@ -109,8 +101,8 @@ function checkNeedPublishOrderBook(userdets,callback){
 				//MDS.log("OrderBook changed! old:"+oldbook+" new:"+newbook);
 				publishbook = true;	
 			
-			//Are we providing liquidity
-			}else if(currentorderbook.nativeenable || currentorderbook.wrappedenable){
+			//Are we providing liquidity - then check balance
+			}else if(currentorderbook.wminima.enable){
 				//Check balances for all - use rounded values to ignore the publish messages
 				if( currentbalances.minima.total != myoldbalance.minima.total ||
 					currentbalances.wminima != myoldbalance.wminima){
@@ -156,14 +148,18 @@ function checkNeedPublishOrderBook(userdets,callback){
 	});
 }
 
-function getCompleteOrderBookTotals(completeorderbook,callback){
+/*function getCompleteOrderBookTotals(completeorderbook,callback){
 	
 	var result = {};
 	
 	//How many valid books are there
-	result.totalbooks 		= 0;
+	result.totalbooks 			= 0;
+	result.wminima 				= {};
+	result.wminima.books 		= 0;
+	result.wminima.books 		= 0;
+	
 	result.minimumminima	= 1000000000;
-	result.minimumwminima	= 1000000000;
+	result.minimumwminima	= 1000000000; 
 	
 	result.minima 			= {};
 	result.minima.total 	= 0;
@@ -179,8 +175,9 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 		var userorderbook 	= completeorderbook[i];
 		
 		var orderbk			= userorderbook.data.orderbook;
-		if(orderbk.nativeenable || orderbk.wrappedenable){
+		if(orderbk.wminima.enable){
 			result.totalbooks++;
+			result.totalwminimabooks++;
 		}
 		
 		var userbalance = userorderbook.data.balance;
@@ -214,7 +211,7 @@ function getCompleteOrderBookTotals(completeorderbook,callback){
 	}
 	
 	callback(result);
-}
+}*/
 
 //I have AMOUNT of TOKEN to swap.. find the best order
 function searchOrderBook(token, amount, ignoreme, callback){
@@ -291,18 +288,114 @@ function searchOrderBook(token, amount, ignoreme, callback){
 	});
 }
 
-function calculateRequiredAmount(token,amount,orderbook){
+//I have AMOUNT of TOKEN to swap.. find the best order
+function searchAllOrderBooks(mytoken, requiredtoken, amount, ignoreme, callback){
+	
+	//Get the complete order book
+	getCompleteOrderBook(function(completeorderbook){
+		
+		var validorders 	= [];
+		var currentbuy 		= 0;
+		var currentsell 	= 1000000;
+		
+		//Cycle through the orders
+		var len = completeorderbook.length;
+		for(var i=0;i<len;i++){
+			
+			var data 		= completeorderbook[i].data;
+			var user		= data.publickey;
+			var orderbook 	= data.orderbook;
+			var balance 	= data.balance;
+			
+			//Which side of the trade are we checking..
+			
+			//HACK ONLY SEARCH ME!
+			if(user != ignoreme){
+				
+				if(mytoken == "minima"){
+					
+					//SELL Orders!
+					if(	requiredtoken == "wminima" &&
+						orderbook.wminima.enable &&
+						balance.wminima >= +amount
+					){
+						//Is the price better than current
+						if(orderbook.wminima.sell == currentsell){
+							
+							//Same as current best.. just add
+							validorders.push(data);
+						}else if(orderbook.wminima.sell < currentsell){
+							
+							//Best price so far	
+							validorders = [];
+							currentsell	= +orderbook.wminima.sell;
+							validorders.push(data);
+						}
+					}
+				
+				}else if(mytoken == "wminima"){
+					
+					//BUY Orders!
+					if(	requiredtoken == "minima" &&
+						orderbook.wminima.enable &&
+						balance.minima.total >= +amount
+					){
+						//Is the price better than current
+						if(orderbook.wminima.buy == currentbuy){
+							
+							//Same as current best.. just add
+							validorders.push(data);
+						}else if(orderbook.wminima.buy > currentbuy){
+							
+							//Best price so far	
+							validorders = [];
+							currentbuy	= +orderbook.wminima.buy;
+							validorders.push(data);
+						}
+					}
+				}
+				 
+			}
+		}
+		
+		//Any at all found ?
+		if(validorders.length == 0){
+			callback(false,{});
+			return;
+		}
+		
+		//MDS.log("Found valid orders : "+validorders.length);
+		
+		//Pick a random one..
+		var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
+
+		//Send it back..
+		callback(true,finalorder);
+	});
+}
+
+function calculateSwapAmount(mytoken,requiredtoken,amount,orderbook){
 	
 	//What is the fee..
-	var fee = 0;
-	if(token == "minima"){
-		fee = toFixedNumber(orderbook.nativefee);
-	}else{
-		fee = toFixedNumber(orderbook.wrappedfee);
+	var swapamount = toFixedNumber(amount);
+	var youramount = 0;
+	if(mytoken == "minima"){
+		
+		if(requiredtoken == "wminima"){
+			//Get the SELL price..
+			price 		= toFixedNumber(orderbook.wminima.sell);
+			youramount 	= swapamount / price;
+		}
+	
+	}else if(mytoken == "wminima"){
+		
+		if(requiredtoken == "minima"){
+			//Get the BUY price..
+			price 		= toFixedNumber(orderbook.wminima.buy);
+			youramount 	= swapamount * price;
+		}
 	}
 	
-	var feeamount = +amount * (fee / 100);
-	
 	//Calculate the amount of wMinima.. 
-	return toFixedNumber(+amount - feeamount);
+	return toFixedNumber(youramount);
 }

@@ -343,10 +343,10 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						
 						//Are we enablked for these swaps..
 						//MDS.log("SKIPPING ORDER BOOK CHECK FOR ETH SWAP!")
-						if(myorderbook.nativeenable){
+						if(myorderbook.wminima.enable){
 							
 							//Calculate how much we should send back..
-							var calcamount = calculateRequiredAmount("minima",sendamount,myorderbook);
+							var calcamount = calculateSwapAmount("wminima","minima",sendamount,myorderbook);
 							if((calcamount >= requestamount)){
 							
 								//Send the ETH counter TXN - to make him reveal the secret

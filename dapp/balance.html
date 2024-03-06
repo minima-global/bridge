@@ -145,11 +145,7 @@
 			myethaddress.innerHTML	  = getETHERUMAddress(); 
 			ethbalance.innerHTML 	  = balances.eth;
 			wminimabalance.innerHTML  = balances.wminima;
-			
-			//AND usdt
-			getUSDTBalance(function(usdtbal){
-				usdtbalance.innerHTML = usdtbal;
-			});
+			usdtbalance.innerHTML 	  = balances.usdt;
 			
 			//Any unconfirmed.. ?
 			balanceunconfirmed = balunconf;	

@@ -107,7 +107,7 @@
 					USER_DETAILS=userdets;
 					
 					//Search for a User in the OrderBook..
-					searchOrderBook("minima",sendamount,USER_DETAILS.minimapublickey,function(found,order){
+					searchAllOrderBooks("minima","wminima",sendamount,USER_DETAILS.minimapublickey,function(found,order){
 						
 						if(!found){
 							swapproceed.innerHTML="No match found for "+sendamount+" Minima..";
@@ -120,7 +120,7 @@
 							reqpublickey = order.publickey;		
 							
 							//What is the amount.. we are requesting WMINIMA
-							reqamount = calculateRequiredAmount("wminima",sendamount,order.orderbook);
+							reqamount = calculateSwapAmount("minima","wminima",sendamount,order.orderbook);
 							
 							//Set the details..
 							swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>You send "+sendamount

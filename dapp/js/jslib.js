@@ -41,7 +41,10 @@ function checkIsNumber(val){
 		return false;
 	}
 	
-	return (val == +val);
+	//Is it a number..
+	var isnumber = (val == +val); 
+	
+	return isnumber;
 }
 
 function checkIsPositiveNumber(val){
@@ -49,7 +52,9 @@ function checkIsPositiveNumber(val){
 		return false
 	}
 	
-	return (+val>0);
+	var ispositive = (+val>0); 
+	
+	return ispositive;
 }
 
 function randomInteger(min, max) {
@@ -57,7 +62,7 @@ function randomInteger(min, max) {
 }
 
 function toFixedNumber(number){
-	return +Number.parseFloat(number).toFixed(2);
+	return +Number.parseFloat(number).toFixed(4);
 }
 
 function getCurrentUnixTime(){

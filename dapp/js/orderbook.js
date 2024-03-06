@@ -246,19 +246,40 @@ function setMyOrderBook(nativeenable, nativefee, wrappedenable, wrappedfee, mini
 	
 	orderbook.nativeenable 	= nativeenable;
 	orderbook.nativefee 	= +Number.parseFloat(nativefee).toFixed(2);
-	if(!nativeenable || orderbook.nativefee<=-100){
+	if(!nativeenable || orderbook.nativefee<=-100 || orderbook.nativefee>=100){
 		orderbook.nativefee = 0;	
 	}
 	
 	orderbook.wrappedenable	= wrappedenable;
 	orderbook.wrappedfee	= +Number.parseFloat(wrappedfee).toFixed(2);
-	if(!wrappedenable || orderbook.wrappedfee<=-100){
+	if(!wrappedenable || orderbook.wrappedfee<=-100 || orderbook.wrappedfee>=100){
 		orderbook.wrappedfee = 0;	
 	}
 	
 	orderbook.minimum = Math.floor(+minimumorder);
 	if(!nativeenable && !wrappedenable){
 		orderbook.minimum = 0;
+	}
+	
+	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
+		if(callback){
+			callback(setorder);
+		}
+	});
+}
+
+function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, callback){
+	
+	//Create an order book for this user
+	var orderbook 				= {};
+	orderbook.wminima 			= {};
+	orderbook.wminima.enable 	= wrappedenable;
+	if(wrappedenable){
+		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
+		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);	
+	}else{
+		orderbook.wminima.buy 		= 0;
+		orderbook.wminima.sell 		= 0;
 	}
 	
 	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
@@ -283,11 +304,12 @@ function getMyOrderBook(callback){
 }
 
 function getEmptyOrderBook(){
-	var orderbook 			= {};
-	orderbook.nativeenable 	= false;
-	orderbook.nativefee 	= 0;
-	orderbook.wrappedenable	= false;
-	orderbook.wrappedfee	= 0;
-	orderbook.minimum		= 0;
+	var orderbook 				= {};
+	
+	orderbook.wminima			= {};
+	orderbook.wminima.enable	= false;
+	orderbook.wminima.buy 		= 0;
+	orderbook.wminima.sell 		= 0;
+	
 	return orderbook;
 }

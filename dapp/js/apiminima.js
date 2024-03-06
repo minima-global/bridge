@@ -381,13 +381,13 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						
 						//Are we enabled
 						//MDS.log("SKIPPING ORDER BOOK CHECK FOR MINIMA SWAP!")
-						if(myorderbook.wrappedenable){
+						if(myorderbook.wminima.enable){
 							//Check the details are valid!.. FEES etc.. 
 							var sendamount 		= +coin.amount; 
 							var requestamount 	= +coin.state[1];
 						
 							//Calculate how much we should send back..
-							var calcamount = calculateRequiredAmount("wminima",sendamount,myorderbook);
+							var calcamount = calculateSwapAmount("minima","wminima",sendamount,myorderbook);
 							if((calcamount >= requestamount)){
 								
 								//Send the ETH counter TXN - to make him reveal the secret

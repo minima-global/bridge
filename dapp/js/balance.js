@@ -15,11 +15,15 @@ function getAllBalances(userdetails,callback){
 			
 			//Get the Wrapped Minima balance
 			getWMinimaBalance(function(wminbal){
-				//Get wrapped and ETH
 				balance.wminima	= wminbal;
 				
-				//And return the results..
-				callback(balance);
+				//get the USDT balance..
+				getUSDTBalance(function(usdtbal){
+					balance.usdt	= usdtbal;
+				
+					//And return the results..
+					callback(balance);	
+				});
 			});	
 		});
 	});

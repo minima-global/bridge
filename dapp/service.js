@@ -18,6 +18,7 @@ MDS.load("./js/ethers-4.0.31.min.js");
 MDS.load("./abi/erc20abi.js");
 MDS.load("./js/etherc20util.js");
 MDS.load("./js/etherc20wMinima.js");
+MDS.load("./js/etherc20USDT.js");
 
 MDS.load("./js/htlcvars.js");
 MDS.load("./abi/htlcabi.js");

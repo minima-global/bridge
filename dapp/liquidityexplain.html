@@ -47,7 +47,7 @@
 	
 	Add liquidity to the Bridge.. the FEE can be negative<br>
 	<br>
-	You <b>MUST</b> have some native minima to broadcast orderbook messages<br>
+	You <b>MUST</b> have some native minima to send broadcast messages<br>
 	<br>
 	You <b>MUST</b> have some ETH to pay the fee for transferring wMinima / USDT<br>
 	<br>
@@ -80,23 +80,23 @@
 			<td><input type=text id=minimumorder placeholder=1000 /></td>
 		</tr>
 	</table> -->
-	
-	<br>
+ 	
+	<br><br>
 	<b>WMINIMA POOL</b><br>
-	<input type=checkbox id=wrappedenableid>
+	<input type=checkbox id=enablewrapped>
 	<label for=enablewrapped>Enable Wrapped Minima Pool</label>
 	<table>
 		<tr>
 			<td>BUY :</td>
-			<td><input type=text id=wrappedbuyid placeholder=0 /></td>
+			<td><input type=text id=nativefee placeholder=5 /></td>
 		</tr>
 		<tr>
 			<td>SELL :</td>
-			<td><input type=text id=wrappedsellid placeholder=0 /></td>
+			<td><input type=text id=nativefee placeholder=5 /></td>
 		</tr>
 	</table>
 	
-	<!--  <br><br>
+	<br><br>
 	<b>USDT POOL</b><br>
 	<input type=checkbox id=enablewrapped>
 	<label for=enablewrapped>Enable USDT Pool</label>
@@ -109,8 +109,7 @@
 			<td>SELL :</td>
 			<td><input type=text id=nativefee placeholder=5 /></td>
 		</tr>
-	</table>-->
-	
+	</table>
 	<br>
 	Prices are in Native Minima
 	
@@ -129,28 +128,37 @@
 	
 	function updateorderbook(){
 		
-		//Wrapped Minima
-		var wrappedenable 	= wrappedenableid.checked;
-		var wrappedbuy 		= wrappedbuyid.value.trim();
-		var wrappedsell 	= wrappedsellid.value.trim();
+		var nativeenable 	= usenativeminima.checked;
+		var wrappedenable 	= usewminima.checked;
 		
-		if(wrappedenable){
-			if(!checkIsPositiveNumber(wrappedbuy)){
-				alert("You must specify a valid BUY for Wrapped Minima : "+wrappedbuy);
-				return;
-			}
-			
-			if(!checkIsPositiveNumber(wrappedsell)){
-				alert("You must specify a valid SELL for Wrapped Minima : "+wrappedsell);
+		var nativefeeamt 	= nativefee.value.trim();
+		if(nativeenable){
+			if(nativefeeamt == "" || !checkIsNumber(nativefeeamt)){
+				alert("You must specify a valid Fee for Native Minima");
 				return;
 			}
 		}else{
-			wrappedbuy 	= 0;
-			wrappedsell = 0;
+			nativefeeamt = 0;
+		}
+		
+		var wrappedfeeamt 	= wrappedfee.value;
+		if(wrappedenable){
+			if(wrappedfeeamt == "" || !checkIsNumber(wrappedfeeamt)){
+				alert("You must specify a valid Fee for wMinima");
+				return;
+			}
+		}else{
+			wrappedfeeamt 	= 0;
+		}
+		
+		var minorder = minimumorder.value;
+		if(!checkIsPositiveNumber(minorder)){
+			alert("You must specify a valid Minimum order");
+			return;
 		}
 		
 		//Store this..
-		setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, function(dets){
+		setMyOrderBook(nativeenable,nativefeeamt, wrappedenable, wrappedfeeamt, minorder, function(dets){
 			
 			//Set details as may have been set to ZERO
 			setOrderBookDetails();
@@ -163,12 +171,14 @@
 	function setOrderBookDetails(){
 		//Get the details..
 		getMyOrderBook(function(orderbook){
-			MDS.log(JSON.stringify(orderbook));
+			//MDS.log(JSON.stringify(orderbook));
 			
 			//Set GUI
-			wrappedenableid.checked = orderbook.wminima.enable;
-			wrappedbuyid.value		= orderbook.wminima.buy;
-			wrappedsellid.value		= orderbook.wminima.sell;
+			usenativeminima.checked = orderbook.nativeenable;
+			nativefee.value			= orderbook.nativefee;
+			usewminima.checked		= orderbook.wrappedenable;
+			wrappedfee.value		= orderbook.wrappedfee;
+			minimumorder.value		= orderbook.minimum;
 		});
 	}
 	
