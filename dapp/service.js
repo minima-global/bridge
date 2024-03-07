@@ -73,6 +73,11 @@ MDS.init(function(msg){
 		
 		//We want to be notified of Coin Secret Events
 		setupCoinSecretEvents(function(notify){});
+		
+		//Are we already inited.. then check order book
+		if(BRIDGE_INITED){
+			createAndSendOrderBook(USER_DETAILS,function(){});
+		}
 						
 		MDS.log("Bridge Inited..");
 		
@@ -129,6 +134,11 @@ MDS.init(function(msg){
 		
 		//Always publish your book every hour
 		createAndSendOrderBook(USER_DETAILS);
+	
+	}else if(msg.event == "NEWBLOCK"){
+	
+		//Check the Complete Order Book - will only check sigs for NEW entries..
+		createCompleteOrderBook(function(completeorderbook){});
 	
 	}else if(msg.event == "NOTIFYCOIN"){
 		

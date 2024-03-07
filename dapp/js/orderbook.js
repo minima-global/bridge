@@ -1,6 +1,12 @@
 
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
 
+//Should be 2 hours..
+var ORDEBOOK_CHECK_DEPTH = 512;
+
+//How many new SIGS checked in complete orderbook
+var SIGS_CHECKED = 0;
+
 function signData(publickey,data, callback){
 	MDS.cmd("maxsign data:"+data,function(resp){
 		callback(resp.response);
@@ -68,7 +74,23 @@ function sendOrderBook(userdetails, objson, callback){
 	});
 }
 
+function setCompleteOrderBook(orderbook,callback){
+	MDS.keypair.set("_completeorderbook",JSON.stringify(orderbook),function(setresult){
+		callback(setresult);
+	}); 	
+}
+
 function getCompleteOrderBook(callback){
+	MDS.keypair.get("_completeorderbook",function(getresult){
+		if(getresult.status){
+			callback(JSON.parse(getresult.value));
+		}else{
+			callback([]);	
+		}
+	}); 	
+}
+
+function createCompleteOrderBook(callback){
 	
 	//First get ALL the records..
 	_getAllOrderCoins(function(allrecords){
@@ -76,16 +98,40 @@ function getCompleteOrderBook(callback){
 		//All the valid signed records
 		var validsignedrecords = [];
 		
-		MDS.log("Check order book valid sigs : "+allrecords.length);
+		//Reset the sigs checked
+		SIGS_CHECKED = 0;
 		
 		//Now check all the signatures..
 		_checkValidSigs(0,allrecords,validsignedrecords,function(){
-			
+				
 			//Now we have all the valid records.. only add the latest per owner..
 			var unique = getUniqueRecords(validsignedrecords);
 			
-			//And send this back..
-			callback(unique);
+			//Did we check any new coins..
+			if(SIGS_CHECKED > 0){
+				MDS.log("NEW orderbook coins found:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
+			}
+			
+			//Now we only want the ones providing liquidity
+			var finallist 	= [];
+			var orderlen 	= unique.length;
+			for(var i=0;i<orderlen;i++){
+				var orderbk = unique[i];
+				
+				try{
+					if(orderbk.data.orderbook.wminima.enable || orderbk.data.orderbook.usdt.enable){
+						finallist.push(orderbk);
+					}	
+				}catch(e){
+					MDS.log("OrderBook inavlid format :"+e+" "+JSON.stringify(orderbk));
+				}
+			}
+			
+			//Now STORE this..
+			setCompleteOrderBook(finallist,function(){
+				//And send this back..
+				callback(finallist);	
+			});
 		});	
 	});
 }
@@ -96,7 +142,7 @@ function getCompleteOrderBook(callback){
 function _getAllOrderCoins(callback){
 	
 	//Search for coins..
-	var search = "coins depth:512 simplestate:true address:"+BRIDGEORDERBBOK;
+	var search = "coins depth:"+ORDEBOOK_CHECK_DEPTH+" simplestate:true address:"+BRIDGEORDERBBOK;
 	
 	//Run it..
 	MDS.cmd(search,function(resp){
@@ -111,15 +157,20 @@ function _getAllOrderCoins(callback){
 			//Get the coin
 			var coin = coins[i];
 			
-			//Create a Record..
-			var record 			= {};
-			record.publickey	= coin.state[0];
-			record.data 		= stripBrackets(coin.state[1]);
-			record.datahash 	= hashString(record.data);
-			record.signature	= coin.state[2];
-			
-			//Add to our list
-			allfound.push(record);
+			try{
+				//Create a Record..
+				var record 			= {};
+				record.publickey	= coin.state[0];
+				record.data 		= stripBrackets(coin.state[1]);
+				record.datahash 	= hashString(record.data);
+				record.signature	= coin.state[2];
+				
+				//Add to our list
+				allfound.push(record);	
+				
+			}catch(e){
+				MDS.log("OrderBook COIN inavlid format :"+e+" "+JSON.stringify(coin));	
+			}
 		}
 			//Send the result back		
 		callback(allfound);
@@ -169,6 +220,10 @@ function _checkValidSigs(counter,allrecords,correctrecords,callback){
 			_checkValidSigs(counter+1,allrecords,correctrecords,callback);
 			
 		}else{
+			
+			//Checking a NEW signature coin
+			SIGS_CHECKED++;
+			
 			//Check it..
 			verifyData(record.publickey,record.datahash,record.signature,function(isvalid){
 				

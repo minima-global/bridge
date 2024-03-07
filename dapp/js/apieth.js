@@ -129,7 +129,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 						resp.error.message.includes("refundable: not sender")){
 								
 						//Already collected - don't try again..
-						collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "0xFF", function(){
+						collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "Already collected", function(){
 							callback(resp);		
 						});			
 					}else{
@@ -141,7 +141,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 			
 			//Already collected - don't try again..
 			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
-			collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "0xFF", function(){
+			collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "Already collected", function(){
 				callback();		
 			});	
 		}
@@ -209,7 +209,7 @@ function checkETHNewSecrets(currentethblock, callback){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
 					
 					//Put a log in db so no need to call ETH..
-					collectExpiredHTLC(withdrawlog.hashlock, "withdrawn", 0, "0x01", function(){});
+					collectExpiredHTLC(withdrawlog.hashlock, "unknown", 0, "SECRET REVEALED - Withdrawn", function(){});
 				}
 			});
 		}

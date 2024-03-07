@@ -23,7 +23,23 @@ function broadcastMyOrderBook(userdets, completeorderbook, callback){
 /**
  * Keep the old versions to check..
  */
-var myoldorderbook 	= getEmptyOrderBook();
+function setOldOrderBook(orderbook,callback){
+	MDS.keypair.set("_oldorderbook",JSON.stringify(orderbook),function(setresult){
+		callback(setresult);
+	}); 	
+}
+
+function getOldOrderBook(callback){
+	MDS.keypair.get("_oldorderbook",function(getresult){
+		if(getresult.status){
+			callback(JSON.parse(getresult.value));
+		}else{
+			callback(getEmptyOrderBook());	
+		}
+	}); 	
+}
+
+//var myoldorderbook 	= getEmptyOrderBook();
 var myoldbalance	= {};
 
 /**
@@ -59,13 +75,18 @@ function createAndSendOrderBook(userdets, callback){
 				
 				//Success send..?
 				if(sendvalid){
-					myoldorderbook  = currentorderbook;
-					myoldbalance	= currentbalances;
+					setOldOrderBook(currentorderbook,function(oldbk){
+						myoldbalance	= currentbalances;	
+					});
+					
 				}else{
 					
 					//Wipe the order book so the timer check sends again..
-					myoldorderbook 	= getEmptyOrderBook();
-					myoldbalance	= {};
+					var warpedorderbook 	= getEmptyOrderBook();
+					warpedorderbook.warped 	= true;
+					setOldOrderBook(warpedorderbook,function(oldbk){
+						myoldbalance	= {};	
+					});
 				}
 				
 				if(callback){
@@ -81,69 +102,86 @@ function checkNeedPublishOrderBook(userdets,callback){
 	//First check if your orderbook has changed - default is empty
 	getMyOrderBook(function(currentorderbook){
 		
-		//Has it changed or not providing liquidity..
-		var oldbook = JSON.stringify(myoldorderbook);
-		var newbook = JSON.stringify(currentorderbook);
-		if((oldbook==newbook) && !currentorderbook.wminima.enable){
-			//No change.. no need to check any further..
-			if(callback){
-				callback(false);	
-			}
-			return;	
-		}
-		
-		//Now check whether the balance hash changed..
-		getAllBalances(userdets,function(currentbalances){
+		//Get the OLD orderbook..
+		getOldOrderBook(function(myoldorderbook){
 			
-			//Now do some some checking..
-			var publishbook = false;
-			if(oldbook != newbook){
-				//MDS.log("OrderBook changed! old:"+oldbook+" new:"+newbook);
-				publishbook = true;	
-			
-			//Are we providing liquidity - then check balance
-			}else if(currentorderbook.wminima.enable){
-				//Check balances for all - use rounded values to ignore the publish messages
-				if( currentbalances.minima.total != myoldbalance.minima.total ||
-					currentbalances.wminima != myoldbalance.wminima){
-					//MDS.log("Balance Changed! old:"+JSON.stringify(myoldbalance)+" new:"+JSON.stringify(currentbalances));
-					publishbook = true;
-				}
-			}	
-			
-			//Are we publishing..
-			if(publishbook){
+			//Has it changed or not providing liquidity.. otherwise need to check balances
+			var oldbook = JSON.stringify(myoldorderbook);
+			var newbook = JSON.stringify(currentorderbook);
+			if((oldbook==newbook) && 
+				!currentorderbook.wminima.enable &&
+				!currentorderbook.usdt.enable){
 				
-				//Create the complete book
-				var orderbookmsg = {};
-				orderbookmsg.publickey 		= userdets.minimapublickey;
-				orderbookmsg.ethpublickey 	= userdets.ethaddress;
-				orderbookmsg.orderbook 		= currentorderbook;
-				orderbookmsg.balance 		= currentbalances;
-				
-				//Get his balance..
-				broadcastMyOrderBook(userdets, orderbookmsg, function(sendvalid){
-					
-					//Success send..?
-					if(sendvalid){
-						myoldorderbook  = currentorderbook;
-						myoldbalance	= currentbalances;
-					}else{
-						
-						//Wipe so send again..
-						myoldorderbook 	= getEmptyOrderBook();
-						myoldbalance	= {};
-					}
-					
-					if(callback){
-						callback(true);
-					}	
-				});
-			}else{
+				//No change.. no need to check any further..
 				if(callback){
-					callback(false);
+					callback(false);	
 				}
-			}				
+				return;	
+			}
+			
+			//Now check whether the balance hash changed..
+			getAllBalances(userdets,function(currentbalances){
+				
+				//Now do some some checking..
+				var publishbook = false;
+				if(oldbook != newbook){
+					publishbook = true;	
+				
+				//Are we providing liquidity - then check balance
+				}else if(currentorderbook.wminima.enable){
+					
+					if( currentbalances.minima.total != myoldbalance.minima.total ||
+						currentbalances.wminima != myoldbalance.wminima){
+						publishbook = true;
+					}
+				
+				}else if(currentorderbook.usdt.enable){
+					
+					if( currentbalances.minima.total != myoldbalance.minima.total ||
+						currentbalances.usdt != myoldbalance.usdt){
+						publishbook = true;
+					}
+				}
+				
+				//Are we publishing..
+				if(publishbook){
+					
+					//Create the complete book
+					var orderbookmsg = {};
+					orderbookmsg.publickey 		= userdets.minimapublickey;
+					orderbookmsg.ethpublickey 	= userdets.ethaddress;
+					orderbookmsg.orderbook 		= currentorderbook;
+					orderbookmsg.balance 		= currentbalances;
+					
+					//Get his balance..
+					broadcastMyOrderBook(userdets, orderbookmsg, function(sendvalid){
+						
+						//Success send..?
+						if(sendvalid){
+							setOldOrderBook(currentorderbook,function(oldbk){
+								myoldbalance = currentbalances;	
+							});
+					
+						}else{
+							
+							//Wipe so send again..
+							var warpedorderbook 	= getEmptyOrderBook();
+							warpedorderbook.warped 	= true;
+							setOldOrderBook(warpedorderbook,function(oldbk){
+								myoldbalance = {};	
+							});
+						}
+						
+						if(callback){
+							callback(true);
+						}	
+					});
+				}else{
+					if(callback){
+						callback(false);
+					}
+				}				
+			});	
 		});
 	});
 }

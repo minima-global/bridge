@@ -20,6 +20,9 @@
 	<script type="text/javascript" src="./js/jslib.js"></script>
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
+	
 	
 </head>
 
@@ -44,6 +47,25 @@
 	
 	function striptags(text){
 		return text.replace(/<\/?[^>]+(>|$)/g, "");
+	}
+	
+	function getTokenType(token){
+		if(token=="minima"){
+			return "Minima";
+		}
+		
+		var checktoken = token; 
+		if(checktoken.startsWith("ETH:")){
+			checktoken = checktoken.substring(4);
+		}
+		
+		if(checktoken == wMinimaContractAddress){
+			return "wMinima";
+		}else if(checktoken == USDTContractAddress){
+			return "USDT";
+		}
+		
+		return "UNKNOWN";
 	}
 	
 	function wipeHistory(){
@@ -81,7 +103,7 @@
 			trow.insertCell(1).innerHTML = hash;
 			
 			trow.insertCell(2).innerHTML = row.EVENT;
-			trow.insertCell(3).innerHTML = row.TOKEN;
+			trow.insertCell(3).innerHTML = getTokenType(row.TOKEN);
 			trow.insertCell(4).innerHTML = row.AMOUNT;
 			trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";
 			

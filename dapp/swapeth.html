@@ -135,9 +135,12 @@
 						//What is the amount.. we are requesting MINIMA
 						reqamount = calculateSwapAmount(reqtoken,"minima",sendamount,order.orderbook);
 						
+						//The ACTUAL amount is -0.0001 as this is the NEW SECRET coin..
+						var actualamount = reqamount - 0.0001; 
+						
 						//Set the details..
 						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>You send "+sendamount
-												+" "+reqtokenstr+" on ETH and receive "+reqamount+" Minima<br><br>"
+												+" "+reqtokenstr+" on ETH and receive "+actualamount+" Minima<br><br>"
 												+"<button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
 												+"You <b>MUST</b> have some ETH to send / collect the "+reqtokenstr+"..";					
 					}
