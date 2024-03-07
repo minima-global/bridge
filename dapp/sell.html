@@ -1,0 +1,154 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/puresha1.js"></script>
+	<script type="text/javascript" src="./js/pagelayout.js"></script>
+	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
+	<script type="text/javascript" src="./js/apieth.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/orderbookutil.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./js/htlcvars.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/erc20abi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
+	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
+	
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		createHeader();
+	</script>
+	
+	SWAP Wrapped Minima on ETH for Minima<br>
+	<br>
+	<br>
+	
+	<div id="swapproceed"></div>
+	
+	<script type="text/javascript">
+		createFooter();
+	</script>
+	
+<script type="text/javascript">
+	
+	var USER_DETAILS = {};
+	
+	//How much Native Minima are we swapping..
+	var amount 		= toFixedNumber(MDS.form.getParams("amount"));
+	var reqamount 	= 0;
+	
+	var reqtoken 		= MDS.form.getParams("swaptoken");
+	var reqtokenstr 	= "wMinima";
+	if(reqtoken == "usdt"){
+		reqtokenstr 	= "USDT";
+	}
+	
+	var reqpublickey 	= "0x00";
+	
+	//Start a native swap..
+	function proceed(){
+		
+		//Disable the button
+		proceedbutton.disabled=true;
+			
+		var erc20contract = "0";
+		if(reqtoken == "wminima"){
+			erc20contract = wMinimaContractAddress;
+		}else if(reqtoken == "usdt"){
+			erc20contract = USDTContractAddress;
+		}else{
+			alert("Invalid token requested : "+reqtoken);
+			return
+		}
+		
+		//Send Minima to the HTLC..
+		startETHSwap(USER_DETAILS, reqpublickey, erc20contract, amount, reqamount, function(resp){
+			if(resp.status){
+				alert("Swap started!");
+				
+				//Ok - lets jump to the next page..
+				location.href="swap.html?uid="+MDS.minidappuid;
+				
+			}else{
+				if(resp.error){
+					alert(resp.error);	
+				}else{
+					alert(resp.message);
+				}
+				
+				//Disable the button
+				proceedbutton.disabled=false;
+			}
+		});
+	}
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		
+		//Do initialisation
+		if(msg.event == "inited"){
+			
+			//Init ETH
+			initBridgeSystems(function(userdets){
+				USER_DETAILS=userdets;
+			
+				//Search for a User in the OrderBook..
+				xsearchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
+					if(!found){
+						swapproceed.innerHTML="No match found for "+sendamount+" "+reqtoken+"..";
+					}else{
+						
+						//Get the details..
+						swapproceed.innerHTML=JSON.stringify(order,null,2);
+						
+						//Who is this?
+						reqpublickey = order.ethpublickey;		
+						
+						//What is the amount.. we are requesting MINIMA
+						reqamount = calculateAmount("sell",amount,"wminima",order.orderbook);
+						
+						//The ACTUAL amount is -0.0001 as this is the NEW SECRET coin..
+						var actualamount = reqamount - 0.0001; 
+						
+						//Set the details..
+						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>"
+												+"SELL "+amount+" "+reqtokenstr+" for "+actualamount+" Minima<br><br>"
+												+"<button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
+												+"You <b>MUST</b> have some ETH to send / collect the "+reqtokenstr+"..";					
+					}
+				});
+			});
+		}
+	});
+
+</script>
+
+</body>
+
+</html>

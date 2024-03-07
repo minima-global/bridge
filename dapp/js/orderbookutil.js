@@ -39,7 +39,6 @@ function getOldOrderBook(callback){
 	}); 	
 }
 
-//var myoldorderbook 	= getEmptyOrderBook();
 var myoldbalance	= {};
 
 /**
@@ -76,7 +75,7 @@ function createAndSendOrderBook(userdets, callback){
 				//Success send..?
 				if(sendvalid){
 					setOldOrderBook(currentorderbook,function(oldbk){
-						myoldbalance	= currentbalances;	
+						myoldbalance = currentbalances;	
 					});
 					
 				}else{
@@ -85,7 +84,7 @@ function createAndSendOrderBook(userdets, callback){
 					var warpedorderbook 	= getEmptyOrderBook();
 					warpedorderbook.warped 	= true;
 					setOldOrderBook(warpedorderbook,function(oldbk){
-						myoldbalance	= {};	
+						myoldbalance = {};	
 					});
 				}
 				
@@ -130,15 +129,22 @@ function checkNeedPublishOrderBook(userdets,callback){
 				//Are we providing liquidity - then check balance
 				}else if(currentorderbook.wminima.enable){
 					
-					if( currentbalances.minima.total != myoldbalance.minima.total ||
-						currentbalances.wminima != myoldbalance.wminima){
+					if(myoldbalance.minima){
+						if( currentbalances.minima.total != myoldbalance.minima.total ||
+							currentbalances.wminima != myoldbalance.wminima){
+							publishbook = true;
+						}	
+					}else{
 						publishbook = true;
 					}
-				
 				}else if(currentorderbook.usdt.enable){
 					
-					if( currentbalances.minima.total != myoldbalance.minima.total ||
-						currentbalances.usdt != myoldbalance.usdt){
+					if(myoldbalance.minima){
+						if( currentbalances.minima.total != myoldbalance.minima.total ||
+							currentbalances.usdt != myoldbalance.usdt){
+							publishbook = true;
+						}	
+					}else{
 						publishbook = true;
 					}
 				}
@@ -346,4 +352,122 @@ function calculateSwapAmount(mytoken,requiredtoken,amount,orderbook){
 	
 	//Calculate the amount of wMinima.. 
 	return toFixedNumber(youramount);
+}
+
+
+//I have AMOUNT of TOKEN to swap.. find the best order
+function xsearchAllOrderBooks(action, amount, token, ignoreme, callback){
+	
+	//Get the complete order book
+	getCompleteOrderBook(function(completeorderbook){
+		
+		var validorders 	= [];
+		var currentbuy 		= -1;
+		var currentsell 	= 10000000;
+		
+		//Cycle through the orders
+		var len = completeorderbook.length;
+		for(var i=0;i<len;i++){
+			
+			var data 		= completeorderbook[i].data;
+			var user		= data.publickey;
+			var orderbook 	= data.orderbook;
+			var balance 	= data.balance;
+			
+			//Which side of the trade are we checking..
+			if(user != ignoreme){
+				
+				if(action == "buy"){
+					
+					if(token == "wminima"){
+					
+						//Serach for people SELLING	
+						if(orderbook.wminima.enable){
+							
+							//Check have the required amount..
+							if(balance.wminima >= +amount){
+								//Is the price better than current
+								if(orderbook.wminima.sell == currentsell){
+									//Same as current best.. just add
+									validorders.push(data);
+									
+								}else if(orderbook.wminima.sell < currentsell){
+									
+									//Best price so far	
+									validorders = [];
+									currentsell	= +orderbook.wminima.sell;
+									validorders.push(data);
+								}	
+							}
+						}
+					}
+				
+				}else if(action == "sell"){
+					
+					if(token == "wminima"){
+						
+						//Serach for people BUYING	
+						if(orderbook.wminima.enable){
+							
+							//How much Minima do we need
+							var totalamount = toFixedNumber(amount * orderbook.wminima.buy); 
+							
+							//Check have the required amount..
+							if(balance.minima.total >= totalamount){
+								//Is the price better than current
+								if(orderbook.wminima.buy == currentbuy){
+									//Same as current best.. just add
+									validorders.push(data);
+									
+								}else if(orderbook.wminima.buy > currentbuy){
+									
+									//Best price so far	
+									validorders = [];
+									currentsell	= +orderbook.wminima.sell;
+									validorders.push(data);
+								}	
+							}
+						}
+						
+					}
+				}
+			}
+		}
+				
+		//Any at all found ?
+		if(validorders.length == 0){
+			callback(false,{});
+			return;
+		}
+		
+		//MDS.log("Found valid orders : "+validorders.length);
+		
+		//Pick a random one..
+		var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
+
+		//Send it back..
+		callback(true,finalorder);
+	});
+}
+
+function calculateAmount(action, amount, token, orderbook){
+	
+	//What is the fee..
+	var useamount 	= toFixedNumber(amount);
+	var calcamount 	= 0;
+	
+	if(action == "buy"){
+		if(token == "wminima"){
+			var price 	= toFixedNumber(orderbook.wminima.sell);	
+			calcamount	= useamount * price;
+		}
+	}else if(action == "sell"){
+		if(token == "wminima"){
+			var price 	= toFixedNumber(orderbook.wminima.buy);	
+			calcamount	= useamount * price;
+		}
+	}
+		
+	//Calculate the amount of wMinima.. 
+	return toFixedNumber(calcamount);
 }

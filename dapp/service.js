@@ -76,6 +76,11 @@ MDS.init(function(msg){
 		
 		//Are we already inited.. then check order book
 		if(BRIDGE_INITED){
+			
+			//Check the Complete Order Book - will only check sigs for NEW entries..
+			createCompleteOrderBook(function(completeorderbook){});
+			
+			//Send out your order book if required..
 			createAndSendOrderBook(USER_DETAILS,function(){});
 		}
 						
