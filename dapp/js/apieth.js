@@ -349,7 +349,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							
 								//Calculate how much we should send back..
 								var calcamount = calculateAmount("sell",sendamount,"wminima",myorderbook);
-								MDS.log("ETH NEW CALC:"+calcamount);
+								MDS.log("ETH NEW CALC WMINIMA:"+calcamount);
 								if(calcamount >= requestamount){
 								
 									//Send the ETH counter TXN - to make him reveal the secret
@@ -369,8 +369,9 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							if(myorderbook.usdt.enable){
 							
 								//Calculate how much we should send back..
-								var calcamount = calculateSwapAmount("usdt","minima",sendamount,myorderbook);
-								if((calcamount >= requestamount)){
+								var calcamount = calculateAmount("sell",sendamount,"usdt",myorderbook);
+								MDS.log("ETH NEW CALC USDT:"+calcamount);
+								if(calcamount >= requestamount){
 								
 									//Send the ETH counter TXN - to make him reveal the secret
 									_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});

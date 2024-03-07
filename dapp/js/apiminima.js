@@ -388,10 +388,8 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 								var requestamount 	= +coin.state[1];
 							
 								//Calculate how much we should send back..
-								//var oldcalcamount 	= calculateSwapAmount("minima","wminima",sendamount,myorderbook);
 								var calcamount = calculateAmount("buy",requestamount,"wminima",myorderbook);
-								MDS.log("MINIMA NEW CALCREQ:"+calcamount);
-								
+								MDS.log("MINIMA NEW CALCREQ WMINIMA:"+calcamount);
 								if((sendamount >= calcamount)){
 									
 									//Send the ETH counter TXN - to make him reveal the secret
@@ -414,8 +412,9 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 								var requestamount 	= +coin.state[1];
 							
 								//Calculate how much we should send back..
-								var calcamount = calculateSwapAmount("minima","usdt",sendamount,myorderbook);
-								if((calcamount >= requestamount)){
+								var calcamount = calculateAmount("buy",requestamount,"usdt",myorderbook);
+								MDS.log("MINIMA NEW CALCREQ USDT:"+calcamount);
+								if((sendamount >= calcamount)){
 									
 									//Send the ETH counter TXN - to make him reveal the secret
 									sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
