@@ -73,7 +73,7 @@ function getBalanceWithLimits(orderbook, allbalances){
 			newbalances.usdt = orderbook.usdt.maximum;
 			
 			//MAX to BUY
-			toFixedNumber(newbalances.usdt * orderbook.usdt.buy);
+			maxbuyusdt = toFixedNumber(newbalances.usdt * orderbook.usdt.buy);
 		}
 	}
 	
