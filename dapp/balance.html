@@ -244,14 +244,10 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init ETH
-			initETHSubSystem(function(){
-				getUserDetails(function(userdets){
-					USER_DETAILS=userdets;
-					MDS.log(JSON.stringify(USER_DETAILS,null,2));
-					
-					refresh();
-				});
+			//Init Bridge Systems..
+			initBridgeSystems(function(userdets){
+				USER_DETAILS=userdets;
+				refresh();
 			});
 			
 		}else if(msg.event == "NEWBALANCE"){

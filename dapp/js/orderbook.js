@@ -96,20 +96,21 @@ function createCompleteOrderBook(callback){
 	_getAllOrderCoins(function(allrecords){
 		
 		//All the valid signed records
-		var validsignedrecords = [];
+		//var validsignedrecords = [];
 		
 		//Reset the sigs checked
 		SIGS_CHECKED = 0;
 		
 		//Now check all the signatures..
-		_checkValidSigs(0,allrecords,validsignedrecords,function(){
+		//_checkValidSigs(0,allrecords,validsignedrecords,function(){
+		_checkValidSigsSYNC(allrecords,function(validsignedrecords){
 				
 			//Now we have all the valid records.. only add the latest per owner..
 			var unique = getUniqueRecords(validsignedrecords);
 			
 			//Did we check any new coins..
 			if(SIGS_CHECKED > 0){
-				MDS.log("NEW orderbook coins found:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
+				MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
 			}
 			
 			//Now we only want the ones providing liquidity
@@ -249,6 +250,54 @@ function _checkValidSigs(counter,allrecords,correctrecords,callback){
 		//All scanned..
 		callback();
 	}
+}
+
+function _checkValidSigsSYNC(allrecords,callback){
+	
+	//The correctly signed records..
+	var correctrecords = [];
+	
+	//How many records in all
+	var len = allrecords.length;
+	
+	//Cycle through
+	for(var i=0;i<len;i++){
+		
+		//Get the record
+		var record = allrecords[i];
+		
+		//Has it already been checked
+		if(_isPrevValidSig(record.publickey,record.datahash,record.signature)){
+			
+			//Add to the records
+			correctrecords.push(record);
+			
+		}else{
+			
+			//Checking a NEW signature coin
+			SIGS_CHECKED++;
+			
+			//Check it..
+			verifyData(record.publickey,record.datahash,record.signature,function(isvalid){
+				
+				//Is it valid..
+				if(isvalid){
+					
+					//Add to previous
+					_addValidSig(record.publickey,record.datahash,record.signature);
+					
+					//Add to correct records..
+					correctrecords.push(record);
+					
+				}else{
+					MDS.log("Invalid signature for record.. publickey:"+record.publickey);
+				}
+			});	
+		}
+	}
+	
+	//And send them back
+	callback(correctrecords);
 }
 
 function getUniqueRecords(validrecords){

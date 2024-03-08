@@ -100,7 +100,8 @@
 	
 	<br>
 	BUY and SELL prices are in Minima<br>
-	Minimum and Maximum are in wMinima and USDT
+	<br>
+	Minimum and Maximum Orders are in wMinima and USDT respectively
 	
 	<br>
 	<br>
@@ -223,10 +224,11 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init Bridge
+			//Init Bridge Systems..
 			initBridgeSystems(function(userdets){
 				setOrderBookDetails();
 			});
+			
 		}
 	});
 

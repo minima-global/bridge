@@ -8,7 +8,7 @@ function removeDecimalPart(value){
 	}
 	
 	//Strip it..
-	return +strval.substring(0,dot+5); 
+	return +strval.substring(0,dot+3); 
 }
 
 /**

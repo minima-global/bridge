@@ -49,12 +49,9 @@ function serviceCheckBridgeInited(){
 		//IF inited.. get the details..
 		if(BRIDGE_INITED){
 			
-			//Init ETH
-			initETHSubSystem(function(ethaddress){
-				//Now get the user details.. need ETH to havce started up
-				getUserDetails(function(userdets){
-					USER_DETAILS = userdets;
-				});
+			//Init all subsytems
+			initBridgeSystems(function(userdets){
+				USER_DETAILS = userdets;
 			});	
 		}
 	});
@@ -137,11 +134,14 @@ MDS.init(function(msg){
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		
+		//Clear the previous validated signatures.. so list does not grow endlessly
+		clearPreviousValidSigs();
+		
 		//Always publish your book every hour
 		createAndSendOrderBook(USER_DETAILS);
 	
 	}else if(msg.event == "NEWBLOCK"){
-	
+		
 		//Check the Complete Order Book - will only check sigs for NEW entries..
 		createCompleteOrderBook(function(completeorderbook){});
 	

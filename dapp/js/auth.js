@@ -62,8 +62,20 @@ function initETHSubSystem(callback){
 	});
 }
 
+function setBridgeUserDetails(userdets){
+	MDS.keypair.set("_bridgesystem_userdetails",JSON.stringify(userdets),function(init){
+		callback(init.status);
+	});
+}
+
 function getBridgeUserDetails(callback){
-	
+	MDS.keypair.get("_bridgesystem_userdetails",function(getresult){
+		if(getresult.status){
+			callback(JSON.parse(getresult.value));
+		}else{
+			callback({});	
+		}
+	});
 }
 
 function isBridgeInited(callback){
@@ -73,7 +85,7 @@ function isBridgeInited(callback){
 	});
 }
 
-function initBridgeSystems(callback){
+function initBridgeSystemsStartup(callback){
 	
 	//Have we generated the Userdetails yet
 	isBridgeInited(function(inited){
@@ -117,5 +129,17 @@ function initBridgeSystems(callback){
 				});
 			});
 		}
+	});
+}
+
+function initBridgeSystems(callback){
+	
+	//Just do the normal
+	initETHSubSystem(function(ethaddress){
+		
+		//Now get the user details.. need ETH to havce started up
+		getUserDetails(function(userdets){
+			callback(userdets);
+		});
 	});
 }

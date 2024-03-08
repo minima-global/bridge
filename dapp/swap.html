@@ -65,8 +65,6 @@
 	
 <script type="text/javascript">
 	
-	var USER_DETAILS = {};
-	
 	//Start a native swap..
 	function order(action,swaptoken){
 		
@@ -95,13 +93,7 @@
 		
 	//Main message handler..
 	MDS.init(function(msg){
-		if(msg.event == "inited"){
-			
-			//Init Bridge
-			/*initBridgeSystems(function(userdets){
-				USER_DETAILS=userdets;
-			});*/
-		}
+		if(msg.event == "inited"){}
 	});
 
 </script>

@@ -228,19 +228,19 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init ETH
-			initETHSubSystem(function(){
-				getUserDetails(function(userdets){
-					USER_DETAILS=userdets;
-					mydetails.innerHTML = "<b>"+userdets.otcuid+"</b>";
-					
-					//Get the current block
-					MDS.cmd("block",function(blockresp){
-						//Check for any OTC deals..
-						showOTCDeals(+blockresp.response.block);	
-					});
+			//Init Bridge Systems..
+			initBridgeSystems(function(userdets){
+				//MDS.log(JSON.stringify(userdets));
+				USER_DETAILS=userdets;
+				
+				mydetails.innerHTML = "<b>"+userdets.otcuid+"</b>";
+				
+				//Get the current block
+				MDS.cmd("block",function(blockresp){
+					//Check for any OTC deals..
+					showOTCDeals(+blockresp.response.block);	
 				});
-			});		
+			});
 		
 		}else if(msg.event == "NEWBLOCK"){
 			

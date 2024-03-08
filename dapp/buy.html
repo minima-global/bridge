@@ -112,8 +112,9 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init Bridge
+			//Init Bridge Systems..
 			initBridgeSystems(function(userdets){
+				//MDS.log(JSON.stringify(userdets));
 				USER_DETAILS=userdets;
 				
 				//Search for a User in the OrderBook..

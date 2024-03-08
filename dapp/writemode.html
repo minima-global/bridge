@@ -24,7 +24,7 @@
 	<br>
 	You must be in <b>WRITE</b> mode to use Bridge..<br>
 	<br>
-	Please go back to the MiniHUB, set the dapp to <b>WRITE</b> mode, and reopen.. 
+	Please go back to the MiniHUB, set the MiniDAPP to <b>WRITE</b> mode, and re-open.. 
 	
 	</center>
 
@@ -32,19 +32,8 @@
 	
 	//Main message handler..
 	MDS.init(function(msg){
-		
 		//Do initialisation
-		if(msg.event == "inited"){
-			
-			//wipeDB();
-			
-			//Init ETH
-			initETHSubSystem(function(){
-				getUserDetails(function(userdets){
-					USER_DETAILS=userdets;
-				});
-			});
-		}
+		if(msg.event == "inited"){}
 	});
 
 </script>
