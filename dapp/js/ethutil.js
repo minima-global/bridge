@@ -37,6 +37,19 @@ function initialiseETH(private, callback){
 	});
 }
 
+function createAddressFromPrivateKey(private, callback){
+	
+	//Crteate a new wallet
+	MAIN_WALLET = new ethers.Wallet(PRIVATE_KEY);
+	
+	//Clean up the address
+	var cleanaddress = "0x"+MAIN_WALLET.address.slice(2).toUpperCase();
+	
+	//And send it back
+	callback(cleanaddress);
+}
+
+
 /**
  * Return your main public key
  */
