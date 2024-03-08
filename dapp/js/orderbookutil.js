@@ -46,14 +46,12 @@ var myoldbalance	= {};
  */
 function getBalanceWithLimits(orderbook, allbalances){
 	
-	return allbalances;
-	
 	//Make a copy..
 	var newbalances 	= allbalances;
 	
 	//Set to start
-	var maxbuywminima 	= newbalances.wminima * orderbook.wminima.buy;
-	var maxbuyusdt 		= newbalances.usdt * orderbook.usdt.buy;		
+	var maxbuywminima 	= toFixedNumber(newbalances.wminima * orderbook.wminima.buy);
+	var maxbuyusdt 		= toFixedNumber(newbalances.usdt * orderbook.usdt.buy);		
 		
 	//wMinima
 	if(orderbook.wminima.enable){
@@ -63,7 +61,7 @@ function getBalanceWithLimits(orderbook, allbalances){
 			newbalances.wminima = orderbook.wminima.maximum;
 			
 			//MAX to BUY
-			maxbuywminima = newbalances.wminima * orderbook.wminima.buy;
+			maxbuywminima 	= toFixedNumber(newbalances.wminima * orderbook.wminima.buy);
 		}
 	}
 	
@@ -75,7 +73,7 @@ function getBalanceWithLimits(orderbook, allbalances){
 			newbalances.usdt = orderbook.usdt.maximum;
 			
 			//MAX to BUY
-			maxbuyusdt 		= newbalances.usdt * orderbook.usdt.buy;
+			toFixedNumber(newbalances.usdt * orderbook.usdt.buy);
 		}
 	}
 	
