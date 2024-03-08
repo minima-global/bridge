@@ -45,10 +45,6 @@
 		createHeader();
 	</script>
 	
-	SWAP Wrapped Minima on ETH for Minima<br>
-	<br>
-	<br>
-	
 	<div id="swapproceed"></div>
 	
 	<script type="text/javascript">
@@ -119,9 +115,9 @@
 				USER_DETAILS=userdets;
 			
 				//Search for a User in the OrderBook..
-				xsearchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
+				searchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
 					if(!found){
-						swapproceed.innerHTML="No match found for "+sendamount+" "+reqtoken+"..";
+						swapproceed.innerHTML="No match found to SELL "+amount+" "+reqtokenstr;
 					}else{
 						
 						//Get the details..
@@ -131,7 +127,7 @@
 						reqpublickey = order.ethpublickey;		
 						
 						//What is the amount.. we are requesting MINIMA
-						reqamount = calculateAmount("sell",amount,"wminima",order.orderbook);
+						reqamount = calculateAmount("sell",amount,reqtoken,order.orderbook);
 						
 						//The ACTUAL amount is -0.0001 as this is the NEW SECRET coin..
 						var actualamount = reqamount - 0.0001; 

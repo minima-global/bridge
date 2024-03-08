@@ -45,7 +45,7 @@
 		createHeader();
 	</script>
 	
-	Add liquidity to the Bridge.. the FEE can be negative<br>
+	Here you can add liquidity to the Bridge..<br>
 	<br>
 	You <b>MUST</b> have some native minima to broadcast orderbook messages<br>
 	<br>
@@ -55,35 +55,52 @@
 	<br>
 	<b>WMINIMA POOL</b><br>
 	<input type=checkbox id=wrappedenableid>
-	<label for=enablewrapped>Enable wMinima Pool</label>
+	<label for=enablewrapped>Add Liquidity to wMinima Pool</label>
 	<table>
 		<tr>
-			<td>BUY :</td>
+			<td>Buy :</td>
 			<td><input type=text id=wrappedbuyid placeholder=0 /></td>
 		</tr>
 		<tr>
-			<td>SELL :</td>
+			<td>Sell :</td>
 			<td><input type=text id=wrappedsellid placeholder=0 /></td>
+		</tr>
+		<tr>
+			<td>Minimum Order :</td>
+			<td><input type=text id=wrappedminimumid placeholder=100 /></td>
+		</tr>
+		<tr>
+			<td>Maximum Order :</td>
+			<td><input type=text id=wrappedmaximumid placeholder=10000 /></td>
 		</tr>
 	</table>
 	
 	<br>
 	<b>USDT POOL</b><br>
 	<input type=checkbox id=usdtenableid>
-	<label for=enableusdt>Enable USDT Pool</label>
+	<label for=enableusdt>Add Liquidity to USDT Pool</label>
 	<table>
 		<tr>
-			<td>BUY :</td>
+			<td>Buy :</td>
 			<td><input type=text id=usdtbuyid placeholder=0 /></td>
 		</tr>
 		<tr>
-			<td>SELL :</td>
+			<td>Sell :</td>
 			<td><input type=text id=usdtsellid placeholder=0 /></td>
+		</tr>
+		<tr>
+			<td>Minimum Order :</td>
+			<td><input type=text id=usdtminimumid placeholder=100 /></td>
+		</tr>
+		<tr>
+			<td>Maximum Order :</td>
+			<td><input type=text id=usdtmaximumid placeholder=10000 /></td>
 		</tr>
 	</table>
 	
 	<br>
-	Prices are in Native Minima
+	BUY and SELL prices are in Minima<br>
+	Minimum and Maximum are in wMinima and USDT
 	
 	<br>
 	<br>
@@ -102,6 +119,8 @@
 		var wrappedenable 	= wrappedenableid.checked;
 		var wrappedbuy 		= wrappedbuyid.value.trim();
 		var wrappedsell 	= wrappedsellid.value.trim();
+		var wrappedminimum 	= wrappedminimumid.value.trim();
+		var wrappedmaximum 	= wrappedmaximumid.value.trim();
 		
 		if(wrappedenable){
 			if(!checkIsPositiveNumber(wrappedbuy)){
@@ -113,15 +132,29 @@
 				alert("You must specify a valid SELL for Wrapped Minima : "+wrappedsell);
 				return;
 			}
+			
+			if(!checkIsPositiveNumber(wrappedminimum)){
+				alert("You must specify a valid MINIMUM for Wrapped Minima : "+wrappedminimum);
+				return;
+			}
+			
+			if(!checkIsPositiveNumber(wrappedmaximum)){
+				alert("You must specify a valid MAXIMUM for Wrapped Minima : "+wrappedmaximum);
+				return;
+			}
 		}else{
-			wrappedbuy 	= 0;
-			wrappedsell = 0;
+			wrappedbuy 		= 0;
+			wrappedsell 	= 0;
+			wrappedminimum 	= 100;
+			wrappedmaximum 	= 10000;
 		}
 		
 		//USDT
-		var usdtenable 	= usdtenableid.checked;
-		var usdtbuy 	= usdtbuyid.value.trim();
-		var usdtsell 	= usdtsellid.value.trim();
+		var usdtenable 		= usdtenableid.checked;
+		var usdtbuy 		= usdtbuyid.value.trim();
+		var usdtsell 		= usdtsellid.value.trim();
+		var usdtminimum 	= usdtminimumid.value.trim();
+		var usdtmaximum 	= usdtmaximumid.value.trim();
 		
 		if(usdtenable){
 			if(!checkIsPositiveNumber(usdtbuy)){
@@ -133,14 +166,27 @@
 				alert("You must specify a valid SELL for USDT : "+usdtsell);
 				return;
 			}
+			
+			if(!checkIsPositiveNumber(usdtminimum)){
+				alert("You must specify a valid MINIMUM for USDT : "+usdtminimum);
+				return;
+			}
+			
+			if(!checkIsPositiveNumber(usdtmaximum)){
+				alert("You must specify a valid MAXIMUM for USDT : "+usdtmaximum);
+				return;
+			}
+			
 		}else{
-			usdtbuy  = 0;
-			usdtsell = 0;
+			usdtbuy  		= 0;
+			usdtsell 		= 0;
+			usdtminimum 	= 100;
+			usdtmaximum 	= 10000;
 		}
 		
 		//Store this..
-		setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, 
-						 usdtenable, usdtbuy, usdtsell,	function(dets){
+		setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum, wrappedmaximum,
+						 usdtenable, usdtbuy, usdtsell, usdtminimum, usdtmaximum, function(dets){
 			
 			//Set details as may have been set to ZERO
 			setOrderBookDetails();
@@ -156,14 +202,18 @@
 			MDS.log(JSON.stringify(orderbook));
 			
 			//wMinima
-			wrappedenableid.checked = orderbook.wminima.enable;
-			wrappedbuyid.value		= orderbook.wminima.buy;
-			wrappedsellid.value		= orderbook.wminima.sell;
+			wrappedenableid.checked 	= orderbook.wminima.enable;
+			wrappedbuyid.value			= orderbook.wminima.buy;
+			wrappedsellid.value			= orderbook.wminima.sell;
+			wrappedminimumid.value		= orderbook.wminima.minimum;
+			wrappedmaximumid.value		= orderbook.wminima.maximum;
 			
 			//USDT
 			usdtenableid.checked 	= orderbook.usdt.enable;
 			usdtbuyid.value			= orderbook.usdt.buy;
 			usdtsellid.value		= orderbook.usdt.sell;
+			usdtminimumid.value		= orderbook.usdt.minimum;
+			usdtmaximumid.value		= orderbook.usdt.maximum;
 		});
 	}
 	

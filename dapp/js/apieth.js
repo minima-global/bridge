@@ -209,7 +209,7 @@ function checkETHNewSecrets(currentethblock, callback){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
 					
 					//Put a log in db so no need to call ETH..
-					collectExpiredHTLC(withdrawlog.hashlock, "unknown", 0, "SECRET REVEALED - Withdrawn", function(){});
+					collectExpiredHTLC(withdrawlog.hashlock, "wMinima / USDT", 0, "SECRET REVEALED - Withdrawn", function(){});
 				}
 			});
 		}
@@ -346,10 +346,20 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						if(reqtoken == wMinimaContractAddress){
 							
 							if(myorderbook.wminima.enable){
-							
+								
+								//Make sure is within limits
+								if(sendamount > myorderbook.wminima.maximum){
+									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Maximum "+myorderbook.wminima.maximum);
+									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Maximum "+sendamount, function(sqlresp){});
+									return;	
+								}else if(sendamount < myorderbook.wminima.minimum){
+									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Minimum "+myorderbook.wminima.minimum);
+									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minimum "+sendamount, function(sqlresp){});
+									return;	
+								} 
+								
 								//Calculate how much we should send back..
 								var calcamount = calculateAmount("sell",sendamount,"wminima",myorderbook);
-								MDS.log("ETH NEW CALC WMINIMA:"+calcamount);
 								if(calcamount >= requestamount){
 								
 									//Send the ETH counter TXN - to make him reveal the secret
@@ -367,10 +377,20 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						}else if(reqtoken == USDTContractAddress){
 							
 							if(myorderbook.usdt.enable){
-							
+								
+								//Make sure is within limits
+								if(sendamount > myorderbook.usdt.maximum){
+									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Maximum "+myorderbook.usdt.maximum);
+									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Maximum "+sendamount, function(sqlresp){});
+									return;	
+								}else if(sendamount < myorderbook.usdt.minimum){
+									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Minimum "+myorderbook.usdt.minimum);
+									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minimum "+sendamount, function(sqlresp){});
+									return;	
+								}
+								
 								//Calculate how much we should send back..
 								var calcamount = calculateAmount("sell",sendamount,"usdt",myorderbook);
-								MDS.log("ETH NEW CALC USDT:"+calcamount);
 								if(calcamount >= requestamount){
 								
 									//Send the ETH counter TXN - to make him reveal the secret

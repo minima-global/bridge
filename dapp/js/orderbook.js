@@ -295,8 +295,8 @@ function getUniqueRecords(validrecords){
 	return orderbook;
 }
 
-function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, 
-						  usdtenable, usdtbuy, usdtsell, callback){
+function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum, wrappedmaximum, 
+						  usdtenable, usdtbuy, usdtsell, usdtminimum, usdtmaximum, callback){
 	
 	//Create an order book for this user
 	var orderbook 				= {};
@@ -305,11 +305,15 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell,
 	orderbook.wminima 			= {};
 	orderbook.wminima.enable 	= wrappedenable;
 	if(wrappedenable){
-		orderbook.wminima.buy 	= toFixedNumber(wrappedbuy);
-		orderbook.wminima.sell 	= toFixedNumber(wrappedsell);	
+		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
+		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);
+		orderbook.wminima.minimum 	= toFixedNumber(wrappedminimum);
+		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);	
 	}else{
-		orderbook.wminima.buy 	= 0;
-		orderbook.wminima.sell 	= 0;
+		orderbook.wminima.buy 		= 0;
+		orderbook.wminima.sell 		= 0;
+		orderbook.wminima.minimum 	= 0;
+		orderbook.wminima.maximum 	= 0;
 	}
 	
 	//USDT
@@ -317,10 +321,14 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell,
 	orderbook.usdt.enable 		= usdtenable;
 	if(usdtenable){
 		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
-		orderbook.usdt.sell 	= toFixedNumber(usdtsell);	
+		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
+		orderbook.usdt.minimum 	= toFixedNumber(usdtminimum);
+		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);	
 	}else{
 		orderbook.usdt.buy 		= 0;
 		orderbook.usdt.sell 	= 0;
+		orderbook.usdt.minimum 	= 0;
+		orderbook.usdt.maximum 	= 0;
 	}
 	
 	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
@@ -351,11 +359,15 @@ function getEmptyOrderBook(){
 	orderbook.wminima.enable	= false;
 	orderbook.wminima.buy 		= 0;
 	orderbook.wminima.sell 		= 0;
+	orderbook.wminima.minimum 	= 0;
+	orderbook.wminima.maximum  	= 0;
 	
 	orderbook.usdt				= {};
 	orderbook.usdt.enable		= false;
 	orderbook.usdt.buy 			= 0;
 	orderbook.usdt.sell 		= 0;
+	orderbook.usdt.minimum 		= 0;
+	orderbook.usdt.maximum  	= 0;
 	
 	return orderbook;
 }

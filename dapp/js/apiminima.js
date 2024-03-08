@@ -387,9 +387,19 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 								var sendamount 		= +coin.amount; 
 								var requestamount 	= +coin.state[1];
 							
+								//Make sure is within limits
+								if(requestamount > myorderbook.wminima.maximum){
+									MDS.log("Invalid request to buy wMinima ("+requestamount+") exceeds Maximum "+myorderbook.wminima.maximum);
+									sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Maximum "+requestamount,function(){});
+									return;	
+								}else if(requestamount < myorderbook.wminima.minimum){
+									MDS.log("Invalid request to buy wMinima ("+requestamount+") exceeds Minimum "+myorderbook.wminima.minimum);
+									sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Minimum "+requestamount,function(){});
+									return;	
+								} 
+							
 								//Calculate how much we should send back..
 								var calcamount = calculateAmount("buy",requestamount,"wminima",myorderbook);
-								MDS.log("MINIMA NEW CALCREQ WMINIMA:"+calcamount);
 								if((sendamount >= calcamount)){
 									
 									//Send the ETH counter TXN - to make him reveal the secret
@@ -397,10 +407,12 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 									
 								}else{
 									MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedwminima:"+requestamount+" actual:"+calcamount)
+									sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid swap amount sent:"+sendamount+" request:"+requestamount,function(){});
 								}	
 								
 							}else{
 								MDS.log("Invalid request for wMinima swap - not enabled");
+								sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid request not enabled",function(){});
 							}
 								
 						}else if(token == USDTContractAddress){
@@ -411,9 +423,19 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 								var sendamount 		= +coin.amount; 
 								var requestamount 	= +coin.state[1];
 							
+								//Make sure is within limits
+								if(requestamount > myorderbook.usdt.maximum){
+									MDS.log("Invalid request to buy USDT ("+requestamount+") exceeds Maximum "+myorderbook.usdt.maximum);
+									sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Maximum "+requestamount,function(){});
+									return;	
+								}else if(requestamount < myorderbook.usdt.minimum){
+									MDS.log("Invalid request to buy wMinima ("+requestamount+") exceeds Minimum "+myorderbook.usdt.minimum);
+									sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Minimum "+requestamount,function(){});
+									return;	
+								}
+								
 								//Calculate how much we should send back..
 								var calcamount = calculateAmount("buy",requestamount,"usdt",myorderbook);
-								MDS.log("MINIMA NEW CALCREQ USDT:"+calcamount);
 								if((sendamount >= calcamount)){
 									
 									//Send the ETH counter TXN - to make him reveal the secret
@@ -421,14 +443,17 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 									
 								}else{
 									MDS.log("Invalid request amount for Minima SWAP sent minima:"+sendamount+" requestedusdt:"+requestamount+" actual:"+calcamount)
+									sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid swap amount sent:"+sendamount+" request:"+requestamount,function(){});
 								}	
 								
 							}else{
-								MDS.log("Invalid request for wMinima swap - not enabled");
+								MDS.log("Invalid request for USDT swap - not enabled");
+								sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid request not enabled",function(){});
 							}
 								
 						}else{
 							MDS.log("Invalid request for swap - unknown token : "+token);
+							sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid request unknown token",function(){});
 						}
 					});
 				}

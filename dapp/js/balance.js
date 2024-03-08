@@ -5,7 +5,7 @@
 function getAllBalances(userdetails,callback){
 	
 	getMinimaBalance(userdetails,function(minimabal){
-		var balance 			= {};
+		var balance 	= {};
 		balance.minima 	= minimabal;
 		
 		getETHEREUMBalance(function(ethbal){

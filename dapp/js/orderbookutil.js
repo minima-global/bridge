@@ -42,15 +42,67 @@ function getOldOrderBook(callback){
 var myoldbalance	= {};
 
 /**
+ * Set Balance limits given orderbook
+ */
+function getBalanceWithLimits(orderbook, allbalances){
+	
+	return allbalances;
+	
+	//Make a copy..
+	var newbalances 	= allbalances;
+	
+	//Set to start
+	var maxbuywminima 	= newbalances.wminima * orderbook.wminima.buy;
+	var maxbuyusdt 		= newbalances.usdt * orderbook.usdt.buy;		
+		
+	//wMinima
+	if(orderbook.wminima.enable){
+		
+		//MAX to SELL
+		if(+allbalances.wminima > orderbook.wminima.maximum){
+			newbalances.wminima = orderbook.wminima.maximum;
+			
+			//MAX to BUY
+			maxbuywminima = newbalances.wminima * orderbook.wminima.buy;
+		}
+	}
+	
+	//USDT
+	if(orderbook.usdt.enable){
+		
+		//MAX SELL
+		if(+allbalances.usdt > orderbook.usdt.maximum){
+			newbalances.usdt = orderbook.usdt.maximum;
+			
+			//MAX to BUY
+			maxbuyusdt 		= newbalances.usdt * orderbook.usdt.buy;
+		}
+	}
+	
+	//Now sort max Minima..
+	if(maxbuywminima > maxbuyusdt){
+		if(maxbuywminima < newbalances.minima.total){
+			newbalances.minima.total = maxbuywminima; 
+		}
+	}else{
+		if(maxbuyusdt < newbalances.minima.total){
+			newbalances.minima.total = maxbuyusdt;
+		}
+	}
+	
+	return newbalances;
+}
+
+/**
  * Create and send the complete order book
  */
 function createAndSendOrderBook(userdets, callback){
 	
 	//Get order book and balance..
 	getMyOrderBook(function(currentorderbook){
-		
+				
 		//Do we need to send..
-		if(!currentorderbook.nativeenable && !currentorderbook.wrappedenable){
+		if(!currentorderbook.wminima.enable && !currentorderbook.usdt.enable){
 			//no need..
 			if(callback){
 				callback(false);	
@@ -60,8 +112,11 @@ function createAndSendOrderBook(userdets, callback){
 		
 		MDS.log("Regular hourly orderbook update..");
 		
-		getAllBalances(userdets,function(currentbalances){
-				
+		getAllBalances(userdets,function(fullbalance){
+			
+			//Get limited balance..
+			var currentbalances = getBalanceWithLimits(currentorderbook, fullbalance);
+					
 			//Create the complete book
 			var orderbookmsg = {};
 			orderbookmsg.publickey 		= userdets.minimapublickey;
@@ -119,7 +174,10 @@ function checkNeedPublishOrderBook(userdets,callback){
 			}
 			
 			//Now check whether the balance hash changed..
-			getAllBalances(userdets,function(currentbalances){
+			getAllBalances(userdets,function(fullbalance){
+				
+				//Get limited balance..
+				var currentbalances = getBalanceWithLimits(currentorderbook, fullbalance);
 				
 				//Now do some some checking..
 				var publishbook = false;
@@ -193,170 +251,7 @@ function checkNeedPublishOrderBook(userdets,callback){
 }
 
 //I have AMOUNT of TOKEN to swap.. find the best order
-function searchAllOrderBooks(mytoken, requiredtoken, amount, ignoreme, callback){
-	
-	//Get the complete order book
-	getCompleteOrderBook(function(completeorderbook){
-		
-		var validorders 	= [];
-		var currentbuy 		= -1;
-		var currentsell 	= 10000000;
-		
-		//Cycle through the orders
-		var len = completeorderbook.length;
-		for(var i=0;i<len;i++){
-			
-			var data 		= completeorderbook[i].data;
-			var user		= data.publickey;
-			var orderbook 	= data.orderbook;
-			var balance 	= data.balance;
-			
-			//Which side of the trade are we checking..
-			if(user != ignoreme){
-				
-				if(mytoken == "minima"){
-					
-					//SELL Orders!
-					if(	requiredtoken == "wminima" &&
-						orderbook.wminima.enable &&
-						balance.wminima >= +amount
-					){
-						//Is the price better than current
-						if(orderbook.wminima.sell == currentsell){
-							//Same as current best.. just add
-							validorders.push(data);
-							
-						}else if(orderbook.wminima.sell < currentsell){
-							
-							//Best price so far	
-							validorders = [];
-							currentsell	= +orderbook.wminima.sell;
-							validorders.push(data);
-						}
-					
-					}else if(requiredtoken == "usdt" &&
-							 orderbook.usdt.enable &&
-							 balance.usdt >= +amount
-					){
-						//Is the price better than current
-						if(orderbook.usdt.sell == currentsell){
-							//Same as current best.. just add
-							validorders.push(data);
-							
-						}else if(orderbook.usdt.sell < currentsell){
-							
-							//Best price so far	
-							validorders = [];
-							currentsell	= +orderbook.usdt.sell;
-							validorders.push(data);
-						}
-					}
-				
-				}else if(mytoken == "wminima"){
-					
-					//BUY Orders!
-					if(	requiredtoken == "minima" &&
-						orderbook.wminima.enable &&
-						balance.minima.total >= +amount
-					){
-						//Is the price better than current
-						if(orderbook.wminima.buy == currentbuy){
-							
-							//Same as current best.. just add
-							validorders.push(data);
-						}else if(orderbook.wminima.buy > currentbuy){
-							
-							//Best price so far	
-							validorders = [];
-							currentbuy	= +orderbook.wminima.buy;
-							validorders.push(data);
-						}
-					}
-				
-				}else if(mytoken == "usdt"){
-						
-					//BUY Orders!
-					if(	requiredtoken == "minima" &&
-						orderbook.usdt.enable &&
-						balance.minima.total >= +amount
-					){
-						
-						//Is the price better than current
-						if(orderbook.usdt.buy == currentbuy){
-							
-							//Same as current best.. just add
-							validorders.push(data);
-						}else if(orderbook.usdt.buy > currentbuy){
-							
-							//Best price so far	
-							validorders = [];
-							currentbuy	= +orderbook.usdt.buy;
-							validorders.push(data);
-						}
-					}
-				}
-				 
-			}
-		}
-		
-		//Any at all found ?
-		if(validorders.length == 0){
-			callback(false,{});
-			return;
-		}
-		
-		//MDS.log("Found valid orders : "+validorders.length);
-		
-		//Pick a random one..
-		var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
-
-		//Send it back..
-		callback(true,finalorder);
-	});
-}
-
-function calculateSwapAmount(mytoken,requiredtoken,amount,orderbook){
-	
-	//What is the fee..
-	var swapamount = toFixedNumber(amount);
-	var youramount = 0;
-	if(mytoken == "minima"){
-		
-		if(requiredtoken == "wminima"){
-			//Get the SELL price..
-			price 		= toFixedNumber(orderbook.wminima.sell);
-			youramount 	= swapamount / price;
-		
-		}else if(requiredtoken == "usdt"){
-			//Get the SELL price..
-			price 		= toFixedNumber(orderbook.usdt.sell);
-			youramount 	= swapamount / price;
-		} 
-	
-	}else if(mytoken == "wminima"){
-		
-		if(requiredtoken == "minima"){
-			//Get the BUY price..
-			price 		= toFixedNumber(orderbook.wminima.buy);
-			youramount 	= swapamount * price;
-		}
-	
-	}else if(mytoken == "usdt"){
-		
-		if(requiredtoken == "minima"){
-			//Get the BUY price..
-			price 		= toFixedNumber(orderbook.usdt.buy);
-			youramount 	= swapamount * price;
-		}
-	}
-	
-	//Calculate the amount of wMinima.. 
-	return toFixedNumber(youramount);
-}
-
-
-//I have AMOUNT of TOKEN to swap.. find the best order
-function xsearchAllOrderBooks(action, amount, token, ignoreme, callback){
+function searchAllOrderBooks(action, amount, token, ignoreme, callback){
 	
 	//Get the complete order book
 	getCompleteOrderBook(function(completeorderbook){
@@ -378,57 +273,124 @@ function xsearchAllOrderBooks(action, amount, token, ignoreme, callback){
 			if(user != ignoreme){
 				
 				if(action == "buy"){
-					
 					if(token == "wminima"){
 					
 						//Serach for people SELLING	
 						if(orderbook.wminima.enable){
 							
-							//Check have the required amount..
-							if(balance.wminima >= +amount){
-								//Is the price better than current
-								if(orderbook.wminima.sell == currentsell){
-									//Same as current best.. just add
-									validorders.push(data);
+							//Check maximum
+							if(amount <= orderbook.wminima.maximum && amount >= orderbook.wminima.minimum){
+								
+								//Check have the required amount..
+								if(+balance.wminima >= +amount){
 									
-								}else if(orderbook.wminima.sell < currentsell){
+									//The order book price
+									var obkprice = +orderbook.wminima.sell;
 									
-									//Best price so far	
-									validorders = [];
-									currentsell	= +orderbook.wminima.sell;
-									validorders.push(data);
-								}	
+									//Is the price better than current or the same
+									if(obkprice == currentsell){
+										//Same as current best.. just add
+										validorders.push(data);
+										
+									}else if(obkprice < currentsell){
+										
+										//Best price so far	
+										validorders = [];
+										currentsell	= obkprice;
+										validorders.push(data);
+									}	
+								}
+							}
+						}
+					
+					}else if(token == "usdt"){
+					
+						//Serach for people SELLING	
+						if(orderbook.usdt.enable){
+							
+							//Check maximum
+							if(amount <= orderbook.usdt.maximum && amount >= orderbook.usdt.minimum){
+								
+								//Check have the required amount..
+								if(+balance.usdt >= +amount){
+									
+									//The order book price
+									var obkprice = +orderbook.usdt.sell;
+									
+									//Is the price better than current
+									if(obkprice == currentsell){
+										//Same as current best.. just add
+										validorders.push(data);
+										
+									}else if(obkprice < currentsell){
+										
+										//Best price so far	
+										validorders = [];
+										currentsell	= obkprice;
+										validorders.push(data);
+									}	
+								}
 							}
 						}
 					}
 				
 				}else if(action == "sell"){
-					
 					if(token == "wminima"){
 						
 						//Serach for people BUYING	
 						if(orderbook.wminima.enable){
 							
-							//How much Minima do we need
-							var totalamount = toFixedNumber(amount * orderbook.wminima.buy); 
+							//Check maximum
+							if(amount <= orderbook.wminima.maximum && amount >= orderbook.wminima.minimum){
+								
+								//How much Minima do we need
+								var totalamount = toFixedNumber(amount * orderbook.wminima.buy); 
+								
+								//Check have the required amount..
+								if(balance.minima.total >= totalamount){
+									//Is the price better than current
+									if(orderbook.wminima.buy == currentbuy){
+										//Same as current best.. just add
+										validorders.push(data);
+										
+									}else if(orderbook.wminima.buy > currentbuy){
+										
+										//Best price so far	
+										validorders = [];
+										currentbuy	= +orderbook.wminima.buy;
+										validorders.push(data);
+									}	
+								}	
+							}		
+						}
+					}else if(token == "usdt"){
+						
+						//Serach for people BUYING	
+						if(orderbook.usdt.enable){
 							
-							//Check have the required amount..
-							if(balance.minima.total >= totalamount){
-								//Is the price better than current
-								if(orderbook.wminima.buy == currentbuy){
-									//Same as current best.. just add
-									validorders.push(data);
-									
-								}else if(orderbook.wminima.buy > currentbuy){
-									
-									//Best price so far	
-									validorders = [];
-									currentsell	= +orderbook.wminima.sell;
-									validorders.push(data);
+							//Check maximum
+							if(amount <= orderbook.usdt.maximum && amount >= orderbook.usdt.minimum){
+								
+								//How much Minima do we need
+								var totalamount = toFixedNumber(amount * orderbook.usdt.buy); 
+								
+								//Check have the required amount..
+								if(balance.minima.total >= totalamount){
+									//Is the price better than current
+									if(orderbook.usdt.buy == currentbuy){
+										//Same as current best.. just add
+										validorders.push(data);
+										
+									}else if(orderbook.usdt.buy > currentbuy){
+										
+										//Best price so far	
+										validorders = [];
+										currentbuy	= +orderbook.usdt.buy;
+										validorders.push(data);
+									}	
 								}	
 							}
 						}
-						
 					}
 				}
 			}
@@ -457,13 +419,24 @@ function calculateAmount(action, amount, token, orderbook){
 	var calcamount 	= 0;
 	
 	if(action == "buy"){
+		
 		if(token == "wminima"){
 			var price 	= toFixedNumber(orderbook.wminima.sell);	
 			calcamount	= useamount * price;
+		
+		}else if(token == "usdt"){
+			var price 	= toFixedNumber(orderbook.usdt.sell);	
+			calcamount	= useamount * price;
 		}
+		
 	}else if(action == "sell"){
+		
 		if(token == "wminima"){
 			var price 	= toFixedNumber(orderbook.wminima.buy);	
+			calcamount	= useamount * price;
+		
+		}else if(token == "usdt"){
+			var price 	= toFixedNumber(orderbook.usdt.buy);	
 			calcamount	= useamount * price;
 		}
 	}

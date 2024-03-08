@@ -117,10 +117,10 @@
 				USER_DETAILS=userdets;
 				
 				//Search for a User in the OrderBook..
-				xsearchAllOrderBooks("buy", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
+				searchAllOrderBooks("buy", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
 					
 					if(!found){
-						swapproceed.innerHTML="No match found for "+sendamount+" Minima..";
+						swapproceed.innerHTML="No match found to BUY "+amount+" "+reqtokenstr;
 					}else{
 						
 						//Get the details..
