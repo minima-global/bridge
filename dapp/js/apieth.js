@@ -358,8 +358,6 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							return;
 						}
 						
-						MDS.log("OB : "+JSON.stringify(ob));
-						
 						//Check we are enabled to swap this token
 						if(!ob.enable){
 							MDS.log("Invalid request for Minima swap - not enabled");
@@ -369,11 +367,11 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						
 						//Now check the amounts..
 						if(sendamount > ob.maximum){
-							MDS.log("Invalid request to sell "+simplename+" ("+sendamount+") exceeds Maximum "+ob.maximum);
+							MDS.log("Invalid request to BUY "+simplename+" ("+sendamount+") exceeds Maximum "+ob.maximum);
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Maximum "+sendamount, function(sqlresp){});
 							return;	
 						}else if(sendamount < ob.minimum){
-							MDS.log("Invalid request to sell "+simplename+" ("+sendamount+") exceeds Minimum "+ob.minimum);
+							MDS.log("Invalid request to BUY "+simplename+" ("+sendamount+") exceeds Minimum "+ob.minimum);
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minimum "+sendamount, function(sqlresp){});
 							return;	
 						}
@@ -389,7 +387,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
 									
 						}else{
-							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
+							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" requested:"+requestamount+" actual:"+calcamount)
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
 						}
 						

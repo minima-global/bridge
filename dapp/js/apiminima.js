@@ -379,8 +379,60 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Check the details are valid!.. FEES etc.. 
 					getMyOrderBook(function(myorderbook){
 						
-						//Which token are we swapping for..
+						//Which orderbook are we using
+						var ob = {};
+						var simplename = "";
 						if(token == wMinimaContractAddress){
+							ob = myorderbook.wminima;
+							simplename = "wminima";
+						}else if(token == USDTContractAddress){
+							ob = myorderbook.usdt;
+							simplename = "usdt";
+						}else{
+							//ERROR
+							MDS.log("Invalid request for swap - unknown token : "+token);
+							sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid request unknown token",function(){});
+							return;
+						}
+						
+						//Check we are enabled to swap this token
+						if(!ob.enable){
+							MDS.log("Invalid request for "+simplename+" swap - not enabled");
+							sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid request not enabled",function(){});
+							return;	
+						}
+						
+						//Check the details are valid!.. FEES etc.. 
+						var sendamount 		= toFixedNumber(coin.amount); 
+						var requestamount 	= toFixedNumber(coin.state[1]);
+							
+						//Make sure is within limits
+						if(requestamount > ob.maximum){
+							MDS.log("Invalid request to buy "+simplename+" ("+requestamount+") exceeds Maximum "+ob.maximum);
+							sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Maximum "+requestamount,function(){});
+							return;	
+						}else if(requestamount < ob.minimum){
+							MDS.log("Invalid request to buy "+simplename+" ("+requestamount+") exceeds Minimum "+ob.minimum);
+							sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Minimum "+requestamount,function(){});
+							return;	
+						}
+						
+						//Calculate how much we should send back..
+						MDS.log("TRY CALC sendamount:"+sendamount+" requesttoken:"+requestamount+" simplename:"+simplename);
+						var calcamount = calculateAmount("sell",sendamount,simplename,myorderbook);
+						MDS.log("MINIMA API CALC:"+calcamount+" REQ:"+requestamount);
+						if(requestamount <= calcamount){
+							
+							//Send the ETH counter TXN - to make him reveal the secret
+							sendCounterPartyMinimaTxn(userdets,coin,function(resp){});
+							
+						}else{
+							MDS.log("Invalid request amount for Minima SWAP sent:"+sendamount+" requested:"+requestamount+" of "+simplename+" actual:"+calcamount)
+							sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid swap amount sent:"+sendamount+" request:"+requestamount,function(){});
+						}
+						
+						//Which token are we swapping for..
+						/*if(token == wMinimaContractAddress){
 							//Are we enabled
 							if(myorderbook.wminima.enable){
 								//Check the details are valid!.. FEES etc.. 
@@ -454,7 +506,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						}else{
 							MDS.log("Invalid request for swap - unknown token : "+token);
 							sentCounterPartyTxn(hash,"ETH:"+token,0,"Invalid request unknown token",function(){});
-						}
+						}*/
 					});
 				}
 			});
