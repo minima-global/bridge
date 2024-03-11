@@ -418,9 +418,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						}
 						
 						//Calculate how much we should send back..
-						MDS.log("TRY CALC sendamount:"+sendamount+" requesttoken:"+requestamount+" simplename:"+simplename);
 						var calcamount = calculateAmount("sell",sendamount,simplename,myorderbook);
-						MDS.log("MINIMA API CALC:"+calcamount+" REQ:"+requestamount);
 						if(requestamount <= calcamount){
 							
 							//Send the ETH counter TXN - to make him reveal the secret

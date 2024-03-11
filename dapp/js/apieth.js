@@ -377,9 +377,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						}
 						
 						//How much do they want..
-						MDS.log("TRY CALC sendamount:"+sendamount+" requestminima:"+requestamount+" simplename:"+simplename);
 						var calcamount = calculateAmount("buy",requestamount,simplename,myorderbook);
-						MDS.log("ETH API CALC:"+calcamount+" SENT:"+sendamount);
 						//Have they sent the right amount
 						if(sendamount  >= calcamount){
 						
@@ -387,7 +385,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
 									
 						}else{
-							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" requested:"+requestamount+" actual:"+calcamount)
+							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" required:"+calcamount+" actual:"+calcamount)
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
 						}
 						
