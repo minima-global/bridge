@@ -84,7 +84,8 @@
 		}
 		
 		//Send Minima to the HTLC..
-		startETHSwap(USER_DETAILS, reqpublickey, erc20contract, amount, reqamount, function(resp){
+		startMinimaSwap(USER_DETAILS, amount, reqamount,"ETH:"+erc20contract,reqpublickey, false, function(resp){
+		//startETHSwap(USER_DETAILS, reqpublickey, erc20contract, amount, reqamount, function(resp){
 			if(resp.status){
 				alert("Swap started!");
 				
@@ -118,24 +119,21 @@
 				//Search for a User in the OrderBook..
 				searchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
 					if(!found){
-						swapproceed.innerHTML="No match found to SELL "+amount+" "+reqtokenstr;
+						swapproceed.innerHTML="No match found to SELL "+amount+" Minima for "+reqtokenstr;
 					}else{
 						
 						//Get the details..
 						swapproceed.innerHTML=JSON.stringify(order,null,2);
 						
 						//Who is this?
-						reqpublickey = order.ethpublickey;		
+						reqpublickey = order.publickey;		
 						
 						//What is the amount.. we are requesting MINIMA
 						reqamount = calculateAmount("sell",amount,reqtoken,order.orderbook);
 						
-						//The ACTUAL amount is -0.0001 as this is the NEW SECRET coin..
-						var actualamount = reqamount - 0.0001; 
-						
 						//Set the details..
 						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>"
-												+"SELL "+amount+" "+reqtokenstr+" for "+actualamount+" Minima<br><br>"
+												+"SELL "+amount+" Minima for "+reqamount+" "+reqtokenstr+"<br><br>"
 												+"<button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
 												+"You <b>MUST</b> have some ETH to send / collect the "+reqtokenstr+"..";					
 					}

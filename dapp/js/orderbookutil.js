@@ -46,6 +46,8 @@ var myoldbalance	= {};
  */
 function getBalanceWithLimits(orderbook, allbalances){
 	
+	return allbalances;
+	
 	//Make a copy..
 	var newbalances 	= allbalances;
 	
@@ -248,7 +250,7 @@ function checkNeedPublishOrderBook(userdets,callback){
 	});
 }
 
-//I have AMOUNT of TOKEN to swap.. find the best order
+//I have AMOUNT of MINIMA - I want to swap for TOKEN.. find the best order
 function searchAllOrderBooks(action, amount, token, ignoreme, callback){
 	
 	//Get the complete order book
@@ -270,126 +272,84 @@ function searchAllOrderBooks(action, amount, token, ignoreme, callback){
 			//Which side of the trade are we checking..
 			if(user != ignoreme){
 				
+				//Which book are we using..
+				var ob 		= {};
+				var bookbal = 0;
+				if(token == "wminima"){
+					ob 		= orderbook.wminima;
+					bookbal = balance.wminima;
+					
+				}else if(token == "usdt"){
+					ob 		= orderbook.usdt;
+					bookbal = balance.usdt;
+					
+				}else{
+					//ERROR - should not happen
+					continue;
+				}
+				
+				//Is this book enabled..
+				if(!ob.enable){
+					continue;
+				}
+				
 				if(action == "buy"){
-					if(token == "wminima"){
 					
-						//Serach for people SELLING	
-						if(orderbook.wminima.enable){
+					//Check they have enough Minima - They are SELLING to you
+					if(+amount <= balance.minima.total){
+						
+						//Trying to BUY this much MINIMA - so look for SELLERS
+						var totalamounttoken = toFixedNumber(+amount * +ob.sell);
+						
+						//Check the amount is within limits..
+						if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
 							
-							//Check maximum
-							if(amount <= orderbook.wminima.maximum && amount >= orderbook.wminima.minimum){
-								
-								//Check have the required amount..
-								if(+balance.wminima >= +amount){
-									
-									//The order book price
-									var obkprice = +orderbook.wminima.sell;
-									
-									//Is the price better than current or the same
-									if(obkprice == currentsell){
-										//Same as current best.. just add
-										validorders.push(data);
-										
-									}else if(obkprice < currentsell){
-										
-										//Best price so far	
-										validorders = [];
-										currentsell	= obkprice;
-										validorders.push(data);
-									}	
-								}
-							}
-						}
-					
-					}else if(token == "usdt"){
-					
-						//Serach for people SELLING	
-						if(orderbook.usdt.enable){
+							//The order book price
+							var obkprice = +ob.sell;
 							
-							//Check maximum
-							if(amount <= orderbook.usdt.maximum && amount >= orderbook.usdt.minimum){
+							//Is the price better than current or the same
+							if(obkprice == currentsell){
+								//Same as current best.. just add
+								validorders.push(data);
 								
-								//Check have the required amount..
-								if(+balance.usdt >= +amount){
-									
-									//The order book price
-									var obkprice = +orderbook.usdt.sell;
-									
-									//Is the price better than current
-									if(obkprice == currentsell){
-										//Same as current best.. just add
-										validorders.push(data);
-										
-									}else if(obkprice < currentsell){
-										
-										//Best price so far	
-										validorders = [];
-										currentsell	= obkprice;
-										validorders.push(data);
-									}	
-								}
+							}else if(obkprice < currentsell){
+								
+								//Best price so far	
+								validorders = [];
+								currentsell	= obkprice;
+								validorders.push(data);
 							}
-						}
+						}	
 					}
 				
 				}else if(action == "sell"){
-					if(token == "wminima"){
+					
+					//Trying to SELL this much MINIMA - so look for BUYERS
+					var totalamounttoken = toFixedNumber(+amount * +ob.buy);
 						
-						//Serach for people BUYING	
-						if(orderbook.wminima.enable){
-							
-							//Check maximum
-							if(amount <= orderbook.wminima.maximum && amount >= orderbook.wminima.minimum){
-								
-								//How much Minima do we need
-								var totalamount = toFixedNumber(amount * orderbook.wminima.buy); 
-								
-								//Check have the required amount..
-								if(balance.minima.total >= totalamount){
-									//Is the price better than current
-									if(orderbook.wminima.buy == currentbuy){
-										//Same as current best.. just add
-										validorders.push(data);
-										
-									}else if(orderbook.wminima.buy > currentbuy){
-										
-										//Best price so far	
-										validorders = [];
-										currentbuy	= +orderbook.wminima.buy;
-										validorders.push(data);
-									}	
-								}	
-							}		
-						}
-					}else if(token == "usdt"){
+					//Do we have that much of the token..
+					if(totalamounttoken <= bookbal){
 						
-						//Serach for people BUYING	
-						if(orderbook.usdt.enable){
+						//Is within limits
+						if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
+						
+							//The order book price
+							var obkprice = +ob.buy;
 							
-							//Check maximum
-							if(amount <= orderbook.usdt.maximum && amount >= orderbook.usdt.minimum){
+							//Is the price better than current or the same
+							if(obkprice == currentbuy){
+								//Same as current best.. just add
+								validorders.push(data);
 								
-								//How much Minima do we need
-								var totalamount = toFixedNumber(amount * orderbook.usdt.buy); 
+							}else if(obkprice > currentbuy){
 								
-								//Check have the required amount..
-								if(balance.minima.total >= totalamount){
-									//Is the price better than current
-									if(orderbook.usdt.buy == currentbuy){
-										//Same as current best.. just add
-										validorders.push(data);
-										
-									}else if(orderbook.usdt.buy > currentbuy){
-										
-										//Best price so far	
-										validorders = [];
-										currentbuy	= +orderbook.usdt.buy;
-										validorders.push(data);
-									}	
-								}	
+								//Best price so far	
+								validorders = [];
+								currentsell	= obkprice;
+								validorders.push(data);
 							}
 						}
-					}
+					}	
 				}
 			}
 		}
