@@ -46,14 +46,13 @@ var myoldbalance	= {};
  */
 function getBalanceWithLimits(orderbook, allbalances){
 	
-	return allbalances;
-	
 	//Make a copy..
 	var newbalances 	= allbalances;
 	
 	//Set to start
-	var maxbuywminima 	= toFixedNumber(newbalances.wminima * orderbook.wminima.buy);
-	var maxbuyusdt 		= toFixedNumber(newbalances.usdt * orderbook.usdt.buy);		
+	var cmaxminima 	= newbalances.minima.total;
+	var maxwminbuy  = 0;
+	var maxusdtbuy  = 0;
 		
 	//wMinima
 	if(orderbook.wminima.enable){
@@ -61,10 +60,10 @@ function getBalanceWithLimits(orderbook, allbalances){
 		//MAX to SELL
 		if(+allbalances.wminima > orderbook.wminima.maximum){
 			newbalances.wminima = orderbook.wminima.maximum;
-			
-			//MAX to BUY
-			maxbuywminima 	= toFixedNumber(newbalances.wminima * orderbook.wminima.buy);
 		}
+		
+		//Calculate max minima required..
+		maxwminbuy = toFixedNumber(newbalances.wminima / orderbook.wminima.buy);
 	}
 	
 	//USDT
@@ -73,23 +72,26 @@ function getBalanceWithLimits(orderbook, allbalances){
 		//MAX SELL
 		if(+allbalances.usdt > orderbook.usdt.maximum){
 			newbalances.usdt = orderbook.usdt.maximum;
-			
-			//MAX to BUY
-			maxbuyusdt = toFixedNumber(newbalances.usdt * orderbook.usdt.buy);
 		}
+		
+		//Calculate max minima required..
+		maxusdtbuy  = toFixedNumber(newbalances.usdt / orderbook.usdt.buy);
 	}
+	
+	//MDS.log("MAX WMINIMA BUY :"+maxwminbuy+" totalMinima:"+cmaxminima);
+	//MDS.log("MAX USDT BUY :"+maxusdtbuy+" totalMinima:"+cmaxminima);
 	
 	//Now sort max Minima..
-	if(maxbuywminima > maxbuyusdt){
-		if(maxbuywminima < newbalances.minima.total){
-			newbalances.minima.total = maxbuywminima; 
-		}
-	}else{
-		if(maxbuyusdt < newbalances.minima.total){
-			newbalances.minima.total = maxbuyusdt;
-		}
+	var maxbuy = maxusdtbuy;
+	if(maxwminbuy>maxusdtbuy){
+		maxbuy = maxwminbuy;
 	}
 	
+	//Is the MAX less than total Minima..
+	if(maxbuy<cmaxminima){
+		newbalances.minima.total = maxbuy;
+	}
+	 
 	return newbalances;
 }
 
