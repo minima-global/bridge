@@ -66,9 +66,12 @@
 	var USER_DETAILS = {};
 	
 	function approve(){
-		wMinimaApprove(HTLCContractAddress,"max",function(logs){
-			USDTApprove(HTLCContractAddress,"max",function(logs){
-				
+		wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
+			MDS.log(JSON.stringify(wminlogs));
+			
+			USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
+				MDS.log(JSON.stringify(usdtlogs));
+					
 			});
 		});
 	}

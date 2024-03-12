@@ -2,7 +2,8 @@
 /**
  * The RPC HOST
  */
-var ETH_RPC_HOST = "http://127.0.0.1:8545/";
+//var ETH_RPC_HOST = "http://127.0.0.1:8545/";
+var ETH_RPC_HOST = "https://sepolia.infura.io/v3/9831285ff3f3404aa6250d9b473650f5";
 
 /**
  * the Main ETH Wallet used 
@@ -198,7 +199,7 @@ function createRAWSendTxn(toaddress, ethamount, nonce){
 	var transaction = {
     	nonce: usenonce,
     	gasLimit: 21000,
-    	gasPrice: ethers.utils.bigNumberify("20000000000"),
+    	gasPrice: ethers.utils.bigNumberify("80000000000"),
     	to: toaddress,
     	value: ethers.utils.parseEther(ethamount+""),
 	};
@@ -220,7 +221,7 @@ function createRAWContractCallTxn(contractAddress, functionData, nonce){
 	var transaction = {
     	nonce: usenonce,
     	gasLimit: 1000000,
-    	gasPrice: ethers.utils.bigNumberify("20000000000"),
+    	gasPrice: ethers.utils.bigNumberify("80000000000"),
     	to: contractAddress,
     	data:functionData
 	};

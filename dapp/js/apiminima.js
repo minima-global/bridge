@@ -226,7 +226,7 @@ function checkExpiredMinimaHTLC(userdets, block, callback){
 							_collectExpiredCoin(userdets,coin,function(){});	
 					
 					}else{
-						//MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
+						MDS.log("Timelock CANNOT YET Collect Expired Minima Coin! timelock:"+timelock+" block:"+block+" amount:"+coin.amount);
 					}	
 				}
 			}catch(e){
@@ -630,7 +630,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(ethresp.status){
-			sentCounterPartyTxn(hashlock,"ETH:"+token,reqamount,ethresp.result,function(){
+			sentCounterPartyTxn(hashlock,"ETH:"+token,amount,ethresp.result,function(){
 				callback(ethresp);	
 			});
 		}else{
