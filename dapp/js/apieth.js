@@ -209,7 +209,7 @@ function checkETHNewSecrets(currentethblock, callback){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
 					
 					//Put a log in db so no need to call ETH..
-					collectExpiredHTLC(withdrawlog.hashlock, "wMinima / USDT", 0, "SECRET REVEALED - Withdrawn", function(){});
+					collectExpiredHTLC(withdrawlog.hashlock, "wMinima / USDT", 0, "SECRET REVEALED", function(){});
 				}
 			});
 		}
@@ -378,7 +378,6 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						
 						//How much do they want..
 						var calcamount = calculateAmount("buy",requestamount,simplename,myorderbook);
-						//Have they sent the right amount
 						if(sendamount  >= calcamount){
 						
 							//Send the ETH counter TXN - to make him reveal the secret
@@ -388,73 +387,6 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" required:"+calcamount+" actual:"+calcamount)
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
 						}
-						
-						//Are we enablked for these swaps..
-						/*if(reqtoken == wMinimaContractAddress){
-							
-							if(myorderbook.wminima.enable){
-								
-								//Make sure is within limits
-								if(sendamount > myorderbook.wminima.maximum){
-									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Maximum "+myorderbook.wminima.maximum);
-									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Maximum "+sendamount, function(sqlresp){});
-									return;	
-								}else if(sendamount < myorderbook.wminima.minimum){
-									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Minimum "+myorderbook.wminima.minimum);
-									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minimum "+sendamount, function(sqlresp){});
-									return;	
-								} 
-								
-								//Calculate how much we should send back..
-								var calcamount = calculateAmount("sell",sendamount,"wminima",myorderbook);
-								if(calcamount >= requestamount){
-								
-									//Send the ETH counter TXN - to make him reveal the secret
-									_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
-											
-								}else{
-									MDS.log("Invalid request amount for wMinima SWAP sent wminima:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
-									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
-								}	
-							}else{
-								MDS.log("Invalid request for Minima swap - not enabled");
-								collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request - swap not enabled", function(sqlresp){});
-							}
-								
-						}else if(reqtoken == USDTContractAddress){
-							
-							if(myorderbook.usdt.enable){
-								
-								//Make sure is within limits
-								if(sendamount > myorderbook.usdt.maximum){
-									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Maximum "+myorderbook.usdt.maximum);
-									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Maximum "+sendamount, function(sqlresp){});
-									return;	
-								}else if(sendamount < myorderbook.usdt.minimum){
-									MDS.log("Invalid request to sell wMinima ("+sendamount+") exceeds Minimum "+myorderbook.usdt.minimum);
-									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minimum "+sendamount, function(sqlresp){});
-									return;	
-								}
-								
-								//Calculate how much we should send back..
-								var calcamount = calculateAmount("sell",sendamount,"usdt",myorderbook);
-								if(calcamount >= requestamount){
-								
-									//Send the ETH counter TXN - to make him reveal the secret
-									_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
-											
-								}else{
-									MDS.log("Invalid request amount for USDT SWAP sent usdt:"+sendamount+" requestedminima:"+requestamount+" actual:"+calcamount)
-									collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
-								}	
-							}else{
-								MDS.log("Invalid request for Minima swap - not enabled");
-								collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request - swap not enabled", function(sqlresp){});
-							}
-							
-						}else{
-							MDS.log("Invalid request for swap - unknown token : "+reqtoken);
-						}*/
 					});
 				}
 			});
