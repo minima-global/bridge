@@ -11,14 +11,34 @@ var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpp
 /**
  * Start an HTLC
  */
-function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, erc20address, amount, requestamount,  callback){
+function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, 
+								erc20address, amount, requestamount,  callback){
 	
 	//Get ETH valid address
 	var rec 	= swappubkey.toLowerCase();
 	var ercaddr = erc20address.toLowerCase();
 	
-	//The actual amount - wMinima has 18 decimla places..
-	var sendamount 	= ethers.utils.parseUnits(""+amount,18);
+	//How many decimla places..
+	var decimals = 18;
+	if(erc20address == wMinimaContractAddress){
+		decimals = WMINIMA_DECIMALS;
+	}else if(erc20address == USDTContractAddress){
+		decimals = USDT_DECIMALS;
+	}else{
+		MDS.log("ERROR - UNKNOWN ERC20 setupETHHTLCSwap "+erc20address);
+		
+		var err 	= {};
+		err.status 	= false;
+		err.error 	= "ERROR - UNKNOWN ERC20 setupETHHTLCSwap "+erc20address;
+		
+		callback(err);
+		return;
+	}
+	
+	//The actual amount of the erc20
+	var sendamount 	= ethers.utils.parseUnits(""+amount,decimals);
+	
+	//How much Minima are we requesting - always 18 decimals
 	var reqamount   = ethers.utils.parseUnits(""+requestamount,18);
 	
 	//Get the function data
@@ -254,9 +274,18 @@ function parseHTLCContractData(logdata){
 	newcontract.minimapublickey = "0x"+datavars[0].slice(2).toUpperCase();
 	newcontract.tokencontract	= "0x"+datavars[1].slice(2).toUpperCase();
 	
-	var weiamount 			= ""+parseInt(datavars[2]._hex,16);
-	newcontract.amount		= ethers.utils.formatEther(weiamount,18);
+	var decimals = 18;
+	if(newcontract.tokencontract == wMinimaContractAddress){
+		decimals = WMINIMA_DECIMALS;
+	}else if(newcontract.tokencontract == USDTContractAddress){
+		decimals = USDT_DECIMALS;
+	}
 	
+	//The amount of the token
+	var weiamount 			= ""+parseInt(datavars[2]._hex,16);
+	newcontract.amount		= ethers.utils.formatEther(weiamount,decimals);
+	
+	//The requested amount of Minima
 	var reqweiamount 			= ""+parseInt(datavars[3]._hex,16);
 	newcontract.requestamount	= ethers.utils.formatEther(reqweiamount,18);
 	
