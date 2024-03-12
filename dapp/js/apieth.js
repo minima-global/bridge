@@ -154,6 +154,9 @@ function _collectExpiredETHCoin(htlclog,callback){
 var LAST_CHECKED_SECRET_BLOCK = -1;
 function checkETHNewSecrets(currentethblock, callback){
 	
+	//Incase of failure..
+	var OLD_LAST_CHECKED_SECRET_BLOCK = LAST_CHECKED_SECRET_BLOCK;
+	
 	//Are we on the saem block
 	if(LAST_CHECKED_SECRET_BLOCK == currentethblock){
 		if(callback){
@@ -194,14 +197,24 @@ function checkETHNewSecrets(currentethblock, callback){
 	
 	//Get all the withdraw logs - that reveal a secret
 	getHTLCContractWithdrawLogs(hexstart,hexend,function(ethresp){
-		//MDS.log("WITHDRAWS from "+hexstart+" to "+hexend+" "+JSON.stringify(ethresp,null,2));
+		
+		//Did it work
+		if(!ethresp.status){
+			MDS.log("ERROR get secret logs : "+ethresp.error);
+			
+			//Reset last checked block
+			LAST_CHECKED_SECRET_BLOCK = OLD_LAST_CHECKED_SECRET_BLOCK;
+			
+			if(callback){callback();}
+			return;
+		}
 		
 		//Cycle through the secrets
-		var len = ethresp.length;
+		var len = ethresp.logs.length;
 		for(var i=0;i<len;i++){
 			
 			//Get the current log
-			var withdrawlog = ethresp[i];
+			var withdrawlog = ethresp.logs[i];
 			
 			//Add this to our db of secrets..
 			insertSecret(withdrawlog.secret, withdrawlog.hashlock,function(added){

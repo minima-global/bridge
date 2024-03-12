@@ -157,15 +157,19 @@ function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 		//Complete list of contracts
 		var newcontracts = [];
 		
-		//Now decode the response..
-		var len = ethresp.result.length;
-		for(var i=0;i<len;i++){
-			
-			//Parse the returned Data
-			var newcontract = parseHTLCContractData(ethresp.result[i]);
-						
-			//Add to the total list..
-			newcontracts.push(newcontract);
+		//Did it work..
+		if(ethresp.status){
+		
+			//Now decode the response..
+			var len = ethresp.result.length;
+			for(var i=0;i<len;i++){
+				
+				//Parse the returned Data
+				var newcontract = parseHTLCContractData(ethresp.result[i]);
+							
+				//Add to the total list..
+				newcontracts.push(newcontract);
+			}
 		}
 		
 		callback(newcontracts);
@@ -209,15 +213,19 @@ function getHTLCContractAsReceiver(fomBlockHEX, toBlockHEX, callback){
 		//Complete list of contracts
 		var newcontracts = [];
 		
-		//Now decode the response..
-		var len = ethresp.result.length;
-		for(var i=0;i<len;i++){
+		//Did it work..
+		if(ethresp.status){
 			
-			//Parse the returned Data
-			var newcontract = parseHTLCContractData(ethresp.result[i]);
-						
-			//Add to the total list..
-			newcontracts.push(newcontract);
+			//Now decode the response..
+			var len = ethresp.result.length;
+			for(var i=0;i<len;i++){
+				
+				//Parse the returned Data
+				var newcontract = parseHTLCContractData(ethresp.result[i]);
+							
+				//Add to the total list..
+				newcontracts.push(newcontract);
+			}	
 		}
 		
 		callback(newcontracts);
@@ -288,25 +296,32 @@ function getHTLCContractWithdrawLogs(fomBlockHEX, toBlockHEX, callback){
 		//Complete list of contracts
 		var newcontracts = [];
 		
-		//Now decode the response..
-		var len = ethresp.result.length;
-		for(var i=0;i<len;i++){
-			
-			//Get the topics
-			var topics = ethresp.result[i].topics;
-			
-			//Parse the returned Data
-			var newcontract 		= {};
-			newcontract.block		= parseInt(ethresp.result[i].blockNumber);
-			newcontract.txnhash		= "0x"+(ethresp.result[i].transactionHash+"").slice(2).toUpperCase();
-			newcontract.contractid 	= "0x"+topics[1].slice(2).toUpperCase();
-			newcontract.secret 		= "0x"+topics[2].slice(2).toUpperCase(); 	
-			newcontract.hashlock 	= "0x"+topics[3].slice(2).toUpperCase();
-						
-			//Add to the total list..
-			newcontracts.push(newcontract);
+		//Did it work..
+		if(ethresp.status){
+			//Now decode the response..
+			var len = ethresp.result.length;
+			for(var i=0;i<len;i++){
+				
+				//Get the topics
+				var topics = ethresp.result[i].topics;
+				
+				//Parse the returned Data
+				var newcontract 		= {};
+				newcontract.block		= parseInt(ethresp.result[i].blockNumber);
+				newcontract.txnhash		= "0x"+(ethresp.result[i].transactionHash+"").slice(2).toUpperCase();
+				newcontract.contractid 	= "0x"+topics[1].slice(2).toUpperCase();
+				newcontract.secret 		= "0x"+topics[2].slice(2).toUpperCase(); 	
+				newcontract.hashlock 	= "0x"+topics[3].slice(2).toUpperCase();
+							
+				//Add to the total list..
+				newcontracts.push(newcontract);
+			}
 		}
 		
-		callback(newcontracts);
+		//Add this to the response
+		ethresp.logs = newcontracts;
+		
+		//And send back the details
+		callback(ethresp);
 	});
 }
