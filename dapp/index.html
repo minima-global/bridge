@@ -47,14 +47,48 @@
 	
 	Welcome to Bridge.<br>
 	<br>
-	Here you can Swap native Minima for wMinima on ETH.<br>
+	Here you can Swap native Minima for wMinima / USDT on Ethereum.<br>
 	<br>
-	<button onclick="approve();">APPROVE TRANSFERS</button><br>
 	<br>
+	Before you can use Bridge you <b>MUST</b> do a couple of things..<br>
+	<br>
+	1) Put some ETH into your bridge wallet. You need ETH to collect wMinima or USDT.<br>
+	
+	<br><br>
+	2) You must set your INFURA ETH RPC details here..<br>
+	<br>
+	You can get a key very simply in 3 mins from here <a href='https://app.infura.io/'>https://app.infura.io/</a><br>
+	<br>
+	You need to enable ETH MAINNET access..<br>
+	<br>
+	<table>
+		<tr>
+			<td>API_KEY : </td>
+			<td><input type="text" id=apikey></td>
+		</tr>
+		<tr>
+			<td>API_KEY_SECRET : </td>
+			<td><input type="text" id=apikeysecret></td>
+		</tr>
+		<tr><td colspan=2><button onclick="setapikeys();">SET API KEYS</button></td></tr>
+	</table>
+	
+	<br><br>
+	3) Approve the HTLC smart contracts for access..<br>
+	<br>
+	You only need to do this once.<br>
+	<br>
+	<button onclick="approve();">APPROVE SMART CONTRACTS</button><br>
+	<br><br>
+	
+	<br><br>
+	<button onclick="currentgas();">GET CURRENT GAS</button>
+	<!--  <br>
 	<button onclick="alllogs();">VIEW ALL ETH LOGS</button><br>
 	<br>
 	<button onclick="allOwnerlogs();">VIEW ALL OWNER ETH LOGS</button><br>
 	<br>
+	-->
 	
 	<script type="text/javascript">
 		createFooter();
@@ -71,8 +105,44 @@
 			
 			USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
 				MDS.log(JSON.stringify(usdtlogs));
-					
+				
+				alert(JSON.stringify(wminlogs)+"\n\n"+JSON.stringify(usdtlogs));
 			});
+		});
+	}
+	
+	function setapikeys(){
+		
+		var apik 	= apikey.value;
+		var apiksec = apikeysecret.value;
+		var b64 	= btoa(apik+":"+apiksec);
+		
+		//Let's do a test..
+		setInfuraApiKeys(apik,apiksec,b64,function(setresp){
+			
+			//Now test
+			getCurrentETHBlock(function(block){
+				
+				//Is it valid.
+				if(checkIsPositiveNumber(block)){
+					alert("API Keys Work!");	
+				}else{
+					clearInfuraApiKeys(function(){
+						alert("API Keys FAIL!");
+					});	
+				}
+			});
+		});
+	}
+	
+	function currentgas(){
+		getInfuraGASAPI(function(resp){
+			
+			//Get the data..
+			var gas = JSON.parse(resp.response);
+			
+			//And show..
+			alert(JSON.stringify(gas,null,2));
 		});
 	}
 	
@@ -111,6 +181,14 @@
 					initBridgeSystemsStartup(function(userdets){
 						//MDS.log(JSON.stringify(userdets));
 						USER_DETAILS=userdets;
+						
+						//And set the API key
+						getInfuraApiKeys(function(apikeys){
+							if(apikeys.enabled){
+								apikey.value		= apikeys.apikey;
+								apikeysecret.value	= apikeys.apikeysecret;
+							}
+						});
 					});
 				}
 			});

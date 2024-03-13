@@ -200,7 +200,7 @@ function checkETHNewSecrets(currentethblock, callback){
 		
 		//Did it work
 		if(!ethresp.status){
-			MDS.log("ERROR get secret logs : "+ethresp.error);
+			MDS.log("ERROR get secret logs : "+JSON.stringify(ethresp.error));
 			
 			//Reset last checked block
 			LAST_CHECKED_SECRET_BLOCK = OLD_LAST_CHECKED_SECRET_BLOCK;

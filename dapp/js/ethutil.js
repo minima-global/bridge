@@ -3,7 +3,10 @@
  * The RPC HOST
  */
 //var ETH_RPC_HOST = "http://127.0.0.1:8545/";
-var ETH_RPC_HOST = "https://sepolia.infura.io/v3/9831285ff3f3404aa6250d9b473650f5";
+//var ETH_RPC_HOST 			= "https://sepolia.infura.io/v3/9831285ff3f3404aa6250d9b473650f5";
+
+var ETH_INFURA_HOST 		= "https://sepolia.infura.io/v3/";
+var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";;
 
 /**
  * the Main ETH Wallet used 
@@ -50,6 +53,42 @@ function createAddressFromPrivateKey(private, callback){
 	callback(cleanaddress);
 }
 
+/**
+ * Get / Set the INFURA API KEYS
+ */
+function setInfuraApiKeys(apikey, apikeysecret, base64auth, callback){
+	
+	var fullkeys 			= {};
+	fullkeys.enabled 		= true;
+	fullkeys.apikey 		= apikey;
+	fullkeys.apikeysecret 	= apikeysecret;
+	fullkeys.basicauth 		= base64auth;
+	
+	MDS.keypair.set("_apikeys",JSON.stringify(fullkeys),function(init){
+		callback(init);
+	});
+}
+
+function clearInfuraApiKeys(callback){
+	
+	var fullkeys 	 = {};
+	fullkeys.enabled = false;
+	MDS.keypair.set("_apikeys",JSON.stringify(fullkeys),function(init){
+		callback(init);
+	});
+}
+
+function getInfuraApiKeys(callback){
+	MDS.keypair.get("_apikeys",function(getresult){
+		if(getresult.status){
+			callback(JSON.parse(getresult.value));
+		}else{
+			var fullkeys 			= {};
+			fullkeys.enabled 		= false;
+			callback(fullkeys);	
+		}
+	});
+}
 
 /**
  * Return your main public key
@@ -80,35 +119,54 @@ function setNonceAuto(callback){
  * Run an ETH command  
  */
 function runEthCommand(payload, callback){
-	MDS.net.POST(ETH_RPC_HOST,JSON.stringify(payload),function (resp) {
-	 	//MDS.log(resp.response);
 	
-		var ethresp 			= {};
-		ethresp.networkstatus 	= resp.status;
-		ethresp.status 			= resp.status; 	
-	
-		//Did it work..?
-		if(!resp.status){
-			MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
-			ethresp.error 		  = {};
-			ethresp.error.message = resp.error;
-			
+	//Get the current INFURA HOST
+	getInfuraApiKeys(function(apikeys){
+		
+		var rpchost = "";
+		if(apikeys.enabled){
+			rpchost = ETH_INFURA_HOST+apikeys.apikey;
 		}else{
-			
-			//Parse the returned result
-			var ethreturned = JSON.parse(resp.response);
-			if(ethreturned.error){
-				MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
-				ethresp.status 	= false;
-				ethresp.error 	= ethreturned.error;
-			}else{
-				ethresp.status 	= true;
-				ethresp.result 	= ethreturned.result;
-			}
+			var ethresp 			= {};
+			ethresp.networkstatus 	= false;
+			ethresp.status 			= false;
+			ethresp.error			= "INFURA API keys not specified..!";
+			 	
+			callback(ethresp);
+			return;
 		}
 		
-		//Send this back..
-		callback(ethresp);
+		//Now make the call
+		MDS.net.POST(rpchost,JSON.stringify(payload),function (resp) {
+		 	//MDS.log(resp.response);
+		
+			var ethresp 			= {};
+			ethresp.networkstatus 	= resp.status;
+			ethresp.status 			= resp.status; 	
+		
+			//Did it work..?
+			if(!resp.status){
+				MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
+				ethresp.error 		  = {};
+				ethresp.error.message = resp.error;
+				
+			}else{
+				
+				//Parse the returned result
+				var ethreturned = JSON.parse(resp.response);
+				if(ethreturned.error){
+					MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
+					ethresp.status 	= false;
+					ethresp.error 	= ethreturned.error;
+				}else{
+					ethresp.status 	= true;
+					ethresp.result 	= ethreturned.result;
+				}
+			}
+			
+			//Send this back..
+			callback(ethresp);
+		});	
 	});
 }
 
@@ -161,6 +219,21 @@ function getETHEREUMBalance(callback) {
 		//Convert to ETH
 		var ethvalue = ethers.utils.formatEther(ethresp);
 		callback(ethvalue);
+	});
+}
+
+/**
+ * get the Current GAS API values..
+ */
+function getInfuraGASAPI(callback){
+	
+	//Get the current INFURA HOST
+	getInfuraApiKeys(function(apikeys){
+		
+		//Call the Infura GAS API
+		MDS.net.GETAUTH(ETH_INFURA_GASAPI_HOST,apikeys.basicauth,function(resp){
+			callback(resp);
+		});
 	});
 }
 

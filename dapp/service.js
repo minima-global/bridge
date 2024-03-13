@@ -89,7 +89,7 @@ MDS.init(function(msg){
 	//Check the bridge has inited..
 	serviceCheckBridgeInited();
 	if(!BRIDGE_INITED){
-		MDS.log("BRIDGE NOT YET INITED:"+JSON.stringify(msg.event));
+		//MDS.log("BRIDGE NOT YET INITED:"+JSON.stringify(msg.event));
 		return;
 	}
 	
@@ -99,11 +99,33 @@ MDS.init(function(msg){
 		//SERVICE.js runs function synchromously... as no HTTP call.. 
 		//so no need to to stack functions inside each other
 		
+		//Are the INFURA KEYS SET
+		var infuraenabled = false;
+		getInfuraApiKeys(function(apikeys){
+			infuraenabled = apikeys.enabled;
+		});
+		
+		if(!infuraenabled){
+			return;
+		}
+		
 		//Get the current ETH block
 		var ethblock = 0;
 		getCurrentETHBlock(function(block){
 			ethblock = block;
+			
+			//Check is valid..
+			if(!checkIsPositiveNumber(ethblock)){
+				MDS.log("ERROR Getting latest ETH block.. "+ethblock);
+				ethblock = 0;
+			}
 		});
+		
+		//Check we have a valid ETH block
+		if(ethblock == 0){
+			//Try again in a minute..
+			return;
+		}
 		
 		//Get the current Minima block
 		var minimablock = 0;
