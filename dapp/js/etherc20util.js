@@ -48,29 +48,25 @@ function sendERC20(erc20contract, decimals, toaddress, amount, callback){
  * Get the current nonce and send 
  */
 function sendERC20GetNonce(erc20contract, decimals, toaddress, amount, callback){
+		
+	//Get ETH valid address
+	var addr = toaddress.toLowerCase();
+	if(addr.startsWith("0x")){
+		addr = addr.slice(2)
+	}
 	
-	//Get the current nonce..
-	getRequiredNonce(function(nonce){
-		
-		//Get ETH valid address
-		var addr = toaddress.toLowerCase();
-		if(addr.startsWith("0x")){
-			addr = addr.slice(2)
-		}
-		
-		//The actual amount - wMinima has 18 decimla places..
-		var sendamount = ethers.utils.parseUnits(""+amount,decimals);
-		
-		//Get the function data
-		var functiondata = ERC20InterfaceABI.functions.transfer.encode([addr ,sendamount]);
-		
-		//Now create the RAW txn..
-		var transaction = createRAWContractCallTxn(erc20contract, functiondata, nonce);
-		
-		//NOW SIGN..
-		postTransaction(transaction, function(ethresp){
-			callback(ethresp);
-		});
+	//The actual amount - wMinima has 18 decimla places..
+	var sendamount = ethers.utils.parseUnits(""+amount,decimals);
+	
+	//Get the function data
+	var functiondata = ERC20InterfaceABI.functions.transfer.encode([addr ,sendamount]);
+	
+	//Now create the RAW txn..
+	var transaction = createRAWContractCallTxn(erc20contract, functiondata);
+	
+	//NOW SIGN..
+	postTransaction(transaction, function(ethresp){
+		callback(ethresp);
 	}); 
 }
 
@@ -109,7 +105,7 @@ function erc20Approve(erc20contract, decimals,  contractaddress, amount, callbac
 		}else{
 			callback(ethresp);	
 		}
-	}); 
+	});
 }
 
 /**

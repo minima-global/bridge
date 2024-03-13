@@ -10,28 +10,24 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 	//Create a secret
 	createSecretHash(function(hashlock){
 		
-		//Need to set the nonce as this function called from the frontend
-		setNonceAuto(function(nonce){
-			
-			//Start the swap..
-			setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
-							erc20contract, amount, requestamount, function(ethresp){
-				if(ethresp.status){
+		//Start the swap..
+		setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
+						erc20contract, amount, requestamount, function(ethresp){
+			if(ethresp.status){
+				
+				//Log it..
+				startedCounterPartySwap(hashlock, "ETH:"+erc20contract, 
+							amount, ethresp.result, function(){
 					
-					//Log it..
-					startedCounterPartySwap(hashlock, "ETH:"+erc20contract, 
-								amount, ethresp.result, function(){
-						
-						//Insert these details so you know in future if right amount sent
-						insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
-							callback(ethresp);		
-						});		
-					});	
-				}else{
-					callback(ethresp);
-				}
-			});	
-		});
+					//Insert these details so you know in future if right amount sent
+					insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
+						callback(ethresp);		
+					});		
+				});	
+			}else{
+				callback(ethresp);
+			}
+		});	
 	});
 }
 

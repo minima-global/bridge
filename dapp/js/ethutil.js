@@ -6,7 +6,7 @@
 //var ETH_RPC_HOST 			= "https://sepolia.infura.io/v3/9831285ff3f3404aa6250d9b473650f5";
 
 var ETH_INFURA_HOST 		= "https://sepolia.infura.io/v3/";
-var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";;
+var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";
 
 /**
  * the Main ETH Wallet used 
@@ -23,6 +23,11 @@ var PRIVATE_KEY = "";
 var NONCE_TRACK = 0;
 
 /**
+ * The current GAS - taken from INFURA
+ */
+var GAS_API = {};
+
+/**
  * Initialise the ETH subsystem
  */
 function initialiseETH(private, callback){
@@ -35,9 +40,12 @@ function initialiseETH(private, callback){
 	setNonceAuto(function(){
 		MDS.log("ETH Wallet setup : "+MAIN_WALLET.address+" nonce:"+NONCE_TRACK);
 		
-		if(callback){
-			callback();
-		}
+		//And the initial GAS
+		setGasAuto(function(gasapi){
+			if(callback){
+				callback();
+			}	
+		});
 	});
 }
 
@@ -115,6 +123,28 @@ function setNonceAuto(callback){
 	});
 }
 
+function setGasAuto(callback){
+	
+	//Now get the current fees..
+	getInfuraGASAPI(function(gasapi){
+		
+		//Check valid..
+		if(gasapi.status && gasapi.response != ""){
+			GAS_API 		= JSON.parse(gasapi.response);	
+			GAS_API.valid 	= true;
+		}else{
+			GAS_API 		= {};
+			GAS_API.valid 	= false;
+			MDS.log("ERROR Getting GAS API "+JSON.stringify(gasapi));
+		}
+	});
+		
+	//And send back..
+	if(callback){
+		callback(GAS_API);	
+	}
+}
+
 /**
  * Run an ETH command  
  */
@@ -151,6 +181,7 @@ function runEthCommand(payload, callback){
 				ethresp.error.message = resp.error;
 				
 			}else{
+				//MDS.log("SUCCESS:"+JSON.stringify(resp));
 				
 				//Parse the returned result
 				var ethreturned = JSON.parse(resp.response);
@@ -269,10 +300,15 @@ function createRAWSendTxn(toaddress, ethamount, nonce){
 		usenonce = nonce;
 	}
 	
+	//WE USE the MEDIUM GAS
+	var usegas 			= GAS_API.high;
+	var maxfee 			= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
+	
+	//We are NOT eip1559 compatible
 	var transaction = {
     	nonce: usenonce,
     	gasLimit: 21000,
-    	gasPrice: ethers.utils.bigNumberify("80000000000"),
+    	gasPrice: maxfee,
     	to: toaddress,
     	value: ethers.utils.parseEther(ethamount+""),
 	};
@@ -291,10 +327,16 @@ function createRAWContractCallTxn(contractAddress, functionData, nonce){
 		usenonce = nonce;
 	}
 	
+	//WE USE the MEDIUM GAS
+	var usegas 			= GAS_API.medium;
+	var maxfee 			= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
+	
+	//Our Signing LIB is NOT eip1559 compatible..
 	var transaction = {
     	nonce: usenonce,
-    	gasLimit: 1000000,
-    	gasPrice: ethers.utils.bigNumberify("80000000000"),
+    	gasLimit: 500000,
+		//gasPrice: ethers.utils.bigNumberify("130000000000"),
+		gasPrice: maxfee,
     	to: contractAddress,
     	data:functionData
 	};
@@ -355,32 +397,11 @@ function postTransaction(unsignedtransaction, callback){
 function sendETHEREUM(toaddress, amount, callback){
 	
 	//Create a RAW txn
-	var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"", NONCE_TRACK);
+	var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"");
 	
 	//And now sign and Post It..
 	postTransaction(txn, function(ethresp){
 		callback(ethresp);
-	});
-}
-
-function sendETHEREUMGetNonce(toaddress, amount, callback){
-	
-	//Get the current nonce..
-	getRequiredNonce(function(nonce){
-		
-		//Create a RAW txn
-		var txn = createRAWSendTxn(toaddress.toLowerCase(), amount+"", nonce);
-		
-		//And now sign and Post It..
-		postTransaction(txn, function(ethresp){
-			
-			//Store the nonce..
-			if(ethresp.status){
-				NONCE_TRACK = nonce+1;
-			}
-			
-			callback(ethresp);
-		});	
 	});
 }
 

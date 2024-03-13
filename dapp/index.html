@@ -83,6 +83,10 @@
 	
 	<br><br>
 	<button onclick="currentgas();">GET CURRENT GAS</button>
+	
+	<br><br>
+	<button onclick="backend();">TEST BACKEND SEND</button>
+	
 	<!--  <br>
 	<button onclick="alllogs();">VIEW ALL ETH LOGS</button><br>
 	<br>
@@ -125,7 +129,10 @@
 				
 				//Is it valid.
 				if(checkIsPositiveNumber(block)){
-					alert("API Keys Work!");	
+					alert("API Keys Work!");
+					
+					//refresh
+					location.reload(); 
 				}else{
 					clearInfuraApiKeys(function(){
 						alert("API Keys FAIL!");
@@ -141,8 +148,23 @@
 			//Get the data..
 			var gas = JSON.parse(resp.response);
 			
+			var val = ethers.utils.parseUnits(gas.medium.suggestedMaxFeePerGas,"gwei");
+			MDS.log(val);
+			
 			//And show..
 			alert(JSON.stringify(gas,null,2));
+		});
+	}
+	
+	function backend(){
+		
+		var message = {};
+		message.action  = "SENDETH";
+		message.amount  = "1.23";
+		message.address = "0xFFEEDD";
+		
+		MDS.comms.solo(JSON.stringify(message),function(){
+			
 		});
 	}
 	

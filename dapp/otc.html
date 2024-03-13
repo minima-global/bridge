@@ -208,9 +208,14 @@
 	
 	function acceptOTC(coinid){
 		if(confirm("You are about to accept coin:"+coinid)){
-			//Accept this OTC dfeal..
-			acceptOTCSwapCoin(USER_DETAILS, coinid, function(res,message){
-				alert("OTC accept:"+res+" message:"+message);
+			
+			//Send to the backend..
+			var message 			= {};
+			message.action			= "ACCEPTOTCSWAP";
+			message.coinid 			= coinid;
+			
+			MDS.comms.solo(JSON.stringify(message),function(){
+				alert("Swap accept sent to backend..!");
 				
 				//Get the current block
 				MDS.cmd("block",function(blockresp){
@@ -218,6 +223,17 @@
 					showOTCDeals(+blockresp.response.block);	
 				});
 			});
+			
+			//Accept this OTC dfeal..
+			/*acceptOTCSwapCoin(USER_DETAILS, coinid, function(res,message){
+				alert("OTC accept:"+res+" message:"+message);
+				
+				//Get the current block
+				MDS.cmd("block",function(blockresp){
+					//Check for any OTC deals..
+					showOTCDeals(+blockresp.response.block);	
+				});
+			});*/
 		}	
 	}
 	

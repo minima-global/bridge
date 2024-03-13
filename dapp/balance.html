@@ -143,7 +143,7 @@
 			//Fill in ETH details..
 			myminimaaddress.innerHTML = USER_DETAILS.minimaaddress.mxaddress;
 			myethaddress.innerHTML	  = getETHERUMAddress(); 
-			ethbalance.innerHTML 	  = balances.eth;
+			ethbalance.innerHTML 	  = balances.ethfull;
 			wminimabalance.innerHTML  = balances.wminima;
 			usdtbalance.innerHTML 	  = balances.usdt;
 			
@@ -204,8 +204,14 @@
 		
 		//Send it..
 		if(confirm("Send "+amount+" ETH to "+address+" ?")){
-			sendETHEREUMGetNonce(address, amount, function(ethresp){
-				alert(JSON.stringify(ethresp));
+			
+			var message = {};
+			message.action  = "SENDETH";
+			message.amount  = amount;
+			message.address = address;
+			
+			MDS.comms.solo(JSON.stringify(message),function(){
+				alert("Send request sent to backend..!");	
 			});
 		}
 	}
@@ -220,8 +226,14 @@
 		
 		//Send it..
 		if(confirm("Send "+amount+" wMinima to "+address+" ?")){
-			sendWMinimaERC20GetNonce(address, amount, function(ethresp){
-				alert(JSON.stringify(ethresp));
+			
+			var message = {};
+			message.action  = "SENDWMINIMA";
+			message.amount  = amount;
+			message.address = address;
+			
+			MDS.comms.solo(JSON.stringify(message),function(){
+				alert("Send request sent to backend..!");	
 			});
 		}
 	}
@@ -232,8 +244,14 @@
 		
 		//Send it..
 		if(confirm("Send "+amount+" USDT to "+address+" ?")){
-			sendUSDTGetNonce(address, amount, function(ethresp){
-				alert(JSON.stringify(ethresp));
+			
+			var message = {};
+			message.action  = "SENDUSDT";
+			message.amount  = amount;
+			message.address = address;
+			
+			MDS.comms.solo(JSON.stringify(message),function(){
+				alert("Send request sent to backend..!");	
 			});
 		}
 	}

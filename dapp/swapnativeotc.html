@@ -81,8 +81,24 @@
 			return;
 		}
 		
+		//Send to the backend..
+		var message 			= {};
+		message.action			= "STARTMINIMASWAP";
+		message.sendamount 		= sendamount;
+		message.requestamount 	= reqamount;
+		message.contractaddress	= "ETH:"+contractaddress;
+		message.reqpublickey	= reqpublickey;
+		message.otc				= true;
+		
+		MDS.comms.solo(JSON.stringify(message),function(){
+			alert("Swap request sent to backend..!");
+			
+			//Ok - lets jump to the next page..
+			location.href="otc.html?uid="+MDS.minidappuid;
+		});
+		
 		//Send Minima to the HTLC..
-		startMinimaSwap(USER_DETAILS, sendamount, reqamount,
+		/*startMinimaSwap(USER_DETAILS, sendamount, reqamount,
 				"ETH:"+contractaddress, reqpublickey, true, function(resp){
 			if(resp.status){
 				alert("Swap started!");
@@ -100,7 +116,7 @@
 				//Disable the button
 				proceedbutton.disabled=false;
 			}
-		});
+		});*/
 	}
 	
 	//Main message handler..

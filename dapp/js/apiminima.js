@@ -519,8 +519,15 @@ function acceptOTCSwapCoin(userdets, coinid, callback){
 						callback(false,error);
 					}else{
 						
-						//REDO the nonce - as this is sent from the frontend
-						setNonceAuto(function(nonce){
+						//Set the GAS
+						setGasAuto(function(nonce){
+							
+							//Check the GAS is now valid
+							if(!GAS_API.valid){
+								callback(false,"GAS API invalid..");
+								return;
+							}
+							
 							//Send the ETH counter TXN - to make him reveal the secret
 							sendCounterPartyMinimaTxn(userdets,coin,function(resp){
 								callback(resp.status,JSON.stringify(resp));	

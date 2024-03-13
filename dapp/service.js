@@ -109,6 +109,19 @@ MDS.init(function(msg){
 			return;
 		}
 		
+		//Check the Nonce.. 
+		if(!checkIsPositiveNumber(NONCE_TRACK)){
+			
+			//REDO the NONCE
+			setNonceAuto(function(nonce){});
+			
+			//And check again..	
+			if(!checkIsPositiveNumber(NONCE_TRACK)){
+				MDS.log("ERROR NOnce not valid..");
+				return;
+			}
+		}
+		
 		//Get the current ETH block
 		var ethblock = 0;
 		getCurrentETHBlock(function(block){
@@ -116,14 +129,13 @@ MDS.init(function(msg){
 			
 			//Check is valid..
 			if(!checkIsPositiveNumber(ethblock)){
-				MDS.log("ERROR Getting latest ETH block.. "+ethblock);
+				MDS.log("ERROR Getting latest ETH block.. "+ethblock+" ..waiting for next update round");
 				ethblock = 0;
 			}
 		});
 		
 		//Check we have a valid ETH block
 		if(ethblock == 0){
-			//Try again in a minute..
 			return;
 		}
 		
@@ -133,8 +145,14 @@ MDS.init(function(msg){
 			minimablock = +mblock;
 		});
 		
-		//Auto set the Nonce..
-		setNonceAuto(function(){});
+		//Auto set Gas fees..
+		setGasAuto(function(){});
+		
+		//Is the GAS API valid..
+		if(!GAS_API.valid){
+			MDS.log("ERROR Getting GAS API latest fees..");
+			return;
+		}
 			
 		//Check for new secrets
 		checkETHNewSecrets(ethblock,function(){});
@@ -166,6 +184,57 @@ MDS.init(function(msg){
 		
 		//Check the Complete Order Book - will only check sigs for NEW entries..
 		createCompleteOrderBook(function(completeorderbook){});
+	
+	}else if(msg.event == "MDSCOMMS"){
+	
+		//Messages sent fdrom the front end..
+		//MDS.log(JSON.stringify(msg,null,2));
+	
+		//Make sure is a private message
+		if(!msg.data.public){
+			
+			//Get the message
+			var comms = JSON.parse(msg.data.message);
+			
+			//Get the action
+			if(comms.action == "SENDETH"){
+				sendETHEREUM(comms.address,comms.amount,function(ethresp){
+					MDS.log("SENDETH Request : "+JSON.stringify(ethresp));	
+				});
+			}else if(comms.action == "SENDWMINIMA"){
+				sendWMinimaERC20(comms.address,comms.amount,function(ethresp){
+					MDS.log("SENDWMINIMA Request : "+JSON.stringify(ethresp));	
+				});
+			}else if(comms.action == "SENDUSDT"){
+				sendUSDT(comms.address,comms.amount,function(ethresp){
+					MDS.log("SENDUSDT Request : "+JSON.stringify(ethresp));	
+				});
+			
+			}else if(comms.action == "STARTMINIMASWAP"){
+				startMinimaSwap(USER_DETAILS, comms.sendamount, comms.requestamount,
+					comms.contractaddress, comms.reqpublickey, comms.otc, function(resp){
+					MDS.log("STARTMINIMASWAP Request : "+JSON.stringify(resp));
+				});
+			
+			}else if(comms.action == "ACCEPTOTCSWAP"){
+				acceptOTCSwapCoin(USER_DETAILS, comms.coinid, function(res,message){
+					MDS.log("ACCEPTOTCSWAP "+res+" "+JSON.stringify(message));
+				});
+			
+			}else if(comms.action == "APPROVECONTRACTS"){
+				wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
+					MDS.log(JSON.stringify(wminlogs));
+					USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
+						MDS.log(JSON.stringify(usdtlogs));
+					});
+				});	
+			}else{
+				MDS.log("COMMS Unknown Request : "+JSON.stringify(msg,null,2));
+			}
+					
+		}else{
+			MDS.log("SECURITY received public comms message : "+JSON.stringify(msg,null,2));
+		}
 	
 	}else if(msg.event == "NOTIFYCOIN"){
 		
