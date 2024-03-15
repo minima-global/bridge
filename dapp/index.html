@@ -81,15 +81,15 @@
 	<button onclick="approve();">APPROVE SMART CONTRACTS</button><br>
 	<br>
 	<button onclick="allowance();">SMART CONTRACT ALLOWANCE</button><br>
-	<br><br>
+	<br>
 	
 	<br><br>
 	<button onclick="currentgas();">GET CURRENT GAS</button>
 	
+	<!--  <br>
 	<br><br>
 	<button onclick="tester();">TEST</button>
 	
-	<!--  <br>
 	<button onclick="alllogs();">VIEW ALL ETH LOGS</button><br>
 	<br>
 	<button onclick="allOwnerlogs();">VIEW ALL OWNER ETH LOGS</button><br>
@@ -164,15 +164,8 @@
 	
 	function currentgas(){
 		getInfuraGASAPI(function(resp){
-			
-			//Get the data..
-			var gas = JSON.parse(resp.response);
-			
-			var val = ethers.utils.parseUnits(gas.medium.suggestedMaxFeePerGas,"gwei");
-			MDS.log(val);
-			
 			//And show..
-			alert(JSON.stringify(gas,null,2));
+			alert(JSON.stringify(GAS_API,null,2));
 		});
 	}
 	
