@@ -22,6 +22,7 @@
 	<script type="text/javascript" src="./js/sql.js"></script>
 	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
 	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
 	
 	
 </head>
@@ -40,8 +41,6 @@
 	
 
 <script type="text/javascript">
-	
-	var etherscan = "https://sepolia.etherscan.io/tx/";
 	
 	var USER_DETAILS = {};
 	
@@ -109,7 +108,12 @@
 			trow.insertCell(4).innerHTML = row.AMOUNT;
 			
 			if(row.TXNHASH.startsWith("0x")){
-				trow.insertCell(5).innerHTML = "<a href='"+etherscan+row.TXNHASH+"'>"+row.TXNHASH.substring(0,10)+"..</a>";
+				if(ETHERSCAN_LINK == ""){
+					trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";	
+				}else{
+					trow.insertCell(5).innerHTML = "<a href='"+ETHERSCAN_LINK+row.TXNHASH+"'>"+row.TXNHASH.substring(0,10)+"..</a>";
+				}
+				
 			}else{
 				trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";	
 			}

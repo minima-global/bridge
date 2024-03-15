@@ -1,12 +1,19 @@
 
 /**
- * The RPC HOST
+ * The ETH RPC HOST
  */
-//var ETH_RPC_HOST = "http://127.0.0.1:8545/";
-//var ETH_RPC_HOST 			= "https://sepolia.infura.io/v3/9831285ff3f3404aa6250d9b473650f5";
 
-var ETH_INFURA_HOST 		= "https://sepolia.infura.io/v3/";
-var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";
+//HARDHAT
+var USE_API_KEYS			= false;
+var ETH_INFURA_HOST 		= "http://127.0.0.1:8545/";
+var ETH_INFURA_GASAPI_HOST 	= "";
+var ETHERSCAN_LINK			= "";
+
+//SEPOLIA
+//var USE_API_KEYS				= true;
+//var ETH_INFURA_HOST 			= "https://sepolia.infura.io/v3/";
+//var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";
+//var ETHERSCAN_LINK			= "https://sepolia.etherscan.io/tx/";
 
 /**
  * the Main ETH Wallet used 
@@ -123,7 +130,46 @@ function setNonceAuto(callback){
 	});
 }
 
+/**
+ * Get the Nonce for an address
+ */
+function getRequiredNonce(callback) {
+	
+	//Set the function
+	var payload = {"jsonrpc":"2.0", "method":"eth_getTransactionCount",
+			"params": [getETHERUMAddress(),"latest"], "id": 1};
+	  
+	//Run it..
+	runEthCommand(payload,function(ethresp){
+		if(ethresp.status){
+			var nonce = parseInt(ethresp.result,16);	
+			callback(nonce);	
+		}else{
+			callback(-1);
+		}
+	});
+}
+
 function setGasAuto(callback){
+	
+	//Are we running on HARDHAT
+	if(ETH_INFURA_GASAPI_HOST == ""){
+		GAS_API 								= {};
+		GAS_API.low  							= {};
+		GAS_API.low.suggestedMaxFeePerGas 		= "40.0";	
+		GAS_API.medium  						= {};
+		GAS_API.medium.suggestedMaxFeePerGas 	= "80.0";	
+		GAS_API.high  							= {};
+		GAS_API.high.suggestedMaxFeePerGas 		= "120.0";	
+		GAS_API.valid 							= true;
+		
+		//And send back..
+		if(callback){
+			callback(GAS_API);	
+		}
+		
+		return;
+	}
 	
 	//Now get the current fees..
 	getInfuraGASAPI(function(gasapi){
@@ -154,16 +200,22 @@ function runEthCommand(payload, callback){
 	getInfuraApiKeys(function(apikeys){
 		
 		var rpchost = "";
-		if(apikeys.enabled){
-			rpchost = ETH_INFURA_HOST+apikeys.apikey;
+		
+		if(USE_API_KEYS){
+			if(apikeys.enabled){
+				rpchost = ETH_INFURA_HOST+apikeys.apikey;
+			}else{
+				var ethresp 			= {};
+				ethresp.networkstatus 	= false;
+				ethresp.status 			= false;
+				ethresp.error			= "INFURA API keys not specified..!";
+				 	
+				callback(ethresp);
+				return;
+			}	
 		}else{
-			var ethresp 			= {};
-			ethresp.networkstatus 	= false;
-			ethresp.status 			= false;
-			ethresp.error			= "INFURA API keys not specified..!";
-			 	
-			callback(ethresp);
-			return;
+			//HARDHAT
+			rpchost = ETH_INFURA_HOST;
 		}
 		
 		//Now make the call
@@ -172,16 +224,15 @@ function runEthCommand(payload, callback){
 		
 			var ethresp 			= {};
 			ethresp.networkstatus 	= resp.status;
-			ethresp.status 			= resp.status; 	
-		
+			
 			//Did it work..?
 			if(!resp.status){
-				MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
-				ethresp.error 		  = {};
-				ethresp.error.message = resp.error;
+				MDS.log("NETWORK ERROR running ETH network command : "+JSON.stringify(resp));
+				ethresp.status 			= false;
+				ethresp.error 		  	= {};
+				ethresp.error.message 	= resp.error;
 				
 			}else{
-				//MDS.log("SUCCESS:"+JSON.stringify(resp));
 				
 				//Parse the returned result
 				var ethreturned = JSON.parse(resp.response);
@@ -269,48 +320,21 @@ function getInfuraGASAPI(callback){
 }
 
 /**
- * Get the Nonce for an address
- */
-function getRequiredNonce(callback) {
-	
-	//Set the function
-	var payload = {"jsonrpc":"2.0", "method":"eth_getTransactionCount",
-			"params": [getETHERUMAddress(),"latest"], "id": 1};
-	  
-	//Run it..
-	runEthCommand(payload,function(ethresp){
-		
-		if(ethresp.status){
-			var nonce = parseInt(ethresp.result,16);	
-			callback(nonce);	
-		}else{
-			callback(-1);
-		}
-	});
-}	
-
-/**
  * Create a RAW unsigned Simple ETH Send Transaction
  */
-function createRAWSendTxn(toaddress, ethamount, nonce){
-	
-	//Did we specify a nonce..
-	var usenonce = NONCE_TRACK;
-	if(nonce){
-		usenonce = nonce;
-	}
+function createRAWSendTxn(toaddress, ethamount){
 	
 	//WE USE the MEDIUM GAS
-	var usegas 			= GAS_API.high;
+	var usegas 			= GAS_API.medium;
 	var maxfee 			= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
 	
 	//We are NOT eip1559 compatible
 	var transaction = {
-    	nonce: usenonce,
+    	nonce: NONCE_TRACK,
     	gasLimit: 21000,
     	gasPrice: maxfee,
     	to: toaddress,
-    	value: ethers.utils.parseEther(ethamount+""),
+    	value: ""+ethers.utils.parseEther(ethamount+"")
 	};
 	
 	return transaction;	
@@ -319,13 +343,7 @@ function createRAWSendTxn(toaddress, ethamount, nonce){
 /**
  * Create a RAW unsigned Contract Call Transaction
  */
-function createRAWContractCallTxn(contractAddress, functionData, nonce){
-	
-	//Did we specify a nonce..
-	var usenonce = NONCE_TRACK;
-	if(nonce){
-		usenonce = nonce;
-	}
+function createRAWContractCallTxn(contractAddress, functionData, gaslimit){
 	
 	//WE USE the MEDIUM GAS
 	var usegas 			= GAS_API.medium;
@@ -333,13 +351,32 @@ function createRAWContractCallTxn(contractAddress, functionData, nonce){
 	
 	//Our Signing LIB is NOT eip1559 compatible..
 	var transaction = {
-    	nonce: usenonce,
-    	gasLimit: 500000,
+    	nonce: NONCE_TRACK,
+		
+		gasLimit: gaslimit,
+    	gasPrice: maxfee,
+
+		//gasLimit: gaslimit,
 		//gasPrice: ethers.utils.bigNumberify("130000000000"),
-		gasPrice: maxfee,
+		
     	to: contractAddress,
     	data:functionData
 	};
+	
+	//Estimate the GAS
+	/*estimateGas(transaction,function(estimate){
+		MDS.log("ESTIMATEGAS:"+JSON.stringify(estimate));
+		
+		if(!estimate.error){
+			
+			//Get the estimate
+			var estgas = parseInt(estimate.result,16);
+			transaction.gasLimit = estgas; 
+			return transaction;	
+		}else{
+			return transaction;
+		}
+	});*/
 	
 	return transaction;	
 }	
@@ -357,12 +394,24 @@ function sendRAWSignedTxn(signedtxn,callback){
 	//Run it..
 	runEthCommand(payload,function(ethresp){
 		
-		//Was it a success - as in we spoke to the ETH node..
-		if(ethresp.networkstatus){
+		//Was it a success - as in we spoke to the ETH node and got a sucess..
+		if(ethresp.networkstatus && ethresp.status){
 			//The NONCE MUST be incremented..
 			NONCE_TRACK++;		
 		}
 		
+		callback(ethresp);
+	});
+}
+
+function estimateGas(transaction,callback){
+	var payload = {	"jsonrpc":"2.0", 
+					"method":"eth_estimateGas",
+					"params": [transaction], 
+					"id": 1};
+	  
+	//Run it..
+	runEthCommand(payload,function(ethresp){
 		callback(ethresp);
 	});
 }

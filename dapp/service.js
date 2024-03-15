@@ -117,7 +117,7 @@ MDS.init(function(msg){
 			
 			//And check again..	
 			if(!checkIsPositiveNumber(NONCE_TRACK)){
-				MDS.log("ERROR NOnce not valid..");
+				MDS.log("ERROR Nonce not valid..");
 				return;
 			}
 		}
@@ -153,6 +153,9 @@ MDS.init(function(msg){
 			MDS.log("ERROR Getting GAS API latest fees..");
 			return;
 		}
+		
+		//HARDHAT HACK
+		//setNonceAuto();
 			
 		//Check for new secrets
 		checkETHNewSecrets(ethblock,function(){});
@@ -188,7 +191,7 @@ MDS.init(function(msg){
 	}else if(msg.event == "MDSCOMMS"){
 	
 		//Messages sent fdrom the front end..
-		//MDS.log(JSON.stringify(msg,null,2));
+		MDS.log(JSON.stringify(msg,null,2));
 	
 		//Make sure is a private message
 		if(!msg.data.public){
@@ -217,6 +220,11 @@ MDS.init(function(msg){
 					MDS.log("STARTMINIMASWAP Request : "+JSON.stringify(resp));
 				});
 			
+			}else if(comms.action == "STARTETHSWAP"){
+				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(resp){
+					MDS.log("STARTETHSWAP Request : "+JSON.stringify(resp));
+				});
+			
 			}else if(comms.action == "ACCEPTOTCSWAP"){
 				acceptOTCSwapCoin(USER_DETAILS, comms.coinid, function(res,message){
 					MDS.log("ACCEPTOTCSWAP "+res+" "+JSON.stringify(message));
@@ -224,9 +232,9 @@ MDS.init(function(msg){
 			
 			}else if(comms.action == "APPROVECONTRACTS"){
 				wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
-					MDS.log(JSON.stringify(wminlogs));
+					MDS.log("APPROVECONTRACTS wMinima:"+JSON.stringify(wminlogs));
 					USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
-						MDS.log(JSON.stringify(usdtlogs));
+						MDS.log("APPROVECONTRACTS USDT:"+JSON.stringify(usdtlogs));
 					});
 				});	
 			

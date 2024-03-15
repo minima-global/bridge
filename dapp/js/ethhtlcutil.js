@@ -4,15 +4,30 @@
 var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 
 /**
- * wMinima Contract Address
+ * HTLC Contract Address
  */
-var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());
+
+//SEPOLIA
+//var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());
+
+//HARDHAT
+var HTLCContractAddress = "0x"+("0165878A594ca255338adfa4d48449f69242Eb8F".toUpperCase());
 
 /**
  * Start an HTLC
  */
 function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, 
 								erc20address, amount, requestamount,  callback){
+	
+	/*var datalogs = {};
+	datalogs.ownerminimakey = ownerminimakey;
+	datalogs.swappubkey = swappubkey;
+	datalogs.hashlock = hashlock;
+	datalogs.timelock = timelock;
+	datalogs.erc20address = erc20address;
+	datalogs.amount = amount;
+	datalogs.reqamount = reqamount;
+	MDS.log("setupETHHTLCSwap : "+JSON.stringify(datalogs));*/
 	
 	//Get ETH valid address
 	var rec 	= swappubkey.toLowerCase();
@@ -46,7 +61,7 @@ function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock,
 			rec , hashlock, timelock, ercaddr, sendamount, reqamount, true]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 500000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
@@ -87,7 +102,7 @@ function withdrawHTLCSwap(contractId, secret, callback){
 	var functiondata = HTLCInterfaceABI.functions.withdraw.encode([contr, sec]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 120000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
@@ -107,7 +122,7 @@ function refundHTLCSwap(contractId, callback){
 	var functiondata = HTLCInterfaceABI.functions.refund.encode([contr]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 120000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){

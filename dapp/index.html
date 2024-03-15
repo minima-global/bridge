@@ -79,13 +79,15 @@
 	You only need to do this once.<br>
 	<br>
 	<button onclick="approve();">APPROVE SMART CONTRACTS</button><br>
+	<br>
+	<button onclick="allowance();">SMART CONTRACT ALLOWANCE</button><br>
 	<br><br>
 	
 	<br><br>
 	<button onclick="currentgas();">GET CURRENT GAS</button>
 	
 	<br><br>
-	<button onclick="backend();">TEST BACKEND SEND</button>
+	<button onclick="tester();">TEST</button>
 	
 	<!--  <br>
 	<button onclick="alllogs();">VIEW ALL ETH LOGS</button><br>
@@ -104,10 +106,28 @@
 	var USER_DETAILS = {};
 	
 	function approve(){
-		wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
+		var message 			= {};
+		message.action			= "APPROVECONTRACTS";
+		MDS.comms.solo(JSON.stringify(message),function(){
+			alert("Approve request sent to backend..!");
+		});
+		
+		/*wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
 			MDS.log(JSON.stringify(wminlogs));
 			
 			USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
+				MDS.log(JSON.stringify(usdtlogs));
+				
+				alert(JSON.stringify(wminlogs)+"\n\n"+JSON.stringify(usdtlogs));
+			});
+		});*/
+	}
+	
+	function allowance(){
+		wMinimaAllowance(HTLCContractAddress,function(wminlogs){
+			MDS.log(JSON.stringify(wminlogs));
+			
+			USDTAllowance(HTLCContractAddress,function(usdtlogs){
 				MDS.log(JSON.stringify(usdtlogs));
 				
 				alert(JSON.stringify(wminlogs)+"\n\n"+JSON.stringify(usdtlogs));
@@ -156,15 +176,34 @@
 		});
 	}
 	
-	function backend(){
+	function tester(){
 		
-		var message = {};
-		message.action  = "SENDETH";
-		message.amount  = "1.23";
-		message.address = "0xFFEEDD";
+		//Get ETH valid address
+		var addr = "102A72E1787FDDC5E29435F3068CD66BC89B0568";
+		var sendamount = "0";
+		//sendamount = "115792089237316195423570985008687907853269984665640564039457584007913129639935";
+		//sendamount = ethers.utils.parseUnits(""+amount,decimals);
 		
-		MDS.comms.solo(JSON.stringify(message),function(){
-			
+		//Get the function data
+		var functiondata = ERC20InterfaceABI.functions.approve.encode([addr, sendamount]);
+		
+		//Now create the RAW txn..
+		var txn = createRAWContractCallTxn(wMinimaContractAddress, functiondata, 60000);
+		
+		//var txn = createRAWSendTxn("0x102A72E1787FDDC5E29435F3068CD66BC89B0568","1");
+		//txn.value = "0x" +"e0b6b3a7640000".toUpperCase();
+		
+		/*var txn = {
+				//from : "0x7EB8B6B0D3C074163A64236563C726117BA9F320",
+		    	to: "0x102A72E1787FDDC5E29435F3068CD66BC89B0568",
+		    	value: "0x9184e72a"
+		    	//value: ethers.utils.parseEther("1")
+			};*/
+		
+		MDS.log(JSON.stringify(txn));
+		
+		estaimateGas(txn,function(resp){
+			MDS.log(JSON.stringify(resp));
 		});
 	}
 	

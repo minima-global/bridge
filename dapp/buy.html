@@ -83,9 +83,23 @@
 			return
 		}
 		
-		//Send Minima to the HTLC..
-		startETHSwap(USER_DETAILS, reqpublickey, erc20contract, reqamount, amount, function(resp){
-		//startMinimaSwap(USER_DETAILS, reqamount, amount,"ETH:"+erc20contract,reqpublickey, false, function(resp){
+		//Send to the backend..
+		var message 			= {};
+		message.action			= "STARTETHSWAP";
+		message.reqpublickey 	= reqpublickey;
+		message.erc20contract 	= erc20contract;
+		message.reqamount		= reqamount;
+		message.amount			= amount;
+		
+		MDS.comms.solo(JSON.stringify(message),function(){
+			alert("Swap request sent to backend..!");
+			
+			//Ok - lets jump to the next page..
+			location.href="swap.html?uid="+MDS.minidappuid;
+		});
+		
+		//Send ETH to the HTLC..
+		/*startETHSwap(USER_DETAILS, reqpublickey, erc20contract, reqamount, amount, function(resp){
 					
 			if(resp.status){
 				alert("Swap started!");
@@ -103,7 +117,7 @@
 				//Disable the button
 				proceedbutton.disabled=false;
 			}
-		});
+		});*/
 	}
 	
 	//Main message handler..

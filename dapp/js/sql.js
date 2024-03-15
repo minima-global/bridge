@@ -43,9 +43,25 @@ function createDB(callback){
 					+" )";
 			
 			MDS.sql(myhtlccontracts,function(htlcmsg){
+				
 				if(callback){
-					callback(msg);
-				}	
+					callback(htlcmsg);
+				}
+				
+				/*var ethcontracts = "CREATE TABLE IF NOT EXISTS `ethtxns` ( "
+						+"  `id` bigint auto_increment, "
+						+"  `hash` varchar(128) NOT NULL, "
+						+"  `nonce` bigint NOT NULL, "
+						+"  `gasprice` bigint NOT NULL, "
+						+"  `transaction` varchar(1024) NOT NULL, "
+						+"  `eventdate` bigint NOT NULL "
+						+" )";
+				
+				MDS.sql(ethcontracts,function(ethmsg){
+					if(callback){
+						callback(ethmsg);
+					}	
+				});	*/
 			});	
 		});
 	});
