@@ -271,6 +271,20 @@
 		}else if(msg.event == "NEWBALANCE"){
 			refresh();
 		
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				
+				//Get the message..
+				var comms = JSON.parse(msg.data.message);
+				
+				//Make sure is right message
+				if(comms.action == "FRONTENDMSG"){
+					MDS.log(JSON.stringify(comms));
+				}
+			}
+			
 		}else if(msg.event == "MDS_TIMER_60SECONDS"){
 			//Kepp doing this every 60 secs until there are no unconfirmed.. 
 			if(balanceunconfirmed){

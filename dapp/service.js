@@ -203,6 +203,7 @@ MDS.init(function(msg){
 				});
 			}else if(comms.action == "SENDWMINIMA"){
 				sendWMinimaERC20(comms.address,comms.amount,function(ethresp){
+					sendFrontendMSG(JSON.stringify(ethresp),function(){});
 					MDS.log("SENDWMINIMA Request : "+JSON.stringify(ethresp));	
 				});
 			}else if(comms.action == "SENDUSDT"){
@@ -228,6 +229,10 @@ MDS.init(function(msg){
 						MDS.log(JSON.stringify(usdtlogs));
 					});
 				});	
+			
+			}else if(comms.action == "FRONTENDMSG"){
+				//Ignore..
+				
 			}else{
 				MDS.log("COMMS Unknown Request : "+JSON.stringify(msg,null,2));
 			}

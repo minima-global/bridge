@@ -78,3 +78,17 @@ function getDateString(dateobj){
 	
 	return day+"/"+month+"/"+year+" "+hour+":"+mins;
 }
+
+//Send a message to the front end
+function sendFrontendMSG(msg,callback){
+	
+	var comms 		= {};
+	comms.action 	= "FRONTENDMSG";
+	comms.message	= msg;
+	
+	MDS.comms.solo(JSON.stringify(comms),function(resp){
+		if(callback){
+			callback(resp);	
+		}
+	});
+}
