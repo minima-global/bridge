@@ -238,6 +238,11 @@ MDS.init(function(msg){
 					});
 				});	
 			
+			}else if(comms.action == "REFRESHNONCE"){
+				setNonceAuto(function(resp){
+					MDS.log("REFRESHNONCE "+JSON.stringify(resp));
+				});
+			
 			}else if(comms.action == "FRONTENDMSG"){
 				//Ignore..
 				

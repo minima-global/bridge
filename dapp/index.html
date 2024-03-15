@@ -85,6 +85,8 @@
 	
 	<br><br>
 	<button onclick="currentgas();">GET CURRENT GAS</button>
+	<br><br>
+	<button onclick="refreshnonce();">REFRESH NONCE</button>
 	
 	<!--  <br>
 	<br><br>
@@ -166,6 +168,14 @@
 		getInfuraGASAPI(function(resp){
 			//And show..
 			alert(JSON.stringify(GAS_API,null,2));
+		});
+	}
+	
+	function refreshnonce(){
+		var message 			= {};
+		message.action			= "REFRESHNONCE";
+		MDS.comms.solo(JSON.stringify(message),function(){
+			alert("Refresh Nonce request sent to backend..!");
 		});
 	}
 	
