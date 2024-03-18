@@ -33,7 +33,11 @@
 		createHeader();
 	</script>
 	
-	<table style="border-spacing:5;" border=1 id=histtable></table>
+	<table style="border-spacing:5;width:800;" border=1 id=histtable></table>
+	
+	<br>
+	<button id=prevbuttonid onclick="previous()">PREVIOUS</button>&nbsp;&nbsp;
+	<button id=nextbuttonid onclick="next();">NEXT</button>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -45,6 +49,17 @@
 	var USER_DETAILS = {};
 	
 	var hid = MDS.form.getParams("hashid");
+	if(hid){
+		prevbuttonid.style.display = "none";
+		nextbuttonid.style.display = "none";
+	}
+	
+	//Where are we oin the list
+	var MAX_HISTORY = 20;
+	var offset = MDS.form.getParams("offset");
+	if(!offset){
+		offset = 0;
+	}
 	
 	function striptags(text){
 		return text.replace(/<\/?[^>]+(>|$)/g, "");
@@ -104,23 +119,24 @@
 			trow.insertCell(1).innerHTML = hash;
 			
 			trow.insertCell(2).innerHTML = row.EVENT;
-			trow.insertCell(3).innerHTML = getTokenType(row.TOKEN);
+			
+			var ttype = getTokenType(row.TOKEN);
+			trow.insertCell(3).innerHTML = ttype;
 			trow.insertCell(4).innerHTML = row.AMOUNT;
 			
 			if(row.TXNHASH.startsWith("0x")){
-				if(ETHERSCAN_LINK == ""){
-					trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";	
+				if(ttype == "wMinima" || ttype == "USDT" || ttype == "ETH"){
+					var txnlink = "<a href='ethstatus.html?uid="+MDS.minidappuid+"&txnhash="+row.TXNHASH+"'>"+row.TXNHASH.substring(0,10)+"..</a>";
+					trow.insertCell(5).innerHTML = txnlink;	
 				}else{
-					trow.insertCell(5).innerHTML = "<a href='"+ETHERSCAN_LINK+row.TXNHASH+"'>"+row.TXNHASH.substring(0,10)+"..</a>";
+					trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";
 				}
-				
 			}else{
 				trow.insertCell(5).innerHTML = row.TXNHASH.substring(0,10)+"..";	
 			}
 			
 			//Create a date object
-			var dd = new Date(+row.EVENTDATE);
-			trow.insertCell(6).innerHTML = getDateString(dd);
+			trow.insertCell(6).innerHTML = getDateString(+row.EVENTDATE);
 		}
 	}
 	
@@ -131,10 +147,23 @@
 				createTable(res);
 			});
 		}else{
-			getAllEvents(function(res){
+			getAllEvents(MAX_HISTORY,offset,function(res){
 				createTable(res);
 			});	
 		}
+	}
+	
+	function previous(){
+		offset = offset - MAX_HISTORY;
+		if(offset<0){
+			offset = 0;
+		}
+		updateHistory();
+	}
+	
+	function next(){
+		offset = offset + MAX_HISTORY;
+		updateHistory();
 	}
 	
 	//Main message handler..

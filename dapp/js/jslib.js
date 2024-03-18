@@ -69,12 +69,15 @@ function getCurrentUnixTime(){
 	return Math.floor(new Date().getTime() / 1000);
 }
 
-function getDateString(dateobj){
+function getDateString(eventdatemilli){
+	
+	var dateobj = new Date(eventdatemilli);
+	
 	var year 	= dateobj.getFullYear();
 	var month 	= dateobj.getMonth()+1;
 	var day 	= dateobj.getDate();
-	var hour	= dateobj.getHours();
-	var mins	= dateobj.getMinutes();
+	var hour	= (dateobj.getHours() < 10 ? '0' : '') + dateobj.getHours();
+	var mins	= (dateobj.getMinutes() < 10 ? '0' : '') + dateobj.getMinutes();
 	
 	return day+"/"+month+"/"+year+" "+hour+":"+mins;
 }

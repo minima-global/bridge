@@ -321,6 +321,66 @@ function getInfuraGASAPI(callback){
 	});
 }
 
+function estimateGas(transaction,callback){
+	var payload = {	"jsonrpc":"2.0", 
+					"method":"eth_estimateGas",
+					"params": [transaction], 
+					"id": 1};
+	  
+	//Run it..
+	runEthCommand(payload,function(ethresp){
+		callback(ethresp);
+	});
+}
+
+function getTransactionReceipt(txnhash,callback){
+	var payload = {	"jsonrpc":"2.0", 
+					"method":"eth_getTransactionReceipt",
+					"params": [txnhash], 
+					"id": 1};
+	  
+	//Run it..
+	runEthCommand(payload,function(ethresp){
+		callback(ethresp);
+	});
+}
+
+//Check if this transaction has been mined..
+function checkETHTransactionStatus(transactionid, callback){
+	
+	//Get it from the DB
+	getETHTransaction(transactionid,function(sqlgetresp){
+		
+		//Get details
+		var res 		= sqlgetresp.rows[0];
+		var status 		= res.STATUS;
+		var transaction = JSON.parse(decodeStringFromDB(res.TRANSACTION));
+		var eventdate	= res.EVENTDATE;
+		
+		if(status == "WAITING"){
+			
+			//Check Transaction Receipt
+			getTransactionReceipt(transactionid,function(ethresp){
+				if(ethresp.result && ethresp.result.blockNumber){
+					//Has been mined..
+					changeStatusETHTransaction(transactionid,"MINED",function(sqlupdateresp){
+						callback("MINED",transaction,eventdate)		
+					});
+				}else{
+					//Has not been mined yet
+					callback("WAITING",transaction,eventdate);
+				}
+			});		
+			
+		}else if(status == "MINED"){
+			callback("MINED",transaction,eventdate);
+		}else{
+			//Has been boosted..
+			callback(status,transaction,eventdate);
+		}
+	});
+}
+
 /**
  * Create a RAW unsigned Simple ETH Send Transaction
  */
@@ -329,6 +389,9 @@ function createRAWSendTxn(toaddress, ethamount){
 	//WE USE the MEDIUM GAS
 	var usegas 			= GAS_API.medium;
 	var maxfee 			= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
+	if(maxfee._hex){
+		maxfee = maxfee._hex;
+	}
 	
 	//We are NOT eip1559 compatible
 	var transaction = {
@@ -350,35 +413,22 @@ function createRAWContractCallTxn(contractAddress, functionData, gaslimit){
 	//WE USE the MEDIUM GAS
 	var usegas 			= GAS_API.medium;
 	var maxfee 			= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
+	if(maxfee._hex){
+		maxfee = maxfee._hex;
+	}
 	
 	//Our Signing LIB is NOT eip1559 compatible..
 	var transaction = {
     	nonce: NONCE_TRACK,
 		
 		gasLimit: gaslimit,
-    	gasPrice: maxfee,
-
-		//gasLimit: gaslimit,
+    	
+		gasPrice: maxfee,
 		//gasPrice: ethers.utils.bigNumberify("130000000000"),
 		
     	to: contractAddress,
     	data:functionData
 	};
-	
-	//Estimate the GAS
-	/*estimateGas(transaction,function(estimate){
-		MDS.log("ESTIMATEGAS:"+JSON.stringify(estimate));
-		
-		if(!estimate.error){
-			
-			//Get the estimate
-			var estgas = parseInt(estimate.result,16);
-			transaction.gasLimit = estgas; 
-			return transaction;	
-		}else{
-			return transaction;
-		}
-	});*/
 	
 	return transaction;	
 }	
@@ -406,18 +456,6 @@ function sendRAWSignedTxn(signedtxn,callback){
 	});
 }
 
-function estimateGas(transaction,callback){
-	var payload = {	"jsonrpc":"2.0", 
-					"method":"eth_estimateGas",
-					"params": [transaction], 
-					"id": 1};
-	  
-	//Run it..
-	runEthCommand(payload,function(ethresp){
-		callback(ethresp);
-	});
-}
-
 /**
  * Sign and Send a RAW transaction
  */
@@ -428,7 +466,15 @@ function postTransaction(unsignedtransaction, callback){
 	
 	//Now send!
     sendRAWSignedTxn(signedTransaction,function(ethresp){
-		callback(ethresp);
+		
+		//Put in the SQL DB
+		if(ethresp.networkstatus && ethresp.status){
+			insertEthTransaction(ethresp.result,unsignedtransaction,function(){
+				callback(ethresp);
+			});	
+		}else{
+			callback(ethresp);	
+		}
     });
 	
 	/*var signPromise = MAIN_WALLET.sign(unsignedtransaction);
@@ -452,7 +498,15 @@ function sendETHEREUM(toaddress, amount, callback){
 	
 	//And now sign and Post It..
 	postTransaction(txn, function(ethresp){
-		callback(ethresp);
+		
+		//Put in the SQL DB
+		if(ethresp.networkstatus && ethresp.status){
+			insertSendETH("ETH",ethresp.result, amount, function(){
+				callback(ethresp);
+			});		
+		}else{
+			callback(ethresp);	
+		}
 	});
 }
 
@@ -468,5 +522,42 @@ function checkETHTransaction(txnhash, callback){
 	//Run it..
 	runEthCommand(payload,function(ethresp){
 		callback(ethresp);
+	});
+}
+
+function boostTransaction(transactionid,callback){
+		
+	//Get it from the DB
+	getETHTransaction(transactionid,function(sqlgetresp){
+		
+		//Does it exist..
+		if(sqlgetresp.rows.length==0){
+			//No transaction found..
+			var resp = {};
+			resp.networkstatus 	= false;
+			resp.status 		= false;
+			resp.error  		= "Transaction with ID:"+transactionid+" not found..";
+			callback(resp);
+			return;
+		}
+		
+		//Get details
+		var res 		= sqlgetresp.rows[0];
+		var transaction = JSON.parse(decodeStringFromDB(res.TRANSACTION));
+		
+		//WE USE the HIGH GAS for boost
+		var usegas 				= GAS_API.high;
+		var maxfee 				= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
+		if(maxfee._hex){
+			maxfee = maxfee._hex;
+		}	
+		
+		//Update the GAS
+		transaction.gasPrice	= maxfee;
+		
+		//Boost it..
+		postTransaction(transaction,function(ethresp){
+			callback(ethresp);
+		});
 	});
 }

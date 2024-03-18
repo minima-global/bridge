@@ -48,12 +48,11 @@ function createDB(callback){
 					callback(htlcmsg);
 				}
 				
-				/*var ethcontracts = "CREATE TABLE IF NOT EXISTS `ethtxns` ( "
+				var ethcontracts = "CREATE TABLE IF NOT EXISTS `ethtxns` ( "
 						+"  `id` bigint auto_increment, "
-						+"  `hash` varchar(128) NOT NULL, "
-						+"  `nonce` bigint NOT NULL, "
-						+"  `gasprice` bigint NOT NULL, "
+						+"  `txnhash` varchar(128) NOT NULL, "
 						+"  `transaction` varchar(1024) NOT NULL, "
+						+"  `status` varchar(64) NOT NULL, "
 						+"  `eventdate` bigint NOT NULL "
 						+" )";
 				
@@ -61,7 +60,7 @@ function createDB(callback){
 					if(callback){
 						callback(ethmsg);
 					}	
-				});	*/
+				});
 			});	
 		});
 	});
@@ -241,16 +240,24 @@ function logWithdraw(token, amount, txnhash,callback){
 	});
 }
 
-function logApprove(txnhash,callback){
-	_insertCounterPartyEvent("0x00","wminima",0,"CPTXN_APPROVE",txnhash,function(resp){
+function logApprove(token, txnhash,callback){
+	_insertCounterPartyEvent("0x00",token,0,"CPTXN_APPROVE",txnhash,function(resp){
 		if(callback){
 			callback(resp);	
 		}
 	});
 }
 
-function getAllEvents(callback){
-	MDS.sql("SELECT * FROM counterparty ORDER BY id DESC", function(sqlmsg){
+function insertSendETH(token,txnhash,amount,callback){
+	_insertCounterPartyEvent("0x00",token,amount+"","CPTXN_SENDETH",txnhash,function(resp){
+		if(callback){
+			callback(resp);	
+		}
+	});
+}
+
+function getAllEvents(limit, offset, callback){
+	MDS.sql("SELECT * FROM counterparty ORDER BY id DESC LIMIT "+limit+" OFFSET "+offset, function(sqlmsg){
 		callback(sqlmsg.rows);
 	});
 }
@@ -285,5 +292,33 @@ function _insertCounterPartyEvent(hash,token,amount,event,txnhash,callback){
 function _checkCounterPartyEvent(hash,event,callback){
 	MDS.sql("SELECT * FROM counterparty WHERE hash='"+hash+"' AND event='"+event+"'", function(sqlmsg){
 		callback(sqlmsg.rows.length>0);
+	});
+}
+
+function insertEthTransaction(txnhash,transaction,callback){
+	
+	//the date
+	var recdate = new Date();
+	
+	//Create a string version
+	var dbtrans = encodeStringForDB(JSON.stringify(transaction));
+	
+	//Insert into DB
+	var sql = "INSERT INTO ethtxns(txnhash,transaction,status,eventdate) "
+	+"VALUES ('"+txnhash+"','"+dbtrans+"','WAITING',"+recdate.getTime()+")";
+	MDS.sql(sql,function(msg){
+		callback(msg);
+	});
+}
+
+function getETHTransaction(txnhash, callback){
+	MDS.sql("SELECT * FROM ethtxns WHERE txnhash='"+txnhash+"'", function(sqlmsg){
+		callback(sqlmsg);
+	});
+}
+
+function changeStatusETHTransaction(txnhash, status, callback){
+	MDS.sql("UPDATE ethtxns SET status='"+status+"' WHERE txnhash='"+txnhash+"'", function(sqlmsg){
+		callback(sqlmsg);
 	});
 }

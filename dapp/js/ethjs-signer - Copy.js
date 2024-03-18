@@ -12351,7 +12351,7 @@ var stripHexPrefix = __webpack_require__(9);
  * @throws if the argument is not an array, object that isn't a bignumber, not a string number or number
  */
 module.exports = function numberToBN(arg) {
-  var errorMessage = new Error('[number-to-bn] while converting number to BN.js object, argument "' + JSON.stringify(arg) + '" type "' + String(typeof(arg)) + '" must be either a negative or positive (1) integer number, (2) string integer, (3) valid prefixed hex number string, (4) BN.js object instance or a (5) bignumber.js object.');
+  var errorMessage = new Error('[number-to-bn] while converting number to BN.js object, argument "' + String(arg) + '" type "' + String(typeof(arg)) + '" must be either a negative or positive (1) integer number, (2) string integer, (3) valid prefixed hex number string, (4) BN.js object instance or a (5) bignumber.js object.');
   if (typeof arg === 'string') {
     if (arg.match(/0[xX][0-9a-fA-F]+/) || arg.match(/^-?[0-9]+$/)) {
       if (isHexPrefixed(arg)) {

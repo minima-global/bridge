@@ -128,12 +128,16 @@ function initBridgeSystems(callback){
 	//Just do the normal
 	getBridgeUserDetails(function(userdets){
 		
-		//Set the ETH details..
-		setETHEREUMAddress(userdets.ethaddress);
-		setETHPrivateKey(userdets.ethprivatekey);
-		
-		if(callback){
-			callback(userdets);
-		}
+		//Set up the DB - in case has changed
+		createDB(function(res){
+			
+			//Set the ETH details..
+			setETHEREUMAddress(userdets.ethaddress);
+			setETHPrivateKey(userdets.ethprivatekey);
+			
+			if(callback){
+				callback(userdets);
+			}	
+		});
 	});
 }

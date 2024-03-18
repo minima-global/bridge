@@ -30,15 +30,6 @@ function sendUSDT(toaddress, amount, callback){
 }
 
 /**
- * Get the current nonce and send
- */
-function sendUSDTGetNonce(toaddress, amount, callback){
-	sendERC20GetNonce(USDTContractAddress,USDT_DECIMALS,toaddress,amount,function(ethresp){
-		callback(ethresp);
-	});
-}
-
-/**
  * Approve a Contract to touch your USDT
  */
 function USDTApprove(contractaddress, amount, callback){

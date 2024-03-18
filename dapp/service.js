@@ -51,7 +51,15 @@ function serviceCheckBridgeInited(){
 			
 			//Init all subsytems
 			initBridgeSystems(function(userdets){
+				
+				//Keep the USER Details
 				USER_DETAILS = userdets;
+				
+				//Auto set Gas fees..
+				setGasAuto(function(){});
+				
+				//And the Nonce..
+				setNonceAuto(function(nonce){});
 			});	
 		}
 	});
@@ -213,6 +221,16 @@ MDS.init(function(msg){
 					sendFrontendMSG(comms.action,ethresp);
 				});
 			
+			}else if(comms.action == "POSTTRANSACTION"){
+				postTransaction(comms.transaction, function(ethresp){
+					sendFrontendMSG(comms.action,ethresp);
+				});
+			
+			}else if(comms.action == "BOOSTTRANSACTION"){
+				boostTransaction(comms.transactionid, function(ethresp){
+					sendFrontendMSG(comms.action,ethresp);
+				});
+				
 			}else if(comms.action == "STARTMINIMASWAP"){
 				startMinimaSwap(USER_DETAILS, comms.sendamount, comms.requestamount,
 					comms.contractaddress, comms.reqpublickey, comms.otc, function(ethresp){

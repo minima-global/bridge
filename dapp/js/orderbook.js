@@ -109,9 +109,9 @@ function createCompleteOrderBook(callback){
 			var unique = getUniqueRecords(validsignedrecords);
 			
 			//Did we check any new coins..
-			if(SIGS_CHECKED > 0){
-				MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
-			}
+			//if(SIGS_CHECKED > 0){
+			//	MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
+			//}
 			
 			//Now we only want the ones providing liquidity
 			var finallist 	= [];

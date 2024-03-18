@@ -30,15 +30,6 @@ function sendWMinimaERC20(toaddress, amount, callback){
 }
 
 /**
- * Get the current nonce and send
- */
-function sendWMinimaERC20GetNonce(toaddress, amount, callback){
-	sendERC20GetNonce(wMinimaContractAddress,WMINIMA_DECIMALS,toaddress,amount,function(ethresp){
-		callback(ethresp);
-	});
-}
-
-/**
  * Approve a Contract to touch your wMinima
  */
 function wMinimaApprove(contractaddress, amount, callback){

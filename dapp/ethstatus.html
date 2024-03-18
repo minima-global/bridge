@@ -1,0 +1,127 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/puresha1.js"></script>
+	<script type="text/javascript" src="./js/pagelayout.js"></script>
+	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
+	<script type="text/javascript" src="./js/apieth.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/orderbookutil.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./js/htlcvars.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/erc20abi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
+	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
+	
+	
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		createHeader();
+	</script>
+	
+	ETH Transaction Status
+	
+	<pre style="text-align:left;width:400;" id=ethtransaction></pre>
+	
+	<div id=ethstatus></div><br>
+	
+	<div id=ethtime></div><br>
+	
+	<br><br>
+	<button id=boostbuttonid onclick="boost();">BOOST</button>
+		
+	<script type="text/javascript">
+		createFooter();
+	</script>
+	
+
+<script type="text/javascript">
+	
+	
+	var txnhash = MDS.form.getParams("txnhash");
+	
+	function showTransaction(){
+		
+		checkETHTransactionStatus(txnhash,function(checkresp, transaction, evdate){
+			
+			if(checkresp == "WAITING"){
+				//Show the BOOST button	
+			}else if(checkresp == "MINED"){
+				boostbuttonid.style.display="none";
+			}else{
+				boostbuttonid.style.display="none";
+			}
+			
+			//Set the visuals
+			ethtransaction.innerHTML = JSON.stringify(transaction,null,2);
+			ethstatus.innerHTML		 = checkresp;
+			ethtime.innerHTML		 = "Created : "+getDateString(+evdate);
+		});
+	}
+	
+	function boost(){
+		
+		//Update the DB
+		changeStatusETHTransaction(txnhash,"BOOSTED",function(resp){
+			var message = {};
+			message.action  		= "BOOSTTRANSACTION";
+			message.transactionid  	= txnhash;
+			
+			sendBackendMSG(message);	
+		});
+	}
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		
+		//Do initialisation
+		if(msg.event == "inited"){
+			showTransaction();	
+		
+		//Messages from back end
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				var comms = JSON.parse(msg.data.message);
+				if(comms.action == "FRONTENDMSG"){
+					//Show the message
+					alert(JSON.stringify(comms,null,2));
+				}
+			}
+		} 
+		
+	});
+
+</script>
+
+</body>
+
+</html>

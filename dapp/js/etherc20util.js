@@ -40,7 +40,15 @@ function sendERC20(erc20contract, decimals, toaddress, amount, callback){
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
-		callback(ethresp);
+		
+		//Put in the SQL DB
+		if(ethresp.networkstatus && ethresp.status){
+			insertSendETH(erc20contract,ethresp.result, amount, function(){
+				callback(ethresp);
+			});		
+		}else{
+			callback(ethresp);	
+		}
 	}); 
 }
 
@@ -73,7 +81,7 @@ function erc20Approve(erc20contract, decimals,  contractaddress, amount, callbac
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
 		if(ethresp.status){
-			logApprove(ethresp.result,function(){
+			logApprove(erc20contract,ethresp.result,function(){
 				callback(ethresp);	
 			});
 		}else{
