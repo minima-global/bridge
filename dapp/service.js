@@ -191,7 +191,7 @@ MDS.init(function(msg){
 	}else if(msg.event == "MDSCOMMS"){
 	
 		//Messages sent fdrom the front end..
-		MDS.log(JSON.stringify(msg,null,2));
+		//MDS.log(JSON.stringify(msg,null,2));
 	
 		//Make sure is a private message
 		if(!msg.data.public){
@@ -202,45 +202,52 @@ MDS.init(function(msg){
 			//Get the action
 			if(comms.action == "SENDETH"){
 				sendETHEREUM(comms.address,comms.amount,function(ethresp){
-					MDS.log("SENDETH Request : "+JSON.stringify(ethresp));	
+					sendFrontendMSG("SENDETH",ethresp);	
 				});
 			}else if(comms.action == "SENDWMINIMA"){
 				sendWMinimaERC20(comms.address,comms.amount,function(ethresp){
-					sendFrontendMSG(JSON.stringify(ethresp),function(){});
-					MDS.log("SENDWMINIMA Request : "+JSON.stringify(ethresp));	
+					sendFrontendMSG("SENDWMINIMA",ethresp);
 				});
 			}else if(comms.action == "SENDUSDT"){
 				sendUSDT(comms.address,comms.amount,function(ethresp){
-					MDS.log("SENDUSDT Request : "+JSON.stringify(ethresp));	
+					sendFrontendMSG("SENDUSDT",ethresp);
 				});
 			
 			}else if(comms.action == "STARTMINIMASWAP"){
 				startMinimaSwap(USER_DETAILS, comms.sendamount, comms.requestamount,
-					comms.contractaddress, comms.reqpublickey, comms.otc, function(resp){
-					MDS.log("STARTMINIMASWAP Request : "+JSON.stringify(resp));
+					comms.contractaddress, comms.reqpublickey, comms.otc, function(ethresp){
+					sendFrontendMSG("STARTMINIMASWAP",ethresp);
 				});
 			
 			}else if(comms.action == "STARTETHSWAP"){
-				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(resp){
-					MDS.log("STARTETHSWAP Request : "+JSON.stringify(resp));
+				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(ethresp){
+					sendFrontendMSG("STARTETHSWAP",ethresp);
 				});
 			
 			}else if(comms.action == "ACCEPTOTCSWAP"){
 				acceptOTCSwapCoin(USER_DETAILS, comms.coinid, function(res,message){
-					MDS.log("ACCEPTOTCSWAP "+res+" "+JSON.stringify(message));
+					var fullmess 	 = {};
+					fullmess.res 	 = res;
+					fullmess.message = message;
+					
+					sendFrontendMSG("ACCEPTOTCSWAP",fullmess);
 				});
 			
 			}else if(comms.action == "APPROVECONTRACTS"){
+				var approve = {};
 				wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
-					MDS.log("APPROVECONTRACTS wMinima:"+JSON.stringify(wminlogs));
+					approve.wminima = wminlogs;
 					USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
-						MDS.log("APPROVECONTRACTS USDT:"+JSON.stringify(usdtlogs));
+						approve.usdt = usdtlogs;
+						
+						//Now send to front end..
+						sendFrontendMSG("APPROVECONTRACTS",approve);
 					});
 				});	
 			
 			}else if(comms.action == "REFRESHNONCE"){
 				setNonceAuto(function(resp){
-					MDS.log("REFRESHNONCE "+JSON.stringify(resp));
+					sendFrontendMSG("REFRESHNONCE",resp);
 				});
 			
 			}else if(comms.action == "FRONTENDMSG"){

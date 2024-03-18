@@ -108,30 +108,12 @@
 	var USER_DETAILS = {};
 	
 	function approve(){
-		var message 			= {};
-		message.action			= "APPROVECONTRACTS";
-		MDS.comms.solo(JSON.stringify(message),function(){
-			alert("Approve request sent to backend..!");
-		});
-		
-		/*wMinimaApprove(HTLCContractAddress,"max",function(wminlogs){
-			MDS.log(JSON.stringify(wminlogs));
-			
-			USDTApprove(HTLCContractAddress,"max",function(usdtlogs){
-				MDS.log(JSON.stringify(usdtlogs));
-				
-				alert(JSON.stringify(wminlogs)+"\n\n"+JSON.stringify(usdtlogs));
-			});
-		});*/
+		sendSimpleBackendMSG("APPROVECONTRACTS");
 	}
 	
 	function allowance(){
 		wMinimaAllowance(HTLCContractAddress,function(wminlogs){
-			MDS.log(JSON.stringify(wminlogs));
-			
 			USDTAllowance(HTLCContractAddress,function(usdtlogs){
-				MDS.log(JSON.stringify(usdtlogs));
-				
 				alert(JSON.stringify(wminlogs)+"\n\n"+JSON.stringify(usdtlogs));
 			});
 		});
@@ -172,11 +154,7 @@
 	}
 	
 	function refreshnonce(){
-		var message 			= {};
-		message.action			= "REFRESHNONCE";
-		MDS.comms.solo(JSON.stringify(message),function(){
-			alert("Refresh Nonce request sent to backend..!");
-		});
+		sendSimpleBackendMSG("REFRESHNONCE");
 	}
 	
 	function tester(){
@@ -256,6 +234,18 @@
 					});
 				}
 			});
+		
+		//Messages from back end
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				var comms = JSON.parse(msg.data.message);
+				if(comms.action == "FRONTENDMSG"){
+					//Show the message
+					alert(JSON.stringify(comms,null,2));
+				}
+			}
 		}
 	});
 
