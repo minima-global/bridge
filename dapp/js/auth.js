@@ -84,59 +84,42 @@ function isBridgeInited(callback){
 
 function initBridgeSystemsStartup(callback){
 	
-	//Have we generated the Userdetails yet
-	isBridgeInited(function(inited){
-		
-		//Have we created
-		if(!inited){
+	MDS.log("Initialising base bridge systems..");
+	
+	//Create a private key
+	createPrivateKey(function(privatekey){
+	
+		//Init ETH
+		initialiseETHAddress(privatekey, function(ethaddress){
 			
-			MDS.log("Initialising base bridge systems..");
-			
-			//Create a private key
-			createPrivateKey(function(privatekey){
-			
-				//Init ETH
-				initialiseETHAddress(privatekey, function(ethaddress){
+			//Now get the user details.. need ETH to havce started up
+			_getUserDetails(function(userdets){
+				
+				//Set the private key
+				userdets.ethprivatekey = privatekey;
+				
+				//Do some basic startup work..
+				setUpHTLCScript(userdets, function(resp){
 					
-					//Now get the user details.. need ETH to havce started up
-					_getUserDetails(function(userdets){
+					//We want to be notified of Coin Events
+					setupCoinSecretEvents(function(notify){
 						
-						//Set the private key
-						userdets.ethprivatekey = privatekey;
+						//Set up the DB
+						createDB(function(res){
 						
-						//Do some basic startup work..
-						setUpHTLCScript(userdets, function(resp){
-							
-							//We want to be notified of Coin Events
-							setupCoinSecretEvents(function(notify){
+							//Hard set USER_DETAILS as they don't ever change
+							setBridgeUserDetails(userdets,function(){
 								
-								//Set up the DB
-								createDB(function(res){
-								
-									//Hard set USER_DETAILS as they don't ever change
-									setBridgeUserDetails(userdets,function(){
-										
-										//And NOW - set init to TRUE
-										MDS.keypair.set("_initbridgesystems","true",function(dets){
-											callback(userdets);	
-										});	
-									});
+								//And NOW - set init to TRUE
+								MDS.keypair.set("_initbridgesystems","true",function(dets){
+									callback(userdets);	
 								});	
 							});
-						});		
+						});	
 					});
-				});
+				});		
 			});
-			
-		}else{
-			
-			//Just do the normal
-			initBridgeSystems(function(userdets){
-				if(callback){
-					callback(userdets);
-				}
-			});
-		}
+		});
 	});
 }
 
