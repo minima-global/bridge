@@ -45,6 +45,9 @@
 		createHeader();
 	</script>
 	
+	OTC (Over-the-counter) swaps ALWAYS start with the Minima side.<br>
+	<br>
+	
 	Your Bridge OTC_UID :<br> 
 	<br>
 	<div id=mydetails style="font-size:11;"></div>
@@ -54,17 +57,17 @@
 	<br>
 	<table>
 		<tr>
-			<td>WITH OTC_UID : </td>
+			<td class="rightalign">WITH OTC_UID : </td>
 			<td><input type=text id=otcuid></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td>Amount Minima : </td>
+			<td class="rightalign">Minima : </td>
 			<td><input type=text id=minimaamount></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td>Request Token: </td>
+			<td class="rightalign">Request Token : </td>
 			<td>
 				<select name="tokentype" id="tokentypeid">
 				  <option value="wMinima">wMinima</option>
@@ -73,11 +76,11 @@
 			</td>
 		</tr>
 		<tr>
-			<td>Request Amount of Token: </td>
+			<td class="rightalign">Request Amount : </td>
 			<td><input type=text id=requestamount></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
-		<tr><td><button onclick="swapminima();">I WANT TO SWAP NATIVE MINIMA</button></td></tr>
+		<tr><td colspan=2 style="text-align:center;"><button onclick="swapminima();">I WANT TO SWAP NATIVE MINIMA</button></td></tr>
 		
 	</table>
 	

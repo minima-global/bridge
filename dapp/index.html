@@ -45,13 +45,13 @@
 		createHeader();
 	</script>
 	
-	Welcome to Bridge.<br>
-	<br>
-	Here you can Swap native Minima for wMinima / USDT on Ethereum.<br>
+	<b>BRIDGE</b> let's you trade Minima for wMinima / USDT on Ethereum.<br>
 	<br>
 	<br>
 	Before you can use Bridge you <b>MUST</b> do a couple of things..<br>
 	<br>
+	<div style="text-align:left;width:600;" id=mainview>
+	
 	1) Put some ETH into your bridge wallet. You need ETH to collect wMinima or USDT.<br>
 	
 	<br><br>
@@ -74,19 +74,17 @@
 	</table>
 	
 	<br><br>
-	3) Approve the HTLC smart contracts for access..<br>
+	3) Approve the HTLC smart contracts for access.. you only need to do this once.<br>
 	<br>
-	You only need to do this once.<br>
-	<br>
-	<button onclick="approve();">APPROVE SMART CONTRACTS</button><br>
-	<br>
-	<button onclick="allowance();">SMART CONTRACT ALLOWANCE</button><br>
-	<br>
+	<button onclick="approve();">APPROVE HTLC CONTRACT</button>&nbsp;&nbsp;
+	<button onclick="allowance();">CHECK ALLOWANCE</button><br>
 	
-	<br><br>
+	</div>
+	
+	<!--<br><br>
 	<button onclick="currentgas();">GET CURRENT GAS</button>
 	<br><br>
-	<button onclick="refreshnonce();">REFRESH NONCE</button>
+	<button onclick="refreshnonce();">REFRESH NONCE</button> -->
 	
 	<script type="text/javascript">
 		createFooter();
@@ -98,13 +96,17 @@
 	var USER_DETAILS = {};
 	
 	function approve(){
-		sendSimpleBackendMSG("APPROVECONTRACTS");
+		if(confirm("You are about to approve the HTLC contract access to this wallet.\n\n"
+					+"This will require 2 ETH transactions - so you must have some ETH.\n\n"
+					+"You need only do this once..\n\nContinue ?")){
+			sendSimpleBackendMSG("APPROVECONTRACTS");	
+		}
 	}
 	
 	function allowance(){
 		wMinimaAllowance(HTLCContractAddress,function(wminlogs){
 			USDTAllowance(HTLCContractAddress,function(usdtlogs){
-				alert(JSON.stringify(wminlogs)+"\n\n"+JSON.stringify(usdtlogs));
+				alert("wMinima:"+JSON.stringify(wminlogs)+"\n\nUSDT:"+JSON.stringify(usdtlogs));
 			});
 		});
 	}

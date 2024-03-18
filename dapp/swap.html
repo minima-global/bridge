@@ -45,32 +45,38 @@
 		createHeader();
 	</script>
 	
+	
+	Here you can BUY ansd SELL <b>Minima</b> for <b>wMinima</b> or <b>USDT</b><br>
+	<br>
+	
 	<b>WMINIMA POOL</b><br>
 	<br>
-	Amount : <input type=text id=amountwminima>
+	<b>Amount : </b><input type=text id=amountwminima>
 	<button onclick="order('buy','wminima');">BUY</button>
 	<button onclick="order('sell','wminima');">SELL</button><br>
 	<br><br>
 	
 	<b>USDT POOL</b><br>
 	<br>
-	Amount : <input type=text id=amountusdt>
+	<b>Amount : </b><input type=text id=amountusdt>
 	<button onclick="order('buy','usdt');">BUY</button>
 	<button onclick="order('sell','usdt');">SELL</button>
 	
 	<br><br><br>
-	Here you can BUY ansd SELL <b>Minima</b> for <b>wMinima</b> or <b>USDT</b>
-	
-	<br><br><br><b>
-	Quick OrderBook Glance</b>
+	<b>Quick OrderBook Glance</b>
 	
 	<pre style="text-align:left;width:300;" id=obtotals></pre>
-	
+	<br>
+	<button onclick="openbook();">VIEW FULL BOOK</button>
 	<script type="text/javascript">
 		createFooter();
 	</script>
 	
 <script type="text/javascript">
+	
+	function openbook(){
+		location.href="orderbook.html?uid="+MDS.minidappuid;
+	}
 	
 	//Start a native swap..
 	function order(action,swaptoken){

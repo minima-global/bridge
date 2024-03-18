@@ -38,85 +38,87 @@
 
 <body>
 
+<style>
+
+.senderdiv {
+	position:absolute;
+	margin:auto;
+	top:0;
+	left:0;
+	bottom:0;
+	right:0;
+	background-color:yellow;
+	width:300;
+	height:150;
+	display:none;
+}
+
+</style>
+
+<div id=ethsender class=senderdiv>
+	<center>
+	<br>
+	<table>
+		<tr>
+			<td>TOKEN : </td>
+			<td><input type=text id=sendertoken readonly></td>
+		</tr>
+		<tr>
+			<td>ADDRESS : </td>
+			<td><input type=text id=senderaddress></td>
+		</tr>
+		<tr>
+			<td>AMOUNT : </td>
+			<td><input type=text id=senderamount></td>
+		</tr>
+		<tr>
+			<td style="text-align:left;"><button onclick="closeToken();">CLOSE</button></td>
+			<td style="text-align:right;"><button onclick="sendToken();">SEND TOKENS</button></td>
+			</tr>
+	</table>
+	</center>
+</div>
+
 	<script type="text/javascript">
 		createHeader();
 	</script>
 	
-	BALANCE : <br>
 	<br>
-	<table>
+	<table border=0>
 		<tr>
-			<td>Minima Address : </td>
+			<td class=rightalign>Minima Address : </td>
 			<td colspan=3><div id=myminimaaddress style="font-size:11;">0</div></td>
 		</tr>
 		<tr>
-			<td>Native Minima : </td>
+			<td class=rightalign>Minima : </td>
 			<td><div id=nativeminimabalance>0</div></td>
-			<td>&nbsp;&nbsp;<button onclick="depositMinima();">DEPOSIT MINIMA</button></td>
-			<td>&nbsp;&nbsp;<button onclick="withdrawMinima();">WITHDRAW MINIMA</button></td>
+			<td>&nbsp;<button onclick="depositMinima();">DEPOSIT</button></td>
+			<td>&nbsp;<button onclick="withdrawMinima();">WITHDRAW</button></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td>ETH Address : </td>
+			<td class=rightalign>ETH Address : </td>
 			<td colspan=3><div id=myethaddress>0</div></td>
 		</tr>
 		<tr>
-			<td>ETH : </td>
-			<td colspan=3><div id=ethbalance>0</div></td>
+			<td class=rightalign>ETH : </td>
+			<td><div id=ethbalance>0</div></td>
+			<td>&nbsp;<button onclick="depositETH();">DEPOSIT</button></td>
+			<td>&nbsp;<button onclick="sendETH();">WITHDRAW</button></td>
 		</tr>	
 		<tr>
-			<td>wMinima : </td>
-			<td colspan=3><div id=wminimabalance>0</div></td>
+			<td class=rightalign>wMinima : </td>
+			<td><div id=wminimabalance>0</div></td>
+			<td>&nbsp;<button onclick="depositETH();">DEPOSIT</button></td>
+			<td>&nbsp;<button onclick="sendWMINIMA();">WITHDRAW</button></td>
 		</tr>
 		<tr>
-			<td>USDT : </td>
-			<td colspan=3><div id=usdtbalance>0</div></td>
+			<td class=rightalign>USDT : </td>
+			<td><div id=usdtbalance>0</div></td>
+			<td>&nbsp;<button onclick="depositETH();">DEPOSIT</button></td>
+			<td>&nbsp;<button onclick="sendUSDT();">WITHDRAW</button></td>
 		</tr>
 	</table>
-	<br>
-	<br>
-	
-	WITHDRAW ETH
-	<table>
-		<tr>
-			<td>ADDRESS : </td>
-			<td><input type=text id=ethaddress></td>
-		</tr>
-		<tr>
-			<td>AMOUNT : </td>
-			<td><input type=text id=ethamount></td>
-		</tr>
-		<tr><td colspan=2><button onclick="sendETH();">SEND ETH</button></td></tr>
-	</table>
-	<br><br>
-	WITHDRAW WMINIMA
-	<table>
-		<tr>
-			<td>ADDRESS : </td>
-			<td><input type=text id=wminimaaddress></td>
-		</tr>
-		<tr>
-			<td>AMOUNT : </td>
-			<td><input type=text id=wminimaamount></td>
-		</tr>
-		<tr><td colspan=2><button onclick="sendWMinima();">SEND WMINIMA</button></td></tr>
-	</table>
-	<br><br>
-	WITHDRAW USDT
-	<table>
-		<tr>
-			<td>ADDRESS : </td>
-			<td><input type=text id=usdtaddress></td>
-		</tr>
-		<tr>
-			<td>AMOUNT : </td>
-			<td><input type=text id=usdtamount></td>
-		</tr>
-		<tr><td colspan=2><button onclick="sendUSDT();">SEND USDT</button></td></tr>
-	</table>
-	<br><br>
-	
-	<button onclick="refresh();">REFRESH</button>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -195,58 +197,55 @@
 	}
 	
 	function depositETH(){
-		alert("Send ETH to "+getETHERUMAddress());
+		alert("Send ETH / wMinima / USDT to "+getETHERUMAddress());
+	}
+	
+	function closeToken(){
+		ethsender.style.display="none";
+	}
+	
+	function sendToken(){
+		var type 	= sendertoken.value;
+		var amount 	= senderamount.value;
+		var address = senderaddress.value;
+		
+		if(confirm("You are about to send "+amount+" "+type+" to "+address)){
+			
+			var message = {};
+			message.amount  = amount;
+			message.address = address;
+			
+			if(type == "ETH"){
+				message.action  = "SENDETH";	
+			}else if(type == "WMINIMA"){
+				message.action  = "SENDWMINIMA";	
+			}else if(type == "USDT"){
+				message.action  = "SENDUSDT";	
+			}
+			
+			sendBackendMSG(message);
+			
+			closeToken();
+		}
+	}
+	
+	function setUpSender(type){
+		sendertoken.value= type;
+		senderamount.value = "";
+		senderaddress.value = "";
+		ethsender.style.display="block";
 	}
 	
 	function sendETH(){
-		var amount 	= ethamount.value;
-		var address = ethaddress.value;
-		
-		//Send it..
-		if(confirm("Send "+amount+" ETH to "+address+" ?")){
-			
-			var message = {};
-			message.action  = "SENDETH";
-			message.amount  = amount;
-			message.address = address;
-			
-			sendBackendMSG(message);
-		}
+		setUpSender("ETH");
 	}
 	
-	function depositWMinima(){
-		alert("Send wMinima ERC20 to "+getETHERUMAddress());
-	}
-	
-	function sendWMinima(){
-		var amount 	= wminimaamount.value;
-		var address = wminimaaddress.value;
-		
-		//Send it..
-		if(confirm("Send "+amount+" wMinima to "+address+" ?")){
-			var message = {};
-			message.action  = "SENDWMINIMA";
-			message.amount  = amount;
-			message.address = address;
-			
-			sendBackendMSG(message);
-		}
+	function sendWMINIMA(){
+		setUpSender("WMINIMA");
 	}
 	
 	function sendUSDT(){
-		var amount 	= usdtamount.value;
-		var address = usdtaddress.value;
-		
-		//Send it..
-		if(confirm("Send "+amount+" USDT to "+address+" ?")){
-			
-			var message = {};
-			message.action  = "SENDUSDT";
-			message.amount  = amount;
-			message.address = address;
-			
-			sendBackendMSG(message);
-		}
+		setUpSender("USDT");
 	}
 	
 	//Main message handler..

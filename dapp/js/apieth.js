@@ -125,7 +125,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 						resp.error.message.includes("refundable: not sender")){
 								
 						//Already collected - don't try again..
-						collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "Already collected", function(){
+						collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Already collected", function(){
 							callback(resp);		
 						});			
 					}else{
@@ -137,7 +137,7 @@ function _collectExpiredETHCoin(htlclog,callback){
 			
 			//Already collected - don't try again..
 			//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
-			collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, htlclog.amount, "Already collected", function(){
+			collectExpiredHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Already collected", function(){
 				callback();		
 			});	
 		}
