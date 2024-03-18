@@ -404,16 +404,3 @@ function calculateAmount(action, amount, token, orderbook){
 	//Calculate the amount of wMinima.. 
 	return toFixedNumber(calcamount);
 }
-
-function getOrderBookSimpleTotals(completeorderbook){
-	
-	var totals 						= {};
-	totals.wminima 					= {};
-	totals.wminima.lowestamount		= 1000000000;
-	totals.wminima.highestamount	= 0;
-	totals.wminima.lowestsell		= 1000000000;
-	totals.wminima.highestbuy		= 0;
-	
-	
-	
-}

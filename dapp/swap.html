@@ -61,6 +61,11 @@
 	<br><br><br>
 	Here you can BUY ansd SELL <b>Minima</b> for <b>wMinima</b> or <b>USDT</b>
 	
+	<br><br><br><b>
+	Quick OrderBook Glance</b>
+	
+	<pre style="text-align:left;width:300;" id=obtotals></pre>
+	
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -92,10 +97,18 @@
 			location.href="sell.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken;
 		}
 	}
-		
+	
+	function setTotals(){
+		getSimpleOrderBookTotals(function(totals){
+			obtotals.innerHTML = JSON.stringify(totals,null,2);
+		});
+	}
+	
 	//Main message handler..
 	MDS.init(function(msg){
-		if(msg.event == "inited"){}
+		if(msg.event == "inited"){
+			setTotals();
+		}
 	});
 
 </script>

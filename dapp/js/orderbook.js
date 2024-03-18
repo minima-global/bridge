@@ -76,12 +76,32 @@ function sendOrderBook(userdetails, objson, callback){
 
 function setCompleteOrderBook(orderbook,callback){
 	MDS.keypair.set("_completeorderbook",JSON.stringify(orderbook),function(setresult){
-		callback(setresult);
+		if(callback){
+			callback(setresult);	
+		}
 	}); 	
 }
 
 function getCompleteOrderBook(callback){
 	MDS.keypair.get("_completeorderbook",function(getresult){
+		if(getresult.status){
+			callback(JSON.parse(getresult.value));
+		}else{
+			callback([]);	
+		}
+	}); 	
+}
+
+function setSimpleOrderBookTotals(orderbook,callback){
+	MDS.keypair.set("_simpleorderbooktotals",JSON.stringify(orderbook),function(setresult){
+		if(callback){
+			callback(setresult);	
+		}
+	}); 	
+}
+
+function getSimpleOrderBookTotals(callback){
+	MDS.keypair.get("_simpleorderbooktotals",function(getresult){
 		if(getresult.status){
 			callback(JSON.parse(getresult.value));
 		}else{
@@ -130,11 +150,83 @@ function createCompleteOrderBook(callback){
 			
 			//Now STORE this..
 			setCompleteOrderBook(finallist,function(){
+				
+				//Create the totals list
+				createOrderBookSimpleTotals(finallist);
+				
 				//And send this back..
 				callback(finallist);	
 			});
 		});	
 	});
+}
+
+function createOrderBookSimpleTotals(completeorderbook){
+	
+	var totals 						= {};
+	totals.wminima 					= {};
+	totals.wminima.books 			= 0;
+	totals.wminima.lowestamount		= 1000000000;
+	totals.wminima.highestamount	= 0;
+	totals.wminima.highestbuy		= 0;
+	totals.wminima.lowestsell		= 1000000000;
+	totals.usdt 					= {};
+	totals.usdt.books 				= 0;
+	totals.usdt.lowestamount		= 1000000000;
+	totals.usdt.highestamount		= 0;
+	totals.usdt.highestbuy			= 0;
+	totals.usdt.lowestsell			= 1000000000;
+	
+	var len = completeorderbook.length;
+	for(var i=0;i<len;i++){
+		
+		var orderbook = completeorderbook[i].data.orderbook;
+		
+		if(orderbook.wminima.enable){
+			var ob = orderbook.wminima;
+			totals.wminima.books++;
+			
+			if(ob.minimum < totals.wminima.lowestamount){
+				totals.wminima.lowestamount = ob.minimum; 
+			}
+			
+			if(ob.maximum > totals.wminima.highestamount){
+				totals.wminima.highestamount = ob.maximum; 
+			}
+			
+			if(ob.sell < totals.wminima.lowestsell){
+				totals.wminima.lowestsell = ob.sell;
+			}
+			
+			if(ob.buy > totals.wminima.highestbuy){
+				totals.wminima.highestbuy = ob.buy;
+			}
+		}
+		
+		if(orderbook.usdt.enable){
+			var ob = orderbook.usdt;
+			totals.usdt.books++;
+			
+			if(ob.minimum < totals.usdt.lowestamount){
+				totals.usdt.lowestamount = ob.minimum; 
+			}
+			
+			if(ob.maximum > totals.usdt.highestamount){
+				totals.usdt.highestamount = ob.maximum; 
+			}
+			
+			if(ob.sell < totals.usdt.lowestsell){
+				totals.usdt.lowestsell = ob.sell;
+			}
+			
+			if(ob.buy > totals.usdt.highestbuy){
+				totals.usdt.highestbuy = ob.buy;
+			}
+		}
+	}
+	
+	//And set them..
+	setSimpleOrderBookTotals(totals);
 }
 
 /**
