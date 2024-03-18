@@ -210,9 +210,7 @@
 			message.amount  = amount;
 			message.address = address;
 			
-			MDS.comms.solo(JSON.stringify(message),function(){
-				alert("Send request sent to backend..!");	
-			});
+			sendBackendMSG(message);
 		}
 	}
 	
@@ -232,9 +230,7 @@
 			message.amount  = amount;
 			message.address = address;
 			
-			MDS.comms.solo(JSON.stringify(message),function(){
-				alert("Send request sent to backend..!");	
-			});
+			sendBackendMSG(message);
 		}
 	}
 	
@@ -250,9 +246,7 @@
 			message.amount  = amount;
 			message.address = address;
 			
-			MDS.comms.solo(JSON.stringify(message),function(){
-				alert("Send request sent to backend..!");	
-			});
+			sendBackendMSG(message);
 		}
 	}
 	
@@ -271,24 +265,22 @@
 		}else if(msg.event == "NEWBALANCE"){
 			refresh();
 		
-		}else if(msg.event == "MDSCOMMS"){
-			
-			//Make sure is a private message
-			if(!msg.data.public){
-				
-				//Get the message..
-				var comms = JSON.parse(msg.data.message);
-				
-				//Make sure is right message
-				if(comms.action == "FRONTENDMSG"){
-					MDS.log(JSON.stringify(comms));
-				}
-			}
-			
 		}else if(msg.event == "MDS_TIMER_60SECONDS"){
 			//Kepp doing this every 60 secs until there are no unconfirmed.. 
 			if(balanceunconfirmed){
 				refresh();
+			}
+		
+		//Messages from back end
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				var comms = JSON.parse(msg.data.message);
+				if(comms.action == "FRONTENDMSG"){
+					//Show the message
+					alert(JSON.stringify(comms,null,2));
+				}
 			}
 		}
 	});

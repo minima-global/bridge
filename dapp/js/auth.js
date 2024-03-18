@@ -22,7 +22,7 @@ function _getUserAddress(publickey,callback){
 	});
 }
 
-function getUserDetails(callback){
+function _getUserDetails(callback){
 	
 	var userdetails = {};
 	
@@ -48,23 +48,20 @@ function getUserDetails(callback){
 	});
 }
 
-function initETHSubSystem(callback){
+function createPrivateKey(callback){
 	//First get the Private key.. WRITE function
 	MDS.cmd("seedrandom modifier:ethbridge",function(resp){
 		
 		//The private key is based off the seed - so the same when you resync 
-		var privateKey = resp.response.seedrandom;
-		
-		//Init the ETH subsystem..
-		initialiseETH(privateKey,function(){
-			callback(getETHERUMAddress());
-		});
+		callback(resp.response.seedrandom);
 	});
 }
 
-function setBridgeUserDetails(userdets){
+function setBridgeUserDetails(userdets, callback){
 	MDS.keypair.set("_bridgesystem_userdetails",JSON.stringify(userdets),function(init){
-		callback(init.status);
+		if(callback){
+			callback(init.status);	
+		}
 	});
 }
 
@@ -95,38 +92,49 @@ function initBridgeSystemsStartup(callback){
 			
 			MDS.log("Initialising base bridge systems..");
 			
-			//Init ETH
-			initETHSubSystem(function(ethaddress){
-				
-				//Now get the user details.. need ETH to havce started up
-				getUserDetails(function(userdets){
+			//Create a private key
+			createPrivateKey(function(privatekey){
+			
+				//Init ETH
+				initialiseETHAddress(privatekey, function(ethaddress){
 					
-					//Do some basic startup work..
-					setUpHTLCScript(userdets, function(resp){
+					//Now get the user details.. need ETH to havce started up
+					_getUserDetails(function(userdets){
 						
-						//We want to be notified of Coin Events
-						setupCoinSecretEvents(function(notify){
+						//Set the private key
+						userdets.ethprivatekey = privatekey;
+						
+						//Do some basic startup work..
+						setUpHTLCScript(userdets, function(resp){
 							
-							//Set up the DB
-							createDB(function(res){
+							//We want to be notified of Coin Events
+							setupCoinSecretEvents(function(notify){
 								
-								//And NOW - set init to TRUE
-								MDS.keypair.set("_initbridgesystems","true",function(dets){
-									callback(userdets);	
-								});
-							});	
-						});
-					});		
+								//Set up the DB
+								createDB(function(res){
+								
+									//Hard set USER_DETAILS as they don't ever change
+									setBridgeUserDetails(userdets,function(){
+										
+										//And NOW - set init to TRUE
+										MDS.keypair.set("_initbridgesystems","true",function(dets){
+											callback(userdets);	
+										});	
+									});
+								});	
+							});
+						});		
+					});
 				});
 			});
+			
 		}else{
 			
 			//Just do the normal
-			initETHSubSystem(function(ethaddress){
-				//Now get the user details.. need ETH to havce started up
-				getUserDetails(function(userdets){
+			initBridgeSystems(function(userdets){
+				if(callback){
 					callback(userdets);
-				});
+				}
 			});
 		}
 	});
@@ -135,11 +143,14 @@ function initBridgeSystemsStartup(callback){
 function initBridgeSystems(callback){
 	
 	//Just do the normal
-	initETHSubSystem(function(ethaddress){
+	getBridgeUserDetails(function(userdets){
 		
-		//Now get the user details.. need ETH to havce started up
-		getUserDetails(function(userdets){
+		//Set the ETH details..
+		setETHEREUMAddress(userdets.ethaddress);
+		setETHPrivateKey(userdets.ethprivatekey);
+		
+		if(callback){
 			callback(userdets);
-		});
+		}
 	});
 }

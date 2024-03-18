@@ -16,18 +16,19 @@ var ETHERSCAN_LINK			= "";
 //var ETHERSCAN_LINK			= "https://sepolia.etherscan.io/tx/";
 
 /**
- * the Main ETH Wallet used 
+ * the Main ETH Wallet address
  */
-var MAIN_WALLET = null;
-
+//var MAIN_WALLET	 	 = null;
+var MAIN_ETH_ADDRESS = "unknown";
 /**
  * Private Key
  */
 var PRIVATE_KEY = "";
+
 /**
  * Keep track of the nonce..
  */
-var NONCE_TRACK = 0;
+var NONCE_TRACK = -1;
 
 /**
  * The current GAS - taken from INFURA
@@ -35,37 +36,45 @@ var NONCE_TRACK = 0;
 var GAS_API = {};
 
 /**
- * Initialise the ETH subsystem
+ * Initialise the ETH Address - this is DONE ONCE ONLY
  */
-function initialiseETH(private, callback){
+function initialiseETHAddress(private, callback){
 	
 	//Create a wallet..
-	PRIVATE_KEY = private;
-	MAIN_WALLET = new ethers.Wallet(PRIVATE_KEY);
-	
-	//And now set up the nonce..
-	setNonceAuto(function(){
-		MDS.log("ETH Wallet setup : "+MAIN_WALLET.address+" nonce:"+NONCE_TRACK);
-		
-		//And the initial GAS
-		setGasAuto(function(gasapi){
-			if(callback){
-				callback();
-			}	
-		});
-	});
-}
-
-function createAddressFromPrivateKey(private, callback){
-	
-	//Crteate a new wallet
-	MAIN_WALLET = new ethers.Wallet(PRIVATE_KEY);
+	var wallet = new ethers.Wallet(private);
 	
 	//Clean up the address
-	var cleanaddress = "0x"+MAIN_WALLET.address.slice(2).toUpperCase();
+	var cleanwallet = "0x"+wallet.address.slice(2).toUpperCase();
 	
-	//And send it back
-	callback(cleanaddress);
+	MDS.log("ETH Wallet setup : "+cleanwallet);
+	MAIN_ETH_ADDRESS 	= cleanwallet;
+	PRIVATE_KEY			= private;
+	
+	if(callback){
+		callback(cleanwallet);
+	}
+}
+
+/**
+ * Set get ETH Address
+ */
+function getETHERUMAddress(){
+	return MAIN_ETH_ADDRESS;
+}
+
+function setETHEREUMAddress(address){
+	MAIN_ETH_ADDRESS = address;
+}
+
+/**
+ * Set Get Private keys
+ */
+function setETHPrivateKey(privatekey){
+	PRIVATE_KEY = privatekey;
+}
+
+function getETHPrivateKey(){
+	return PRIVATE_KEY;
 }
 
 /**
@@ -103,13 +112,6 @@ function getInfuraApiKeys(callback){
 			callback(fullkeys);	
 		}
 	});
-}
-
-/**
- * Return your main public key
- */
-function getETHERUMAddress(){
-	return "0x"+MAIN_WALLET.address.slice(2).toUpperCase();
 }
 
 /**

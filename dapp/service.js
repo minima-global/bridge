@@ -202,35 +202,39 @@ MDS.init(function(msg){
 			//Get the action
 			if(comms.action == "SENDETH"){
 				sendETHEREUM(comms.address,comms.amount,function(ethresp){
-					sendFrontendMSG("SENDETH",ethresp);	
+					sendFrontendMSG(comms.action,ethresp);	
 				});
 			}else if(comms.action == "SENDWMINIMA"){
 				sendWMinimaERC20(comms.address,comms.amount,function(ethresp){
-					sendFrontendMSG("SENDWMINIMA",ethresp);
+					sendFrontendMSG(comms.action,ethresp);
 				});
 			}else if(comms.action == "SENDUSDT"){
 				sendUSDT(comms.address,comms.amount,function(ethresp){
-					sendFrontendMSG("SENDUSDT",ethresp);
+					sendFrontendMSG(comms.action,ethresp);
 				});
 			
 			}else if(comms.action == "STARTMINIMASWAP"){
 				startMinimaSwap(USER_DETAILS, comms.sendamount, comms.requestamount,
 					comms.contractaddress, comms.reqpublickey, comms.otc, function(ethresp){
-					sendFrontendMSG("STARTMINIMASWAP",ethresp);
+					sendFrontendMSG(comms.action,ethresp);
 				});
 			
 			}else if(comms.action == "STARTETHSWAP"){
 				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(ethresp){
-					sendFrontendMSG("STARTETHSWAP",ethresp);
+					sendFrontendMSG(comms.action,ethresp);
 				});
 			
 			}else if(comms.action == "ACCEPTOTCSWAP"){
 				acceptOTCSwapCoin(USER_DETAILS, comms.coinid, function(res,message){
 					var fullmess 	 = {};
 					fullmess.res 	 = res;
-					fullmess.message = message;
+					if(res){
+						fullmess.message = JSON.parse(message);	
+					}else{
+						fullmess.message = message;
+					}
 					
-					sendFrontendMSG("ACCEPTOTCSWAP",fullmess);
+					sendFrontendMSG(comms.action,fullmess);
 				});
 			
 			}else if(comms.action == "APPROVECONTRACTS"){
@@ -241,13 +245,13 @@ MDS.init(function(msg){
 						approve.usdt = usdtlogs;
 						
 						//Now send to front end..
-						sendFrontendMSG("APPROVECONTRACTS",approve);
+						sendFrontendMSG(comms.action,approve);
 					});
 				});	
 			
 			}else if(comms.action == "REFRESHNONCE"){
-				setNonceAuto(function(resp){
-					sendFrontendMSG("REFRESHNONCE",resp);
+				setNonceAuto(function(ethresp){
+					sendFrontendMSG(comms.action,ethresp);
 				});
 			
 			}else if(comms.action == "FRONTENDMSG"){

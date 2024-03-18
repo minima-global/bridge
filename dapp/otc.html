@@ -214,26 +214,7 @@
 			message.action			= "ACCEPTOTCSWAP";
 			message.coinid 			= coinid;
 			
-			MDS.comms.solo(JSON.stringify(message),function(){
-				alert("Swap accept sent to backend..!");
-				
-				//Get the current block
-				MDS.cmd("block",function(blockresp){
-					//Check for any OTC deals..
-					showOTCDeals(+blockresp.response.block);	
-				});
-			});
-			
-			//Accept this OTC dfeal..
-			/*acceptOTCSwapCoin(USER_DETAILS, coinid, function(res,message){
-				alert("OTC accept:"+res+" message:"+message);
-				
-				//Get the current block
-				MDS.cmd("block",function(blockresp){
-					//Check for any OTC deals..
-					showOTCDeals(+blockresp.response.block);	
-				});
-			});*/
+			sendBackendMSG(message);
 		}	
 	}
 	
@@ -262,6 +243,24 @@
 			
 			//Check for any OTC deals..
 			showOTCDeals(+msg.data.txpow.header.block);
+		
+		//Messages from back end
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				var comms = JSON.parse(msg.data.message);
+				if(comms.action == "FRONTENDMSG"){
+					//Show the message
+					alert(JSON.stringify(comms,null,2));
+					
+					//Get the current block
+					MDS.cmd("block",function(blockresp){
+						//Check for any OTC deals..
+						showOTCDeals(+blockresp.response.block);	
+					});
+				}
+			}
 		} 
 	});
 
