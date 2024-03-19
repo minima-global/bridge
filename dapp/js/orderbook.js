@@ -110,7 +110,7 @@ function getSimpleOrderBookTotals(callback){
 	}); 	
 }
 
-function createCompleteOrderBook(callback){
+function createCompleteOrderBook(userdets,callback){
 	
 	//First get ALL the records..
 	_getAllOrderCoins(function(allrecords){
@@ -129,9 +129,9 @@ function createCompleteOrderBook(callback){
 			var unique = getUniqueRecords(validsignedrecords);
 			
 			//Did we check any new coins..
-			//if(SIGS_CHECKED > 0){
-			//	MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
-			//}
+			if(SIGS_CHECKED > 0){
+				MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
+			}
 			
 			//Now we only want the ones providing liquidity
 			var finallist 	= [];
@@ -152,7 +152,7 @@ function createCompleteOrderBook(callback){
 			setCompleteOrderBook(finallist,function(){
 				
 				//Create the totals list
-				createOrderBookSimpleTotals(finallist);
+				createOrderBookSimpleTotals(userdets,finallist);
 				
 				//And send this back..
 				callback(finallist);	
@@ -161,72 +161,77 @@ function createCompleteOrderBook(callback){
 	});
 }
 
-function createOrderBookSimpleTotals(completeorderbook){
+function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 	
-	var totals 						= {};
-	totals.wminima 					= {};
-	totals.wminima.books 			= 0;
-	totals.wminima.lowestamount		= 1000000000;
-	totals.wminima.highestamount	= 0;
-	totals.wminima.highestbuy		= 0;
-	totals.wminima.lowestsell		= 1000000000;
-	totals.usdt 					= {};
-	totals.usdt.books 				= 0;
-	totals.usdt.lowestamount		= 1000000000;
-	totals.usdt.highestamount		= 0;
-	totals.usdt.highestbuy			= 0;
-	totals.usdt.lowestsell			= 1000000000;
+	var totals 					= {};
+	
+	totals.wminima 				= {};
+	totals.wminima.books 		= 0;
+	
+	totals.wminima.lowbuy 		= 1000000000;
+	totals.wminima.highbuy 		= 0;
+	totals.wminima.lowsell 		= 1000000000;
+	totals.wminima.highsell		= 0;
+	
+	totals.usdt 				= {};
+	totals.usdt.books 			= 0;
+	
+	totals.usdt.lowbuy 			= 1000000000;
+	totals.usdt.highbuy 		= 0;
+	totals.usdt.lowsell 		= 1000000000;
+	totals.usdt.highsell		= 0;
+	
 	
 	var len = completeorderbook.length;
 	for(var i=0;i<len;i++){
 		
 		var orderbook = completeorderbook[i].data.orderbook;
 		
+		//Check is not THIS user
+		if(completeorderbook[i].data.publickey == userdets.minimapublickey){
+			continue;
+		}
+		
 		if(orderbook.wminima.enable){
-			var ob = orderbook.wminima;
+			var tots = totals.wminima;
+			var ob 	 = orderbook.wminima;
 			totals.wminima.books++;
 			
-			if(ob.minimum < totals.wminima.lowestamount){
-				totals.wminima.lowestamount = ob.minimum; 
-			}
+			var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
+			var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+			var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
+			var highsell 	= toFixedNumber(ob.maximum / ob.buy);
 			
-			if(ob.maximum > totals.wminima.highestamount){
-				totals.wminima.highestamount = ob.maximum; 
-			}
-			
-			if(ob.sell < totals.wminima.lowestsell){
-				totals.wminima.lowestsell = ob.sell;
-			}
-			
-			if(ob.buy > totals.wminima.highestbuy){
-				totals.wminima.highestbuy = ob.buy;
-			}
+			tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
+			tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
+			tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
+			tots.highsell	= Math.floor(max(tots.highsell,highsell));
 		}
 		
 		if(orderbook.usdt.enable){
-			var ob = orderbook.usdt;
+			var tots = totals.usdt;
+			var ob 	 = orderbook.usdt;
 			totals.usdt.books++;
 			
-			if(ob.minimum < totals.usdt.lowestamount){
-				totals.usdt.lowestamount = ob.minimum; 
-			}
+			var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
+			var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+			var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
+			var highsell 	= toFixedNumber(ob.maximum / ob.buy);
 			
-			if(ob.maximum > totals.usdt.highestamount){
-				totals.usdt.highestamount = ob.maximum; 
-			}
-			
-			if(ob.sell < totals.usdt.lowestsell){
-				totals.usdt.lowestsell = ob.sell;
-			}
-			
-			if(ob.buy > totals.usdt.highestbuy){
-				totals.usdt.highestbuy = ob.buy;
-			}
+			tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
+			tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
+			tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
+			tots.highsell	= Math.floor(max(tots.highsell,highsell));
 		}
 	}
 	
 	//And set them..
 	setSimpleOrderBookTotals(totals);
+	
+	//Do they want it 
+	if(callback){
+		callback(totals)
+	}
 }
 
 /**

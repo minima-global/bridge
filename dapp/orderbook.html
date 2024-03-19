@@ -23,7 +23,7 @@
 	<script type="text/javascript" src="./js/auth.js"></script>
 	<script type="text/javascript" src="./js/orderbook.js"></script>
 	<script type="text/javascript" src="./js/orderbookutil.js"></script>
-	
+		
 </head>
 
 <body>
@@ -35,7 +35,7 @@
 	Complete order book for Bridge<br>
 	
 	<pre style="text-align:left;width:200;" id=completeorderbook></pre>
-	
+
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -43,16 +43,12 @@
 
 <script type="text/javascript">
 	
-	var USER_DETAILS = {};
-	
 	function loadCompleteOrderBook(){
 		//Load the complete order book..
 		getCompleteOrderBook(function(orderbook){
-			//Show with pretty graphics..
 			completeorderbook.innerHTML = JSON.stringify(orderbook,null,2);
 		});
-	}
-	
+	} 
 	
 	//Main message handler..
 	MDS.init(function(msg){

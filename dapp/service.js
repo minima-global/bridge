@@ -83,7 +83,7 @@ MDS.init(function(msg){
 		if(BRIDGE_INITED){
 			
 			//Check the Complete Order Book - will only check sigs for NEW entries..
-			createCompleteOrderBook(function(completeorderbook){});
+			createCompleteOrderBook(USER_DETAILS,function(completeorderbook){});
 			
 			//Send out your order book if required..
 			createAndSendOrderBook(USER_DETAILS,function(){});
@@ -194,7 +194,7 @@ MDS.init(function(msg){
 	}else if(msg.event == "NEWBLOCK"){
 		
 		//Check the Complete Order Book - will only check sigs for NEW entries..
-		createCompleteOrderBook(function(completeorderbook){});
+		createCompleteOrderBook(USER_DETAILS,function(completeorderbook){});
 	
 	}else if(msg.event == "MDSCOMMS"){
 	

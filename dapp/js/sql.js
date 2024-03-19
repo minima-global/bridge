@@ -44,10 +44,6 @@ function createDB(callback){
 			
 			MDS.sql(myhtlccontracts,function(htlcmsg){
 				
-				if(callback){
-					callback(htlcmsg);
-				}
-				
 				var ethcontracts = "CREATE TABLE IF NOT EXISTS `ethtxns` ( "
 						+"  `id` bigint auto_increment, "
 						+"  `txnhash` varchar(128) NOT NULL, "

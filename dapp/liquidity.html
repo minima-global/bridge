@@ -195,7 +195,6 @@
 	function setOrderBookDetails(){
 		//Get the details..
 		getMyOrderBook(function(orderbook){
-			MDS.log(JSON.stringify(orderbook));
 			
 			//wMinima
 			wrappedenableid.checked 	= orderbook.wminima.enable;

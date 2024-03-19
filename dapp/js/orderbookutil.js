@@ -254,122 +254,127 @@ function checkNeedPublishOrderBook(userdets,callback){
 
 //I have AMOUNT of MINIMA - I want to swap for TOKEN.. find the best order
 function searchAllOrderBooks(action, amount, token, ignoreme, callback){
-	
 	//Get the complete order book
 	getCompleteOrderBook(function(completeorderbook){
+		_searchAllOrderBooksWithBook(completeorderbook, action, amount, token, ignoreme, function(res,order){
+			callback(res,order);
+		});
+	});
+}
+
+function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, ignoreme, callback){	
 		
-		var validorders 	= [];
-		var currentbuy 		= -1;
-		var currentsell 	= 10000000;
+	var validorders 	= [];
+	var currentbuy 		= -1;
+	var currentsell 	= 10000000;
+	
+	//Cycle through the orders
+	var len = completeorderbook.length;
+	for(var i=0;i<len;i++){
 		
-		//Cycle through the orders
-		var len = completeorderbook.length;
-		for(var i=0;i<len;i++){
+		var data 		= completeorderbook[i].data;
+		var user		= data.publickey;
+		var orderbook 	= data.orderbook;
+		var balance 	= data.balance;
+		
+		//Which side of the trade are we checking..
+		if(user != ignoreme){
 			
-			var data 		= completeorderbook[i].data;
-			var user		= data.publickey;
-			var orderbook 	= data.orderbook;
-			var balance 	= data.balance;
+			//Which book are we using..
+			var ob 		= {};
+			var bookbal = 0;
+			if(token == "wminima"){
+				ob 		= orderbook.wminima;
+				bookbal = balance.wminima;
+				
+			}else if(token == "usdt"){
+				ob 		= orderbook.usdt;
+				bookbal = balance.usdt;
+				
+			}else{
+				//ERROR - should not happen
+				continue;
+			}
 			
-			//Which side of the trade are we checking..
-			if(user != ignoreme){
+			//Is this book enabled..
+			if(!ob.enable){
+				continue;
+			}
+			
+			if(action == "buy"){
 				
-				//Which book are we using..
-				var ob 		= {};
-				var bookbal = 0;
-				if(token == "wminima"){
-					ob 		= orderbook.wminima;
-					bookbal = balance.wminima;
+				//Check they have enough Minima - They are SELLING to you
+				if(+amount <= balance.minima.total){
 					
-				}else if(token == "usdt"){
-					ob 		= orderbook.usdt;
-					bookbal = balance.usdt;
+					//Trying to BUY this much MINIMA - so look for SELLERS
+					var totalamounttoken = toFixedNumber(+amount * +ob.sell);
 					
-				}else{
-					//ERROR - should not happen
-					continue;
-				}
-				
-				//Is this book enabled..
-				if(!ob.enable){
-					continue;
-				}
-				
-				if(action == "buy"){
-					
-					//Check they have enough Minima - They are SELLING to you
-					if(+amount <= balance.minima.total){
+					//Check the amount is within limits..
+					if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
 						
-						//Trying to BUY this much MINIMA - so look for SELLERS
-						var totalamounttoken = toFixedNumber(+amount * +ob.sell);
+						//The order book price
+						var obkprice = +ob.sell;
 						
-						//Check the amount is within limits..
-						if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
+						//Is the price better than current or the same
+						if(obkprice == currentsell){
+							//Same as current best.. just add
+							validorders.push(data);
 							
-							//The order book price
-							var obkprice = +ob.sell;
+						}else if(obkprice < currentsell){
 							
-							//Is the price better than current or the same
-							if(obkprice == currentsell){
-								//Same as current best.. just add
-								validorders.push(data);
-								
-							}else if(obkprice < currentsell){
-								
-								//Best price so far	
-								validorders = [];
-								currentsell	= obkprice;
-								validorders.push(data);
-							}
-						}	
-					}
-				
-				}else if(action == "sell"){
-					
-					//Trying to SELL this much MINIMA - so look for BUYERS
-					var totalamounttoken = toFixedNumber(+amount * +ob.buy);
-						
-					//Do we have that much of the token..
-					if(totalamounttoken <= bookbal){
-						
-						//Is within limits
-						if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
-						
-							//The order book price
-							var obkprice = +ob.buy;
-							
-							//Is the price better than current or the same
-							if(obkprice == currentbuy){
-								//Same as current best.. just add
-								validorders.push(data);
-								
-							}else if(obkprice > currentbuy){
-								
-								//Best price so far	
-								validorders = [];
-								currentsell	= obkprice;
-								validorders.push(data);
-							}
+							//Best price so far	
+							validorders = [];
+							currentsell	= obkprice;
+							validorders.push(data);
 						}
 					}	
 				}
+			
+			}else if(action == "sell"){
+				
+				//Trying to SELL this much MINIMA - so look for BUYERS
+				var totalamounttoken = toFixedNumber(+amount * +ob.buy);
+					
+				//Do we have that much of the token..
+				if(totalamounttoken <= bookbal){
+					
+					//Is within limits
+					if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
+					
+						//The order book price
+						var obkprice = +ob.buy;
+						
+						//Is the price better than current or the same
+						if(obkprice == currentbuy){
+							//Same as current best.. just add
+							validorders.push(data);
+							
+						}else if(obkprice > currentbuy){
+							
+							//Best price so far	
+							validorders = [];
+							currentbuy	= obkprice;
+							validorders.push(data);
+						}
+					}
+				}	
 			}
 		}
-				
-		//Any at all found ?
-		if(validorders.length == 0){
-			callback(false,{});
-			return;
-		}
-		
-		//MDS.log("Found valid orders : "+validorders.length);
-		
-		//Pick a random one..
-		var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
+	}
+			
+	//Any at all found ?
+	if(validorders.length == 0){
+		callback(false,{});
+		return;
+	}
+	
+	//MDS.log("Found valid orders : "+validorders.length);
+	
+	//Pick a random one..
+	var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
 
-		//Send it back..
-		callback(true,finalorder);
-	});
+	//Send it back..
+	callback(true,finalorder);
 }
 
 function calculateAmount(action, amount, token, orderbook){
