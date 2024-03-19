@@ -81,10 +81,8 @@
 	
 	</div>
 	
-	<!--<br><br>
-	<button onclick="currentgas();">GET CURRENT GAS</button>
 	<br><br>
-	<button onclick="refreshnonce();">REFRESH NONCE</button> -->
+	<button onclick="currentgas();">GET CURRENT GAS</button>&nbsp;&nbsp;&nbsp;<button onclick="refreshnonce();">REFRESH NONCE</button>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -139,9 +137,9 @@
 	}
 	
 	function currentgas(){
-		getInfuraGASAPI(function(resp){
+		setGasAuto(function(gas){
 			//And show..
-			alert(JSON.stringify(GAS_API,null,2));
+			alert(JSON.stringify(gas,null,2));
 		});
 	}
 	

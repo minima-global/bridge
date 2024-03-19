@@ -15,10 +15,10 @@ function createHeader(){
 	"			<tr>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='index.html?uid="+uid+"'\">HOME</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='balance.html?uid="+uid+"'\">BALANCE</button></td>"+
-	"				<td class=buttonlinks><button onclick=\"location.href='swap.html?uid="+uid+"'\">TRADE</button></td>"+
+	"				<td class=buttonlinks><button onclick=\"location.href='trade.html?uid="+uid+"'\">TRADE</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='liquidity.html?uid="+uid+"'\">LIQUIDITY</button></td>"+
 	//"				<td class=buttonlinks><button onclick=\"location.href='orderbook.html?uid="+uid+"'\">ORDERBOOK</button></td>"+
-	"				<td class=buttonlinks><button onclick=\"location.href='otc.html?uid="+uid+"'\">OTC</button></td>"+
+	//"				<td class=buttonlinks><button onclick=\"location.href='otc.html?uid="+uid+"'\">OTC</button></td>"+
 	"				<td class=buttonlinks><button onclick=\"location.href='history.html?uid="+uid+"'\">ACTIVITY</button></td>"+
 	"			</tr>"+
 	"		</table>"+

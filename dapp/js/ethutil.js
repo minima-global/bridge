@@ -185,12 +185,12 @@ function setGasAuto(callback){
 			GAS_API.valid 	= false;
 			MDS.log("ERROR Getting GAS API "+JSON.stringify(gasapi));
 		}
-	});
 		
-	//And send back..
-	if(callback){
-		callback(GAS_API);	
-	}
+		//And send back..
+		if(callback){
+			callback(GAS_API);	
+		}
+	});
 }
 
 /**

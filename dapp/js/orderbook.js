@@ -161,7 +161,7 @@ function createCompleteOrderBook(userdets,callback){
 	});
 }
 
-function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
+function createOrderBookSimpleTotals(userdets,completeorderbook){
 	
 	var totals 					= {};
 	
@@ -226,11 +226,105 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 	
 	//And set them..
 	setSimpleOrderBookTotals(totals);
+}
+
+var PRICE_BOOK_STEPS = 10;
+function makeAmountPriceBook(userdets, completeorderbook, totals){
 	
-	//Do they want it 
-	if(callback){
-		callback(totals)
+	var pricebook 			= {};
+	
+	pricebook.wminima 		= {};
+	pricebook.wminima.buy 	= [];
+	pricebook.wminima.sell 	= [];
+	
+	pricebook.usdt 			= {};
+	pricebook.usdt.buy 		= [];
+	pricebook.usdt.sell 	= [];
+	
+	var start	= 0;
+	var gap		= 0;
+	
+	//wMinima first
+	if(totals.wminima.books>0){
+		
+		start 	= totals.wminima.lowbuy;
+		gap 	= (totals.wminima.highbuy - totals.wminima.lowbuy) / PRICE_BOOK_STEPS;
+		for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+			var amount = Math.floor(start + i*gap);
+			_searchAllOrderBooksWithBook(completeorderbook, "buy", amount, "wminima", userdets.minimapublickey, function(found,order){
+				var priceamount = {};
+				priceamount.amount = amount;
+				if(found){
+					priceamount.price = order.orderbook.wminima.sell;
+				}else{
+					priceamount.price = "-";
+				}
+				
+				//Add to the total
+				pricebook.wminima.buy.push(priceamount);
+			});
+		}
+		
+		start 	= totals.wminima.lowsell;
+		gap 	= (totals.wminima.highsell - totals.wminima.lowsell) / PRICE_BOOK_STEPS;
+		for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+			var amount = Math.floor(start + i*gap);
+			_searchAllOrderBooksWithBook(completeorderbook, "sell", amount, "wminima", userdets.minimapublickey, function(found,order){
+				var priceamount = {};
+				priceamount.amount = amount;
+				if(found){
+					priceamount.price = order.orderbook.wminima.buy;
+				}else{
+					priceamount.price = "-";
+				}
+				
+				//Add to the total
+				pricebook.wminima.sell.push(priceamount);
+			});
+		}
 	}
+	
+	//USDT
+	if(totals.usdt.books>0){
+		
+		start 	= totals.usdt.lowbuy;
+		gap 	= (totals.usdt.highbuy - totals.usdt.lowbuy) / PRICE_BOOK_STEPS;
+		for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+			var amount = Math.floor(start + i*gap);
+			_searchAllOrderBooksWithBook(completeorderbook, "buy", amount, "usdt", userdets.minimapublickey, function(found,order){
+				var priceamount = {};
+				priceamount.amount = amount;
+				if(found){
+					priceamount.price = order.orderbook.usdt.sell;
+				}else{
+					priceamount.price = "-";
+				}
+				
+				//Add to the total
+				pricebook.usdt.buy.push(priceamount);
+			});
+		}
+		
+		start 	= totals.usdt.lowsell;
+		gap 	= (totals.usdt.highsell - totals.usdt.lowsell) / PRICE_BOOK_STEPS;
+		for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+			var amount = Math.floor(start + i*gap);
+			_searchAllOrderBooksWithBook(completeorderbook, "sell", amount, "usdt", userdets.minimapublickey, function(found,order){
+				var priceamount = {};
+				priceamount.amount = amount;
+				if(found){
+					priceamount.price = order.orderbook.usdt.buy;
+				}else{
+					priceamount.price = "-";
+				}
+				
+				//Add to the total
+				pricebook.usdt.sell.push(priceamount);
+			});
+		}
+	}
+	
+	return pricebook;
 }
 
 /**

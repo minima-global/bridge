@@ -1,0 +1,80 @@
+<html>
+
+<head>
+	<title>Bridge</title>
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	
+	<!-- Load the main MDS JS lib -->
+	<script type="text/javascript" src="./js/mds.js"></script>
+	
+	<!-- Load the CSS Style sheet -->
+	<link rel="stylesheet" href="./css/style.css">
+	
+	<!-- And the ICON for the page -->
+	<link rel="icon" type="image/x-icon" href="favicon.ico">
+	
+	<!-- Load the local JS lib -->
+	<script type="text/javascript" src="./js/puresha1.js"></script>
+	<script type="text/javascript" src="./js/pagelayout.js"></script>
+	<script type="text/javascript" src="./js/jslib.js"></script>
+	<script type="text/javascript" src="./js/scripts.js"></script>
+	<script type="text/javascript" src="./js/auth.js"></script>
+	<script type="text/javascript" src="./js/sql.js"></script>
+	<script type="text/javascript" src="./js/apiminima.js"></script>
+	<script type="text/javascript" src="./js/apieth.js"></script>
+	<script type="text/javascript" src="./js/balance.js"></script>
+	<script type="text/javascript" src="./js/orderbook.js"></script>
+	<script type="text/javascript" src="./js/orderbookutil.js"></script>
+	<script type="text/javascript" src="./js/ethers-4.0.31.min.js"></script>
+	<script type="text/javascript" src="./js/htlcvars.js"></script>
+	<script type="text/javascript" src="./abi/htlcabi.js"></script>
+	<script type="text/javascript" src="./abi/erc20abi.js"></script>
+	<script type="text/javascript" src="./js/ethutil.js"></script>
+	<script type="text/javascript" src="./js/etherc20util.js"></script>
+	<script type="text/javascript" src="./js/etherc20wMinima.js"></script>
+	<script type="text/javascript" src="./js/etherc20USDT.js"></script>
+	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
+	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
+	
+</head>
+
+<body>
+
+	<script type="text/javascript">
+		createHeader();
+	</script>
+	
+	If you <b>know</b> the person you are trading with ( over-the-counter )<br>
+	<br>
+	<button onclick="otctrade();">OTC TRADE</button><br>
+	<br><br>
+	
+	If you <b>do not know</b> anyone you can find someone from the orderbook<br>
+	<br>
+	<button onclick="orderbooktrade();">ORDERBOOK TRADE</button><br>
+	
+	<script type="text/javascript">
+		createFooter();
+	</script>
+	
+<script type="text/javascript">
+	
+	function otctrade(){
+		location.href="otc.html?uid="+MDS.minidappuid;
+	}
+	
+	function orderbooktrade(){
+		location.href="swap.html?uid="+MDS.minidappuid;
+	}
+	
+	//Main message handler..
+	MDS.init(function(msg){
+		if(msg.event == "inited"){}
+	});
+
+</script>
+
+</body>
+
+</html>

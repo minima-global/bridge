@@ -45,7 +45,6 @@
 		createHeader();
 	</script>
 	
-	
 	Here you can BUY ansd SELL <b>Minima</b> for <b>wMinima</b> or <b>USDT</b><br>
 	<br>
 	
@@ -61,13 +60,7 @@
 		<tr><td><b>SELL</b></td><td id=wminimaminsellid>&nbsp;</td><td id=wminimamaxsellid>&nbsp;</td></tr>
 	</table>
 	<br>
-	<table>
-		<tr>
-			<td><table id=wminimarangetablebuy></table></td>
-			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-			<td><table id=wminimarangetablesell></table></td>
-		</tr>
-	</table>
+	<table id=wminimarangetablebuy></table>
 	
 	<br><br>
 	<b>USDT POOL</b><br>
@@ -82,16 +75,10 @@
 		<tr><td><b>SELL</b></td><td id=usdtminsellid>&nbsp;</td><td id=usdtmaxsellid>&nbsp;</td></tr>
 	</table>
 	<br>
-	<table>
-		<tr>
-			<td><table id=usdtrangetablebuy></table></td>
-			<td>&nbsp;&nbsp;&nbsp;&nbsp;</td>
-			<td><table id=usdtrangetablesell></table></td>
-		</tr>
-	</table>
+	<table id=usdtrangetablebuy></table>
 	
 	<br><br>
-	<button onclick="openbook();">VIEW FULL BOOK</button>
+	<button onclick="openbook();">VIEW FULL ORDERBOOK</button>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -141,61 +128,39 @@
 			//Now get the Totals..
 			getSimpleOrderBookTotals(function(totals){
 				
+				//Get the price book
+				var pricebook = makeAmountPriceBook(USER_DETAILS, completeorderbook, totals);
+				
 				//wMinima range amounts
 				if(totals.wminima.books>0){
 					wminimaminbuyid.innerHTML  = totals.wminima.lowbuy;
 					wminimamaxbuyid.innerHTML  = totals.wminima.highbuy;
 					wminimaminsellid.innerHTML = totals.wminima.lowsell;
 					wminimamaxsellid.innerHTML = totals.wminima.highsell;
-				
-					//Now do the BUY calc..
+					
+					//Set up thew tables
 					wminimarangetablebuy.innerHTML = "";
 					var thead = wminimarangetablebuy.insertRow();
 					thead.insertCell(0).innerHTML = "<b>BUY</b>";
-					thead.insertCell(1).innerHTML = "<b>PRICE</b>";
-					var start 	= totals.wminima.lowbuy;
-					var gap 	= (totals.wminima.highbuy - totals.wminima.lowbuy) / jumps
-					for(var i=0;i<jumps+1;i++){
-						var amount = Math.floor(start + i*gap);
-						_searchAllOrderBooksWithBook(completeorderbook, "buy", amount, "wminima", USER_DETAILS.minimapublickey, function(found,order){
-							var trow = wminimarangetablebuy.insertRow();
-							if(found){
-								trow.insertCell(0).innerHTML = amount;
-								trow.insertCell(1).innerHTML = order.orderbook.wminima.sell;	
-							}else{
-								trow.insertCell(0).innerHTML = "-";
-								trow.insertCell(1).innerHTML = "-";
-							}
-						});
-					}
+					thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
+					thead.insertCell(2).innerHTML = "<b>SELL</b>";
+					thead.insertCell(3).innerHTML = "<b>PRICE</b>";
 					
-					//Now do the SELL calc..
-					wminimarangetablesell.innerHTML = "";
-					var thead = wminimarangetablesell.insertRow();
-					thead.insertCell(0).innerHTML = "<b>SELL</b>";
-					thead.insertCell(1).innerHTML = "<b>PRICE</b>";
-					var start 	= totals.wminima.lowsell;
-					var gap 	= (totals.wminima.highsell - totals.wminima.lowsell) / jumps
-					for(var i=0;i<jumps+1;i++){
-						var amount = Math.floor(start + i*gap);
-						_searchAllOrderBooksWithBook(completeorderbook, "sell", amount, "wminima", USER_DETAILS.minimapublickey, function(found,order){
-							var trow = wminimarangetablesell.insertRow();
-							if(found){
-								trow.insertCell(0).innerHTML = amount;
-								trow.insertCell(1).innerHTML = order.orderbook.wminima.buy;	
-							}else{
-								trow.insertCell(0).innerHTML = "-";
-								trow.insertCell(1).innerHTML = "-";
-							}
-						});
+					for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+						var priceamountbuy = pricebook.wminima.buy[i]; 
+						var trow = wminimarangetablebuy.insertRow();
+						trow.insertCell(0).innerHTML = priceamountbuy.amount;
+						trow.insertCell(1).innerHTML = priceamountbuy.price;	
+						
+						var priceamountsell = pricebook.wminima.sell[i]; 
+						trow.insertCell(2).innerHTML = priceamountsell.amount;
+						trow.insertCell(3).innerHTML = priceamountsell.price;	
 					}
-					
 				}else{
-					buywminimabuttonid.disabled = true;
-					sellwminimabuttonid.disabled = true;
-					wminimaminmaxid.style.display="none";
+					buywminimabuttonid.disabled 	= true;
+					sellwminimabuttonid.disabled 	= true;
+					wminimaminmaxid.style.display	= "none";
 				}
-				
 				
 				//USDT range amounts
 				if(totals.usdt.books>0){
@@ -204,56 +169,32 @@
 					usdtminsellid.innerHTML = totals.usdt.lowsell;
 					usdtmaxsellid.innerHTML = totals.usdt.highsell;
 				
-					//Now do the BUY calc..
+					//Set up thew tables
 					usdtrangetablebuy.innerHTML = "";
 					var thead = usdtrangetablebuy.insertRow();
 					thead.insertCell(0).innerHTML = "<b>BUY</b>";
-					thead.insertCell(1).innerHTML = "<b>PRICE</b>";
-					var start 	= totals.usdt.lowbuy;
-					var gap 	= (totals.usdt.highbuy - totals.usdt.lowbuy) / jumps
-					for(var i=0;i<jumps+1;i++){
-						var amount = Math.floor(start + i*gap);
-						_searchAllOrderBooksWithBook(completeorderbook, "buy", amount, "usdt", USER_DETAILS.minimapublickey, function(found,order){
-							var trow = usdtrangetablebuy.insertRow();
-							if(found){
-								trow.insertCell(0).innerHTML = amount;
-								trow.insertCell(1).innerHTML = order.orderbook.usdt.sell;	
-							}else{
-								trow.insertCell(0).innerHTML = "-";
-								trow.insertCell(1).innerHTML = "-";
-							}
-						});
+					thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
+					thead.insertCell(2).innerHTML = "<b>SELL</b>";
+					thead.insertCell(3).innerHTML = "<b>PRICE</b>";
+					
+					for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+						var priceamountbuy = pricebook.usdt.buy[i]; 
+						var trow = usdtrangetablebuy.insertRow();
+						trow.insertCell(0).innerHTML = priceamountbuy.amount;
+						trow.insertCell(1).innerHTML = priceamountbuy.price;	
+						
+						var priceamountsell = pricebook.usdt.sell[i]; 
+						trow.insertCell(2).innerHTML = priceamountsell.amount;
+						trow.insertCell(3).innerHTML = priceamountsell.price;	
 					}
 					
-					//Now do the SELL calc..
-					usdtrangetablesell.innerHTML = "";
-					var thead = usdtrangetablesell.insertRow();
-					thead.insertCell(0).innerHTML = "<b>SELL</b>";
-					thead.insertCell(1).innerHTML = "<b>PRICE</b>";
-					var start 	= totals.usdt.lowsell;
-					var gap 	= (totals.usdt.highsell - totals.usdt.lowsell) / jumps
-					for(var i=0;i<jumps+1;i++){
-						var amount = Math.floor(start + i*gap);
-						_searchAllOrderBooksWithBook(completeorderbook, "sell", amount, "usdt", USER_DETAILS.minimapublickey, function(found,order){
-							var trow = usdtrangetablesell.insertRow();
-							if(found){
-								trow.insertCell(0).innerHTML = amount;
-								trow.insertCell(1).innerHTML = order.orderbook.usdt.buy;	
-							}else{
-								trow.insertCell(0).innerHTML = "-";
-								trow.insertCell(1).innerHTML = "-";
-							}
-						});
-					}				
 				}else{
 					buyusdtbuttonid.disabled = true;
 					sellusdtbuttonid.disabled = true;
 					usdtminmaxid.style.display="none";
 				}
-				
 			});	
 		});
-		
 	}
 	
 	//Main message handler..
