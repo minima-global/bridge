@@ -71,7 +71,7 @@ MDS.init(function(msg){
 	//Do initialisation
 	if(msg.event == "inited"){
 		
-		MDS.log("Bridge Init start..");
+		//MDS.log("Bridge Init start..");
 		
 		//Are we inited..
 		serviceCheckBridgeInited();
@@ -85,8 +85,8 @@ MDS.init(function(msg){
 			//Check the Complete Order Book - will only check sigs for NEW entries..
 			createCompleteOrderBook(USER_DETAILS,function(completeorderbook){});
 			
-			//Send out your order book if required..
-			createAndSendOrderBook(USER_DETAILS,function(){});
+			//Send out your order book if required.. TAKES TIME.. 
+			//createAndSendOrderBook(USER_DETAILS,function(){});
 		}
 						
 		MDS.log("Bridge Inited..");

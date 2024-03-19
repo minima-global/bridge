@@ -54,6 +54,8 @@
 	
 	<div id=ethtime></div><br>
 	
+	<div id=etherscan></div><br>
+	
 	<br><br>
 	<button id=boostbuttonid onclick="boost();">BOOST</button>
 		
@@ -68,6 +70,9 @@
 	var txnhash = MDS.form.getParams("txnhash");
 	
 	function showTransaction(){
+		
+		//Set the etherscan link
+		etherscan.innerHTML = "<a target='_blank' href='"+ETHERSCAN_LINK+txnhash+"'>VIEW ON ETHERSCAN</a>"
 		
 		checkETHTransactionStatus(txnhash,function(checkresp, transaction, evdate){
 			
