@@ -161,6 +161,7 @@ function createCompleteOrderBook(userdets,callback){
 	});
 }
 
+var PRICE_BOOK_STEPS = 10;
 function createOrderBookSimpleTotals(userdets,completeorderbook){
 	
 	var totals 					= {};
@@ -172,6 +173,8 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 	totals.wminima.highbuy 		= 0;
 	totals.wminima.lowsell 		= 1000000000;
 	totals.wminima.highsell		= 0;
+	totals.wminima.buybook		= [];
+	totals.wminima.sellbook		= [];
 	
 	totals.usdt 				= {};
 	totals.usdt.books 			= 0;
@@ -180,7 +183,8 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 	totals.usdt.highbuy 		= 0;
 	totals.usdt.lowsell 		= 1000000000;
 	totals.usdt.highsell		= 0;
-	
+	totals.usdt.buybook			= [];
+	totals.usdt.sellbook		= [];
 	
 	var len = completeorderbook.length;
 	for(var i=0;i<len;i++){
@@ -224,23 +228,6 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 		}
 	}
 	
-	//And set them..
-	setSimpleOrderBookTotals(totals);
-}
-
-var PRICE_BOOK_STEPS = 10;
-function makeAmountPriceBook(userdets, completeorderbook, totals){
-	
-	var pricebook 			= {};
-	
-	pricebook.wminima 		= {};
-	pricebook.wminima.buy 	= [];
-	pricebook.wminima.sell 	= [];
-	
-	pricebook.usdt 			= {};
-	pricebook.usdt.buy 		= [];
-	pricebook.usdt.sell 	= [];
-	
 	var start	= 0;
 	var gap		= 0;
 	
@@ -261,7 +248,7 @@ function makeAmountPriceBook(userdets, completeorderbook, totals){
 				}
 				
 				//Add to the total
-				pricebook.wminima.buy.push(priceamount);
+				totals.wminima.buybook.push(priceamount);
 			});
 		}
 		
@@ -279,7 +266,7 @@ function makeAmountPriceBook(userdets, completeorderbook, totals){
 				}
 				
 				//Add to the total
-				pricebook.wminima.sell.push(priceamount);
+				totals.wminima.sellbook.push(priceamount);
 			});
 		}
 	}
@@ -301,7 +288,7 @@ function makeAmountPriceBook(userdets, completeorderbook, totals){
 				}
 				
 				//Add to the total
-				pricebook.usdt.buy.push(priceamount);
+				totals.usdt.buybook.push(priceamount);
 			});
 		}
 		
@@ -319,12 +306,13 @@ function makeAmountPriceBook(userdets, completeorderbook, totals){
 				}
 				
 				//Add to the total
-				pricebook.usdt.sell.push(priceamount);
+				totals.usdt.sellbook.push(priceamount);
 			});
 		}
 	}
 	
-	return pricebook;
+	//And set them..
+	setSimpleOrderBookTotals(totals);
 }
 
 /**

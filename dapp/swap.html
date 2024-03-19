@@ -122,78 +122,71 @@
 		
 		var jumps = 10;
 		
-		//Get the complete book
-		getCompleteOrderBook(function(completeorderbook){
+		//Now get the Totals..
+		getSimpleOrderBookTotals(function(totals){
 			
-			//Now get the Totals..
-			getSimpleOrderBookTotals(function(totals){
+			//wMinima range amounts
+			if(totals.wminima.books>0){
+				wminimaminbuyid.innerHTML  = totals.wminima.lowbuy;
+				wminimamaxbuyid.innerHTML  = totals.wminima.highbuy;
+				wminimaminsellid.innerHTML = totals.wminima.lowsell;
+				wminimamaxsellid.innerHTML = totals.wminima.highsell;
 				
-				//Get the price book
-				var pricebook = makeAmountPriceBook(USER_DETAILS, completeorderbook, totals);
+				//Set up thew tables
+				wminimarangetablebuy.innerHTML = "";
+				var thead = wminimarangetablebuy.insertRow();
+				thead.insertCell(0).innerHTML = "<b>BUY</b>";
+				thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
+				thead.insertCell(2).innerHTML = "<b>SELL</b>";
+				thead.insertCell(3).innerHTML = "<b>PRICE</b>";
 				
-				//wMinima range amounts
-				if(totals.wminima.books>0){
-					wminimaminbuyid.innerHTML  = totals.wminima.lowbuy;
-					wminimamaxbuyid.innerHTML  = totals.wminima.highbuy;
-					wminimaminsellid.innerHTML = totals.wminima.lowsell;
-					wminimamaxsellid.innerHTML = totals.wminima.highsell;
+				for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+					var priceamountbuy = totals.wminima.buybook[i]; 
+					var trow = wminimarangetablebuy.insertRow();
+					trow.insertCell(0).innerHTML = priceamountbuy.amount;
+					trow.insertCell(1).innerHTML = priceamountbuy.price;	
 					
-					//Set up thew tables
-					wminimarangetablebuy.innerHTML = "";
-					var thead = wminimarangetablebuy.insertRow();
-					thead.insertCell(0).innerHTML = "<b>BUY</b>";
-					thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
-					thead.insertCell(2).innerHTML = "<b>SELL</b>";
-					thead.insertCell(3).innerHTML = "<b>PRICE</b>";
+					var priceamountsell = totals.wminima.sellbook[i]; 
+					trow.insertCell(2).innerHTML = priceamountsell.amount;
+					trow.insertCell(3).innerHTML = priceamountsell.price;	
+				}
+			}else{
+				buywminimabuttonid.disabled 	= true;
+				sellwminimabuttonid.disabled 	= true;
+				wminimaminmaxid.style.display	= "none";
+			}
+			
+			//USDT range amounts
+			if(totals.usdt.books>0){
+				usdtminbuyid.innerHTML  = totals.usdt.lowbuy;
+				usdtmaxbuyid.innerHTML  = totals.usdt.highbuy;
+				usdtminsellid.innerHTML = totals.usdt.lowsell;
+				usdtmaxsellid.innerHTML = totals.usdt.highsell;
+			
+				//Set up thew tables
+				usdtrangetablebuy.innerHTML = "";
+				var thead = usdtrangetablebuy.insertRow();
+				thead.insertCell(0).innerHTML = "<b>BUY</b>";
+				thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
+				thead.insertCell(2).innerHTML = "<b>SELL</b>";
+				thead.insertCell(3).innerHTML = "<b>PRICE</b>";
+				
+				for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+					var priceamountbuy = totals.usdt.buybook[i]; 
+					var trow = usdtrangetablebuy.insertRow();
+					trow.insertCell(0).innerHTML = priceamountbuy.amount;
+					trow.insertCell(1).innerHTML = priceamountbuy.price;	
 					
-					for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
-						var priceamountbuy = pricebook.wminima.buy[i]; 
-						var trow = wminimarangetablebuy.insertRow();
-						trow.insertCell(0).innerHTML = priceamountbuy.amount;
-						trow.insertCell(1).innerHTML = priceamountbuy.price;	
-						
-						var priceamountsell = pricebook.wminima.sell[i]; 
-						trow.insertCell(2).innerHTML = priceamountsell.amount;
-						trow.insertCell(3).innerHTML = priceamountsell.price;	
-					}
-				}else{
-					buywminimabuttonid.disabled 	= true;
-					sellwminimabuttonid.disabled 	= true;
-					wminimaminmaxid.style.display	= "none";
+					var priceamountsell = totals.usdt.sellbook[i]; 
+					trow.insertCell(2).innerHTML = priceamountsell.amount;
+					trow.insertCell(3).innerHTML = priceamountsell.price;	
 				}
 				
-				//USDT range amounts
-				if(totals.usdt.books>0){
-					usdtminbuyid.innerHTML  = totals.usdt.lowbuy;
-					usdtmaxbuyid.innerHTML  = totals.usdt.highbuy;
-					usdtminsellid.innerHTML = totals.usdt.lowsell;
-					usdtmaxsellid.innerHTML = totals.usdt.highsell;
-				
-					//Set up thew tables
-					usdtrangetablebuy.innerHTML = "";
-					var thead = usdtrangetablebuy.insertRow();
-					thead.insertCell(0).innerHTML = "<b>BUY</b>";
-					thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
-					thead.insertCell(2).innerHTML = "<b>SELL</b>";
-					thead.insertCell(3).innerHTML = "<b>PRICE</b>";
-					
-					for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
-						var priceamountbuy = pricebook.usdt.buy[i]; 
-						var trow = usdtrangetablebuy.insertRow();
-						trow.insertCell(0).innerHTML = priceamountbuy.amount;
-						trow.insertCell(1).innerHTML = priceamountbuy.price;	
-						
-						var priceamountsell = pricebook.usdt.sell[i]; 
-						trow.insertCell(2).innerHTML = priceamountsell.amount;
-						trow.insertCell(3).innerHTML = priceamountsell.price;	
-					}
-					
-				}else{
-					buyusdtbuttonid.disabled = true;
-					sellusdtbuttonid.disabled = true;
-					usdtminmaxid.style.display="none";
-				}
-			});	
+			}else{
+				buyusdtbuttonid.disabled = true;
+				sellusdtbuttonid.disabled = true;
+				usdtminmaxid.style.display="none";
+			}
 		});
 	}
 	
