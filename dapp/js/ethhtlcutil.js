@@ -8,10 +8,10 @@ var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
  */
 
 //SEPOLIA
-//var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());
+var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());
 
 //HARDHAT
-var HTLCContractAddress = "0x"+("0165878A594ca255338adfa4d48449f69242Eb8F".toUpperCase());
+//var HTLCContractAddress = "0x"+("0165878A594ca255338adfa4d48449f69242Eb8F".toUpperCase());
 
 /**
  * Start an HTLC

@@ -3,10 +3,10 @@
  */
 
 //SEPOLIA
-//var USDTContractAddress = "0x"+("b3BEe194535aBF4E8e2C0f0eE54a3eF3b176703C".toUpperCase());
+var USDTContractAddress = "0x"+("b3BEe194535aBF4E8e2C0f0eE54a3eF3b176703C".toUpperCase());
 
 //HARDHAT
-var USDTContractAddress = "0x"+("5FbDB2315678afecb367f032d93F642f64180aa3".toUpperCase());
+//var USDTContractAddress = "0x"+("5FbDB2315678afecb367f032d93F642f64180aa3".toUpperCase());
 
 //How many decimals does the USDT contract have
 var USDT_DECIMALS = 18;
