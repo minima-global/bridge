@@ -188,40 +188,39 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 		var orderbook = completeorderbook[i].data.orderbook;
 		
 		//Check is not THIS user
-		if(completeorderbook[i].data.publickey == userdets.minimapublickey){
-			continue;
-		}
-		
-		if(orderbook.wminima.enable){
-			var tots = totals.wminima;
-			var ob 	 = orderbook.wminima;
-			totals.wminima.books++;
+		if(completeorderbook[i].data.publickey != userdets.minimapublickey){
 			
-			var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
-			var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
-			var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
-			var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+			if(orderbook.wminima.enable){
+				var tots = totals.wminima;
+				var ob 	 = orderbook.wminima;
+				totals.wminima.books++;
+				
+				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
+				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
+				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+				
+				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
+				tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
+				tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
+				tots.highsell	= Math.floor(max(tots.highsell,highsell));
+			}
 			
-			tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
-			tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
-			tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
-			tots.highsell	= Math.floor(max(tots.highsell,highsell));
-		}
-		
-		if(orderbook.usdt.enable){
-			var tots = totals.usdt;
-			var ob 	 = orderbook.usdt;
-			totals.usdt.books++;
-			
-			var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
-			var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
-			var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
-			var highsell 	= toFixedNumber(ob.maximum / ob.buy);
-			
-			tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
-			tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
-			tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
-			tots.highsell	= Math.floor(max(tots.highsell,highsell));
+			if(orderbook.usdt.enable){
+				var tots = totals.usdt;
+				var ob 	 = orderbook.usdt;
+				totals.usdt.books++;
+				
+				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
+				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
+				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+				
+				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
+				tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
+				tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
+				tots.highsell	= Math.floor(max(tots.highsell,highsell));
+			}
 		}
 	}
 	

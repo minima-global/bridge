@@ -85,10 +85,11 @@
 	
 	<br>
 	<table border=0>
-		<tr>
+		<!--  <tr>
 			<td class=rightalign>Minima Address : </td>
 			<td colspan=3><div id=myminimaaddress style="font-size:11;">0</div></td>
-		</tr>
+		</tr>-->
+		
 		<tr>
 			<td class=rightalign>Minima : </td>
 			<td><div id=nativeminimabalance>0</div></td>
@@ -143,7 +144,7 @@
 			}
 				
 			//Fill in ETH details..
-			myminimaaddress.innerHTML = USER_DETAILS.minimaaddress.mxaddress;
+			//myminimaaddress.innerHTML = USER_DETAILS.minimaaddress.mxaddress;
 			myethaddress.innerHTML	  = getETHERUMAddress(); 
 			ethbalance.innerHTML 	  = balances.ethfull;
 			wminimabalance.innerHTML  = balances.wminima;

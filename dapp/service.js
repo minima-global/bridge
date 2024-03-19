@@ -124,9 +124,11 @@ MDS.init(function(msg){
 			setNonceAuto(function(nonce){});
 			
 			//And check again..	
-			if(!checkIsPositiveNumber(NONCE_TRACK)){
-				MDS.log("ERROR Nonce not valid..");
-				return;
+			if(NONCE_TRACK != 0){
+				if(!checkIsPositiveNumber(NONCE_TRACK)){
+					MDS.log("ERROR Nonce not valid..");
+					return;
+				}	
 			}
 		}
 		
