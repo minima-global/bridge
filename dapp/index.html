@@ -119,25 +119,21 @@
 		setInfuraApiKeys(apik,apiksec,b64,function(setresp){
 			
 			//Now test
-			getCurrentETHBlock(function(block){
+			getInfuraGASAPI(function(gas){
 				
-				//Is it valid.
-				if(checkIsPositiveNumber(block)){
+				if(gas.response.length > 10){
 					alert("API Keys Work!");
-					
-					//refresh
-					location.reload(); 
 				}else{
 					clearInfuraApiKeys(function(){
 						alert("API Keys FAIL!");
-					});	
+					});
 				}
 			});
 		});
 	}
 	
 	function currentgas(){
-		setGasAuto(function(gas){
+		getInfuraGASAPI(function(gas){
 			//And show..
 			alert(JSON.stringify(gas,null,2));
 		});
