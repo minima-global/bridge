@@ -199,11 +199,17 @@ function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 			var len = ethresp.result.length;
 			for(var i=0;i<len;i++){
 				
-				//Parse the returned Data
-				var newcontract = parseHTLCContractData(ethresp.result[i]);
-							
-				//Add to the total list..
-				newcontracts.push(newcontract);
+				try{
+				
+					//Parse the returned Data
+					var newcontract = parseHTLCContractData(ethresp.result[i]);
+								
+					//Add to the total list..
+					newcontracts.push(newcontract);
+				
+				}catch(e){
+					MDS.log("ERROR NEW CONTRACT "+JSON.stringify(ethresp.result[i],null,2)+" "+e);
+				}
 			}
 		}
 		
@@ -255,11 +261,17 @@ function getHTLCContractAsReceiver(fomBlockHEX, toBlockHEX, callback){
 			var len = ethresp.result.length;
 			for(var i=0;i<len;i++){
 				
-				//Parse the returned Data
-				var newcontract = parseHTLCContractData(ethresp.result[i]);
-							
-				//Add to the total list..
-				newcontracts.push(newcontract);
+				try{
+					
+					//Parse the returned Data
+					var newcontract = parseHTLCContractData(ethresp.result[i]);
+								
+					//Add to the total list..
+					newcontracts.push(newcontract);	
+					
+				}catch(e){
+					MDS.log("ERROR NEW CONTRACT "+JSON.stringify(ethresp.result[i],null,2)+" "+e);
+				}
 			}	
 		}
 		
@@ -269,6 +281,9 @@ function getHTLCContractAsReceiver(fomBlockHEX, toBlockHEX, callback){
 
 function parseHTLCContractData(logdata){
 	
+	//Now create a complete object
+	var newcontract = {};
+		
 	//Get the contractid
 	var contractid = logdata.topics[1]; 
 
@@ -295,19 +310,19 @@ function parseHTLCContractData(logdata){
 	}else if(newcontract.tokencontract == USDTContractAddress){
 		decimals = USDT_DECIMALS;
 	}
-	
+		
 	//The amount of the token
-	var weiamount 			= ""+parseInt(datavars[2]._hex,16);
-	newcontract.amount		= ethers.utils.formatEther(weiamount,decimals);
+	var weiamount 				= ethers.utils.bigNumberify(datavars[2]._hex);
+	newcontract.amount			= ethers.utils.formatEther(weiamount,decimals);
 	
 	//The requested amount of Minima
-	var reqweiamount 			= ""+parseInt(datavars[3]._hex,16);
+	var reqweiamount 			= ethers.utils.bigNumberify(datavars[3]._hex);
 	newcontract.requestamount	= ethers.utils.formatEther(reqweiamount,18);
 	
-	newcontract.hashlock	= "0x"+datavars[4].slice(2).toUpperCase();
-	newcontract.timelock 	= parseInt(datavars[5]._hex,16);
+	newcontract.hashlock		= "0x"+datavars[4].slice(2).toUpperCase();
+	newcontract.timelock 		= ethers.utils.bigNumberify(datavars[5]._hex).toNumber();
 	
-	newcontract.otc			= datavars[6];
+	newcontract.otc				= datavars[6];
 	
 	return newcontract;
 }
@@ -346,19 +361,25 @@ function getHTLCContractWithdrawLogs(fomBlockHEX, toBlockHEX, callback){
 			var len = ethresp.result.length;
 			for(var i=0;i<len;i++){
 				
-				//Get the topics
-				var topics = ethresp.result[i].topics;
-				
-				//Parse the returned Data
-				var newcontract 		= {};
-				newcontract.block		= parseInt(ethresp.result[i].blockNumber);
-				newcontract.txnhash		= "0x"+(ethresp.result[i].transactionHash+"").slice(2).toUpperCase();
-				newcontract.contractid 	= "0x"+topics[1].slice(2).toUpperCase();
-				newcontract.secret 		= "0x"+topics[2].slice(2).toUpperCase(); 	
-				newcontract.hashlock 	= "0x"+topics[3].slice(2).toUpperCase();
-							
-				//Add to the total list..
-				newcontracts.push(newcontract);
+				try{
+					
+					//Get the topics
+					var topics = ethresp.result[i].topics;
+					
+					//Parse the returned Data
+					var newcontract 		= {};
+					newcontract.block		= parseInt(ethresp.result[i].blockNumber);
+					newcontract.txnhash		= "0x"+(ethresp.result[i].transactionHash+"").slice(2).toUpperCase();
+					newcontract.contractid 	= "0x"+topics[1].slice(2).toUpperCase();
+					newcontract.secret 		= "0x"+topics[2].slice(2).toUpperCase(); 	
+					newcontract.hashlock 	= "0x"+topics[3].slice(2).toUpperCase();
+								
+					//Add to the total list..
+					newcontracts.push(newcontract);
+						
+				}catch(e){
+					MDS.log("WITHDRAW LOGS ERROR : "+JSON.stringify(ethresp.result[i],null,2));
+				}
 			}
 		}
 		

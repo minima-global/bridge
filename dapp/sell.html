@@ -112,19 +112,19 @@
 						swapproceed.innerHTML="No match found to SELL "+amount+" Minima for "+reqtokenstr;
 					}else{
 						
-						//Get the details..
-						swapproceed.innerHTML=JSON.stringify(order,null,2);
-						
 						//Who is this?
 						reqpublickey = order.publickey;		
 						
 						//What is the amount.. we are requesting MINIMA
 						reqamount = calculateAmount("sell",amount,reqtoken,order.orderbook);
 						
+						//What Price..
+						var price = calculatePrice("sell",reqtoken,order.orderbook);
+						
 						//Set the details..
-						swapproceed.innerHTML=JSON.stringify(order,null,2)+"<br><br>Have found a match!<br><br>"
-												+"SELL "+amount+" Minima for "+reqamount+" "+reqtokenstr+"<br><br>"
-												+"<button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
+						swapproceed.innerHTML=  "Have found a match!<br><br>"
+												+"<b>SELL</b> "+amount+" Minima for "+reqamount+" "+reqtokenstr+" @ "+price+"<br><br>"
+												+"<br><button id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
 												+"You <b>MUST</b> have some ETH to send / collect the "+reqtokenstr+"..";					
 					}
 				});

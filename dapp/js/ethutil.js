@@ -420,13 +420,10 @@ function createRAWContractCallTxn(contractAddress, functionData, gaslimit){
 	//Our Signing LIB is NOT eip1559 compatible..
 	var transaction = {
     	nonce: NONCE_TRACK,
-		
 		gasLimit: gaslimit,
-    	
-		gasPrice: maxfee,
+    	gasPrice: maxfee,
 		//gasPrice: ethers.utils.bigNumberify("130000000000"),
-		
-    	to: contractAddress,
+		to: contractAddress,
     	data:functionData
 	};
 	

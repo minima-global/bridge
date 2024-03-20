@@ -122,10 +122,10 @@
 			getInfuraGASAPI(function(gas){
 				
 				if(gas.response.length > 10){
-					alert("API Keys Work!");
+					alert("API Keys Work!\n\n"+JSON.stringify(gas));
 				}else{
 					clearInfuraApiKeys(function(){
-						alert("API Keys FAIL!");
+						alert("API Keys FAIL!\n\n"+JSON.stringify(gas));
 					});
 				}
 			});

@@ -274,6 +274,7 @@ function checkMinimaSwapHTLC(userdets, block, callback){
 	//First search coins
 	var cmd = "coins coinage:2 tokenid:0x00 simplestate:true relevant:true address:"+HTLC_ADDRESS;		
 	MDS.cmd(cmd,function(resp){
+		//MDS.log("checkMinimaSwapHTLC:"+JSON.stringify(resp));
 		
 		//How many coins..
 		var len=resp.response.length;

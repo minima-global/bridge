@@ -2,7 +2,7 @@
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
 
 //Should be 2 hours..
-var ORDEBOOK_CHECK_DEPTH = 512;
+var ORDEBOOK_CHECK_DEPTH = 256;
 
 //How many new SIGS checked in complete orderbook
 var SIGS_CHECKED = 0;
@@ -130,7 +130,7 @@ function createCompleteOrderBook(userdets,callback){
 			
 			//Did we check any new coins..
 			if(SIGS_CHECKED > 0){
-				MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
+				//MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
 			}
 			
 			//Now we only want the ones providing liquidity

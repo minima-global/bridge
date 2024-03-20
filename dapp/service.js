@@ -34,6 +34,8 @@ var USER_DETAILS 	= {};
 //Has the bridge been initialised - done in the frontend
 var BRIDGE_INITED = false;
 
+var LOGS_ENABLED = false;
+
 //Check and init the bridge - when you can
 function serviceCheckBridgeInited(){
 	
@@ -107,6 +109,10 @@ MDS.init(function(msg){
 		//SERVICE.js runs function synchromously... as no HTTP call.. 
 		//so no need to to stack functions inside each other
 		
+		if(LOGS_ENABLED){
+			MDS.log("Bridge Update 60 seconds..");	
+		}
+		
 		//Are the INFURA KEYS SET
 		var infuraenabled = false;
 		getInfuraApiKeys(function(apikeys){
@@ -166,6 +172,10 @@ MDS.init(function(msg){
 		
 		//HARDHAT HACK
 		//setNonceAuto();
+		
+		if(LOGS_ENABLED){
+			MDS.log("Start Bridge Functions..");	
+		}
 			
 		//Check for new secrets
 		checkETHNewSecrets(ethblock,function(){});
@@ -184,6 +194,10 @@ MDS.init(function(msg){
 		
 		//Check if my orderbook has changed..
 		checkNeedPublishOrderBook(USER_DETAILS);	
+		
+		if(LOGS_ENABLED){
+			MDS.log("Bridge functions finished..");	
+		}
 			
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		

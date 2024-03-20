@@ -46,8 +46,12 @@ var myoldbalance	= {};
  */
 function getBalanceWithLimits(orderbook, allbalances){
 	
-	//Make a copy..
-	var newbalances 	= allbalances;
+	//Make a copy.. leave out uneeded info..
+	var newbalances 			= {};
+	newbalances.minima  		= {};
+	newbalances.minima.total  	= allbalances.minima.total;
+	newbalances.wminima  		= allbalances.wminima;
+	newbalances.usdt  			= allbalances.usdt;
 	
 	//Set to start
 	var cmaxminima 	= newbalances.minima.total;
@@ -58,8 +62,10 @@ function getBalanceWithLimits(orderbook, allbalances){
 	if(orderbook.wminima.enable){
 		
 		//MAX to SELL
-		if(+allbalances.wminima > orderbook.wminima.maximum){
+		if(+newbalances.wminima > orderbook.wminima.maximum){
 			newbalances.wminima = orderbook.wminima.maximum;
+		}else{
+			orderbook.wminima.maximum = newbalances.wminima;
 		}
 		
 		//Calculate max minima required..
@@ -70,16 +76,15 @@ function getBalanceWithLimits(orderbook, allbalances){
 	if(orderbook.usdt.enable){
 		
 		//MAX SELL
-		if(+allbalances.usdt > orderbook.usdt.maximum){
+		if(+newbalances.usdt > orderbook.usdt.maximum){
 			newbalances.usdt = orderbook.usdt.maximum;
+		}else{
+			orderbook.usdt.maximum = newbalances.usdt;
 		}
 		
 		//Calculate max minima required..
 		maxusdtbuy  = toFixedNumber(newbalances.usdt / orderbook.usdt.buy);
 	}
-	
-	//MDS.log("MAX WMINIMA BUY :"+maxwminbuy+" totalMinima:"+cmaxminima);
-	//MDS.log("MAX USDT BUY :"+maxusdtbuy+" totalMinima:"+cmaxminima);
 	
 	//Now sort max Minima..
 	var maxbuy = maxusdtbuy;
@@ -118,7 +123,7 @@ function createAndSendOrderBook(userdets, callback){
 			
 			//Get limited balance..
 			var currentbalances = getBalanceWithLimits(currentorderbook, fullbalance);
-					
+						
 			//Create the complete book
 			var orderbookmsg = {};
 			orderbookmsg.publickey 		= userdets.minimapublickey;
@@ -161,25 +166,25 @@ function checkNeedPublishOrderBook(userdets,callback){
 		//Get the OLD orderbook..
 		getOldOrderBook(function(myoldorderbook){
 			
-			//Has it changed or not providing liquidity.. otherwise need to check balances
-			var oldbook = JSON.stringify(myoldorderbook);
-			var newbook = JSON.stringify(currentorderbook);
-			if((oldbook==newbook) && 
-				!currentorderbook.wminima.enable &&
-				!currentorderbook.usdt.enable){
-				
-				//No change.. no need to check any further..
-				if(callback){
-					callback(false);	
-				}
-				return;	
-			}
-			
 			//Now check whether the balance hash changed..
 			getAllBalances(userdets,function(fullbalance){
 				
 				//Get limited balance..
 				var currentbalances = getBalanceWithLimits(currentorderbook, fullbalance);
+			
+				//Has it changed or not providing liquidity.. otherwise need to check balances
+				var oldbook = JSON.stringify(myoldorderbook);
+				var newbook = JSON.stringify(currentorderbook);
+				if((oldbook==newbook) && 
+					!currentorderbook.wminima.enable &&
+					!currentorderbook.usdt.enable){
+					
+					//No change.. no need to check any further..
+					if(callback){
+						callback(false);	
+					}
+					return;	
+				}
 				
 				//Now do some some checking..
 				var publishbook = false;
@@ -379,7 +384,6 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 
 function calculateAmount(action, amount, token, orderbook){
 	
-	//What is the fee..
 	var useamount 	= toFixedNumber(amount);
 	var calcamount 	= 0;
 	
@@ -408,4 +412,29 @@ function calculateAmount(action, amount, token, orderbook){
 		
 	//Calculate the amount of wMinima.. 
 	return toFixedNumber(calcamount);
+}
+
+function calculatePrice(action, token, orderbook){
+	
+	if(action == "buy"){
+		
+		if(token == "wminima"){
+			return toFixedNumber(orderbook.wminima.sell);	
+			
+		}else if(token == "usdt"){
+			return toFixedNumber(orderbook.usdt.sell);	
+		}
+		
+	}else if(action == "sell"){
+		
+		if(token == "wminima"){
+			return toFixedNumber(orderbook.wminima.buy);	
+			
+		}else if(token == "usdt"){
+			return  toFixedNumber(orderbook.usdt.buy);	
+		}
+	}
+		
+	//Calculate the amount of wMinima.. 
+	return -1;
 }
