@@ -189,7 +189,8 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 	var len = completeorderbook.length;
 	for(var i=0;i<len;i++){
 		
-		var orderbook = completeorderbook[i].data.orderbook;
+		var orderbook 	= completeorderbook[i].data.orderbook;
+		var balance 	= completeorderbook[i].data.balance;
 		
 		//Check is not THIS user
 		if(completeorderbook[i].data.publickey != userdets.minimapublickey){
@@ -201,6 +202,10 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 				
 				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
 				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+				if(highbuy > balance.minima.total){
+					highbuy = balance.minima.total;
+				}
+				
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
 				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
 				
@@ -217,6 +222,10 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 				
 				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
 				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+				if(highbuy > balance.minima.total){
+					highbuy = balance.minima.total;
+				}
+				
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
 				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
 				
