@@ -123,18 +123,20 @@ MDS.init(function(msg){
 			return;
 		}
 		
-		//Check the Nonce.. 
-		if(!checkIsPositiveNumber(NONCE_TRACK)){
+		//Check the Nonce.. 0 is valid
+		if(NONCE_TRACK != 0){
+			if(!checkIsPositiveNumber(NONCE_TRACK)){
 			
-			//REDO the NONCE
-			setNonceAuto(function(nonce){});
-			
-			//And check again..	
-			if(NONCE_TRACK != 0){
-				if(!checkIsPositiveNumber(NONCE_TRACK)){
-					MDS.log("ERROR Nonce not valid..");
-					return;
-				}	
+				//REDO the NONCE
+				setNonceAuto(function(nonce){});
+				
+				//And check again..	
+				if(NONCE_TRACK != 0){
+					if(!checkIsPositiveNumber(NONCE_TRACK)){
+						MDS.log("ERROR Nonce not valid..");
+						return;
+					}	
+				}
 			}
 		}
 		

@@ -242,6 +242,9 @@ function runEthCommand(payload, callback){
 					MDS.log("ERROR running ETH network command : "+JSON.stringify(resp));
 					ethresp.status 	= false;
 					ethresp.error 	= ethreturned.error;
+					
+					//Send a message to frontend..
+					sendFrontendMSG("ETHCOMMAND",resp.response);
 				}else{
 					ethresp.status 	= true;
 					ethresp.result 	= ethreturned.result;
