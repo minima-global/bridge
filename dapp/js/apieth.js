@@ -148,7 +148,7 @@ function _collectExpiredETHCoin(htlclog,callback){
  * Check for NEW secrets.. 
  */
 var LAST_CHECKED_SECRET_BLOCK = -1;
-function checkETHNewSecrets(currentethblock, callback){
+function checkETHNewSecrets(userdets, currentethblock, callback){
 	
 	//Incase of failure..
 	var OLD_LAST_CHECKED_SECRET_BLOCK = LAST_CHECKED_SECRET_BLOCK;

@@ -53,9 +53,19 @@ function createDB(callback){
 						+" )";
 				
 				MDS.sql(ethcontracts,function(ethmsg){
-					if(callback){
-						callback(ethmsg);
-					}	
+					
+					var favourites = "CREATE TABLE IF NOT EXISTS `favs` ( "
+						+"  `id` bigint auto_increment, "
+						+"  `name` varchar(128) NOT NULL, "
+						+"  `bridgeuid` varchar(1024) NOT NULL "
+						+" )";
+				
+					MDS.sql(favourites,function(ethmsg){
+						
+						if(callback){
+							callback(ethmsg);
+						}	
+					});
 				});
 			});	
 		});
@@ -315,6 +325,34 @@ function getETHTransaction(txnhash, callback){
 
 function changeStatusETHTransaction(txnhash, status, callback){
 	MDS.sql("UPDATE ethtxns SET status='"+status+"' WHERE txnhash='"+txnhash+"'", function(sqlmsg){
+		callback(sqlmsg);
+	});
+}
+
+//FAVOURITES
+function addFavourites(name, uid, callback){
+	var sql = "INSERT INTO favs(name,bridgeuid) VALUES ('"+name+"','"+uid+"')";
+	MDS.sql(sql,function(msg){
+		callback(msg);
+	});
+}
+
+function removeFavourites(name, callback){
+	var sql = "DELETE FROM favs WHERE name='"+name+"'";
+	MDS.sql(sql,function(msg){
+		callback(msg);
+	});
+}
+
+function removeAllFavourites(callback){
+	var sql = "DELETE FROM favs WHERE name!=''";
+	MDS.sql(sql,function(msg){
+		callback(msg);
+	});
+}
+
+function getFavourites(callback){
+	MDS.sql("SELECT * FROM favs", function(sqlmsg){
 		callback(sqlmsg);
 	});
 }

@@ -37,6 +37,9 @@
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
+	<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+	
+	
 </head>
 
 <body>
@@ -54,6 +57,29 @@
 	<br>
 	<button onclick="orderbooktrade();">ORDERBOOK TRADE</button><br>
 	
+	
+	<!--  <br><br>
+	FAVOURITES..
+	
+	<pre id=favsdiv></pre>
+	<button onclick="removeall();">REMOVE ALL FAVS</button>
+	
+	<br><br><br>
+	<table>
+		<tr>
+			<td>NAME:</td>
+			<td><input type=text id=nameid></td>
+		</tr>
+		<tr>
+			<td>BRIDGE UID:</td>
+			<td><input type=text id=bridgeuid></td>
+		</tr>
+		<tr>
+			<td colspan=2><button onclick="addfav();">ADD FAVOURITE</button></td>
+		</tr>
+	</table>
+	-->
+	
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -68,9 +94,34 @@
 		location.href="swap.html?uid="+MDS.minidappuid;
 	}
 	
+	function removeall(){
+		removeAllFavourites(function(){
+			loadFavs();
+		});
+	}
+	
+	function loadFavs(){
+		getFavourites(function(favs){
+			favsdiv.innerHTML = JSON.stringify(favs,null,2);
+		});	
+	}
+	
+	function addfav(){
+		var name = nameid.value;
+		var uid  = bridgeuid.value;
+		
+		addFavourites(name,uid,function(){
+			loadFavs();
+		});
+	}
+	
 	//Main message handler..
 	MDS.init(function(msg){
-		if(msg.event == "inited"){}
+		if(msg.event == "inited"){
+			
+			//loadFavs();
+			
+		}
 	});
 
 </script>

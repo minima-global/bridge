@@ -19,16 +19,6 @@ var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpp
 function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, 
 								erc20address, amount, requestamount,  callback){
 	
-	/*var datalogs = {};
-	datalogs.ownerminimakey = ownerminimakey;
-	datalogs.swappubkey = swappubkey;
-	datalogs.hashlock = hashlock;
-	datalogs.timelock = timelock;
-	datalogs.erc20address = erc20address;
-	datalogs.amount = amount;
-	datalogs.reqamount = reqamount;
-	MDS.log("setupETHHTLCSwap : "+JSON.stringify(datalogs));*/
-	
 	//Get ETH valid address
 	var rec 	= swappubkey.toLowerCase();
 	var ercaddr = erc20address.toLowerCase();

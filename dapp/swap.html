@@ -37,6 +37,10 @@
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
+	<!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
+	-->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	
 </head>
 
 <body>
@@ -46,6 +50,8 @@
 	</script>
 	
 	Here you can BUY ansd SELL <b>Minima</b> for <b>wMinima</b> or <b>USDT</b><br>
+	<br>
+	Books are shown with PRICE / QUANTITY<br>
 	<br>
 	
 	<b>WMINIMA POOL</b><br>
@@ -60,7 +66,10 @@
 		<tr><td><b>SELL</b></td><td id=wminimaminsellid>&nbsp;</td><td id=wminimamaxsellid>&nbsp;</td></tr>
 	</table>
 	<br>
-	<table id=wminimarangetablebuy></table>
+	
+	<canvas id="wMinimaBUYChart" style="max-width:600;max-height:400;"></canvas><br>
+	<canvas id="wMinimaSELLChart" style="max-width:600;max-height:400;"></canvas>
+	<!--<table id=wminimarangetablebuy></table>-->
 	
 	<br><br>
 	<b>USDT POOL</b><br>
@@ -75,7 +84,9 @@
 		<tr><td><b>SELL</b></td><td id=usdtminsellid>&nbsp;</td><td id=usdtmaxsellid>&nbsp;</td></tr>
 	</table>
 	<br>
-	<table id=usdtrangetablebuy></table>
+	<canvas id="USDTBUYChart" style="max-width:600;max-height:400;"></canvas><br>
+	<canvas id="USDTSELLChart" style="max-width:600;max-height:400;"></canvas>
+	<!--  <table id=usdtrangetablebuy></table>-->
 	
 	<br><br>
 	<button onclick="openbook();">VIEW FULL ORDERBOOK</button>
@@ -118,9 +129,34 @@
 		}
 	}
 	
-	function setTotals(){
+	function makechart(chart, data, title, color){
+		var quantity =[];
+		var price =[];
+		for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
+			var priceamountbuy = data[i];
+			quantity.push(priceamountbuy.amount);
+			price.push(priceamountbuy.price);
+		}
 		
-		var jumps = 10;
+		new Chart(chart, {
+			  type: "bar",
+			  data: {
+			    labels: quantity,
+			    datasets: [{
+			      backgroundColor: color,
+			      data: price
+			    }]
+			  },
+			  options: {
+				  plugins: {
+					  legend: {display: false},
+					  title: {display: true,text: title}
+				  }
+			  }
+			});
+	}
+	
+	function setTotals(){
 		
 		//Now get the Totals..
 		getSimpleOrderBookTotals(function(totals){
@@ -132,7 +168,10 @@
 				wminimaminsellid.innerHTML = totals.wminima.lowsell;
 				wminimamaxsellid.innerHTML = totals.wminima.highsell;
 				
-				//Set up thew tables
+				makechart("wMinimaBUYChart",totals.wminima.buybook,"wMinima BUY Book","blue");
+				makechart("wMinimaSELLChart",totals.wminima.sellbook,"wMinima SELL Book","red");
+				
+				/*//Set up thew tables
 				wminimarangetablebuy.innerHTML = "";
 				var thead = wminimarangetablebuy.insertRow();
 				thead.insertCell(0).innerHTML = "<b>BUY</b>";
@@ -149,7 +188,7 @@
 					var priceamountsell = totals.wminima.sellbook[i]; 
 					trow.insertCell(2).innerHTML = priceamountsell.amount;
 					trow.insertCell(3).innerHTML = priceamountsell.price;	
-				}
+				}*/
 			}else{
 				buywminimabuttonid.disabled 	= true;
 				sellwminimabuttonid.disabled 	= true;
@@ -163,8 +202,11 @@
 				usdtminsellid.innerHTML = totals.usdt.lowsell;
 				usdtmaxsellid.innerHTML = totals.usdt.highsell;
 			
+				makechart("USDTBUYChart",totals.usdt.buybook,"USDT BUY Book","blue");
+				makechart("USDTSELLChart",totals.usdt.sellbook,"USDT SELL Book","red");
+				
 				//Set up thew tables
-				usdtrangetablebuy.innerHTML = "";
+				/*usdtrangetablebuy.innerHTML = "";
 				var thead = usdtrangetablebuy.insertRow();
 				thead.insertCell(0).innerHTML = "<b>BUY</b>";
 				thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -180,7 +222,7 @@
 					var priceamountsell = totals.usdt.sellbook[i]; 
 					trow.insertCell(2).innerHTML = priceamountsell.amount;
 					trow.insertCell(3).innerHTML = priceamountsell.price;	
-				}
+				}*/
 				
 			}else{
 				buyusdtbuttonid.disabled = true;

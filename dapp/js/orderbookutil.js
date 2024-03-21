@@ -436,6 +436,7 @@ function calculatePrice(action, token, orderbook){
 		}
 	}
 		
+	MDS.log("UNKNOWN QUESTION : "+action+" "+token+" "+JSON.stringify(orderbook));	
 	//Calculate the amount of wMinima.. 
-	return -1;
+	return 0;
 }

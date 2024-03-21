@@ -2,10 +2,13 @@
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
 
 //Should be 2 hours..
-var ORDEBOOK_CHECK_DEPTH = 256;
+var ORDEBOOK_CHECK_DEPTH = 128;
 
 //How many new SIGS checked in complete orderbook
 var SIGS_CHECKED = 0;
+
+//The MAXIMIUM Maximum
+var MAXIMUM_ORDERBBOK_VALUE = 10000;
 
 function signData(publickey,data, callback){
 	MDS.cmd("maxsign data:"+data,function(resp){
@@ -139,6 +142,22 @@ function createCompleteOrderBook(userdets,callback){
 			for(var i=0;i<orderlen;i++){
 				var orderbk = unique[i];
 				
+				var maxexceeded = false;
+				//Check Limits..
+				if(orderbk.data.orderbook.wminima.maximum > MAXIMUM_ORDERBBOK_VALUE){
+					orderbk.data.orderbook.wminima.maximum = MAXIMUM_ORDERBBOK_VALUE;
+					maxexceeded = true;
+				}
+				
+				if(orderbk.data.orderbook.usdt.maximum > MAXIMUM_ORDERBBOK_VALUE){
+					orderbk.data.orderbook.usdt.maximum = MAXIMUM_ORDERBBOK_VALUE;
+					maxexceeded = true;
+				}
+				
+				if(maxexceeded){
+					MDS.log("ORDERBOOK Exceeded maximum : "+JSON.stringify(orderbk));
+				}
+				
 				try{
 					if(orderbk.data.orderbook.wminima.enable || orderbk.data.orderbook.usdt.enable){
 						finallist.push(orderbk);
@@ -161,7 +180,7 @@ function createCompleteOrderBook(userdets,callback){
 	});
 }
 
-var PRICE_BOOK_STEPS = 10;
+var PRICE_BOOK_STEPS = 100;
 function createOrderBookSimpleTotals(userdets,completeorderbook){
 	
 	var totals 					= {};
@@ -202,12 +221,21 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 				
 				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
 				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+				
+				//Put some limits
 				if(highbuy > balance.minima.total){
 					highbuy = balance.minima.total;
 				}
 				
+				if(highbuy > MAXIMUM_ORDERBBOK_VALUE){
+					highbuy = MAXIMUM_ORDERBBOK_VALUE;
+				}
+				
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
 				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+				if(highsell > MAXIMUM_ORDERBBOK_VALUE){
+					highsell = MAXIMUM_ORDERBBOK_VALUE;
+				}
 				
 				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
 				tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
@@ -222,12 +250,21 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 				
 				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
 				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
+				
+				//Limits
 				if(highbuy > balance.minima.total){
 					highbuy = balance.minima.total;
 				}
 				
+				if(highbuy > MAXIMUM_ORDERBBOK_VALUE){
+					highbuy = MAXIMUM_ORDERBBOK_VALUE;
+				}
+				
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
 				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+				if(highsell > MAXIMUM_ORDERBBOK_VALUE){
+					highsell = MAXIMUM_ORDERBBOK_VALUE;
+				}
 				
 				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
 				tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
@@ -544,7 +581,12 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
 		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);
 		orderbook.wminima.minimum 	= toFixedNumber(wrappedminimum);
-		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);	
+		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);
+		
+		//Set limits
+		if(orderbook.wminima.maximum > MAXIMUM_ORDERBBOK_VALUE){
+			orderbook.wminima.maximum = MAXIMUM_ORDERBBOK_VALUE;
+		}	
 	}else{
 		orderbook.wminima.buy 		= 0;
 		orderbook.wminima.sell 		= 0;
@@ -559,7 +601,12 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
 		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
 		orderbook.usdt.minimum 	= toFixedNumber(usdtminimum);
-		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);	
+		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
+		
+		//Set limits
+		if(orderbook.usdt.maximum > MAXIMUM_ORDERBBOK_VALUE){
+			orderbook.usdt.maximum = MAXIMUM_ORDERBBOK_VALUE;
+		}	
 	}else{
 		orderbook.usdt.buy 		= 0;
 		orderbook.usdt.sell 	= 0;

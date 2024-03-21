@@ -73,7 +73,8 @@ MDS.init(function(msg){
 	//Do initialisation
 	if(msg.event == "inited"){
 		
-		//MDS.log("Bridge Init start..");
+		//Create the DB - if not yet
+		createDB();
 		
 		//Are we inited..
 		serviceCheckBridgeInited();
@@ -180,7 +181,7 @@ MDS.init(function(msg){
 		}
 			
 		//Check for new secrets
-		checkETHNewSecrets(ethblock,function(){});
+		checkETHNewSecrets(USER_DETAILS, ethblock,function(){});
 		
 		//Check expired Minima coins
 		checkExpiredMinimaHTLC(USER_DETAILS, minimablock, function(expiredminima){});
