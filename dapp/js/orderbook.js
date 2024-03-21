@@ -8,7 +8,7 @@ var ORDEBOOK_CHECK_DEPTH = 128;
 var SIGS_CHECKED = 0;
 
 //The MAXIMIUM Maximum
-var MAXIMUM_ORDERBBOK_VALUE = 10000;
+var MAXIMUM_ORDERBOOK_VALUE = 10000;
 
 function signData(publickey,data, callback){
 	MDS.cmd("maxsign data:"+data,function(resp){
@@ -144,13 +144,13 @@ function createCompleteOrderBook(userdets,callback){
 				
 				var maxexceeded = false;
 				//Check Limits..
-				if(orderbk.data.orderbook.wminima.maximum > MAXIMUM_ORDERBBOK_VALUE){
-					orderbk.data.orderbook.wminima.maximum = MAXIMUM_ORDERBBOK_VALUE;
+				if(orderbk.data.orderbook.wminima.maximum > MAXIMUM_ORDERBOOK_VALUE){
+					orderbk.data.orderbook.wminima.maximum = MAXIMUM_ORDERBOOK_VALUE;
 					maxexceeded = true;
 				}
 				
-				if(orderbk.data.orderbook.usdt.maximum > MAXIMUM_ORDERBBOK_VALUE){
-					orderbk.data.orderbook.usdt.maximum = MAXIMUM_ORDERBBOK_VALUE;
+				if(orderbk.data.orderbook.usdt.maximum > MAXIMUM_ORDERBOOK_VALUE){
+					orderbk.data.orderbook.usdt.maximum = MAXIMUM_ORDERBOOK_VALUE;
 					maxexceeded = true;
 				}
 				
@@ -227,14 +227,14 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 					highbuy = balance.minima.total;
 				}
 				
-				if(highbuy > MAXIMUM_ORDERBBOK_VALUE){
-					highbuy = MAXIMUM_ORDERBBOK_VALUE;
+				if(highbuy > MAXIMUM_ORDERBOOK_VALUE){
+					highbuy = MAXIMUM_ORDERBOOK_VALUE;
 				}
 				
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
 				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
-				if(highsell > MAXIMUM_ORDERBBOK_VALUE){
-					highsell = MAXIMUM_ORDERBBOK_VALUE;
+				if(highsell > MAXIMUM_ORDERBOOK_VALUE){
+					highsell = MAXIMUM_ORDERBOOK_VALUE;
 				}
 				
 				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
@@ -256,14 +256,14 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 					highbuy = balance.minima.total;
 				}
 				
-				if(highbuy > MAXIMUM_ORDERBBOK_VALUE){
-					highbuy = MAXIMUM_ORDERBBOK_VALUE;
+				if(highbuy > MAXIMUM_ORDERBOOK_VALUE){
+					highbuy = MAXIMUM_ORDERBOOK_VALUE;
 				}
 				
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
 				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
-				if(highsell > MAXIMUM_ORDERBBOK_VALUE){
-					highsell = MAXIMUM_ORDERBBOK_VALUE;
+				if(highsell > MAXIMUM_ORDERBOOK_VALUE){
+					highsell = MAXIMUM_ORDERBOOK_VALUE;
 				}
 				
 				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
@@ -584,8 +584,8 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);
 		
 		//Set limits
-		if(orderbook.wminima.maximum > MAXIMUM_ORDERBBOK_VALUE){
-			orderbook.wminima.maximum = MAXIMUM_ORDERBBOK_VALUE;
+		if(orderbook.wminima.maximum > MAXIMUM_ORDERBOOK_VALUE){
+			orderbook.wminima.maximum = MAXIMUM_ORDERBOOK_VALUE;
 		}	
 	}else{
 		orderbook.wminima.buy 		= 0;
@@ -604,8 +604,8 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
 		
 		//Set limits
-		if(orderbook.usdt.maximum > MAXIMUM_ORDERBBOK_VALUE){
-			orderbook.usdt.maximum = MAXIMUM_ORDERBBOK_VALUE;
+		if(orderbook.usdt.maximum > MAXIMUM_ORDERBOOK_VALUE){
+			orderbook.usdt.maximum = MAXIMUM_ORDERBOOK_VALUE;
 		}	
 	}else{
 		orderbook.usdt.buy 		= 0;
