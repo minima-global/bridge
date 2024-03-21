@@ -50,6 +50,7 @@ function getBalanceWithLimits(orderbook, allbalances){
 	var newbalances 			= {};
 	newbalances.minima  		= {};
 	newbalances.minima.total  	= allbalances.minima.total;
+	newbalances.eth  			= allbalances.eth;
 	newbalances.wminima  		= allbalances.wminima;
 	newbalances.usdt  			= allbalances.usdt;
 	
