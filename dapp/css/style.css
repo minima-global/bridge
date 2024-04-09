@@ -1,5 +1,111 @@
 
+@font-face {
+	font-family: Manrope;
+	src: url('./Manrope-Regular.ttf');
+}
+
+body {
+	font-family: Manrope; 
+    margin: 8;   /* Remove body margins */
+}
+
 .rightalign{
 	text-align:right;
 	font-weight:bold;
+}
+
+.titlebar{
+  width:100%;
+  height:50px;
+  text-align: left;
+  
+  text-align: left;
+  border: 2px solid #0000ff;
+  border-radius: 10px;
+}
+
+.solobutton {
+    background-color: #eee;
+    border: 0.5px solid #EDEDED;
+  	border-radius: 8px;
+  	padding: 4px 4px;
+  	font-family: Manrope;
+  	font-size: 14px;
+}
+.solobutton-edit {
+	font-family: Manrope;
+	background: #fff;
+}
+.solobutton-edit:focus {
+	font-family: Manrope;
+	border: 0.5px solid #EDEDED;
+}
+
+.solobutton:hover {
+	font-family: Manrope;
+	cursor: pointer;
+    color: #fff;
+	background-color: #0000ff;
+  	border-radius: 8px;
+  	padding: 4px 4px;
+	border-color: #16181C;
+}
+
+.solobutton[disabled]:hover {
+	cursor: default;
+    color: #fff;
+    background-color: #eee;
+    border: 0.5px solid #EDEDED;
+  	border-radius: 8px;
+  	padding: 4px 4px;
+  	font-size: 14px;
+}
+
+.solobutton:active {
+  	opacity: 0.8;
+	font-style: italic;
+}
+
+.menubutton {
+	width:100;
+	height:60;
+    background-color: #eee;
+    border: 0.5px solid #EDEDED;
+  	border-radius: 8px;
+  	padding: 4px 4px;
+  	font-family: Manrope;
+  	font-size: 14px;
+}
+.menubutton-edit {
+	font-family: Manrope;
+	background: #fff;
+}
+.menubutton-edit:focus {
+	font-family: Manrope;
+	border: 0.5px solid #EDEDED;
+}
+
+.menubutton:hover {
+	font-family: Manrope;
+	cursor: pointer;
+    color: #fff;
+	background-color: #0000ff;
+  	border-radius: 8px;
+  	padding: 4px 4px;
+	border-color: #16181C;
+}
+
+.menubutton[disabled]:hover {
+	cursor: default;
+    color: #fff;
+    background-color: #eee;
+    border: 0.5px solid #EDEDED;
+  	border-radius: 8px;
+  	padding: 4px 4px;
+  	font-size: 14px;
+}
+
+.menubutton:active {
+  	opacity: 0.8;
+	font-style: italic;
 }

@@ -40,22 +40,41 @@
 </head>
 
 <body>
-	
+
+
 	<script type="text/javascript">
 		createHeader();
 	</script>
 	
-	<b>BRIDGE</b> let's you trade Minima for wMinima / USDT on Ethereum.<br>
+	You must set your INFURA ETH RPC details here..<br>
 	<br>
+	You can get a key very simply in 3 mins from here <a href='https://app.infura.io/'>https://app.infura.io/</a><br>
 	<br>
-	We use HTLC atomic swap contracts.. which may be slow and expensive..<br>
+	You need to enable ETH MAINNET / SEPOLIA (for testing) access..<br>
 	<br>
-	BUT - they are decentralised, trustless and atomic.<br>
-	<br>
-	Before you can use Bridge you <b>MUST</b> set up your API RPC methods..<br>
-	<br>
-	<button class=solobutton onclick="jumpSettings();">Go to Settings</button> 
+	<table>
+		<tr>
+			<td>API_KEY : </td>
+			<td><input type="text" id=apikey></td>
+		</tr>
+		<tr>
+			<td>API_KEY_SECRET : </td>
+			<td><input type="text" id=apikeysecret></td>
+		</tr>
+		<tr><td colspan=2><button onclick="setapikeys();">SET API KEYS</button></td></tr>
+	</table>
 	
+	<br><br>
+	3) Approve the HTLC smart contracts for access.. you only need to do this once.<br>
+	<br>
+	<button onclick="approve();">APPROVE HTLC CONTRACT</button>&nbsp;&nbsp;
+	<button onclick="allowance();">CHECK ALLOWANCE</button><br>
+	
+	</div>
+	
+	<!--  <br><br>
+	<button onclick="currentgas();">GET CURRENT GAS</button>&nbsp;&nbsp;&nbsp;<button onclick="refreshnonce();">REFRESH NONCE</button>
+	-->
 	
 	<script type="text/javascript">
 		createFooter();
@@ -64,12 +83,6 @@
 
 <script type="text/javascript">
 	
-	function showTitleOnAndroid(){
-		if (window.navigator.userAgent.includes('Minima Browser')) {
-			Android.showTitleBar();
-		}
-	}
-
 	var USER_DETAILS = {};
 	
 	function approve(){
@@ -146,12 +159,12 @@
 						USER_DETAILS=userdets;
 						
 						//And set the API key
-						/*getInfuraApiKeys(function(apikeys){
+						getInfuraApiKeys(function(apikeys){
 							if(apikeys.enabled){
 								apikey.value		= apikeys.apikey;
 								apikeysecret.value	= apikeys.apikeysecret;
 							}
-						});*/
+						});
 					});
 				}
 			});

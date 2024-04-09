@@ -134,3 +134,17 @@ function sendFrontendMSG(title, msg, callback){
 		}
 	});
 }
+
+function showTitleOnAndroid(){
+	if (window.navigator.userAgent.includes('Minima Browser')) {
+		Android.showTitleBar();
+	}
+}
+
+function jumpHome(){
+	location.href="index.html?uid="+MDS.minidappuid;
+}
+
+function jumpSettings(){
+	location.href="settings.html?uid="+MDS.minidappuid;
+}
