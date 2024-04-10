@@ -85,8 +85,8 @@
 	</table>
 	
 	<br><br>
-	Current OTC deals..
-	<table id=otctable></table>
+	<b>Current OTC deals..</b><br><br>
+	<table id=otctable style="font-size:12;"></table>
 		
 	<script type="text/javascript">
 		createFooter();
@@ -131,12 +131,12 @@
 		//Wipe Table
 		otctable.innerHTML 	= "";
 		var trow 			= otctable.insertRow();
-		trow.insertCell(0).innerHTML = "FROM";
-		trow.insertCell(1).innerHTML = "MINIMA";
-		trow.insertCell(2).innerHTML = "TOKEN";
-		trow.insertCell(3).innerHTML = "REQUEST";
-		trow.insertCell(4).innerHTML = "TIMELOCK";
-		trow.insertCell(5).innerHTML = "ACTION";
+		trow.insertCell(0).innerHTML = "<b>FROM</b>";
+		trow.insertCell(1).innerHTML = "<b>MINIMA</b>";
+		trow.insertCell(2).innerHTML = "<b>TOKEN</b>";
+		trow.insertCell(3).innerHTML = "<b>REQUEST</b>";
+		trow.insertCell(4).innerHTML = "<b>TIMELOCK</b>";
+		trow.insertCell(5).innerHTML = "<b>ACTION</b>";
 		
 		//See if there any waiting..
 		checkForCurrentSwaps(true, function(otcdeals){
@@ -201,7 +201,7 @@
 				
 				//Only send it once..
 				if(!sent){
-					cell.innerHTML = "<button onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";
+					cell.innerHTML = "<button class=solobutton onclick=acceptOTC('"+coin.coinid+"')>ACCEPT</button>";
 				}else{
 					cell.innerHTML = "ACCEPTED";
 				}	

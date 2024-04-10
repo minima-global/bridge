@@ -375,7 +375,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						}
 						
 						//Now check the amounts..
-						if(sendamount > ob.maximum){
+						/*if(sendamount > ob.maximum){
 							MDS.log("Invalid request to BUY "+simplename+" ("+sendamount+") exceeds Maximum "+ob.maximum);
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Maximum "+sendamount, function(sqlresp){});
 							return;	
@@ -383,7 +383,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							MDS.log("Invalid request to BUY "+simplename+" ("+sendamount+") exceeds Minimum "+ob.minimum);
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minimum "+sendamount, function(sqlresp){});
 							return;	
-						}
+						}*/
 						
 						//Check global Min / Max
 						if(requestamount > MAXIMUM_MINIMA_TRADE){

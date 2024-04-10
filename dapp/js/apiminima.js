@@ -74,7 +74,7 @@ function depositNativeMinima(userdets, amount, callback){
 			+" address:"+userdets.minimaaddress.mxaddress
 			+" tokenid:0x00 split:10",function(resp){
 		if(resp.status){
-			logDeposit("minima",amount);	
+			logDeposit("minima",amount,"0x00");	
 		}
 		callback(resp);			
 	});
@@ -408,7 +408,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						var requestamount 	= toFixedNumber(coin.state[1]);
 							
 						//Make sure is within limits
-						if(requestamount > ob.maximum){
+						/*if(requestamount > ob.maximum){
 							MDS.log("Invalid request to buy "+simplename+" ("+requestamount+") exceeds Maximum "+ob.maximum);
 							sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Maximum "+requestamount,function(){});
 							return;	
@@ -416,7 +416,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 							MDS.log("Invalid request to buy "+simplename+" ("+requestamount+") exceeds Minimum "+ob.minimum);
 							sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Minimum "+requestamount,function(){});
 							return;	
-						}
+						}*/
 						
 						//Check global Min Max
 						if(sendamount > MAXIMUM_MINIMA_TRADE){

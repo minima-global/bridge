@@ -142,8 +142,8 @@ function createCompleteOrderBook(userdets,callback){
 			for(var i=0;i<orderlen;i++){
 				var orderbk = unique[i];
 				
-				var maxexceeded = false;
 				//Check Limits..
+				var maxexceeded = false;
 				if(orderbk.data.orderbook.wminima.maximum > MAXIMUM_ORDERBOOK_VALUE){
 					orderbk.data.orderbook.wminima.maximum = MAXIMUM_ORDERBOOK_VALUE;
 					maxexceeded = true;
@@ -219,20 +219,16 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 				var ob 	 = orderbook.wminima;
 				totals.wminima.books++;
 				
+				//BUY SIDE
 				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
-				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
-				
-				//Put some limits
-				if(highbuy > balance.minima.total){
-					highbuy = balance.minima.total;
-				}
-				
+				var highbuy 	= balance.minima.total;
 				if(highbuy > MAXIMUM_ORDERBOOK_VALUE){
 					highbuy = MAXIMUM_ORDERBOOK_VALUE;
 				}
 				
+				//SELL SIDE
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
-				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+				var highsell 	= toFixedNumber(balance.wminima / ob.buy);
 				if(highsell > MAXIMUM_ORDERBOOK_VALUE){
 					highsell = MAXIMUM_ORDERBOOK_VALUE;
 				}
@@ -248,20 +244,16 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 				var ob 	 = orderbook.usdt;
 				totals.usdt.books++;
 				
+				//BUY SIDE
 				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
-				var highbuy 	= toFixedNumber(ob.maximum / ob.sell);
-				
-				//Limits
-				if(highbuy > balance.minima.total){
-					highbuy = balance.minima.total;
-				}
-				
+				var highbuy 	= balance.minima.total;
 				if(highbuy > MAXIMUM_ORDERBOOK_VALUE){
 					highbuy = MAXIMUM_ORDERBOOK_VALUE;
 				}
 				
+				//SELL SIDE
 				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
-				var highsell 	= toFixedNumber(ob.maximum / ob.buy);
+				var highsell 	= toFixedNumber(balance.usdt / ob.buy);
 				if(highsell > MAXIMUM_ORDERBOOK_VALUE){
 					highsell = MAXIMUM_ORDERBOOK_VALUE;
 				}
@@ -580,7 +572,7 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 	if(wrappedenable){
 		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
 		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);
-		orderbook.wminima.minimum 	= toFixedNumber(wrappedminimum);
+		orderbook.wminima.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
 		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);
 		
 		//Set limits
@@ -600,7 +592,7 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 	if(usdtenable){
 		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
 		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
-		orderbook.usdt.minimum 	= toFixedNumber(usdtminimum);
+		orderbook.usdt.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
 		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
 		
 		//Set limits
@@ -613,6 +605,8 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.usdt.minimum 	= 0;
 		orderbook.usdt.maximum 	= 0;
 	}
+	
+	//MDS.log("SET ORDER BOOK : "+JSON.stringify(orderbook));
 	
 	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
 		if(callback){

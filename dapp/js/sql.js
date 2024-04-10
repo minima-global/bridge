@@ -230,7 +230,7 @@ function haveCollectExpiredHTLC(hash, callback){
 	});
 }
 
-function logDeposit(token,amount, txnhash,callback){
+function logDeposit(token, amount, txnhash, callback){
 	_insertCounterPartyEvent("0x00",token,amount,"CPTXN_DEPOSIT",txnhash,function(resp){
 		if(callback){
 			callback(resp);	

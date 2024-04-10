@@ -96,7 +96,11 @@
 			<td>&nbsp;<button class=solobutton onclick="depositMinima();">DEPOSIT</button></td>
 			<td>&nbsp;<button class=solobutton onclick="withdrawMinima();">WITHDRAW</button></td>
 		</tr>
-		<tr><td>&nbsp;</td></tr>
+		<tr>
+			<td class=rightalign>Coins : </td>
+			<td colspan=3><div id=minimacoins>0</div></td>
+		</tr>
+		<tr><td colspan=4><hr></td></tr>
 		<tr>
 			<td class=rightalign>ETH Address : </td>
 			<td colspan=3><div id=myethaddress>0</div></td>
@@ -142,7 +146,9 @@
 			}else{
 				nativeminimabalance.innerHTML = balances.minima.confirmed;
 			}
-				
+			
+			minimacoins.innerHTML = balances.minima.coins;
+			
 			//Fill in ETH details..
 			//myminimaaddress.innerHTML = USER_DETAILS.minimaaddress.mxaddress;
 			myethaddress.innerHTML	  = getETHERUMAddress(); 

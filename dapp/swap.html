@@ -182,28 +182,12 @@
 				makechart("wMinimaBUYChart",totals.wminima.buybook,"wMinima BUY Book","blue");
 				makechart("wMinimaSELLChart",totals.wminima.sellbook,"wMinima SELL Book","red");
 				
-				/*//Set up thew tables
-				wminimarangetablebuy.innerHTML = "";
-				var thead = wminimarangetablebuy.insertRow();
-				thead.insertCell(0).innerHTML = "<b>BUY</b>";
-				thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
-				thead.insertCell(2).innerHTML = "<b>SELL</b>";
-				thead.insertCell(3).innerHTML = "<b>PRICE</b>";
-				
-				for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
-					var priceamountbuy = totals.wminima.buybook[i]; 
-					var trow = wminimarangetablebuy.insertRow();
-					trow.insertCell(0).innerHTML = priceamountbuy.amount;
-					trow.insertCell(1).innerHTML = priceamountbuy.price;	
-					
-					var priceamountsell = totals.wminima.sellbook[i]; 
-					trow.insertCell(2).innerHTML = priceamountsell.amount;
-					trow.insertCell(3).innerHTML = priceamountsell.price;	
-				}*/
 			}else{
 				buywminimabuttonid.disabled 	= true;
 				sellwminimabuttonid.disabled 	= true;
 				wminimaminmaxid.style.display	= "none";
+				wMinimaBUYChart.style.display	= "none";
+				wMinimaSELLChart.style.display	= "none";
 			}
 			
 			//USDT range amounts
@@ -216,29 +200,12 @@
 				makechart("USDTBUYChart",totals.usdt.buybook,"USDT BUY Book","blue");
 				makechart("USDTSELLChart",totals.usdt.sellbook,"USDT SELL Book","red");
 				
-				//Set up thew tables
-				/*usdtrangetablebuy.innerHTML = "";
-				var thead = usdtrangetablebuy.insertRow();
-				thead.insertCell(0).innerHTML = "<b>BUY</b>";
-				thead.insertCell(1).innerHTML = "<b>PRICE</b>&nbsp;&nbsp;&nbsp;&nbsp;";
-				thead.insertCell(2).innerHTML = "<b>SELL</b>";
-				thead.insertCell(3).innerHTML = "<b>PRICE</b>";
-				
-				for(var i=0;i<PRICE_BOOK_STEPS+1;i++){
-					var priceamountbuy = totals.usdt.buybook[i]; 
-					var trow = usdtrangetablebuy.insertRow();
-					trow.insertCell(0).innerHTML = priceamountbuy.amount;
-					trow.insertCell(1).innerHTML = priceamountbuy.price;	
-					
-					var priceamountsell = totals.usdt.sellbook[i]; 
-					trow.insertCell(2).innerHTML = priceamountsell.amount;
-					trow.insertCell(3).innerHTML = priceamountsell.price;	
-				}*/
-				
 			}else{
 				buyusdtbuttonid.disabled = true;
 				sellusdtbuttonid.disabled = true;
 				usdtminmaxid.style.display="none";
+				USDTBUYChart.style.display	= "none";
+				USDTSELLChart.style.display	= "none";
 			}
 		});
 	}
