@@ -1,8 +1,8 @@
 
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
 
-//Should be 2 hours..
-var ORDEBOOK_CHECK_DEPTH = 128;
+//Should be 2 hours.. better safe than sorry
+var ORDEBOOK_CHECK_DEPTH = 512;
 
 //How many new SIGS checked in complete orderbook
 var SIGS_CHECKED = 0;

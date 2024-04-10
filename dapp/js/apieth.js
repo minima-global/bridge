@@ -385,6 +385,17 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							return;	
 						}
 						
+						//Check global Min / Max
+						if(requestamount > MAXIMUM_MINIMA_TRADE){
+							MDS.log("Invalid request to BUY "+simplename+" ("+requestamount+") exceeds Minima Maximum "+MAXIMUM_MINIMA_TRADE);
+							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minima Maximum "+requestamount, function(sqlresp){});
+							return;	
+						}else if(requestamount < MINIMUM_MINIMA_TRADE){
+							MDS.log("Invalid request to BUY "+simplename+" ("+requestamount+") exceeds Minima Minimum "+MINIMUM_MINIMA_TRADE);
+							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minima Minimum "+requestamount, function(sqlresp){});
+							return;	
+						}
+						
 						//How much do they want..
 						var calcamount = calculateAmount("buy",requestamount,simplename,myorderbook);
 						if(sendamount  >= calcamount){
@@ -393,7 +404,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							_sendCounterPartyETHTxn(userdets,htlclog,minimablock,function(resp){});
 									
 						}else{
-							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" required:"+calcamount+" actual:"+calcamount)
+							MDS.log("Invalid request amount for "+simplename+" SWAP sent:"+sendamount+" required:"+calcamount+" actual:"+requestamount)
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Invalid request amount", function(sqlresp){});
 						}
 					});

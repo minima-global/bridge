@@ -53,8 +53,9 @@
 	<br>
 	Books are shown with PRICE / QUANTITY<br>
 	<br>
+	<br>
 	
-	<b>WMINIMA POOL</b><br>
+	<b>wMinima Pool</b><br>
 	<br>
 	<b>Amount : </b><input type=text id=amountwminima>
 	<button class=solobutton id=buywminimabuttonid onclick="order('buy','wminima');">BUY</button>
@@ -73,7 +74,7 @@
 	</p>
 	
 	<br><br>
-	<b>USDT POOL</b><br>
+	<b>USDT Pool</b><br>
 	<br>
 	<b>Amount : </b><input type=text id=amountusdt>
 	<button class=solobutton id=buyusdtbuttonid onclick="order('buy','usdt');">BUY</button>
@@ -124,6 +125,13 @@
 		
 		//Round..
 		var sndamt = toFixedNumber(amount);
+		
+		//Check limits
+		if(sndamt > MAXIMUM_MINIMA_TRADE || sndamt<MINIMUM_MINIMA_TRADE){
+			alert("Request exceeds limits..\n\nMinimum : "+MINIMUM_MINIMA_TRADE
+				 +"\n\nMaximum : "+MAXIMUM_MINIMA_TRADE);
+			return;
+		}
 		
 		//Ok - lets jump to the next page..
 		if(action == "buy"){

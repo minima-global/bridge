@@ -47,25 +47,26 @@
 	
 	Here you can add liquidity to the Bridge..<br>
 	<br>
-	You <b>MUST</b> have some native minima to broadcast orderbook messages<br>
+	You <b>MUST</b> have some native Minima to broadcast orderbook messages<br>
 	<br>
-	You <b>MUST</b> have some ETH to pay the fee for transferring wMinima / USDT<br>
+	You <b>MUST</b> have enough ETH to pay the fee for transferring wMinima / USDT<br>
 	<br>
 	
 	<br>
-	<b>WMINIMA POOL</b><br>
+	<b>wMinima Pool</b><br>
 	<input type=checkbox id=wrappedenableid>
 	<label for=enablewrapped>Add Liquidity to wMinima Pool</label>
 	<table>
 		<tr>
-			<td class="rightalign">Buy Minima @ :</td>
+			<td class="rightalign">Buy : </td>
 			<td><input type=text id=wrappedbuyid placeholder=0 /></td>
 		</tr>
 		<tr>
-			<td class="rightalign">Sell Minima @ :</td>
+			<td class="rightalign">Sell : </td>
 			<td><input type=text id=wrappedsellid placeholder=0 /></td>
 		</tr>
-		<tr>
+		
+		<!--  <tr>
 			<td class="rightalign">Minimum wMinima Order :</td>
 			<td><input type=text id=wrappedminimumid placeholder=100 /></td>
 		</tr>
@@ -73,21 +74,24 @@
 			<td class="rightalign">Maximum wMinima Order :</td>
 			<td><input type=text id=wrappedmaximumid placeholder=10000 /></td>
 		</tr>
+		-->
 	</table>
+	Prices are in <b>wMinima</b><br>
 	
 	<br>
-	<b>USDT POOL</b><br>
+	<b>USDT Pool</b><br>
 	<input type=checkbox id=usdtenableid>
 	<label for=enableusdt>Add Liquidity to USDT Pool</label>
 	<table>
 		<tr>
-			<td class="rightalign">Buy Minima @ :</td>
+			<td class="rightalign">Buy : </td>
 			<td><input type=text id=usdtbuyid placeholder=0 /></td>
 		</tr>
 		<tr>
-			<td class="rightalign">Sell Minima @ :</td>
+			<td class="rightalign">Sell : </td>
 			<td><input type=text id=usdtsellid placeholder=0 /></td>
 		</tr>
+		<!--  
 		<tr>
 			<td class="rightalign">Minimum USDT Order :</td>
 			<td><input type=text id=usdtminimumid placeholder=100 /></td>
@@ -96,8 +100,9 @@
 			<td class="rightalign">Maximum USDT Order :</td>
 			<td><input type=text id=usdtmaximumid placeholder=10000 /></td>
 		</tr>
+		-->
 	</table>
-	
+	Prices are in <b>USDT</b>
 	<br>
 	<br>
 	<button class=solobutton onclick="updateorderbook();">UPDATE MY ORDERBOOK</button>
@@ -115,8 +120,8 @@
 		var wrappedenable 	= wrappedenableid.checked;
 		var wrappedbuy 		= wrappedbuyid.value.trim();
 		var wrappedsell 	= wrappedsellid.value.trim();
-		var wrappedminimum 	= wrappedminimumid.value.trim();
-		var wrappedmaximum 	= wrappedmaximumid.value.trim();
+		var wrappedminimum 	= 250;//wrappedminimumid.value.trim();
+		var wrappedmaximum 	= 10000;//wrappedmaximumid.value.trim();
 		
 		if(wrappedenable){
 			if(!checkIsPositiveNumber(wrappedbuy)){
@@ -141,7 +146,7 @@
 		}else{
 			wrappedbuy 		= 0;
 			wrappedsell 	= 0;
-			wrappedminimum 	= 100;
+			wrappedminimum 	= 250;
 			wrappedmaximum 	= 10000;
 		}
 		
@@ -149,8 +154,8 @@
 		var usdtenable 		= usdtenableid.checked;
 		var usdtbuy 		= usdtbuyid.value.trim();
 		var usdtsell 		= usdtsellid.value.trim();
-		var usdtminimum 	= usdtminimumid.value.trim();
-		var usdtmaximum 	= usdtmaximumid.value.trim();
+		var usdtminimum 	= 250;//usdtminimumid.value.trim();
+		var usdtmaximum 	= 10000;//usdtmaximumid.value.trim();
 		
 		if(usdtenable){
 			if(!checkIsPositiveNumber(usdtbuy)){
@@ -176,7 +181,7 @@
 		}else{
 			usdtbuy  		= 0;
 			usdtsell 		= 0;
-			usdtminimum 	= 100;
+			usdtminimum 	= 250;
 			usdtmaximum 	= 10000;
 		}
 		
@@ -200,15 +205,15 @@
 			wrappedenableid.checked 	= orderbook.wminima.enable;
 			wrappedbuyid.value			= orderbook.wminima.buy;
 			wrappedsellid.value			= orderbook.wminima.sell;
-			wrappedminimumid.value		= orderbook.wminima.minimum;
-			wrappedmaximumid.value		= orderbook.wminima.maximum;
+			//wrappedminimumid.value		= orderbook.wminima.minimum;
+			//wrappedmaximumid.value		= orderbook.wminima.maximum;
 			
 			//USDT
 			usdtenableid.checked 	= orderbook.usdt.enable;
 			usdtbuyid.value			= orderbook.usdt.buy;
 			usdtsellid.value		= orderbook.usdt.sell;
-			usdtminimumid.value		= orderbook.usdt.minimum;
-			usdtmaximumid.value		= orderbook.usdt.maximum;
+			//usdtminimumid.value		= orderbook.usdt.minimum;
+			//usdtmaximumid.value		= orderbook.usdt.maximum;
 		});
 	}
 	
