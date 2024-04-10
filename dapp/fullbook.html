@@ -40,59 +40,78 @@
 </head>
 
 <body>
-
+	
 	<script type="text/javascript">
 		createHeader();
 	</script>
 	
-	<div id="swapproceed"></div>
+	Here is the full Book
+	
+	
 	
 	<script type="text/javascript">
 		createFooter();
 	</script>
 	
+
 <script type="text/javascript">
 	
+	function showTitleOnAndroid(){
+		if (window.navigator.userAgent.includes('Minima Browser')) {
+			Android.showTitleBar();
+		}
+	}
+
 	var USER_DETAILS = {};
 	
-	//How much Native Minima are we swapping..
-	var amount 		= toFixedNumber(MDS.form.getParams("amount"));
-	var reqamount 	= 0;
-	
-	var reqtoken 		= MDS.form.getParams("swaptoken");
-	var reqtokenstr 	= "wMinima";
-	if(reqtoken == "usdt"){
-		reqtokenstr 	= "USDT";
+	function approve(){
+		if(confirm("You are about to approve the HTLC contract access to this wallet.\n\n"
+					+"This will require 2 ETH transactions - so you must have some ETH.\n\n"
+					+"You need only do this once..\n\nContinue ?")){
+			sendSimpleBackendMSG("APPROVECONTRACTS");	
+		}
 	}
 	
-	var reqpublickey 	= "0x00";
+	function allowance(){
+		wMinimaAllowance(HTLCContractAddress,function(wminlogs){
+			USDTAllowance(HTLCContractAddress,function(usdtlogs){
+				alert("wMinima:"+JSON.stringify(wminlogs)+"\n\nUSDT:"+JSON.stringify(usdtlogs));
+			});
+		});
+	}
 	
-	//Start a native swap..
-	function proceed(){
+	function setapikeys(){
 		
-		//Disable the button
-		proceedbutton.disabled=true;
+		var apik 	= apikey.value;
+		var apiksec = apikeysecret.value;
+		var b64 	= btoa(apik+":"+apiksec);
+		
+		//Let's do a test..
+		setInfuraApiKeys(apik,apiksec,b64,function(setresp){
 			
-		var erc20contract = "0";
-		if(reqtoken == "wminima"){
-			erc20contract = wMinimaContractAddress;
-		}else if(reqtoken == "usdt"){
-			erc20contract = USDTContractAddress;
-		}else{
-			alert("Invalid token requested : "+reqtoken);
-			return
-		}
-		
-		//Send to the backend..
-		var message 			= {};
-		message.action			= "STARTMINIMASWAP";
-		message.sendamount 		= amount;
-		message.requestamount 	= reqamount;
-		message.contractaddress	= "ETH:"+erc20contract;
-		message.reqpublickey	= reqpublickey;
-		message.otc				= false;
-		
-		sendBackendMSG(message);
+			//Now test
+			getInfuraGASAPI(function(gas){
+				
+				if(gas.response.length > 10){
+					alert("API Keys Work!\n\n"+JSON.stringify(gas));
+				}else{
+					clearInfuraApiKeys(function(){
+						alert("API Keys FAIL!\n\n"+JSON.stringify(gas));
+					});
+				}
+			});
+		});
+	}
+	
+	function currentgas(){
+		getInfuraGASAPI(function(gas){
+			//And show..
+			alert(JSON.stringify(gas,null,2));
+		});
+	}
+	
+	function refreshnonce(){
+		sendSimpleBackendMSG("REFRESHNONCE");
 	}
 	
 	//Main message handler..
@@ -101,35 +120,34 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//Init Bridge Systems..
-			initBridgeSystems(function(userdets){
-				//MDS.log(JSON.stringify(userdets));
-				USER_DETAILS=userdets;
+			//DEBUG TEST
+			//wipeDB();
 			
-				//Search for a User in the OrderBook..
-				searchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
-					if(!found){
-						swapproceed.innerHTML="No match found to SELL "+amount+" Minima for "+reqtokenstr;
-					}else{
+			//Are we in write mode.
+			MDS.cmd("checkmode",function(moderesp){
+				
+				//MUST be in write mode..
+				if(!moderesp.response.writemode){
+					
+					//Jump to a special page
+					location.href="writemode.html?uid="+MDS.minidappuid;
+				}else{
+					
+					//Init Bridge Systems..
+					initBridgeSystemsStartup(function(userdets){
+						USER_DETAILS=userdets;
 						
-						//Who is this?
-						reqpublickey = order.publickey;		
-						
-						//What is the amount.. we are requesting MINIMA
-						reqamount = calculateAmount("sell",amount,reqtoken,order.orderbook);
-						
-						//What Price..
-						var price = calculatePrice("sell",reqtoken,order.orderbook);
-						
-						//Set the details..
-						swapproceed.innerHTML=  "Have found a match!<br><br>"
-												+"<b>SELL</b> "+amount+" Minima for "+reqamount+" "+reqtokenstr+" @ "+price+"<br><br>"
-												+"<br><button class=solobutton id=proceedbutton onclick='proceed();'>PROCEED</button><br><br><br>"
-												+"You <b>MUST</b> have some ETH to send / collect the "+reqtokenstr+"..";					
-					}
-				});
+						//And set the API key
+						/*getInfuraApiKeys(function(apikeys){
+							if(apikeys.enabled){
+								apikey.value		= apikeys.apikey;
+								apikeysecret.value	= apikeys.apikeysecret;
+							}
+						});*/
+					});
+				}
 			});
-	
+		
 		//Messages from back end
 		}else if(msg.event == "MDSCOMMS"){
 			
@@ -139,9 +157,6 @@
 				if(comms.action == "FRONTENDMSG"){
 					//Show the message
 					alert(JSON.stringify(comms,null,2));
-					
-					//Jump back..
-					location.href="swap.html?uid="+MDS.minidappuid;
 				}
 			}
 		}

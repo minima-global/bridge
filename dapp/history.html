@@ -33,11 +33,11 @@
 		createHeader();
 	</script>
 	
-	<table style="border-spacing:5;width:800;" border=1 id=histtable></table>
+	<table style="border-spacing:5;font-size:12;" border=0 id=histtable></table>
 	
 	<br>
-	<button id=prevbuttonid onclick="previous()">PREVIOUS</button>&nbsp;&nbsp;
-	<button id=nextbuttonid onclick="next();">NEXT</button>
+	<button class=solobutton id=prevbuttonid onclick="previous()">PREVIOUS</button>&nbsp;&nbsp;
+	<button class=solobutton id=nextbuttonid onclick="next();">NEXT</button>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -98,13 +98,13 @@
 		histtable.innerHTML = "";
 		
 		var thead = histtable.insertRow();
-		thead.insertCell(0).innerHTML = "ID";
-		thead.insertCell(1).innerHTML = "HASHLOCK";
-		thead.insertCell(2).innerHTML = "EVENT";
-		thead.insertCell(3).innerHTML = "TOKEN";
-		thead.insertCell(4).innerHTML = "AMOUNT";
-		thead.insertCell(5).innerHTML = "TXN_HASH";
-		thead.insertCell(6).innerHTML = "DATE";
+		thead.insertCell(0).innerHTML = "<b>ID</b>";
+		thead.insertCell(1).innerHTML = "<b>HASHLOCK</b>";
+		thead.insertCell(2).innerHTML = "<b>EVENT</b>";
+		thead.insertCell(3).innerHTML = "<b>TOKEN</b>";
+		thead.insertCell(4).innerHTML = "<b>AMOUNT</b>";
+		thead.insertCell(5).innerHTML = "<b>TXN_HASH</b>";
+		thead.insertCell(6).innerHTML = "<b>DATE</b>";
 		
 		var len = rows.length;
 		for(var i=0;i<len;i++){

@@ -8,6 +8,9 @@ function createHeader(){
 	var uid  = MDS.form.getParams("uid");
 	
 	document.write(
+	
+	"<center>"+
+	
 	"<div class=\"titlebar\" onclick=\"showTitleOnAndroid();\">"+
 	"	<table width=100% border=0>"+
 	"		<tr>"+
@@ -23,7 +26,8 @@ function createHeader(){
 	"	</table>"+
 	"</div>"+
 	"<br>"+
-	"<center>"+
+	
+	"<div class=\"mainview\">"+
 	"<table>"+	
 	"<tr>"+
 	"		<table style='border-spacing:10;'>"+
@@ -39,7 +43,8 @@ function createHeader(){
 	"		</table>"+
 	"	</td>"+
 	"</tr>"+
-	"</table><br><br>");
+	"</table><br><br>"
+	);
 	
 }
 
@@ -47,5 +52,5 @@ function createHeader(){
  * Create the footer for the pages
 */
 function createFooter(){
-	document.write("<br></center>");
+	document.write("<br><br></div></center>");
 }

@@ -158,6 +158,12 @@ MDS.init(function(msg){
 			return;
 		}
 		
+		//Wait 3 blocks so is definitely confirmed..
+		ethblock = ethblock - 3;
+		if(ethblock<0){
+			ethblock = 0;
+		}
+		
 		//Get the current Minima block
 		var minimablock = 0;
 		getCurrentMinimaBlock(function(mblock){

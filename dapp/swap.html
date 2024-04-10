@@ -57,8 +57,8 @@
 	<b>WMINIMA POOL</b><br>
 	<br>
 	<b>Amount : </b><input type=text id=amountwminima>
-	<button id=buywminimabuttonid onclick="order('buy','wminima');">BUY</button>
-	<button  id=sellwminimabuttonid onclick="order('sell','wminima');">SELL</button><br>
+	<button class=solobutton id=buywminimabuttonid onclick="order('buy','wminima');">BUY</button>
+	<button class=solobutton id=sellwminimabuttonid onclick="order('sell','wminima');">SELL</button><br>
 	<br>
 	<table id=wminimaminmaxid style="border-spacing:5;" border=1>
 		<tr><td>&nbsp;</td><td>&nbsp;<b>Minimum</b>&nbsp;</td><td>&nbsp;<b>Maximum</b>&nbsp;</td></tr>
@@ -67,16 +67,17 @@
 	</table>
 	<br>
 	
-	<canvas id="wMinimaBUYChart" style="max-width:600;max-height:200;"></canvas><br>
-	<canvas id="wMinimaSELLChart" style="max-width:600;max-height:200;"></canvas>
-	<!--<table id=wminimarangetablebuy></table>-->
+	<p align="center">
+		<canvas id="wMinimaBUYChart"></canvas><br>
+		<canvas id="wMinimaSELLChart" style="max-width:600;max-height:200;"></canvas>
+	</p>
 	
 	<br><br>
 	<b>USDT POOL</b><br>
 	<br>
 	<b>Amount : </b><input type=text id=amountusdt>
-	<button id=buyusdtbuttonid onclick="order('buy','usdt');">BUY</button>
-	<button id=sellusdtbuttonid onclick="order('sell','usdt');">SELL</button><br>
+	<button class=solobutton id=buyusdtbuttonid onclick="order('buy','usdt');">BUY</button>
+	<button class=solobutton id=sellusdtbuttonid onclick="order('sell','usdt');">SELL</button><br>
 	<br>
 	<table id=usdtminmaxid style="border-spacing:5;" border=1>
 		<tr><td>&nbsp;</td><td>&nbsp;<b>Minimum</b>&nbsp;</td><td>&nbsp;<b>Maximum</b>&nbsp;</td></tr>
@@ -84,12 +85,15 @@
 		<tr><td><b>SELL</b></td><td id=usdtminsellid>&nbsp;</td><td id=usdtmaxsellid>&nbsp;</td></tr>
 	</table>
 	<br>
-	<canvas id="USDTBUYChart" style="max-width:600;max-height:200;"></canvas><br>
-	<canvas id="USDTSELLChart" style="max-width:600;max-height:200;"></canvas>
-	<!--  <table id=usdtrangetablebuy></table>-->
 	
-	<br><br>
+	<p align="center">
+		<canvas id="USDTBUYChart" style="max-width:600;max-height:200;"></canvas><br>
+		<canvas id="USDTSELLChart" style="max-width:600;max-height:200;"></canvas>
+	</p>
+	
+	<!--  <br><br>
 	<button onclick="openbook();">VIEW FULL ORDERBOOK</button>
+	-->
 	
 	<script type="text/javascript">
 		createFooter();
