@@ -37,9 +37,9 @@
 	<script type="text/javascript" src="./js/ethhtlcutil.js"></script>
 	<script type="text/javascript" src="./js/ethjs-signer.js"></script>
 	
-	<!--  <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.js"></script>
-	-->
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	<script type="text/javascript" src="./js/chart.min.js"></script>
+	
+	<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js" integrity="sha512-ElRFoEQdI5Ht6kZvyzXhYG9NqjtkmlkfYk0wr6wHxU9JEHakS7UJZNeml5ALk+8IKlU6jDgMabC3vkumRokgJA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script> -->
 	
 </head>
 
@@ -55,7 +55,7 @@
 	<br>
 	<br>
 	
-	<b>wMinima Pool</b><br>
+	<h3>wMinima Pool</h3>
 	<br>
 	<b>Amount : </b><input type=text id=amountwminima>
 	<button class=solobutton id=buywminimabuttonid onclick="order('buy','wminima');">BUY</button>
@@ -68,13 +68,14 @@
 	</table>
 	<br>
 	
-	<p align="center">
+	<p align="center" id=wminimacharts>
 		<canvas id="wMinimaBUYChart"></canvas><br>
 		<canvas id="wMinimaSELLChart" style="max-width:600;max-height:200;"></canvas>
 	</p>
 	
 	<br><br>
-	<b>USDT Pool</b><br>
+	
+	<h3>USDT Pool</h3>
 	<br>
 	<b>Amount : </b><input type=text id=amountusdt>
 	<button class=solobutton id=buyusdtbuttonid onclick="order('buy','usdt');">BUY</button>
@@ -87,7 +88,7 @@
 	</table>
 	<br>
 	
-	<p align="center">
+	<p align="center" id=usdtcharts>
 		<canvas id="USDTBUYChart" style="max-width:600;max-height:200;"></canvas><br>
 		<canvas id="USDTSELLChart" style="max-width:600;max-height:200;"></canvas>
 	</p>
@@ -188,6 +189,7 @@
 				wminimaminmaxid.style.display	= "none";
 				wMinimaBUYChart.style.display	= "none";
 				wMinimaSELLChart.style.display	= "none";
+				wminimacharts.innerHTML = "No orderbooks found..";
 			}
 			
 			//USDT range amounts
@@ -206,6 +208,7 @@
 				usdtminmaxid.style.display="none";
 				USDTBUYChart.style.display	= "none";
 				USDTSELLChart.style.display	= "none";
+				usdtcharts.innerHTML = "No orderbooks found..";
 			}
 		});
 	}

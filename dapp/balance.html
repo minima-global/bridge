@@ -47,9 +47,11 @@
 	left:0;
 	bottom:0;
 	right:0;
-	background-color:yellow;
-	width:300;
-	height:150;
+	border: 2px solid #0000ff;
+  	border-radius: 10px;
+    background-color:white;
+	width:350;
+	height:200;
 	display:none;
 }
 
@@ -60,20 +62,21 @@
 	<br>
 	<table>
 		<tr>
-			<td>TOKEN : </td>
+			<td class=rightalign>TOKEN : </td>
 			<td><input type=text id=sendertoken readonly></td>
 		</tr>
 		<tr>
-			<td>ADDRESS : </td>
+			<td class=rightalign>ADDRESS : </td>
 			<td><input type=text id=senderaddress></td>
 		</tr>
 		<tr>
-			<td>AMOUNT : </td>
+			<td class=rightalign>AMOUNT : </td>
 			<td><input type=text id=senderamount></td>
 		</tr>
+		<tr><td>&nbsp;</td></tr>
 		<tr>
-			<td style="text-align:left;"><button onclick="closeToken();">CLOSE</button></td>
-			<td style="text-align:right;"><button onclick="sendToken();">SEND TOKENS</button></td>
+			<td style="text-align:left;"><button class=solobutton onclick="closeToken();">CLOSE</button></td>
+			<td style="text-align:right;"><button class=solobutton onclick="sendToken();">SEND TOKENS</button></td>
 			</tr>
 	</table>
 	</center>
@@ -100,11 +103,14 @@
 			<td class=rightalign>Coins : </td>
 			<td colspan=3><div id=minimacoins>0</div></td>
 		</tr>
+		<tr><td colspan=4>&nbsp;</td></tr>
 		<tr><td colspan=4><hr></td></tr>
+		<tr><td colspan=4>&nbsp;</td></tr>
 		<tr>
 			<td class=rightalign>ETH Address : </td>
 			<td colspan=3><div id=myethaddress>0</div></td>
 		</tr>
+		<tr><td colspan=4>&nbsp;</td></tr>
 		<tr>
 			<td class=rightalign>ETH : </td>
 			<td><div id=ethbalance>0</div></td>

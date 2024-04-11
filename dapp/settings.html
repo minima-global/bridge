@@ -48,7 +48,7 @@
 	
 	You must set your INFURA ETH RPC details here..<br>
 	<br>
-	You can get a key very simply in 3 mins from here <a href='https://app.infura.io/'>https://app.infura.io/</a><br>
+	You can get a key very simply in 3 mins from here <a target="_blank" href='https://app.infura.io/'>https://app.infura.io/</a><br>
 	<br>
 	You also need to enable the GAS API..<br>
 	<br>
@@ -62,20 +62,32 @@
 			<td><input type="text" id=apikeysecret></td>
 		</tr>
 		<tr><td>&nbsp;</td></tr>
-		<tr><td colspan=2 style="text-align:center;"><button class=solobutton onclick="setapikeys();">SET API KEYS</button></td></tr>
+		<tr><td colspan=2 style="text-align:center;">
+			<button class=solobutton onclick="setapikeys();">SET API KEYS</button>
+			&nbsp;&nbsp;
+			<button class=solobutton onclick="currentgas();">TEST API KEYS</button>
+			</td></tr>
 	</table>
 	
-	<br><br>
+	<br>
+	<hr style="width:80%;">
+	<br>
+	
 	Once you have set that up.. AND added some ETH to your balance..<br>
 	<br>
-	You must authorize the DEX contract access..<br>
+	You must authorise the ETH DEX contract access..<br>
 	<br>
 	<button class=solobutton onclick="approve();">APPROVE HTLC CONTRACT</button>&nbsp;&nbsp;
 	<button class=solobutton onclick="allowance();">CHECK ALLOWANCE</button>
 	
-	<!--  <br><br>
-	<button onclick="currentgas();">GET CURRENT GAS</button>&nbsp;&nbsp;&nbsp;<button onclick="refreshnonce();">REFRESH NONCE</button>
-	-->
+	<br>
+	<br>
+	<hr style="width:80%;">
+	<br>
+	
+	If you ever get ETH NONCE issues.. you can reset it here..<br>
+	<br>
+	<button class=solobutton onclick="refreshnonce();">REFRESH NONCE</button>
 	
 	<script type="text/javascript">
 		createFooter();

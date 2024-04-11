@@ -45,47 +45,54 @@
 		createHeader();
 	</script>
 	
-	Here you can add liquidity to the Bridge..<br>
-	<br>
-	You <b>MUST</b> have some native Minima to broadcast orderbook messages<br>
-	<br>
-	You <b>MUST</b> have enough ETH to pay the fee for transferring wMinima / USDT<br>
-	<br>
+	<div class=liquiditybox>
+		<b>Minima / wMinima Pool</b><br>
+		<br>
+		<input type=checkbox id=wrappedenableid>
+		<label for=enablewrapped>Add liquidity to this Pool</label>
+		<br><br>
+		<table>
+			<tr>
+				<td class="rightalign">Buy : </td>
+				<td><input type=text id=wrappedbuyid placeholder=0 /></td>
+			</tr>
+			<tr>
+				<td class="rightalign">Sell : </td>
+				<td><input type=text id=wrappedsellid placeholder=0 /></td>
+			</tr>
+		</table>
+		<br>
+		Price to BUY/SELL Minima in wMinima<br>
+	</div>
 	
 	<br>
-	<b>wMinima Pool</b><br>
-	<input type=checkbox id=wrappedenableid>
-	<label for=enablewrapped>Add Liquidity to wMinima Pool</label>
-	<table>
-		<tr>
-			<td class="rightalign">Buy : </td>
-			<td><input type=text id=wrappedbuyid placeholder=0 /></td>
-		</tr>
-		<tr>
-			<td class="rightalign">Sell : </td>
-			<td><input type=text id=wrappedsellid placeholder=0 /></td>
-		</tr>
-	</table>
-	<!--  Prices are in <b>wMinima</b><br> -->
+	<div class=liquiditybox>
+		<b>Minima / USDT Pool</b><br>
+		<br>
+		<input type=checkbox id=usdtenableid>
+		<label for=enableusdt>Add liquidity to this Pool</label>
+		<br><br>
+		<table>
+			<tr>
+				<td class="rightalign">Buy : </td>
+				<td><input type=text id=usdtbuyid placeholder=0 /></td>
+			</tr>
+			<tr>
+				<td class="rightalign">Sell : </td>
+				<td><input type=text id=usdtsellid placeholder=0 /></td>
+			</tr>
+		</table>
+		<br>
+		Price to BUY/SELL Minima in USDT<br>
+	</div>
 	
-	<br>
-	<b>USDT Pool</b><br>
-	<input type=checkbox id=usdtenableid>
-	<label for=enableusdt>Add Liquidity to USDT Pool</label>
-	<table>
-		<tr>
-			<td class="rightalign">Buy : </td>
-			<td><input type=text id=usdtbuyid placeholder=0 /></td>
-		</tr>
-		<tr>
-			<td class="rightalign">Sell : </td>
-			<td><input type=text id=usdtsellid placeholder=0 /></td>
-		</tr>
-	</table>
-	<!--  Prices are in <b>USDT</b> -->
-	<br>
 	<br>
 	<button class=solobutton onclick="updateorderbook();">UPDATE MY ORDERBOOK</button>
+	
+	<br><br>
+	You <b>MUST</b> have some native Minima to broadcast orderbook messages<br>
+	<br>
+	You <b>MUST</b> have enough ETH to pay the fee for transferring wMinima / USDT
 	
 	<script type="text/javascript">
 		createFooter();

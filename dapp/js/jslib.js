@@ -148,3 +148,7 @@ function jumpHome(){
 function jumpSettings(){
 	location.href="settings.html?uid="+MDS.minidappuid;
 }
+
+function jumpActivity(){
+	location.href="history.html?uid="+MDS.minidappuid;
+}
