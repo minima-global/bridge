@@ -65,6 +65,7 @@
 	<br>
 	Bridge will always picks the best price for the amount you wish to swap automatically.<br>
 	<br>
+	You do not need to setup an ETH RPC end-point.. unlike Minima where everyone already runs everything.. :)
 	
 	<h3>Technical Exaplantion</h3>  
 	Alice wants to swap 100 Minima for 100 wMinima with Bob.<br>
@@ -89,7 +90,7 @@
 	<br>
 	- Alice sees the contract BUT she knows the secret!.. So she collects the 100 wMinima by signing and revealing the secret.<br>
 	<br>
-	- Bob sees Alice collect the 100 wMinima and sees the secret.. So now he knows the secret! He collects the 100 Minima..<br>
+	- Bob sees Alice collect the 100 wMinima and sees the secret.. So now he knows the secret! He signs and collects the 100 Minima..<br>
 	<br>
 	
 	<h3>Final Thoughts</h3>  
@@ -98,7 +99,15 @@
 	<br>
 	Both parties must perform a transaction on Minima and on ETH.<br>
 	<br>
-	Yes - it is slow and expensive.. but is also secure and decentralised.<br>
+	The transactions take time to confirm on both chains - slow..<br>
+	<br>
+	ETH transctions are expensive..<br>
+	<br>
+	There are initial technical challenges like getting the 
+	ETH RPC end-points working and approving the ETH HTLC contract.<br>
+	 
+	<br><br>
+	Yes - it is slow, expensive and a little complicated to get started.. but is also secure, trustless, non-custodial and completely decentralised.. <br>
 	 
 	</div>
 	
