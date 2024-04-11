@@ -45,25 +45,62 @@
 		createHeader();
 	</script>
 	
+	<div style="text-align:left;width:80%;margin:0 auto;">
+	
+	<h3>How does Bridge Work ?</h3>
+	<br>
 	<b>BRIDGE</b> let's you trade Minima for wMinima / USDT on Ethereum.<br>
 	<br>
+	We use HTLC contracts. Hashed Time Lock Contracts.<br>
 	<br>
-	We use HTLC atomic swap contracts.. which may be slow and expensive..<br>
+	This is quite slow (5 mins) and quite expensive as both parties 
+	need to do an ETH transaction..<br>
 	<br>
-	BUT - they are decentralised, trustless and atomic.<br>
+	BUT - it is completely decentralised, server-less, trustless and secure.<br>
 	<br>
+	You can trade directly with someone you know using the OTC trade feature OR if you do 
+	not know anyone you can find a matching order in the orderbook.<br>
 	<br>
+	Orderbook messages are broadcast over the Minima network as Minima tranactions which all Bridge Users see.<br>
 	<br>
-	Before you can use Bridge you <b>MUST</b> :<br>
+	Bridge will always picks the best price for the amount you wish to swap automatically.<br>
 	<br>
-	1) Set up your INFURA API RPC methods..<br>
-	<br>
-	2) Authorize the HTLC DEX contract..<br>
-	<br>
-	You can do this in your settings..<br>
-	<br>
-	<button class=solobutton onclick="jumpSettings();">Go to Settings</button> 
 	
+	<h3>Technical Exaplantion</h3>  
+	Alice wants to swap 100 Minima for 100 wMinima with Bob.<br>
+	<br>
+	- Alice asks Bob for his public key.<br>
+	<br>
+	- Bob asks Alice for her public key.<br>
+	<br>
+	- Alice then creates a random secret that <b>only she knows</b> and hashes that secret.<br>
+	<br>
+	- Alice then sends 100 Minima (on the Minima network) to a contracts that has that hash and Bob's public key.<br>
+	<br>
+	<b>The contract says</b> : Bob can take the 100 Minima if he signs and includes the secret (which when hashed is the same as the hash Alice added) 
+	for the next 2 hours. Alice cannot touch the funds until the 2 hours is up.<br>
+	<br>
+	- Bob sees the contract but does not yet know the secret - so cannot collect. He thinks.. How can I make Alice reveal the secret.. ?<br>
+	<br>
+	- Bob send 100 wMinima (on the ETH network) to a contract that has that same hash and Alice's public key.<br>
+	<br>
+	<b>The contract says</b> : Alice can take the 100 wMinima if she signs and includes the secret (which when hashed is the same as the hash Bob added) 
+	for the next 1 hour. Bob cannot touch the funds until the 1 hour is up.<br>
+	<br>
+	- Alice sees the contract BUT she knows the secret!.. So she collects the 100 wMinima by signing and revealing the secret.<br>
+	<br>
+	- Bob sees Alice collect the 100 wMinima and sees the secret.. So now he knows the secret! He collects the 100 Minima..<br>
+	<br>
+	
+	<h3>Final Thoughts</h3>  
+	
+	<b>No-one</b> other than Alice and Bob are involved in this trade.<br>
+	<br>
+	Both parties must perform a transaction on Minima and on ETH.<br>
+	<br>
+	Yes - it is slow and expensive.. but is also secure and decentralised.<br>
+	 
+	</div>
 	
 	<script type="text/javascript">
 		createFooter();
@@ -78,35 +115,6 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//DEBUG TEST
-			//wipeDB();
-			
-			//Are we in write mode.
-			MDS.cmd("checkmode",function(moderesp){
-				
-				//MUST be in write mode..
-				if(!moderesp.response.writemode){
-					
-					//Jump to a special page
-					location.href="writemode.html?uid="+MDS.minidappuid;
-				}else{
-					
-					//Init Bridge Systems..
-					initBridgeSystemsStartup(function(userdets){
-						USER_DETAILS=userdets;
-						
-						//And set the API key
-						/*getInfuraApiKeys(function(apikeys){
-							if(apikeys.enabled){
-								apikey.value		= apikeys.apikey;
-								apikeysecret.value	= apikeys.apikeysecret;
-							}
-						});*/
-					});
-				}
-			});
-		
-		//Messages from back end
 		}else if(msg.event == "MDSCOMMS"){
 			
 			//Make sure is a private message

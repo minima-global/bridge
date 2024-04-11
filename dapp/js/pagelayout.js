@@ -20,6 +20,9 @@ function createHeader(){
 	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpActivity();\" height=40 src=\"history.png\">&nbsp;&nbsp;"+
 	"			</td>"+
 	"			<td nowrap>"+
+	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpHelp();\" height=40 src=\"help.png\">&nbsp;&nbsp;"+
+	"			</td>"+
+	"			<td nowrap>"+
 	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpSettings();\" height=40 src=\"settings.png\">&nbsp;&nbsp;"+
 	"			</td>"+
 	//"			<td nowrap>"+
