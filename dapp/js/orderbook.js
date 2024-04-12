@@ -142,22 +142,6 @@ function createCompleteOrderBook(userdets,callback){
 			for(var i=0;i<orderlen;i++){
 				var orderbk = unique[i];
 				
-				//Check Limits..
-				var maxexceeded = false;
-				if(orderbk.data.orderbook.wminima.maximum > MAXIMUM_ORDERBOOK_VALUE){
-					orderbk.data.orderbook.wminima.maximum = MAXIMUM_ORDERBOOK_VALUE;
-					maxexceeded = true;
-				}
-				
-				if(orderbk.data.orderbook.usdt.maximum > MAXIMUM_ORDERBOOK_VALUE){
-					orderbk.data.orderbook.usdt.maximum = MAXIMUM_ORDERBOOK_VALUE;
-					maxexceeded = true;
-				}
-				
-				if(maxexceeded){
-					MDS.log("ORDERBOOK Exceeded maximum : "+JSON.stringify(orderbk));
-				}
-				
 				try{
 					if(orderbk.data.orderbook.wminima.enable || orderbk.data.orderbook.usdt.enable){
 						finallist.push(orderbk);
@@ -214,58 +198,113 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 		//Check is not THIS user
 		if(completeorderbook[i].data.publickey != userdets.minimapublickey){
 			
+			var validbuy  = false;
+			var validsell = false;
+			
 			if(orderbook.wminima.enable){
 				var tots = totals.wminima;
 				var ob 	 = orderbook.wminima;
-				totals.wminima.books++;
 				
 				//BUY SIDE
-				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
-				var highbuy 	= balance.minima.total;
-				if(highbuy > MAXIMUM_ORDERBOOK_VALUE){
-					highbuy = MAXIMUM_ORDERBOOK_VALUE;
+				var lowbuy 	= MINIMUM_MINIMA_TRADE;
+				var highbuy = toFixedNumber(balance.minima.total);
+				if(highbuy > MAXIMUM_MINIMA_TRADE){
+					highbuy = MAXIMUM_MINIMA_TRADE;
 				}
+				
+				//Must be higher high for valid book
+				validbuy = (highbuy > lowbuy);
 				
 				//SELL SIDE
-				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
+				var lowsell 	= MINIMUM_MINIMA_TRADE;
 				var highsell 	= toFixedNumber(balance.wminima / ob.buy);
-				if(highsell > MAXIMUM_ORDERBOOK_VALUE){
-					highsell = MAXIMUM_ORDERBOOK_VALUE;
+				if(highsell > MAXIMUM_MINIMA_TRADE){
+					highsell = MAXIMUM_MINIMA_TRADE;
 				}
 				
-				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
-				tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
-				tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
-				tots.highsell	= Math.floor(max(tots.highsell,highsell));
+				//Must be higher high for valid book
+				validsell = (highsell > lowsell);
+				
+				//Now add to totals
+				if(validbuy){
+					tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
+					tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));	
+				}
+				
+				if(validsell){
+					tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
+					tots.highsell	= Math.floor(max(tots.highsell,highsell));	
+				}
+				
+				if(validbuy || validsell){
+					totals.wminima.books++;	
+				}
 			}
 			
+			//reset
+			validbuy  = false;
+			validsell = false;
+			
 			if(orderbook.usdt.enable){
+				
 				var tots = totals.usdt;
 				var ob 	 = orderbook.usdt;
-				totals.usdt.books++;
 				
 				//BUY SIDE
-				var lowbuy 		= toFixedNumber(ob.minimum / ob.sell);
-				var highbuy 	= balance.minima.total;
-				if(highbuy > MAXIMUM_ORDERBOOK_VALUE){
-					highbuy = MAXIMUM_ORDERBOOK_VALUE;
+				var lowbuy 	= MINIMUM_MINIMA_TRADE;
+				var highbuy = toFixedNumber(balance.minima.total);
+				if(highbuy > MAXIMUM_MINIMA_TRADE){
+					highbuy = MAXIMUM_MINIMA_TRADE;
 				}
+				
+				//Must be higher high for valid book
+				validbuy = (highbuy > lowbuy);
 				
 				//SELL SIDE
-				var lowsell 	= toFixedNumber(ob.minimum / ob.buy);
+				var lowsell 	= MINIMUM_MINIMA_TRADE;
 				var highsell 	= toFixedNumber(balance.usdt / ob.buy);
-				if(highsell > MAXIMUM_ORDERBOOK_VALUE){
-					highsell = MAXIMUM_ORDERBOOK_VALUE;
+				if(highsell > MAXIMUM_MINIMA_TRADE){
+					highsell = MAXIMUM_MINIMA_TRADE;
 				}
 				
-				tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
-				tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));
-				tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
-				tots.highsell	= Math.floor(max(tots.highsell,highsell));
+				//Must be higher high for valid book
+				validsell = (highsell > lowsell);
+				
+				//Now add to totals
+				if(validbuy){
+					tots.lowbuy		= Math.ceil(min(tots.lowbuy,lowbuy));
+					tots.highbuy	= Math.floor(max(tots.highbuy,highbuy));	
+				}
+				
+				if(validsell){
+					tots.lowsell	= Math.ceil(min(tots.lowsell,lowsell));
+					tots.highsell	= Math.floor(max(tots.highsell,highsell));	
+				}
+				
+				if(validbuy || validsell){
+					totals.usdt.books++;	
+				}
 			}
 		}
 	}
 	
+	//wMinima
+	if(totals.wminima.highsell < totals.wminima.lowsell){
+		totals.wminima.lowsell = totals.wminima.highsell;
+	}
+	if(totals.wminima.highbuy < totals.wminima.lowbuy){
+		totals.wminima.lowbuy = totals.wminima.highbuy;
+	}
+	
+	//USDT
+	if(totals.usdt.highsell < totals.usdt.lowsell){
+		totals.usdt.lowsell = totals.usdt.highsell;
+	}
+	if(totals.usdt.highbuy < totals.usdt.lowbuy){
+		totals.usdt.lowbuy = totals.usdt.highbuy;
+	}
+	
+	//Now create a totals table
 	var start	= 0;
 	var gap		= 0;
 	

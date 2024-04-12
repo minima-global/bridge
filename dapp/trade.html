@@ -121,6 +121,17 @@
 			
 			//loadFavs();
 			
+		//Messages from back end
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				var comms = JSON.parse(msg.data.message);
+				if(comms.action == "FRONTENDMSG"){
+					//Show the message
+					alert(JSON.stringify(comms,null,2));
+				}
+			}
 		}
 	});
 

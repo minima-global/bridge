@@ -61,12 +61,6 @@
 	<button class=solobutton id=buywminimabuttonid onclick="order('buy','wminima');">BUY</button>
 	<button class=solobutton id=sellwminimabuttonid onclick="order('sell','wminima');">SELL</button><br>
 	<br>
-	<table id=wminimaminmaxid style="border-spacing:5;" border=1>
-		<tr><td>&nbsp;</td><td>&nbsp;<b>Minimum</b>&nbsp;</td><td>&nbsp;<b>Maximum</b>&nbsp;</td></tr>
-		<tr><td><b>BUY</b></td><td id=wminimaminbuyid>&nbsp;</td><td id=wminimamaxbuyid>&nbsp;</td></tr>
-		<tr><td><b>SELL</b></td><td id=wminimaminsellid>&nbsp;</td><td id=wminimamaxsellid>&nbsp;</td></tr>
-	</table>
-	<br>
 	
 	<p align="center" id=wminimacharts>
 		<canvas id="wMinimaBUYChart"></canvas><br>
@@ -80,12 +74,6 @@
 	<b>Amount : </b><input type=text id=amountusdt>
 	<button class=solobutton id=buyusdtbuttonid onclick="order('buy','usdt');">BUY</button>
 	<button class=solobutton id=sellusdtbuttonid onclick="order('sell','usdt');">SELL</button><br>
-	<br>
-	<table id=usdtminmaxid style="border-spacing:5;" border=1>
-		<tr><td>&nbsp;</td><td>&nbsp;<b>Minimum</b>&nbsp;</td><td>&nbsp;<b>Maximum</b>&nbsp;</td></tr>
-		<tr><td><b>BUY</b></td><td id=usdtminbuyid>&nbsp;</td><td id=usdtmaxbuyid>&nbsp;</td></tr>
-		<tr><td><b>SELL</b></td><td id=usdtminsellid>&nbsp;</td><td id=usdtmaxsellid>&nbsp;</td></tr>
-	</table>
 	<br>
 	
 	<p align="center" id=usdtcharts>
@@ -165,7 +153,7 @@
 					  title: {display: true,text: title}
 				  }
 			  }
-			});
+		});
 	}
 	
 	function setTotals(){
@@ -175,40 +163,28 @@
 			
 			//wMinima range amounts
 			if(totals.wminima.books>0){
-				wminimaminbuyid.innerHTML  = totals.wminima.lowbuy;
-				wminimamaxbuyid.innerHTML  = totals.wminima.highbuy;
-				wminimaminsellid.innerHTML = totals.wminima.lowsell;
-				wminimamaxsellid.innerHTML = totals.wminima.highsell;
-				
 				makechart("wMinimaBUYChart",totals.wminima.buybook,"wMinima BUY Book","blue");
 				makechart("wMinimaSELLChart",totals.wminima.sellbook,"wMinima SELL Book","red");
 				
 			}else{
 				buywminimabuttonid.disabled 	= true;
 				sellwminimabuttonid.disabled 	= true;
-				wminimaminmaxid.style.display	= "none";
 				wMinimaBUYChart.style.display	= "none";
 				wMinimaSELLChart.style.display	= "none";
-				wminimacharts.innerHTML = "No orderbooks found..";
+				wminimacharts.innerHTML 		= "No orderbooks found..";
 			}
 			
 			//USDT range amounts
 			if(totals.usdt.books>0){
-				usdtminbuyid.innerHTML  = totals.usdt.lowbuy;
-				usdtmaxbuyid.innerHTML  = totals.usdt.highbuy;
-				usdtminsellid.innerHTML = totals.usdt.lowsell;
-				usdtmaxsellid.innerHTML = totals.usdt.highsell;
-			
 				makechart("USDTBUYChart",totals.usdt.buybook,"USDT BUY Book","blue");
 				makechart("USDTSELLChart",totals.usdt.sellbook,"USDT SELL Book","red");
 				
 			}else{
-				buyusdtbuttonid.disabled = true;
-				sellusdtbuttonid.disabled = true;
-				usdtminmaxid.style.display="none";
+				buyusdtbuttonid.disabled 	= true;
+				sellusdtbuttonid.disabled 	= true;
 				USDTBUYChart.style.display	= "none";
 				USDTSELLChart.style.display	= "none";
-				usdtcharts.innerHTML = "No orderbooks found..";
+				usdtcharts.innerHTML 		= "No orderbooks found..";
 			}
 		});
 	}
@@ -224,6 +200,18 @@
 				
 				setTotals();
 			});
+		
+		//Messages from back end
+		}else if(msg.event == "MDSCOMMS"){
+			
+			//Make sure is a private message
+			if(!msg.data.public){
+				var comms = JSON.parse(msg.data.message);
+				if(comms.action == "FRONTENDMSG"){
+					//Show the message
+					alert(JSON.stringify(comms,null,2));
+				}
+			}
 		}
 	});
 

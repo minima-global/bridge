@@ -39,7 +39,9 @@ function getOldOrderBook(callback){
 	}); 	
 }
 
+//Store the old blanace..
 var myoldbalance	= {};
+
 
 /**
  * Set Balance limits given orderbook
@@ -288,29 +290,22 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 				
 				//Check they have enough Minima - They are SELLING to you
 				if(+amount <= balance.minima.total){
-					
-					//Trying to BUY this much MINIMA - so look for SELLERS
-					var totalamounttoken = toFixedNumber(+amount * +ob.sell);
-					
-					//Check the amount is within limits..
-					if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
 						
-						//The order book price
-						var obkprice = +ob.sell;
+					//The order book price
+					var obkprice = +ob.sell;
+					
+					//Is the price better than current or the same
+					if(obkprice == currentsell){
+						//Same as current best.. just add
+						validorders.push(data);
 						
-						//Is the price better than current or the same
-						if(obkprice == currentsell){
-							//Same as current best.. just add
-							validorders.push(data);
-							
-						}else if(obkprice < currentsell){
-							
-							//Best price so far	
-							validorders = [];
-							currentsell	= obkprice;
-							validorders.push(data);
-						}
-					}	
+					}else if(obkprice < currentsell){
+						
+						//Best price so far	
+						validorders = [];
+						currentsell	= obkprice;
+						validorders.push(data);
+					}
 				}
 			
 			}else if(action == "sell"){
@@ -321,24 +316,20 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 				//Do we have that much of the token..
 				if(totalamounttoken <= bookbal){
 					
-					//Is within limits
-					if(totalamounttoken >= ob.minimum && totalamounttoken <= ob.maximum){
+					//The order book price
+					var obkprice = +ob.buy;
 					
-						//The order book price
-						var obkprice = +ob.buy;
+					//Is the price better than current or the same
+					if(obkprice == currentbuy){
+						//Same as current best.. just add
+						validorders.push(data);
 						
-						//Is the price better than current or the same
-						if(obkprice == currentbuy){
-							//Same as current best.. just add
-							validorders.push(data);
-							
-						}else if(obkprice > currentbuy){
-							
-							//Best price so far	
-							validorders = [];
-							currentbuy	= obkprice;
-							validorders.push(data);
-						}
+					}else if(obkprice > currentbuy){
+						
+						//Best price so far	
+						validorders = [];
+						currentbuy	= obkprice;
+						validorders.push(data);
 					}
 				}	
 			}
