@@ -6,14 +6,15 @@ var ERC20InterfaceABI = new ethers.utils.Interface(ERC20_ABI);
 /**
  * Get ERC20 Balance
  */
-function getERC20Balance(erc20contract, callback){
+function getERC20Balance(erc20contract, decimals, callback){
 	
 	//Get the function data
 	var functiondata = ERC20InterfaceABI.functions.balanceOf.encode([ getETHERUMAddress() ]);
 	
 	//Run this
 	ethCallCommand(erc20contract,functiondata,function(ethresp){
-		var bal = ethers.utils.formatEther(ethresp.result);
+		//var bal = ethers.utils.formatEther(ethresp.result);
+		var bal = ethers.utils.formatUnits(""+ethresp.result, decimals);
 		callback(bal);	
 	});
 }

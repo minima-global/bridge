@@ -185,7 +185,11 @@ MDS.init(function(msg){
 		}
 		
 		if(LOGS_ENABLED){
-			MDS.log("Start Bridge Functions..");	
+			MDS.log("Start Bridge Functions..");
+			
+			MDS.log("ETH BLOCK    : "+ethblock);
+			MDS.log("MINIMA BLOCK : "+minimablock);	
+			MDS.log("NONCE        : "+NONCE_TRACK);
 		}
 			
 		//Check for new secrets
@@ -205,6 +209,7 @@ MDS.init(function(msg){
 		
 		//Do we have to send the orderbook..
 		ORDERSEND_COUNTER++;
+		MDS.log("ORDERSEND_COUNTER:"+ORDERSEND_COUNTER);
 		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){
 			
 			//Clear the previous validated signatures.. so list does not grow endlessly

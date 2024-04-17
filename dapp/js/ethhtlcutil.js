@@ -4,16 +4,6 @@
 var HTLCInterfaceABI = new ethers.utils.Interface(HTLC_ABI.abi);
 
 /**
- * HTLC Contract Address
- */
-
-//SEPOLIA
-var HTLCContractAddress = "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());
-
-//HARDHAT
-//var HTLCContractAddress = "0x"+("0165878A594ca255338adfa4d48449f69242Eb8F".toUpperCase());
-
-/**
  * Start an HTLC
  */
 function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock, 
@@ -303,11 +293,11 @@ function parseHTLCContractData(logdata){
 		
 	//The amount of the token
 	var weiamount 				= ethers.utils.bigNumberify(datavars[2]._hex);
-	newcontract.amount			= ethers.utils.formatEther(weiamount,decimals);
+	newcontract.amount			= ethers.utils.formatUnits(""+weiamount,decimals);
 	
 	//The requested amount of Minima
 	var reqweiamount 			= ethers.utils.bigNumberify(datavars[3]._hex);
-	newcontract.requestamount	= ethers.utils.formatEther(reqweiamount,18);
+	newcontract.requestamount	= ethers.utils.formatUnits(""+reqweiamount,18);
 	
 	newcontract.hashlock		= "0x"+datavars[4].slice(2).toUpperCase();
 	newcontract.timelock 		= ethers.utils.bigNumberify(datavars[5]._hex).toNumber();

@@ -36,3 +36,34 @@ var HTLC_SECRETS_BACKLOG_CHECK = 50 + Math.floor(HTLC_TIMELOCK_SECS / ETH_BLOCK_
 //The Minimum and maximum trade amounts
 var MINIMUM_MINIMA_TRADE = 10;
 var MAXIMUM_MINIMA_TRADE = 1000;
+
+/*
+//SEPOLIA
+var USE_API_KEYS			= true;
+var ETH_INFURA_HOST 		= "https://sepolia.infura.io/v3/";
+var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";
+var ETHERSCAN_LINK			= "https://sepolia.etherscan.io/tx/";
+
+var USDTContractAddress 	= "0x"+("b3BEe194535aBF4E8e2C0f0eE54a3eF3b176703C".toUpperCase());
+var USDT_DECIMALS = 18;
+
+var wMinimaContractAddress 	= "0x"+("2Bf712b19a52772bF54A545E4f108e9683fA4E2F".toUpperCase());
+var WMINIMA_DECIMALS = 18;
+
+var HTLCContractAddress 	= "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());
+*/
+
+//MAIN NET
+var USE_API_KEYS			= true;
+var ETH_INFURA_HOST 		= "https://mainnet.infura.io/v3/";
+var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/1/suggestedGasFees";
+var ETHERSCAN_LINK			= "https://etherscan.io/tx/";
+
+var USDTContractAddress 	= "0x"+("dAC17F958D2ee523a2206206994597C13D831ec7".toUpperCase());
+var USDT_DECIMALS = 6;
+
+var wMinimaContractAddress 	= "0x"+("669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF".toUpperCase());
+var WMINIMA_DECIMALS = 18;
+
+var HTLCContractAddress 	= "0x"+("67376c3bf3b5a336b14398920cfbc292013718ea".toUpperCase());
+

@@ -97,7 +97,7 @@ function createAndSendOrderBook(userdets, callback){
 			return;	
 		}
 		
-		MDS.log("Regular hourly orderbook update..");
+		MDS.log("Regular orderbook update..");
 		
 		getAllBalances(userdets,function(fullbalance){
 			

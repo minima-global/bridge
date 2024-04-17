@@ -1,21 +1,5 @@
 
 /**
- * The ETH RPC HOST
- */
-
-//HARDHAT
-//var USE_API_KEYS			= false;
-//var ETH_INFURA_HOST 		= "http://127.0.0.1:8545/";
-//var ETH_INFURA_GASAPI_HOST 	= "";
-//var ETHERSCAN_LINK			= "";
-
-//SEPOLIA
-var USE_API_KEYS			= true;
-var ETH_INFURA_HOST 		= "https://sepolia.infura.io/v3/";
-var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/11155111/suggestedGasFees";
-var ETHERSCAN_LINK			= "https://sepolia.etherscan.io/tx/";
-
-/**
  * the Main ETH Wallet address
  */
 //var MAIN_WALLET	 	 = null;

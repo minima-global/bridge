@@ -1,21 +1,9 @@
-/**
- * wMinima Contract Address
- */
-
-//SEPOLIA
-var wMinimaContractAddress = "0x"+("2Bf712b19a52772bF54A545E4f108e9683fA4E2F".toUpperCase());
-
-//HARD HAT
-//var wMinimaContractAddress = "0x"+("e7f1725E7734CE288F8367e1Bb143E90bb3F0512".toUpperCase());
-
-//How many decimals does the USDT contract have
-var WMINIMA_DECIMALS = 18;
 
 /**
  * Get wMinima Balance
  */
 function getWMinimaBalance(callback){
-	getERC20Balance(wMinimaContractAddress,function(balance){
+	getERC20Balance(wMinimaContractAddress,WMINIMA_DECIMALS,function(balance){
 		callback(balance);
 	});
 }
