@@ -109,7 +109,7 @@
 		<tr><td colspan=4>&nbsp;</td></tr>
 		<tr>
 			<td class=rightalign>ETH Address : </td>
-			<td colspan=3><div id=myethaddress>0</div></td>
+			<td colspan=3><div id=myethaddress style="font-size:10;">0</div></td>
 		</tr>
 		<tr><td colspan=4>&nbsp;</td></tr>
 		<tr>
@@ -151,7 +151,7 @@
 				nativeminimabalance.innerHTML = balances.minima.confirmed+" (unconfirmed:"+balances.minima.unconfirmed+")";	
 				balunconf = true;
 			}else{
-				nativeminimabalance.innerHTML = balances.minima.confirmed;
+				nativeminimabalance.innerHTML = toFixedNumber(balances.minima.confirmed);
 			}
 			
 			minimacoins.innerHTML = balances.minima.coins;
@@ -159,7 +159,7 @@
 			//Fill in ETH details..
 			//myminimaaddress.innerHTML = USER_DETAILS.minimaaddress.mxaddress;
 			myethaddress.innerHTML	  = getETHERUMAddress(); 
-			ethbalance.innerHTML 	  = balances.ethfull;
+			ethbalance.innerHTML 	  = toFixedNumber(balances.ethfull);
 			wminimabalance.innerHTML  = balances.wminima;
 			usdtbalance.innerHTML 	  = balances.usdt;
 			
