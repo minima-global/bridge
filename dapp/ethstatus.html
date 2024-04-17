@@ -109,8 +109,11 @@
 		
 		//Do initialisation
 		if(msg.event == "inited"){
-			showTransaction();	
-		
+			
+			initBridgeSystems(function(userdets){
+				showTransaction();
+			});
+				
 		//Messages from back end
 		}else if(msg.event == "MDSCOMMS"){
 			

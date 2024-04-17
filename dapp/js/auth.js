@@ -135,9 +135,12 @@ function initBridgeSystems(callback){
 			setETHEREUMAddress(userdets.ethaddress);
 			setETHPrivateKey(userdets.ethprivatekey);
 			
-			if(callback){
-				callback(userdets);
-			}	
+			//Set the correct Network
+			setCurrentNetwork(function(){
+				if(callback){
+					callback(userdets);
+				}	
+			});	
 		});
 	});
 }

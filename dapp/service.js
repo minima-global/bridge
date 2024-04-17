@@ -86,6 +86,9 @@ MDS.init(function(msg){
 		//We want to be notified of Coin Secret Events
 		setupCoinSecretEvents(function(notify){});
 		
+		//Set the correct ETH Network
+		setCurrentNetwork();
+		
 		//Are we already inited.. then check order book
 		if(BRIDGE_INITED){
 			
@@ -209,7 +212,6 @@ MDS.init(function(msg){
 		
 		//Do we have to send the orderbook..
 		ORDERSEND_COUNTER++;
-		MDS.log("ORDERSEND_COUNTER:"+ORDERSEND_COUNTER);
 		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){
 			
 			//Clear the previous validated signatures.. so list does not grow endlessly
@@ -346,7 +348,23 @@ MDS.init(function(msg){
 				});
 			
 			}else if(comms.action == "REFRESHBALANCE"){
+			
+			}else if(comms.action == "SWITCHSEPOLIA"){
 				
+				//Convert to Sepolia settings..
+				setNetwork("sepolia");
+				
+				//Now send to front end..
+				sendFrontendMSG(comms.action,"Switched to ETH Sepolia Network");
+										
+			}else if(comms.action == "SWITCHMAINNET"){
+				
+				//Convert to Sepolia settings..
+				setNetwork("mainnet");
+				
+				//Now send to front end..
+				sendFrontendMSG(comms.action,"Switched to ETH Main Network");
+										
 			}else if(comms.action == "FRONTENDMSG"){
 				//Ignore..
 				

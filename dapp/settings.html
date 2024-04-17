@@ -89,6 +89,17 @@
 	<br>
 	<button class=solobutton onclick="refreshnonce();">REFRESH NONCE</button>
 	
+	<br>
+	<br>
+	<hr style="width:80%;">
+	<br>
+	
+	For Testers - you can switch to the ETH Sepolia Test NET<br>
+	<br>
+	<div id=currentnetwork></div><br>
+	<button class=solobutton onclick="mainnetswitch();">SWITCH TO ETH MAINNET</button>
+	<button class=solobutton onclick="sepoliaswitch();">SWITCH TO ETH SEPOLIA</button>
+	
 	<script type="text/javascript">
 		createFooter();
 	</script>
@@ -148,40 +159,41 @@
 		sendSimpleBackendMSG("REFRESHNONCE");
 	}
 	
+	function sepoliaswitch(){
+		var message 	= {};
+		message.action  = "SWITCHSEPOLIA";	
+		sendBackendMSG(message);
+	}
+	
+	function mainnetswitch(){
+		var message 	= {};
+		message.action  = "SWITCHMAINNET";	
+		sendBackendMSG(message);
+	}
+	
 	//Main message handler..
 	MDS.init(function(msg){
 		
 		//Do initialisation
 		if(msg.event == "inited"){
 			
-			//DEBUG TEST
-			//wipeDB();
-			
-			//Are we in write mode.
-			MDS.cmd("checkmode",function(moderesp){
+			//Init Bridge Systems..
+			initBridgeSystems(function(userdets){
+				USER_DETAILS=userdets;
 				
-				//MUST be in write mode..
-				if(!moderesp.response.writemode){
-					
-					//Jump to a special page
-					location.href="writemode.html?uid="+MDS.minidappuid;
-				}else{
-					
-					//Init Bridge Systems..
-					initBridgeSystemsStartup(function(userdets){
-						USER_DETAILS=userdets;
-						
-						//And set the API key
-						getInfuraApiKeys(function(apikeys){
-							if(apikeys.enabled){
-								apikey.value		= apikeys.apikey;
-								apikeysecret.value	= apikeys.apikeysecret;
-							}
-						});
-					});
-				}
+				//And set the API key
+				getInfuraApiKeys(function(apikeys){
+					if(apikeys.enabled){
+						apikey.value		= apikeys.apikey;
+						apikeysecret.value	= apikeys.apikeysecret;
+					}
+				});
+				
+				getNetwork(function(network){
+					currentnetwork.innerHTML = "Current network : <b>"+network+"</b>";	
+				});
 			});
-		
+					
 		//Messages from back end
 		}else if(msg.event == "MDSCOMMS"){
 			
@@ -191,6 +203,10 @@
 				if(comms.action == "FRONTENDMSG"){
 					//Show the message
 					alert(JSON.stringify(comms,null,2));
+					
+					getNetwork(function(network){
+						currentnetwork.innerHTML = "Current network : <b>"+network+"</b>";	
+					});
 				}
 			}
 		}

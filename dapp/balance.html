@@ -268,15 +268,12 @@
 		//Do initialisation
 		if(msg.event == "inited"){
 			
+			setCurrentNetwork();
+			
 			//Init Bridge Systems..
 			initBridgeSystems(function(userdets){
 				USER_DETAILS=userdets;
 				refresh();
-				
-				getUSDTBalance(function(usdtbal){
-					MDS.log("USDTBAL : "+JSON.stringify(usdtbal));
-				});
-				
 			});
 			
 		}else if(msg.event == "NEWBALANCE"){
