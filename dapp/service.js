@@ -203,7 +203,7 @@ MDS.init(function(msg){
 		//Check ETH for SWAPS
 		checkETHSwapHTLC(USER_DETAILS,ethblock, minimablock, function(ethswaps){});
 		
-		//Do we HAVE to send..
+		//Do we have to send the orderbook..
 		ORDERSEND_COUNTER++;
 		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){
 			
