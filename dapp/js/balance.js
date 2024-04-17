@@ -11,8 +11,6 @@ function removeDecimalPart(value){
 	return +strval.substring(0,dot+3); 
 }
 
-
-
 /**
  * Calculate all Balances..
  */
@@ -37,9 +35,13 @@ function calculateAllBalances(userdetails,callback){
 				getUSDTBalance(function(usdtbal){
 					balance.usdt 	 = removeDecimalPart(usdtbal);
 					balance.usdtfull = usdtbal;
-				
-					//And return the results..
-					callback(balance);	
+					
+					//Set this is a JSON keypair
+					MDS.keypair.set("_allbalance",JSON.stringify(balance),function(init){
+						if(callback){
+							callback(balance);	
+						}
+					});	
 				});
 			});	
 		});
@@ -51,30 +53,68 @@ function calculateAllBalances(userdetails,callback){
  */
 function getAllBalances(userdetails,callback){
 	
+	/*MDS.keypair.get("_allbalance",function(getresult){
+		if(getresult.status){
+			callback(JSON.parse(getresult.value));
+		}else{
+			var balance 		= {};
+			
+			balance.minima 				= {};
+			balance.minima.confirmed 	= 0;
+			balance.minima.unconfirmed 	= 0;
+			balance.minima.total 		= 0;
+			balance.minima.coins 		= 0;
+			
+			balance.eth			= 0;
+			balance.ethfull		= 0;
+			balance.wminima		= 0;
+			balance.wminimafull	= 0;
+			balance.usdt		= 0;
+			balance.usdtfull	= 0;
+				
+			callback(balance);	
+		}
+	});*/
+	
 	getMinimaBalance(userdetails,function(minimabal){
 		var balance 	= {};
 		balance.minima 	= minimabal;
 		
-		getETHEREUMBalance(function(ethbal){
+		//Is Infura setup..
+		validInfuraKeys(function(valid){
 			
-			//Get wrapped and ETH
-			balance.eth		= removeDecimalPart(ethbal);
-			balance.ethfull	= ethbal;
+			if(valid){
+				getETHEREUMBalance(function(ethbal){
 			
-			//Get the Wrapped Minima balance
-			getWMinimaBalance(function(wminbal){
-				balance.wminima		= removeDecimalPart(wminbal);
-				balance.wminimafull	= wminbal;
+					//Get wrapped and ETH
+					balance.eth		= removeDecimalPart(ethbal);
+					balance.ethfull	= ethbal;
+					
+					//Get the Wrapped Minima balance
+					getWMinimaBalance(function(wminbal){
+						balance.wminima		= removeDecimalPart(wminbal);
+						balance.wminimafull	= wminbal;
+						
+						//get the USDT balance..
+						getUSDTBalance(function(usdtbal){
+							balance.usdt 	 = removeDecimalPart(usdtbal);
+							balance.usdtfull = usdtbal;
+						
+							//And return the results..
+							callback(balance);	
+						});
+					});	
+				});	
+			}else{
+				balance.eth			= 0;
+				balance.ethfull		= 0;
+				balance.wminima		= 0;
+				balance.wminimafull	= 0;
+				balance.usdt		= 0;
+				balance.usdtfull	= 0;
 				
-				//get the USDT balance..
-				getUSDTBalance(function(usdtbal){
-					balance.usdt 	 = removeDecimalPart(usdtbal);
-					balance.usdtfull = usdtbal;
-				
-					//And return the results..
-					callback(balance);	
-				});
-			});	
+				callback(balance);
+			}	
 		});
 	});
 }

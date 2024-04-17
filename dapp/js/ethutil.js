@@ -114,6 +114,13 @@ function getInfuraApiKeys(callback){
 	});
 }
 
+function validInfuraKeys(callback){
+	//Are the INFURA KEYS SET
+	getInfuraApiKeys(function(apikeys){
+		callback(apikeys.enabled);
+	});
+}
+
 /**
  * Auto-set the NONCE
  */

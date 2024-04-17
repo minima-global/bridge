@@ -1,14 +1,9 @@
 
+//The Bridge order book address
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
-
-//Should be 2 hours.. better safe than sorry
-var ORDEBOOK_CHECK_DEPTH = 512;
 
 //How many new SIGS checked in complete orderbook
 var SIGS_CHECKED = 0;
-
-//The MAXIMIUM Maximum
-var MAXIMUM_ORDERBOOK_VALUE = 10000;
 
 function signData(publickey,data, callback){
 	MDS.cmd("maxsign data:"+data,function(resp){
@@ -398,7 +393,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 function _getAllOrderCoins(callback){
 	
 	//Search for coins..
-	var search = "coins depth:"+ORDEBOOK_CHECK_DEPTH+" simplestate:true address:"+BRIDGEORDERBBOK;
+	var search = "coins depth:"+ORDERBOOK_DEPTH+" simplestate:true address:"+BRIDGEORDERBBOK;
 	
 	//Run it..
 	MDS.cmd(search,function(resp){
@@ -425,7 +420,7 @@ function _getAllOrderCoins(callback){
 				allfound.push(record);	
 				
 			}catch(e){
-				MDS.log("OrderBook COIN inavlid format :"+e+" "+JSON.stringify(coin));	
+				MDS.log("OrderBook COIN invalid format :"+e+" "+JSON.stringify(coin));	
 			}
 		}
 			//Send the result back		
@@ -615,8 +610,8 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);
 		
 		//Set limits
-		if(orderbook.wminima.maximum > MAXIMUM_ORDERBOOK_VALUE){
-			orderbook.wminima.maximum = MAXIMUM_ORDERBOOK_VALUE;
+		if(orderbook.wminima.maximum > MAXIMUM_MINIMA_TRADE){
+			orderbook.wminima.maximum = MAXIMUM_MINIMA_TRADE;
 		}	
 	}else{
 		orderbook.wminima.buy 		= 0;
@@ -635,8 +630,8 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
 		
 		//Set limits
-		if(orderbook.usdt.maximum > MAXIMUM_ORDERBOOK_VALUE){
-			orderbook.usdt.maximum = MAXIMUM_ORDERBOOK_VALUE;
+		if(orderbook.usdt.maximum > MAXIMUM_MINIMA_TRADE){
+			orderbook.usdt.maximum = MAXIMUM_MINIMA_TRADE;
 		}	
 	}else{
 		orderbook.usdt.buy 		= 0;

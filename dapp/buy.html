@@ -137,6 +137,8 @@
 			if(!msg.data.public){
 				var comms = JSON.parse(msg.data.message);
 				if(comms.action == "FRONTENDMSG"){
+					MDS.log("FRONTENDMSG:"+JSON.stringify(comms,null,2));
+					
 					//Show the message
 					alert(JSON.stringify(comms,null,2));
 					

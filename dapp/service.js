@@ -34,7 +34,11 @@ var USER_DETAILS 	= {};
 //Has the bridge been initialised - done in the frontend
 var BRIDGE_INITED = false;
 
+//DEBUG LOGS
 var LOGS_ENABLED = false;
+
+//We send the orderbook every 20 mins..
+var ORDERSEND_COUNTER = 0;
 
 //Check and init the bridge - when you can
 function serviceCheckBridgeInited(){
@@ -120,6 +124,7 @@ MDS.init(function(msg){
 			infuraenabled = apikeys.enabled;
 		});
 		
+		//No Infura nothing works..
 		if(!infuraenabled){
 			return;
 		}
@@ -148,13 +153,13 @@ MDS.init(function(msg){
 			
 			//Check is valid..
 			if(!checkIsPositiveNumber(ethblock)){
-				MDS.log("ERROR Getting latest ETH block.. "+ethblock+" ..waiting for next update round");
 				ethblock = 0;
 			}
 		});
 		
 		//Check we have a valid ETH block
 		if(ethblock == 0){
+			MDS.log("ERROR Getting latest ETH block.. "+ethblock+" ..waiting for next update round");
 			return;
 		}
 		
@@ -179,9 +184,6 @@ MDS.init(function(msg){
 			return;
 		}
 		
-		//HARDHAT HACK
-		//setNonceAuto();
-		
 		if(LOGS_ENABLED){
 			MDS.log("Start Bridge Functions..");	
 		}
@@ -201,8 +203,21 @@ MDS.init(function(msg){
 		//Check ETH for SWAPS
 		checkETHSwapHTLC(USER_DETAILS,ethblock, minimablock, function(ethswaps){});
 		
-		//Check if my orderbook has changed..
-		checkNeedPublishOrderBook(USER_DETAILS);	
+		//Do we HAVE to send..
+		ORDERSEND_COUNTER++;
+		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){
+			
+			//Clear the previous validated signatures.. so list does not grow endlessly
+			clearPreviousValidSigs();
+			
+			//Always publish your book timeout..
+			createAndSendOrderBook(USER_DETAILS);
+			
+		}else{
+			
+			//Check if my orderbook has changed..
+			checkNeedPublishOrderBook(USER_DETAILS);	
+		}
 		
 		if(LOGS_ENABLED){
 			MDS.log("Bridge functions finished..");	
@@ -211,10 +226,10 @@ MDS.init(function(msg){
 	}else if(msg.event == "MDS_TIMER_1HOUR"){
 		
 		//Clear the previous validated signatures.. so list does not grow endlessly
-		clearPreviousValidSigs();
+		//clearPreviousValidSigs();
 		
 		//Always publish your book every hour
-		createAndSendOrderBook(USER_DETAILS);
+		//createAndSendOrderBook(USER_DETAILS);
 	
 	}else if(msg.event == "NEWBLOCK"){
 		
@@ -231,6 +246,23 @@ MDS.init(function(msg){
 			
 			//Get the message
 			var comms = JSON.parse(msg.data.message);
+			
+			//Is Infura enabled..
+			var validinfura = false;
+			validInfuraKeys(function(valid){
+				validinfura = valid;
+			});
+			
+			//No INFURA!.. cannot perform these functions..
+			if(comms.action != "FRONTENDMSG"){
+				if(!validinfura){
+					var ethresp  	= {};
+					ethresp.status 	= false;
+					ethresp.error	= "Infura API keys not enabled";
+					sendFrontendMSG(comms.action,ethresp);
+					return;
+				}
+			}	
 			
 			//Get the action
 			if(comms.action == "SENDETH"){
@@ -259,7 +291,18 @@ MDS.init(function(msg){
 			}else if(comms.action == "STARTMINIMASWAP"){
 				startMinimaSwap(USER_DETAILS, comms.sendamount, comms.requestamount,
 					comms.contractaddress, comms.reqpublickey, comms.otc, function(ethresp){
-					sendFrontendMSG(comms.action,ethresp);
+					
+					var msg 	= {};
+					msg.status 	= ethresp.status;
+						
+					//was it a sucess..
+					if(ethresp.status){
+						msg.message = "Minima swap started!";
+					}else{
+						msg.message = "Minima swap fail - "+ethresp.message;
+					}
+					
+					sendFrontendMSG(comms.action,msg);
 				});
 			
 			}else if(comms.action == "STARTETHSWAP"){
@@ -297,6 +340,8 @@ MDS.init(function(msg){
 					sendFrontendMSG(comms.action,ethresp);
 				});
 			
+			}else if(comms.action == "REFRESHBALANCE"){
+				
 			}else if(comms.action == "FRONTENDMSG"){
 				//Ignore..
 				

@@ -5,6 +5,10 @@ var MIN_HTLC_BLOCK = 0;
 //The Minima block time - different for TEST net
 var MINIMA_BLOCK_TIME = 20;
 
+//How far back in the order book to check..
+var ORDERBOOK_UPDATE_TIME_MINUTES = 50;
+var ORDERBOOK_DEPTH = Math.floor((60 * (ORDERBOOK_UPDATE_TIME_MINUTES+10)) / MINIMA_BLOCK_TIME); 
+
 //The ETH block time
 var ETH_BLOCK_TIME = 15;
 
