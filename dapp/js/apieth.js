@@ -148,7 +148,12 @@ function _collectExpiredETHCoin(htlclog,callback){
  * Check for NEW secrets.. 
  */
 var LAST_CHECKED_SECRET_BLOCK = -1;
-function checkETHNewSecrets(userdets, currentethblock, callback){
+
+function resetLastCheckedETHBlock(){
+	LAST_CHECKED_SECRET_BLOCK = -1;
+}
+
+function checkETHNewSecrets(currentethblock, callback){
 	
 	//Incase of failure..
 	var OLD_LAST_CHECKED_SECRET_BLOCK = LAST_CHECKED_SECRET_BLOCK;
@@ -172,10 +177,8 @@ function checkETHNewSecrets(userdets, currentethblock, callback){
 		if(startblock<0){
 			startblock = 0;
 		}
-		endblock   = currentethblock;
 	}else{
 		startblock = LAST_CHECKED_SECRET_BLOCK+1;
-		endblock	
 	}
 	
 	//Endblock should be a few blocks back.. incase of reorgs..

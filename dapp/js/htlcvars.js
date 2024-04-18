@@ -6,7 +6,7 @@ var MIN_HTLC_BLOCK = 0;
 var MINIMA_BLOCK_TIME = 50;
 
 //How far back in the order book to check..
-var ORDERBOOK_UPDATE_TIME_MINUTES = 20;
+var ORDERBOOK_UPDATE_TIME_MINUTES = 30;
 var ORDERBOOK_DEPTH = Math.floor((60 * (ORDERBOOK_UPDATE_TIME_MINUTES*2)) / MINIMA_BLOCK_TIME); 
 
 //The ETH block time
@@ -37,7 +37,7 @@ var HTLC_SECRETS_BACKLOG_CHECK = 50 + Math.floor(HTLC_TIMELOCK_SECS / ETH_BLOCK_
 var MINIMUM_MINIMA_TRADE = 10;
 var MAXIMUM_MINIMA_TRADE = 1000;
 
-//MAIN NET RPC
+//MAIN NET RPC (Default)
 var USE_API_KEYS			= true;
 var ETH_INFURA_HOST 		= "https://mainnet.infura.io/v3/";
 var ETH_INFURA_GASAPI_HOST 	= "https://gas.api.infura.io/networks/1/suggestedGasFees";

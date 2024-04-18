@@ -196,7 +196,7 @@ MDS.init(function(msg){
 		}
 			
 		//Check for new secrets
-		checkETHNewSecrets(USER_DETAILS, ethblock,function(){});
+		checkETHNewSecrets(ethblock,function(){});
 		
 		//Check expired Minima coins
 		checkExpiredMinimaHTLC(USER_DETAILS, minimablock, function(expiredminima){});
@@ -353,6 +353,7 @@ MDS.init(function(msg){
 				
 				//Convert to Sepolia settings..
 				setNetwork("sepolia");
+				resetLastCheckedETHBlock();
 				
 				//Now send to front end..
 				sendFrontendMSG(comms.action,"Switched to ETH Sepolia Network");
@@ -361,6 +362,7 @@ MDS.init(function(msg){
 				
 				//Convert to Sepolia settings..
 				setNetwork("mainnet");
+				resetLastCheckedETHBlock();
 				
 				//Now send to front end..
 				sendFrontendMSG(comms.action,"Switched to ETH Main Network");
