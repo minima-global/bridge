@@ -150,17 +150,34 @@ function createCompleteOrderBook(userdets,callback){
 			setCompleteOrderBook(finallist,function(){
 				
 				//Create the totals list
-				createOrderBookSimpleTotals(userdets,finallist);
-				
-				//And send this back..
-				callback(finallist);	
+				createOrderBookSimpleTotals(userdets,finallist,function(totals){
+					
+					//Set for fast access
+					setSimpleOrderBookTotals(totals);
+					
+					//And send this back..
+					callback(finallist);
+				});	
 			});
 		});	
 	});
 }
 
+/**
+ * Create a custom total with just certain users 
+ */
+function createFavsOrderBookSimpleTotals(userdets,callback){
+	//Create the favs orderbook..
+	getFavsOrderBook(function(favsorderbook){
+		//Now create a totals
+		createOrderBookSimpleTotals(userdets,favsorderbook,function(totals){
+			callback(totals);	
+		});	
+	});
+}
+
 var PRICE_BOOK_STEPS = 100;
-function createOrderBookSimpleTotals(userdets,completeorderbook){
+function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 	
 	var totals 					= {};
 	
@@ -384,7 +401,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook){
 	}
 	
 	//And set them..
-	setSimpleOrderBookTotals(totals);
+	callback(totals);
 }
 
 /**

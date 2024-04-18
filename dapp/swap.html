@@ -91,7 +91,10 @@
 <script type="text/javascript">
 	
 	var USER_DETAILS = {};
-
+	
+	//Are we searching Favourites
+	var favs = MDS.form.getParams("favs");
+	
 	function openbook(){
 		location.href="orderbook.html?uid="+MDS.minidappuid;
 	}
@@ -123,9 +126,9 @@
 		
 		//Ok - lets jump to the next page..
 		if(action == "buy"){
-			location.href="buy.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken;	
+			location.href="buy.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken+"&favs="+favs;	
 		}else{
-			location.href="sell.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken;
+			location.href="sell.html?uid="+MDS.minidappuid+"&amount="+sndamt+"&swaptoken="+swaptoken+"&favs="+favs;
 		}
 	}
 	
@@ -156,37 +159,47 @@
 		});
 	}
 	
+	function setGraphTotals(totals){
+		//wMinima range amounts
+		if(totals.wminima.books>0){
+			makechart("wMinimaBUYChart",totals.wminima.buybook,"wMinima BUY Book","blue");
+			makechart("wMinimaSELLChart",totals.wminima.sellbook,"wMinima SELL Book","red");
+			
+		}else{
+			buywminimabuttonid.disabled 	= true;
+			sellwminimabuttonid.disabled 	= true;
+			wMinimaBUYChart.style.display	= "none";
+			wMinimaSELLChart.style.display	= "none";
+			wminimacharts.innerHTML 		= "No orderbooks found..";
+		}
+		
+		//USDT range amounts
+		if(totals.usdt.books>0){
+			makechart("USDTBUYChart",totals.usdt.buybook,"USDT BUY Book","blue");
+			makechart("USDTSELLChart",totals.usdt.sellbook,"USDT SELL Book","red");
+			
+		}else{
+			buyusdtbuttonid.disabled 	= true;
+			sellusdtbuttonid.disabled 	= true;
+			USDTBUYChart.style.display	= "none";
+			USDTSELLChart.style.display	= "none";
+			usdtcharts.innerHTML 		= "No orderbooks found..";
+		}
+	}
+	
 	function setTotals(){
 		
-		//Now get the Totals..
-		getSimpleOrderBookTotals(function(totals){
-			
-			//wMinima range amounts
-			if(totals.wminima.books>0){
-				makechart("wMinimaBUYChart",totals.wminima.buybook,"wMinima BUY Book","blue");
-				makechart("wMinimaSELLChart",totals.wminima.sellbook,"wMinima SELL Book","red");
-				
-			}else{
-				buywminimabuttonid.disabled 	= true;
-				sellwminimabuttonid.disabled 	= true;
-				wMinimaBUYChart.style.display	= "none";
-				wMinimaSELLChart.style.display	= "none";
-				wminimacharts.innerHTML 		= "No orderbooks found..";
-			}
-			
-			//USDT range amounts
-			if(totals.usdt.books>0){
-				makechart("USDTBUYChart",totals.usdt.buybook,"USDT BUY Book","blue");
-				makechart("USDTSELLChart",totals.usdt.sellbook,"USDT SELL Book","red");
-				
-			}else{
-				buyusdtbuttonid.disabled 	= true;
-				sellusdtbuttonid.disabled 	= true;
-				USDTBUYChart.style.display	= "none";
-				USDTSELLChart.style.display	= "none";
-				usdtcharts.innerHTML 		= "No orderbooks found..";
-			}
-		});
+		if(favs == 0){
+			//Use Complete OrderBook
+			getSimpleOrderBookTotals(function(totals){
+				setGraphTotals(totals);
+			});
+		}else{
+			//Use Favs Orderbook
+			createFavsOrderBookSimpleTotals(USER_DETAILS,function(totals){
+				setGraphTotals(totals);
+			});	
+		}
 	}
 	
 	//Main message handler..
@@ -197,7 +210,6 @@
 			//Init Bridge Systems..
 			initBridgeSystems(function(userdets){
 				USER_DETAILS=userdets;
-				
 				setTotals();
 			});
 		

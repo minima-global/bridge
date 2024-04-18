@@ -67,6 +67,17 @@
 	
 	var reqpublickey 	= "0x00";
 	
+	//Are we only searching favourites
+	var favsparam 		= MDS.form.getParams("favs");
+	if(!favsparam){
+		favsparam = 0;
+	}
+	
+	var favs = false;
+	if(favsparam != 0){
+		favs = true;
+	}
+	
 	//Start a native swap..
 	function proceed(){
 		
@@ -107,7 +118,8 @@
 				USER_DETAILS=userdets;
 			
 				//Search for a User in the OrderBook..
-				searchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
+				//searchAllOrderBooks("sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
+				searchAllorFavsOrderBooks(favs,"sell", amount, reqtoken, USER_DETAILS.minimapublickey, function(found,order){
 					if(!found){
 						swapproceed.innerHTML="No match found to SELL "+amount+" Minima for "+reqtokenstr;
 					}else{

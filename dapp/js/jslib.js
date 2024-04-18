@@ -145,6 +145,10 @@ function jumpHelp(){
 	location.href="help.html?uid="+MDS.minidappuid;
 }
 
+function jumpFavs(){
+	location.href="favourites.html?uid="+MDS.minidappuid;
+}
+
 function jumpHome(){
 	location.href="index.html?uid="+MDS.minidappuid;
 }

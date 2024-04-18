@@ -247,6 +247,56 @@ function searchAllOrderBooks(action, amount, token, ignoreme, callback){
 	});
 }
 
+//I have AMOUNT of MINIMA - I want to swap for TOKEN.. find the best order
+function searchAllorFavsOrderBooks(favs,action, amount, token, ignoreme, callback){
+	
+	if(favs){
+		//Get the complete order book
+		getFavsOrderBook(function(completeorderbook){
+			_searchAllOrderBooksWithBook(completeorderbook, action, amount, token, ignoreme, function(res,order){
+				callback(res,order);
+			});
+		});
+	}else{
+		//Get the complete order book
+		getCompleteOrderBook(function(completeorderbook){
+			_searchAllOrderBooksWithBook(completeorderbook, action, amount, token, ignoreme, function(res,order){
+				callback(res,order);
+			});
+		});	
+	}
+}
+
+function getFavsOrderBook(callback){
+	
+	//Get the current complete
+	getCompleteOrderBook(function(completeorderbook){
+		
+		//Get the favourites..
+		getFavourites(function(favs){
+			var filterorderbook = [];
+			
+			var orderlen = completeorderbook.length;
+			for(var o=0;o<orderlen;o++){
+				var ob = completeorderbook[o];
+				
+				var len = favs.rows.length;
+				for(var i=0;i<len;i++){
+					var fav = favs.rows[i];
+					
+					//Check is not THIS user
+					if(ob.data.publickey == fav.BRIDGEUID){
+						filterorderbook.push(ob);	
+					}			
+				}
+			}
+			
+			//And send back
+			callback(filterorderbook);
+		});	
+	});
+}
+
 function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, ignoreme, callback){	
 		
 	var validorders 	= [];

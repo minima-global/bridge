@@ -48,43 +48,94 @@
 		createHeader();
 	</script>
 	
-	If you <b>know</b> the person you are trading with ( over-the-counter )<br>
+	<b style="font-size:20;">Favourites</b><br>
 	<br>
-	<button class=solobutton onclick="otctrade();">OTC TRADE</button><br>
+	
+	<table id="favstable"></table>
+	
+	<!--<button onclick="removeall();" class='solobutton'>REMOVE ALL FAVS</button>-->
+	
 	<br><br>
+	<table>
+		<tr>
+			<td class="rightalign">NAME : </td>
+			<td><input type=text id=nameid></td>
+		</tr>
+		<tr>
+			<td class="rightalign">BRIDGE OTC_UID : </td>
+			<td><input type=text id=bridgeuid></td>
+		</tr>
+		<tr>
+			<td style="text-align:center;" colspan=2><br><button class='solobutton' onclick="addfav();">ADD FAVOURITE</button></td>
+		</tr>
+	</table>
 	
-	If you <b>do not know</b> anyone you can find someone from the orderbook<br>
 	<br>
-	<button class=solobutton onclick="orderbooktrade();">ORDERBOOK TRADE</button><br>
+	Users <b>MUST</b> be online to trade with you.. some users may not be connected 100% of the time.<br>
 	<br>
-	<input type="checkbox" id="idfavscheckbox" name="favscheckbox">
-	<label for="favscheckbox">Only search your Favourites</label><br>
-	
+	Your funds are not at risk but they can be locked up for a few hours should a User fail to respond.<br>
+	<br> 
+	By using favourites, you ensure you trade with Users that have<br> shown themselves to be best connected and available at all times.    
 	<script type="text/javascript">
 		createFooter();
 	</script>
 	
 <script type="text/javascript">
 	
-	function otctrade(){
-		location.href="otc.html?uid="+MDS.minidappuid;
+	function removeall(){
+		removeAllFavourites(function(){
+			loadFavs();
+		});
 	}
 	
-	function orderbooktrade(){
-		
-		//Are favourites checked..
-		var favs = 0;
-		if(idfavscheckbox.checked){
-			favs = 1;
+	function loadFavs(){
+		getFavourites(function(favs){
+			
+			//Wipe Table
+			favstable.innerHTML = "";
+			
+			var thead = favstable.insertRow();
+			thead.insertCell(0).innerHTML = "<b>NAME</b>";
+			thead.insertCell(1).innerHTML = "<b>OTC_UID</b>";
+			thead.insertCell(2).innerHTML = "";
+			
+			var len = favs.rows.length;
+			for(var i=0;i<len;i++){
+				var row = favs.rows[i];
+				
+				var trow = favstable.insertRow();
+				trow.insertCell(0).innerHTML = row.NAME;
+				trow.insertCell(1).innerHTML = row.BRIDGEUID.substring(0,16)+"..";
+				trow.insertCell(2).innerHTML = "<button onclick='removeFav("+row.ID+");' class='solobutton'>REMOVE</button>";
+			}
+		});	
+	}
+	
+	function removeFav(id){
+		if(confirm("Are you sure you wish to remove this user ?")){
+			removeFavourite(id,function(){
+				loadFavs();
+			});	
 		}
 		
-		location.href="swap.html?uid="+MDS.minidappuid+"&favs="+favs;
+	}
+	
+	function addfav(){
+		var name = nameid.value;
+		var uid  = bridgeuid.value;
+		
+		nameid.value 	= "";
+		bridgeuid.value = "";
+		
+		addFavourites(name,uid,function(){
+			loadFavs();
+		});
 	}
 	
 	//Main message handler..
 	MDS.init(function(msg){
 		if(msg.event == "inited"){
-				
+			loadFavs();
 			
 		//Messages from back end
 		}else if(msg.event == "MDSCOMMS"){

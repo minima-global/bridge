@@ -148,7 +148,7 @@
 			//Set the Minima...
 			var balunconf = false;
 			if(balances.minima.unconfirmed != "0"){
-				nativeminimabalance.innerHTML = balances.minima.confirmed+" (unconfirmed:"+balances.minima.unconfirmed+")";	
+				nativeminimabalance.innerHTML = balances.minima.confirmed+"<br>(unconfirmed:"+balances.minima.unconfirmed+")";	
 				balunconf = true;
 			}else{
 				nativeminimabalance.innerHTML = toFixedNumber(balances.minima.confirmed);

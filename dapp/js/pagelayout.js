@@ -17,13 +17,16 @@ function createHeader(){
 	"			<td><img height=40 src=\"bridge.png\"></td>"+
 	"			<td style=\"text-align:left;font-size:26px;width:100%\">&nbsp;<b>ETH BRIDGE</b></td>"+
 	"			<td nowrap>"+
-	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpActivity();\" height=40 src=\"history.png\">&nbsp;&nbsp;"+
+	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpFavs();\" height=40 src=\"./images/favs.png\">&nbsp;&nbsp;"+
 	"			</td>"+
 	"			<td nowrap>"+
-	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpHelp();\" height=40 src=\"help.png\">&nbsp;&nbsp;"+
+	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpActivity();\" height=40 src=\"./images/history.png\">&nbsp;&nbsp;"+
 	"			</td>"+
 	"			<td nowrap>"+
-	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpSettings();\" height=40 src=\"settings.png\">&nbsp;&nbsp;"+
+	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpHelp();\" height=40 src=\"./images/help.png\">&nbsp;&nbsp;"+
+	"			</td>"+
+	"			<td nowrap>"+
+	"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpSettings();\" height=40 src=\"./images/settings.png\">&nbsp;&nbsp;"+
 	"			</td>"+
 	//"			<td nowrap>"+
 	//"				<img style=\"cursor:pointer;\" onclick=\"event.stopPropagation(); jumpHome();\" height=40 src=\"home.png\">&nbsp;&nbsp;"+

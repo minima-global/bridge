@@ -337,8 +337,8 @@ function addFavourites(name, uid, callback){
 	});
 }
 
-function removeFavourites(name, callback){
-	var sql = "DELETE FROM favs WHERE name='"+name+"'";
+function removeFavourite(id, callback){
+	var sql = "DELETE FROM favs WHERE id="+id+"";
 	MDS.sql(sql,function(msg){
 		callback(msg);
 	});
