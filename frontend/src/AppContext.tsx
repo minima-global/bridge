@@ -1,4 +1,4 @@
-import { createContext, useRef, useEffect } from "react";
+import { createContext, useRef, useEffect, useState } from "react";
 
 export const appContext = createContext({} as any);
 
@@ -7,6 +7,10 @@ interface IProps {
 }
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
+
+  const [_currentNavigation, setCurrentNavigation] = useState("balance");
+
+  
 
   useEffect(() => {
     if (!loaded.current) {
@@ -19,11 +23,14 @@ const AppProvider = ({ children }: IProps) => {
     }
   }, [loaded]);
 
+
+
   return (
     <appContext.Provider
       value={
         {
-          // add some stuff
+          _currentNavigation,
+          setCurrentNavigation
         }
       }
     >

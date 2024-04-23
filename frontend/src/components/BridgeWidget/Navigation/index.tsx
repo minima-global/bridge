@@ -1,0 +1,20 @@
+import { useContext } from "react";
+import { appContext } from "../../../AppContext";
+
+const Navigation = () => {
+    const { _currentNavigation, setCurrentNavigation } = useContext(appContext);
+
+  const isActive = (_current: string) => {
+    return _currentNavigation === _current ? "bg-violet-500 rounded-lg text-black font-bold hover:text-black py-2" : "text-violet-300 hover:text-violet-400 cursor-pointer my-auto";
+  }
+
+  return (
+    <nav className="bg-violet-800 rounded-lg grid grid-cols-3 max-w-sm mx-auto text-center">
+      <a onClick={() => setCurrentNavigation("balance")} className={`${isActive('balance')}`}>Balance</a>
+      <a onClick={() => setCurrentNavigation("trade")} className={`${isActive('trade')}`}>Trade</a>
+      <a onClick={() => setCurrentNavigation("liquidity")} className={`${isActive('liquidity')}`}>Liquidity</a>
+    </nav>
+  );
+};
+
+export default Navigation;
