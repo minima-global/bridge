@@ -5,7 +5,7 @@ const Navigation = () => {
     const { _currentNavigation, setCurrentNavigation } = useContext(appContext);
 
   const isActive = (_current: string) => {
-    return _currentNavigation === _current ? "bg-violet-500 rounded-lg text-black font-bold hover:text-black py-2" : "text-violet-300 hover:text-violet-400 cursor-pointer my-auto";
+    return _currentNavigation === _current ? "bg-violet-500 rounded-lg text-white dark:text-black font-bold hover:text-white dark:hover:text-black py-2" : "text-violet-300 hover:text-violet-400 cursor-pointer my-auto";
   }
 
   return (
