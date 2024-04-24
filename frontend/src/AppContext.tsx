@@ -5,6 +5,9 @@ import { setInfuraApiKeys, getInfuraGASAPI } from "../../dapp/js/ethutil.js";
 import { JsonRpcProvider } from "ethers";
 import { Networks } from "./types/Network.js";
 import { sql } from "./utils/SQL/index.js";
+import { Asset } from "./types/Asset.js";
+import defaultAssetsStored, { _defaults } from "./constants/index.js";
+import { CoinStats } from "./types/MinimaBalance.js";
 
 export const appContext = createContext({} as any);
 
@@ -18,12 +21,18 @@ const AppProvider = ({ children }: IProps) => {
   const [isWorking, setWorking] = useState(false);
   // App's navigation
   const [_currentNavigation, setCurrentNavigation] = useState("balance");
+  // Deposit Modal
+  const [_promptDeposit, setPromptDeposit] = useState(false);
   // Is App in Read or Write Mode
   const [_promptReadMode, setReadMode] = useState<null | boolean>(null);
   // Set up API Keys
   const [_promptJsonRpcSetup, setPromptJsonRpcSetup] = useState<null | boolean>(
     false
   );
+  // Default ERC 20 Assets
+  const [_defaultAssets, setDefaultAssets] = useState<{ assets: Asset[] }>({
+    assets: [],
+  });
   // Generated Key by MDS seedrandom generator
   const [_generatedKey, setGeneratedKey] = useState("");
   // JSON RPC Network Provider
@@ -33,6 +42,58 @@ const AppProvider = ({ children }: IProps) => {
     apiKey: string;
     apiKeySecret: string;
   } | null>(null);
+  // User Details Sync with Backend
+  const [_userDetails, setUserDetails] = useState<any>(null);
+  // Native Minima Balance
+  const [_minimaBalance, setMinimaBalance] = useState<null | CoinStats>(null);
+
+  useEffect(() => {
+    (async () => {
+      // if MDS inited then we can run our init SQL/re-sql on network change
+      if (loaded && loaded.current && _provider) {
+        setWorking(true);
+        setDefaultAssets({ assets: [] });
+
+        // We get the current provider
+        const currentNetwork = await _provider.getNetwork();
+        // Fetch assets according to the default network (different network, different assets)
+        const defaultAssets: any = await sql(
+          `SELECT * FROM cache WHERE name = 'DEFAULTASSETS_${currentNetwork.chainId}'`
+        );
+
+        // if exists, set them in memory
+        if (defaultAssets) {
+          setDefaultAssets(JSON.parse(defaultAssets.DATA));
+        } else {
+          // let's initialize the default assets
+          const _d = defaultAssetsStored
+            .filter((asset) => {
+              // Check if _defaults has the network for the current asset
+              const networkExists =
+                _defaults[asset.name] &&
+                _defaults[asset.name][currentNetwork.name];
+
+              // Return true if the network exists, false otherwise
+              return networkExists;
+            })
+            .map((asset) => ({
+              ...asset,
+              address: _defaults[asset.name]
+                ? _defaults[asset.name][currentNetwork.name]
+                : "",
+            }));
+
+          await sql(
+            `INSERT INTO cache (name, data) VALUES ('DEFAULTASSETS_${
+              currentNetwork.chainId
+            }', '${JSON.stringify({ assets: _d })}')`
+          );
+          setDefaultAssets({ assets: _d });
+        }
+        setWorking(false);
+      }
+    })();
+  }, [_provider, loaded]);
 
   useEffect(() => {
     if (!loaded.current) {
@@ -47,6 +108,33 @@ const AppProvider = ({ children }: IProps) => {
               if (response.response.mode === "WRITE") {
                 initBridgeSystemsStartup(function (userdets) {
                   console.log(userdets);
+                  setUserDetails(userdets);
+
+                  const { mxaddress } = userdets.minimaaddress;
+                  (window as any).MDS.cmd(
+                    `balance tokenid:0x00 address:${mxaddress}`,
+                    (resp: any) => {
+                      if (resp.status) {
+                        const { confirmed, unconfirmed, coins } =
+                          resp.response[0];
+
+                        // Use Minima Maths to calculate total of confirmed + unconfirmed
+                        const add =
+                          'runscript script:"LET total=' +
+                          confirmed +
+                          "+" +
+                          unconfirmed +
+                          ' LET roundedtotal=FLOOR(total)"';
+
+                        (window as any).MDS.cmd(add, function (respo) {
+                          const total = respo.response.variables.roundedtotal;                         
+                          setMinimaBalance({confirmed, unconfirmed, total, coins});
+                        });
+
+                        setMinimaBalance(resp.balance[0].confirmed);
+                      }
+                    }
+                  );
                 });
 
                 // Generate key for Eth Wallet
@@ -234,6 +322,10 @@ const AppProvider = ({ children }: IProps) => {
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
   };
+  
+  const promptDeposit = () => {
+    setPromptDeposit((prevState) => !prevState);
+  };
 
   return (
     <appContext.Provider
@@ -242,6 +334,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _provider,
 
+        _promptDeposit,
+        promptDeposit,
+
         _promptReadMode,
         _promptJsonRpcSetup,
         promptJsonRpcSetup,
@@ -249,8 +344,12 @@ const AppProvider = ({ children }: IProps) => {
         _currentNavigation,
         setCurrentNavigation,
 
+        _minimaBalance,
+        _defaultAssets,
+
         _generatedKey,
         _userKeys,
+        _userDetails,
         updateApiKeys,
       }}
     >

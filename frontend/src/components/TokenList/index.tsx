@@ -4,6 +4,7 @@ import { useWalletContext } from "../../providers/WalletProvider/WalletProvider"
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
+import DepositIcon from "../UI/DepositIcon";
 
 const TokenList = () => {
   const { _currentNavigation, promptTokenDetails } = useContext(appContext);
@@ -14,8 +15,8 @@ const TokenList = () => {
   }
 
   return (
-    <div className="mx-4 md:mx-0">
-      <h3 className="font-bold mb-2">Tokens</h3>
+    <div className="text-left">
+      <h3 className="font-bold mb-2">ERC-20 Tokens</h3>
 
       <ul>
         {tokens.map((token) => (
@@ -71,13 +72,14 @@ const TokenList = () => {
             </g>
           </svg>
 
-          <div className="flex justify-between ml-2">
+          <div className="flex justify-between ml-2 text-left">
             <div>
-              <h3 className="font-bold">Ethereum</h3>
+              <h3 className="font-bold ">Ethereum</h3>
               <p className="font-mono text-sm">{_balance}</p>
             </div>
           </div>
         </li>
+
       </ul>
     </div>
   );
