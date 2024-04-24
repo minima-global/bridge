@@ -356,3 +356,7 @@ function getFavourites(callback){
 		callback(sqlmsg);
 	});
 }
+
+
+
+export { createDB };

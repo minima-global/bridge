@@ -29,3 +29,5 @@ function setupCoinSecretEvents(callback){
 		callback(resp);
 	});
 }
+
+export { MAIN_ADDRESS, setUpHTLCScript, setupCoinSecretEvents };

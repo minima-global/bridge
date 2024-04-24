@@ -1,8 +1,8 @@
 import "./App.css";
-import AppGrid from "./components/UI/appgrid";
-import Dashboard from "./components/dashboard";
-import Footer from "./components/footer";
-import Header from "./components/header";
+import AppGrid from "./components/UI/AppGrid";
+import Dashboard from "./components/Dashboard";
+import Footer from "./components/Footer";
+import Header from "./components/Header";
 
 function App() {
 

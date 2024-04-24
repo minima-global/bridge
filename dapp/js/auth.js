@@ -1,8 +1,13 @@
 
+import { initialiseETHAddress } from "./ethutil";
+import { MAIN_ADDRESS, setUpHTLCScript, setupCoinSecretEvents } from "./scripts";
+import { getETHERUMAddress } from "./ethutil";
+import { createDB } from "./sql";
+
 /**
  * Get the user Public key and Wallet address
  */
-function _getUserMaximaPublicKey(callback){
+export function _getUserMaximaPublicKey(callback){
 	MDS.cmd("maxima",function(max){
 		callback(max.response.publickey);
 	});	
@@ -82,7 +87,7 @@ function isBridgeInited(callback){
 	});
 }
 
-function initBridgeSystemsStartup(callback){
+export function initBridgeSystemsStartup(callback){
 	
 	MDS.log("Initialising base bridge systems..");
 	

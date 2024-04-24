@@ -134,3 +134,5 @@ function switchNetwork(network){
 		HTLCContractAddress 	= "0x"+("D359f1A2C1026646a2FBaF1B4339F4b3449716aB".toUpperCase());	
 	}
 }
+
+export { ETH_INFURA_GASAPI_HOST };

@@ -1,3 +1,6 @@
+import "./ethers-4.0.31.min";
+
+import { ETH_INFURA_GASAPI_HOST }from "./htlcvars";
 
 /**
  * the Main ETH Wallet address
@@ -22,17 +25,17 @@ var GAS_API = {};
 /**
  * Initialise the ETH Address - this is DONE ONCE ONLY
  */
-function initialiseETHAddress(private, callback){
+export function initialiseETHAddress(priv, callback){
 	
 	//Create a wallet..
-	var wallet = new ethers.Wallet(private);
+	var wallet = new ethers.Wallet(priv);
 	
 	//Clean up the address
 	var cleanwallet = "0x"+wallet.address.slice(2).toUpperCase();
 	
 	MDS.log("ETH Wallet setup : "+cleanwallet);
 	MAIN_ETH_ADDRESS 	= cleanwallet;
-	PRIVATE_KEY			= private;
+	PRIVATE_KEY			= priv;
 	
 	if(callback){
 		callback(cleanwallet);
@@ -552,3 +555,8 @@ function boostTransaction(transactionid,callback){
 		});
 	});
 }
+
+
+
+
+export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI };
