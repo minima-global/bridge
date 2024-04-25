@@ -4,10 +4,10 @@ import { useWalletContext } from "../../providers/WalletProvider/WalletProvider"
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
-import DepositIcon from "../UI/DepositIcon";
+// import DepositIcon from "../UI/DepositIcon";
 
 const TokenList = () => {
-  const { _currentNavigation, promptTokenDetails } = useContext(appContext);
+  const { _currentNavigation } = useContext(appContext);
   const { _balance, _network } = useWalletContext();
   const { tokens } = useTokenStoreContext();
   if (_currentNavigation !== "balance") {
@@ -21,9 +21,9 @@ const TokenList = () => {
       <ul>
         {tokens.map((token) => (
           <li
-            onClick={() => promptTokenDetails(token)}
+            // onClick={() => promptTokenDetails(token)}
             key={token.address}
-            className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md dark:bg-opacity-10 bg-opacity-30 p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
+            className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md dark:bg-[#1B1B1B] bg-opacity-30 p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
           >
             {_defaults["wMinima"][_network] === token.address ? (
               <img
@@ -54,7 +54,7 @@ const TokenList = () => {
             </div>
           </li>
         ))}
-        <li className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-opacity-10 p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2">
+        <li className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2">
           <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
             <g fill="none" fillRule="evenodd">
               <circle cx="16" cy="16" r="16" fill="#627EEA" />

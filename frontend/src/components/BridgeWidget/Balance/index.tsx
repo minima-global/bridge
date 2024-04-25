@@ -16,7 +16,7 @@ const Balance = () => {
     <div className="mx-4 md:mx-0 text-left">
       <div className="my-4">
         <div className="flex justify-between items-center">
-          <div className="flex items-center">
+          <div className="flex gap-1 items-center">
             <WalletIcon />
             <h1 className="text-lg dark:text-white font-bold">Bridge Wallet</h1>
           </div>
@@ -28,7 +28,7 @@ const Balance = () => {
         <h3 className="font-bold mb-2">Native</h3>
         <NativeMinima />
       </div>
-      <hr className="border-2 border-violet-400 my-6"></hr>
+      <hr className="border border-violet-400 my-6"></hr>
       <TokenList />
 
       <div className="mx-auto max-w-sm my-8">        

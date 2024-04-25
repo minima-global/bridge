@@ -699,3 +699,6 @@ function getEmptyOrderBook(){
 	
 	return orderbook;
 }
+
+
+export { setUserOrderBook, getMyOrderBook };

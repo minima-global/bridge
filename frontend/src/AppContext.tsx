@@ -288,6 +288,7 @@ const AppProvider = ({ children }: IProps) => {
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
+              console.log(comms);
               //Show the message
               alert(JSON.stringify(comms, null, 2));
             }

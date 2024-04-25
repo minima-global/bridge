@@ -2,6 +2,7 @@
 import Deposit from "../Deposit";
 import Withdraw from "../Withdraw";
 import Balance from "./Balance";
+import Liquidity from "./Liquidity";
 
 const BridgeWidget = () => {
 
@@ -10,6 +11,7 @@ const BridgeWidget = () => {
       <Deposit />
       <Withdraw />
       <Balance />
+      <Liquidity />
     </div>
   );
 };
