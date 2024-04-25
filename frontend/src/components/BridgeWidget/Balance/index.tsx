@@ -6,7 +6,7 @@ import InfoTooltip from "../../UI/InfoTooltip";
 import WalletIcon from "../../UI/WalletIcon";
 
 const Balance = () => {
-  const { _currentNavigation, promptDeposit } = useContext(appContext);
+  const { _currentNavigation, promptDeposit, promptWithdraw } = useContext(appContext);
 
   if (_currentNavigation !== "balance") {
     return null;
@@ -33,8 +33,8 @@ const Balance = () => {
 
       <div className="mx-auto max-w-sm my-8">        
         <div className="grid grid-cols-2 gap-2">
-          <button onClick={promptDeposit} className="font-bold bg-teal-800 text-white dark:text-black">Deposit</button>
-          <button className="font-bold bg-violet-800 text-white dark:text-black">Withdraw</button>
+          <button onClick={promptDeposit} className="font-bold bg-teal-600 text-white dark:text-black">Deposit</button>
+          <button onClick={promptWithdraw} className="font-bold bg-orange-600 text-white dark:text-black">Withdraw</button>
         </div>
       </div>
     </div>

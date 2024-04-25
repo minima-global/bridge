@@ -23,16 +23,22 @@ const AppProvider = ({ children }: IProps) => {
   const [_currentNavigation, setCurrentNavigation] = useState("balance");
   // Deposit Modal
   const [_promptDeposit, setPromptDeposit] = useState(false);
+  // Withdraw Modal
+  const [_promptWithdraw, setPromptWithdraw] = useState(false);
   // Is App in Read or Write Mode
   const [_promptReadMode, setReadMode] = useState<null | boolean>(null);
   // Set up API Keys
   const [_promptJsonRpcSetup, setPromptJsonRpcSetup] = useState<null | boolean>(
     false
   );
+  // Current Network
+  const [_currentNetwork, setCurrentNetwork] = useState('mainnet');
   // Default ERC 20 Assets
   const [_defaultAssets, setDefaultAssets] = useState<{ assets: Asset[] }>({
     assets: [],
   });
+  // Default ERC 20 Assets
+  const [_defaultNetworks, setDefaultNetworks] = useState<Networks | null>(null);
   // Generated Key by MDS seedrandom generator
   const [_generatedKey, setGeneratedKey] = useState("");
   // JSON RPC Network Provider
@@ -131,7 +137,7 @@ const AppProvider = ({ children }: IProps) => {
                           setMinimaBalance({confirmed, unconfirmed, total, coins});
                         });
 
-                        setMinimaBalance(resp.balance[0].confirmed);
+                        setMinimaBalance(resp.response[0].confirmed);
                       }
                     }
                   );
@@ -233,6 +239,46 @@ const AppProvider = ({ children }: IProps) => {
               promptJsonRpcSetup();
             }
 
+            if (defaultNetworks) {
+              // set all networks saved
+              setDefaultNetworks(JSON.parse(defaultNetworks.DATA));
+            } else {
+
+              // Initialize networks
+              await sql(
+                `INSERT INTO cache (name, data) VALUES ('DEFAULTNETWORKS', '${JSON.stringify(
+                  {
+                    mainnet: {
+                      name: "Ethereum",
+                      rpc: "https://mainnet.infura.io/v3/",
+                      chainId: "1",
+                      symbol: "ETH",
+                    },
+                    sepolia: {
+                      name: "SepoliaETH",
+                      rpc: "https://sepolia.infura.io/v3/",
+                      chainId: "11155111",
+                      symbol: "SepoliaETH",
+                    },
+                  }
+                )}')`
+              );
+              setDefaultNetworks({
+                mainnet: {
+                  name: "Ethereum",
+                  rpc: "https://mainnet.infura.io/v3/",
+                  chainId: "1",
+                  symbol: "ETH",
+                },
+                sepolia: {
+                  name: "SepoliaETH",
+                  rpc: "https://sepolia.infura.io/v3/",
+                  chainId: "11155111",
+                  symbol: "SepoliaETH",
+                },
+              });
+            }
+
             setWorking(false);
           })();
 
@@ -286,6 +332,8 @@ const AppProvider = ({ children }: IProps) => {
       );
 
       setProvider(networkToConnect);
+      setCurrentNetwork(network);
+
     } else {
       console.error("Network configuration not found.");
     }
@@ -326,6 +374,10 @@ const AppProvider = ({ children }: IProps) => {
   const promptDeposit = () => {
     setPromptDeposit((prevState) => !prevState);
   };
+  
+  const promptWithdraw = () => {
+    setPromptWithdraw((prevState) => !prevState);
+  };
 
   return (
     <appContext.Provider
@@ -333,6 +385,9 @@ const AppProvider = ({ children }: IProps) => {
         isWorking,
 
         _provider,
+
+        _promptWithdraw,
+        promptWithdraw,
 
         _promptDeposit,
         promptDeposit,
@@ -345,7 +400,9 @@ const AppProvider = ({ children }: IProps) => {
         setCurrentNavigation,
 
         _minimaBalance,
+        _currentNetwork,
         _defaultAssets,
+        _defaultNetworks,
 
         _generatedKey,
         _userKeys,

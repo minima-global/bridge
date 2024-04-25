@@ -659,3 +659,6 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 	});
 }
 
+
+
+export { sendMinima };

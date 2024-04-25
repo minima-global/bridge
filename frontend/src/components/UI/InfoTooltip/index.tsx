@@ -34,7 +34,7 @@ const InfoTooltip = ({ message }) => {
         <div
           style={{
             position: 'absolute',
-            top: '0px',
+            top: '5%',
             left: '50%',
             transform: 'translateX(-50%)',
             backgroundColor: 'rgba(0, 0, 0, 0.8)',
