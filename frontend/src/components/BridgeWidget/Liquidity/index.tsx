@@ -1,8 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../../AppContext";
-import { getMyOrderBook, setUserOrderBook } from "../../../../../dapp/js/orderbook.js";
 import PoolIcon from "../../UI/PoolIcon/index.js";
-import AddLiquidity from "./AddLiquidity/index.js";
 import YourPools from "./YourPools/index.js";
 
 const Liquidity = () => {
@@ -21,9 +19,9 @@ const Liquidity = () => {
             <h1 className="text-lg dark:text-white font-bold">Pools</h1>
           </div>
         </div>
+        <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />
       </div>
       <div>
-        {/* <AddLiquidity /> */}
         <YourPools />
       </div>
     </div>

@@ -22,6 +22,7 @@ const Balance = () => {
           </div>
           <InfoTooltip message="The Bridge wallet is separated from your main Native Minima and Ethereum Wallets." />
         </div>
+        <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />
       </div>
       <div></div>
       <div>

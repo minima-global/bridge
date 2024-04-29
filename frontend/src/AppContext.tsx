@@ -22,6 +22,8 @@ const AppProvider = ({ children }: IProps) => {
   const [isWorking, setWorking] = useState(false);
   // App's navigation
   const [_currentNavigation, setCurrentNavigation] = useState("balance");
+  // Trading Method Navigation
+  const [_currentTradeWindow, setCurrentTradeWindow] = useState<'otc' | 'orderbook' | null>(null);
   // Deposit Modal
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
@@ -399,6 +401,9 @@ const AppProvider = ({ children }: IProps) => {
         _promptReadMode,
         _promptJsonRpcSetup,
         promptJsonRpcSetup,
+
+        _currentTradeWindow,
+        setCurrentTradeWindow,
 
         _currentNavigation,
         setCurrentNavigation,

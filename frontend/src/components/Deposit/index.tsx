@@ -29,7 +29,7 @@ const Deposit = () => {
           Native
         </a>
         <a onClick={() => setView("erc20")} className={`${isActive("erc20")}`}>
-          ERC20
+          Ethereum
         </a>
       </nav>
       {view === "native" && <NativeAddress />}
