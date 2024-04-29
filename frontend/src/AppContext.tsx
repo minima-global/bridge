@@ -8,6 +8,7 @@ import { sql } from "./utils/SQL/index.js";
 import { Asset } from "./types/Asset.js";
 import defaultAssetsStored, { _defaults } from "./constants/index.js";
 import { CoinStats } from "./types/MinimaBalance.js";
+import { toast } from "react-toastify";
 
 export const appContext = createContext({} as any);
 
@@ -380,6 +381,8 @@ const AppProvider = ({ children }: IProps) => {
     setPromptWithdraw((prevState) => !prevState);
   };
 
+  const notify = (message: string) => toast(message, { position: 'bottom-right', theme: 'dark'});
+
   return (
     <appContext.Provider
       value={{
@@ -409,6 +412,8 @@ const AppProvider = ({ children }: IProps) => {
         _userKeys,
         _userDetails,
         updateApiKeys,
+
+        notify
       }}
     >
       {children}

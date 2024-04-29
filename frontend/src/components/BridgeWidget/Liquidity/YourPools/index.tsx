@@ -1,25 +1,12 @@
-import { useEffect, useState } from "react";
-import {
-  getMyOrderBook,
-  setUserOrderBook,
-} from "../../../../../../dapp/js/orderbook.js";
 import WrappedPool from "./WrappedPool/index.js";
+import TetherPool from "./TetherPool/index.js";
 
-const YourPools = () => {
-  const [myOrderBook, setOrderBook] = useState<any>(null);
-
-  useEffect(() => {
-    // get our pools
-    getMyOrderBook(function (orderBook) {
-      console.log(orderBook);
-      setOrderBook(orderBook);
-    });
-  }, []);
+const YourPools = () => {  
 
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       <WrappedPool />
-      {/* <TetherPool /> */}
+      <TetherPool />
     </div>
   );
 };

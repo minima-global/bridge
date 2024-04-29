@@ -29,7 +29,7 @@ const Navigation = () => {
           onClick={() => setCurrentNavigation("liquidity")}
           className={`${isActive("liquidity")}`}
         >
-          Liquidity
+          Pools
         </a>
       </nav>
     </div>

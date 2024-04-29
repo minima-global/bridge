@@ -1,3 +1,5 @@
+import { toFixedNumber } from "./jslib.js";
+import {MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE} from "./htlcvars.js";
 
 //The Bridge order book address
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
