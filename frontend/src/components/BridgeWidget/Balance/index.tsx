@@ -27,7 +27,7 @@ const Balance = () => {
       <div></div>
       <div>
         <h3 className="font-bold mb-2">Native</h3>
-        <NativeMinima />
+        <NativeMinima display={false} />
       </div>
       <hr className="border border-violet-400 my-6"></hr>
       <TokenList />

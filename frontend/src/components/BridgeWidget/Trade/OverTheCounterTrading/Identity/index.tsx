@@ -36,33 +36,17 @@ const Identity = ({ fullAddress = false, _address }) => {
       }}
       className="mx-auto text-center relative dark:text-black grid grid-cols-[auto_1fr] items-center"
     >
-      <span className="text-black-300 font-bold px-1 bg-teal-300 h-full flex justify-center items-center">UID</span>
+      <span className="text-black-300 rounded-l font-bold px-1 pl-2 bg-teal-500 h-full flex justify-center items-center">UID</span>
       {fullAddress && (
         <input
           readOnly
           onClick={handleCopy}
           onKeyDown={handleKeyDown}
           onDoubleClick={handleDoubleClick}
-          className="p-2 text-left font-bold focus:bg-teal-200 pr-10 truncate focus:outline-none dark:focus:text-black px-3 text-sm w-full bg-teal-300"
+          className="p-2 pl-0 text-left font-bold focus:bg-teal-200 pr-10 truncate focus:outline-none dark:focus:text-black px-3 text-sm w-full bg-teal-500 rounded-r"
           value={_address ? _address : "N/A"}
         />
-      )}
-      {!fullAddress && (
-        <input
-          readOnly
-          onClick={handleCopy}
-          onKeyDown={handleKeyDown}
-          onDoubleClick={handleDoubleClick}
-          className="p-2 text-left font-bold rounded-full focus:bg-teal-200 focus:outline-teal-600 dark:focus:text-black px-3 text-sm !w-max !max-w-max bg-teal-300"
-          value={
-            _address
-              ? _address.substring(0, 8) +
-                "..." +
-                _address.substring(_address.length - 8, _address.length)
-              : "N/A"
-          }
-        />
-      )}
+      )}      
       <svg
         onInput={() => {}}
         className="absolute right-2 top-2"

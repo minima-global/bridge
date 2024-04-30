@@ -139,8 +139,6 @@ const AppProvider = ({ children }: IProps) => {
                           const total = respo.response.variables.roundedtotal;                         
                           setMinimaBalance({confirmed, unconfirmed, total, coins});
                         });
-
-                        setMinimaBalance(resp.response[0].confirmed);
                       }
                     }
                   );
