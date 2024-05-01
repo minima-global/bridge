@@ -47,34 +47,36 @@ const renderCell = (cellData) => {
     <>
       <td className="p-3">
         <input
-          className="w-20 bg-black focus:outline-none truncate pl-2 font-mono text-sm font-bold"
+          className="w-20 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={uid}
         />
       </td>
       <td className="p-3">
         <input
-          className="w-20 bg-black focus:outline-none truncate pl-6 font-mono text-sm text-center"
+          className="w-20 bg-transparent focus:outline-none truncate font-mono text-sm text-center"
           value={native}
         />
       </td>
 
       <td className="p-3">
-        <div className="flex py-3">
-          <img className="w-[36px] rounded-full" src="/assets/token.svg" />
-          <input
-            className="bg-black w-20 focus:outline-none truncate pl-2 font-mono text-sm"
-            value={token.amount}
+        <div className="bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max">
+          <img
+            className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
+            src="/assets/tether.svg"
           />
+          <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
+            {token.amount}
+          </p>
         </div>
       </td>
       <td className="p-3">
         <input
-          className="bg-black w-20 focus:outline-none truncate pl-2 font-mono text-sm text-center"
+          className="bg-transparent w-10 focus:outline-none truncate font-mono text-sm text-center"
           value={timelock}
         />
       </td>
-      <td className="p-3">
-        <p className="my-auto text-right text-sm">{action}</p>
+      <td className="p-3 w-40">
+        <p className="my-auto text-right text-xs">{action}</p>
       </td>
     </>
   );
@@ -98,12 +100,14 @@ const renderCellMobile = (cellData) => {
       </div>
 
       <div className="p-4">
-        <div className="flex justify-between items-center">
-          <img className="w-[24px] rounded-full" src="/assets/token.svg" />
-          <input
-            className="bg-transparent w-full focus:outline-none truncate font-mono text-xs pl-2"
-            value={token.amount}
+        <div className="bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max">
+          <img
+            className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
+            src="/assets/tether.svg"
           />
+          <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
+            {token.amount}
+          </p>
         </div>
       </div>
       <div className="p-4 pt-2">
@@ -139,7 +143,7 @@ const Activity = ({ data }: Props) => {
           "tracking-wider font-semibold text-sm p-3 w-20",
           "tracking-wider font-semibold text-sm p-3 w-40",
           "tracking-wider font-semibold text-sm p-3 w-20",
-          "tracking-wider font-semibold text-sm p-3",
+          "tracking-wider font-semibold text-sm p-3 w-40 text-right",
         ]}
         headers={headers}
         data={fakeData}

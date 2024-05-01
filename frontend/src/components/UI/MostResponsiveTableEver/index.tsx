@@ -20,8 +20,6 @@ const MostResponsiveTableEver = ({
   renderCell,
   renderCellMobile,
 }: Props) => {
-  console.log(renderCell);
-  console.log(data);
   return (
     <>
       <table className="w-full hidden md:block">
@@ -54,7 +52,7 @@ const MostResponsiveTableEver = ({
                 <div key={headerIndex} className={headerCellClassesMobile ? headerCellClassesMobile[headerIndex] : ""}>{header}</div>
               ))}
             </div>
-            <div className="bg-black bg-opacity-10">{renderCellMobile(cell)}</div>
+            <div className="bg-gray-200 dark:bg-black !bg-opacity-10">{renderCellMobile(cell)}</div>
           </div>
         ))}
       </div>
