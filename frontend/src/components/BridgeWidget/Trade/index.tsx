@@ -20,8 +20,6 @@ const Trade = () => {
 
   return (
     <div className="mx-4 md:mx-0 text-left">
-
-
       <OverTheCounterTrading />
       {/* <OrderBookTrading /> */}
     </div>

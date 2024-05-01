@@ -1,4 +1,4 @@
-
+import { HTLC_ADDRESS } from "./scripts";
 /**
  * Get the current Minima block
  */
@@ -661,4 +661,4 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 
 
 
-export { sendMinima };
+export { sendMinima, checkForCurrentSwaps };

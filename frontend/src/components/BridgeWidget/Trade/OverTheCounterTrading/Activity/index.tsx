@@ -1,8 +1,6 @@
+import { useEffect, useState } from "react";
 import MostResponsiveTableEver from "../../../../UI/MostResponsiveTableEver";
-
-interface Props {
-  data: any[];
-}
+import { checkForCurrentSwaps } from "../../../../../../../dapp/js/apiminima.js";
 
 const headers = ["UID", "Native", "Request", "TimeLock", "Action"];
 const fakeData = [
@@ -47,12 +45,14 @@ const renderCell = (cellData) => {
     <>
       <td className="p-3">
         <input
+          readOnly
           className="w-20 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={uid}
         />
       </td>
       <td className="p-3">
         <input
+          readOnly
           className="w-20 bg-transparent focus:outline-none truncate font-mono text-sm text-center"
           value={native}
         />
@@ -71,6 +71,7 @@ const renderCell = (cellData) => {
       </td>
       <td className="p-3">
         <input
+          readOnly
           className="bg-transparent w-10 focus:outline-none truncate font-mono text-sm text-center"
           value={timelock}
         />
@@ -88,12 +89,14 @@ const renderCellMobile = (cellData) => {
     <>
       <div className="p-4 pt-3">
         <input
+          readOnly
           className="w-full bg-transparent focus:outline-none truncate font-mono text-xs font-bold"
           value={uid}
         />
       </div>
       <div className="p-4 pt-3">
         <input
+          readOnly
           className="bg-transparent focus:outline-none truncate font-mono text-xs"
           value={native}
         />
@@ -112,6 +115,7 @@ const renderCellMobile = (cellData) => {
       </div>
       <div className="p-4 pt-2">
         <input
+          readOnly
           className="bg-transparent w-full focus:outline-none truncate font-mono text-xs"
           value={timelock}
         />
@@ -124,36 +128,51 @@ const renderCellMobile = (cellData) => {
 };
 
 // Activity can be loading, Locked, Accept or Accepted
-const Activity = ({ data }: Props) => {
+const Activity = () => {
+  const [deals, setDeals] = useState<any[]>([]);
+
+  useEffect(() => {
+    checkForCurrentSwaps(true, (swaps) => {
+      console.log(swaps);
+      setDeals([...swaps.owner, ...swaps.receiver]);
+    });
+  }, []);
+
+  console.log(deals.length);
+
   return (
     <div className="bg-gray-100 bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg">
-      <MostResponsiveTableEver
-        headerClasses=""
-        headerClassesMobile="divide-y dark:divide-teal-300"
-        headerCellClassesMobile={[
-          "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
-          "tracking-wider text-sm p-4 font-bold",
-          "tracking-wider text-sm p-4 font-bold",
-          "tracking-wider text-sm p-4 font-bold",
-          "tracking-wider text-sm p-4 font-bold",
-          "tracking-wider text-sm p-4 font-bold",
-        ]}
-        headerCellClasses={[
-          "tracking-wider font-semibold text-sm p-3 w-20",
-          "tracking-wider font-semibold text-sm p-3 w-20",
-          "tracking-wider font-semibold text-sm p-3 w-40",
-          "tracking-wider font-semibold text-sm p-3 w-20",
-          "tracking-wider font-semibold text-sm p-3 w-40 text-right",
-        ]}
-        headers={headers}
-        data={fakeData}
-        renderCell={renderCell}
-        renderCellMobile={renderCellMobile}
-      />
+      {!!deals.length && (
+        <MostResponsiveTableEver
+          headerClasses=""
+          headerClassesMobile="divide-y dark:divide-teal-300"
+          headerCellClassesMobile={[
+            "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
+            "tracking-wider text-sm p-4 font-bold",
+            "tracking-wider text-sm p-4 font-bold",
+            "tracking-wider text-sm p-4 font-bold",
+            "tracking-wider text-sm p-4 font-bold",
+            "tracking-wider text-sm p-4 font-bold",
+          ]}
+          headerCellClasses={[
+            "tracking-wider font-semibold text-sm p-3 w-20",
+            "tracking-wider font-semibold text-sm p-3 w-20",
+            "tracking-wider font-semibold text-sm p-3 w-40",
+            "tracking-wider font-semibold text-sm p-3 w-20",
+            "tracking-wider font-semibold text-sm p-3 w-40 text-right",
+          ]}
+          headers={headers}
+          data={fakeData}
+          renderCell={renderCell}
+          renderCellMobile={renderCellMobile}
+        />
+      )}
 
-      {/* <div className="flex justify-center items-center h-full">
-        {!data.length && <p className="text-white text-opacity-30">No active deals</p>}
-      </div> */}
+      {!deals.length && (
+        <div className="flex justify-center items-center h-full">
+          <p className="text-sm !text-opacity-30 dark:text-white py-16 md:py-0">No active deals</p>
+        </div>
+      )}
     </div>
   );
 };

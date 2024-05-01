@@ -30,4 +30,4 @@ function setupCoinSecretEvents(callback){
 	});
 }
 
-export { MAIN_ADDRESS, setUpHTLCScript, setupCoinSecretEvents };
+export { MAIN_ADDRESS, HTLC_ADDRESS, setUpHTLCScript, setupCoinSecretEvents };

@@ -54,7 +54,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
       validationSchema={yup.object().shape({
         amount: yup
           .string()
-          .matches(/^\d*\.?\d+$/, "Must be a number")
+          .matches(/^\d*\.?\d+$/, "Enter a valid number.")
           .required("Amount is required")
           .test("has funds", function (val) {
             const { path, createError, parent } = this;

@@ -47,37 +47,37 @@ const EthereumTokenSelect = ({ setToken, token }: Props) => {
         <img
           alt="token-icon"
           src={
-            token === "wminima" ? "./assets/token.svg" : "./assets/tether.svg"
+            token === "WMINIMA" ? "./assets/token.svg" : "./assets/tether.svg"
           }
           className="w-[30px] h-[30px] rounded-full"
         />
-        <p className="text-sm font-bold pt-1">{token}</p>
+        <p className="text-xs font-bold pt-1">{token}</p>
       </div>
 
       {active && (
         <animated.div
           style={springProps}
-          className="origin-top-right z-[50] w-[105px] absolute right-0 top-[70px] mt-2 rounded-r-sm shadow-lg bg-white bg-opacity-30 dark:bg-[#1B1B1B]"
+          className="origin-top-right z-[50] w-[105px] absolute right-0 top-[70px] mt-2 rounded-r-sm shadow-lg bg-white dark:bg-opacity-30 dark:bg-[#1B1B1B]"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="options-menu"
         >
           <ul className="grid grid-rows-2 divide-y divide-teal-100">
-            <li onClick={() => setToken("usdt")} className="hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1">
+            <li onClick={() => setToken("USDT")} className="hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1">
               <img
                 alt="token-icon"
                 src={"./assets/tether.svg"}
                 className="w-[22px] h-[22px] rounded-full"
               />
-              <p className="text-sm font-bold">Tether</p>
+              <p className="text-xs font-bold">Tether</p>
             </li>
-            <li onClick={() => setToken("wminima")} className="px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer py-3 grid grid-cols-[auto_1fr] items-center gap-1">
+            <li onClick={() => setToken("WMINIMA")} className="px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer py-3 grid grid-cols-[auto_1fr] items-center gap-1">
               <img
                 alt="token-icon"
                 src={"./assets/token.svg"}
                 className="w-[22px] h-[24px] rounded-full"
               />
-              <p className="text-sm font-bold">wMinima</p>
+              <p className="text-xs font-bold">wMinima</p>
             </li>
           </ul>
         </animated.div>

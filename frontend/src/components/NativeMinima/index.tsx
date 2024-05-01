@@ -7,7 +7,7 @@ interface Props {
 }
 const NativeMinima = ({ display = false }: Props) => {
   const { _minimaBalance } = useContext(appContext);
-  console.log("_minimaBalance", _minimaBalance);
+
   if (_minimaBalance === null) {
     return null;
   }

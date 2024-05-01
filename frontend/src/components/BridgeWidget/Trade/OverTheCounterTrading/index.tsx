@@ -11,6 +11,7 @@ const OverTheCounterTrading = () => {
   if (_currentTradeWindow !== "otc") {
     return null;
   }
+  
 
   return (
     <div className="mx-4 md:mx-0 text-left">
@@ -30,7 +31,7 @@ const OverTheCounterTrading = () => {
           />
         </div>
       </div>
-      <div className="grid grid-rows-[auto_auto_1fr]">
+      <div className="grid grid-rows-[auto_auto_1fr] md:grid-rows-[1fr_auto_1fr]">
         <OTCForm />
 
         <div className="flex items-center justify-center">
@@ -41,7 +42,7 @@ const OverTheCounterTrading = () => {
           <hr className="border border-violet-400 my-6 w-[120px]" />
         </div>
         
-        <Activity data={[]} />
+        <Activity />
       </div>
     </div>
   );
