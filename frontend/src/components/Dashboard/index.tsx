@@ -7,7 +7,7 @@ import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
   return (
-    <main>
+    <main className="h-full">
       <ToastContainer />
       <ContentGrid>
         <Navigation />

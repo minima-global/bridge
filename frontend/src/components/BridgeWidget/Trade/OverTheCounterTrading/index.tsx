@@ -3,6 +3,7 @@ import { appContext } from "../../../../AppContext";
 import SwapIcon from "../../../UI/SwapIcon";
 import Identity from "./Identity";
 import OTCForm from "./OTCForm";
+import Activity from "./Activity";
 
 const OverTheCounterTrading = () => {
   const { _currentTradeWindow } = useContext(appContext);
@@ -29,8 +30,18 @@ const OverTheCounterTrading = () => {
           />
         </div>
       </div>
-      <div className="h-full">
+      <div className="grid grid-rows-[auto_auto_1fr]">
         <OTCForm />
+
+        <div className="flex items-center justify-center">
+          <hr className="border border-violet-400 my-6 w-[120px]" />
+          <span className="mx-4 text-sm text-black dark:text-white font-bold">
+            Activity
+          </span>
+          <hr className="border border-violet-400 my-6 w-[120px]" />
+        </div>
+        
+        <Activity data={[]} />
       </div>
     </div>
   );

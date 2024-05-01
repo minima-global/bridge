@@ -40,7 +40,7 @@ const OTCForm = () => {
         }
       />
 
-      <button className="my-4 w-full bg-orange-600 font-bold dark:text-black">Trade</button>
+      <button className="mt-4 w-full bg-orange-600 font-bold dark:text-black">Trade</button>
     </form>
   );
 };
