@@ -8,6 +8,7 @@ interface Props {
   headerCellClasses?: string[];
   headerCellClassesMobile?: string[];
   renderCell: (cellData: any) => ReactNode;
+  renderCellMobile: (cellData: any) => ReactNode;
 }
 const MostResponsiveTableEver = ({
   headers,
@@ -17,6 +18,7 @@ const MostResponsiveTableEver = ({
   headerCellClassesMobile,
   data,
   renderCell,
+  renderCellMobile,
 }: Props) => {
   console.log(renderCell);
   console.log(data);
@@ -47,12 +49,12 @@ const MostResponsiveTableEver = ({
       <div className="block md:hidden w-full">
         {data.map((cell, cellIndex) => (
           <div className={`${headerClassesMobile} grid grid-cols-[auto_1fr]`} key={cellIndex}>
-            <div className="divide-x divide-teal-300">
+            <div className="divide-x dark:divide-teal-300">
               {headers.map((header, headerIndex) => (
                 <div key={headerIndex} className={headerCellClassesMobile ? headerCellClassesMobile[headerIndex] : ""}>{header}</div>
               ))}
             </div>
-            <div></div>
+            <div className="bg-black bg-opacity-10">{renderCellMobile(cell)}</div>
           </div>
         ))}
       </div>

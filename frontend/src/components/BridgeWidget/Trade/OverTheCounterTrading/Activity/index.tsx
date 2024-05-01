@@ -79,6 +79,45 @@ const renderCell = (cellData) => {
     </>
   );
 };
+const renderCellMobile = (cellData) => {
+  const { uid, native, token, timelock, action } = cellData;
+
+  return (
+    <>
+      <div className="p-4 pt-3">
+        <input
+          className="w-full bg-transparent focus:outline-none truncate font-mono text-xs font-bold"
+          value={uid}
+        />
+      </div>
+      <div className="p-4 pt-3">
+        <input
+          className="bg-transparent focus:outline-none truncate font-mono text-xs"
+          value={native}
+        />
+      </div>
+
+      <div className="p-4">
+        <div className="flex justify-between items-center">
+          <img className="w-[24px] rounded-full" src="/assets/token.svg" />
+          <input
+            className="bg-transparent w-full focus:outline-none truncate font-mono text-xs pl-2"
+            value={token.amount}
+          />
+        </div>
+      </div>
+      <div className="p-4 pt-2">
+        <input
+          className="bg-transparent w-full focus:outline-none truncate font-mono text-xs"
+          value={timelock}
+        />
+      </div>
+      <div className="p-4 pt-5">
+        <p className="my-auto text-xs">{action}</p>
+      </div>
+    </>
+  );
+};
 
 // Activity can be loading, Locked, Accept or Accepted
 const Activity = ({ data }: Props) => {
@@ -86,14 +125,14 @@ const Activity = ({ data }: Props) => {
     <div className="bg-gray-100 bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg">
       <MostResponsiveTableEver
         headerClasses=""
-        headerClassesMobile="divide-y divide-teal-300"
+        headerClassesMobile="divide-y dark:divide-teal-300"
         headerCellClassesMobile={[
-          "tracking-wider text-sm p-3 text-teal-600 dark:text-teal-300 font-bold shadow-sm shadow-teal-300",
-          "tracking-wider text-sm p-3 font-bold",
-          "tracking-wider text-sm p-3 font-bold",
-          "tracking-wider text-sm p-3 font-bold",
-          "tracking-wider text-sm p-3 font-bold",
-          "tracking-wider text-sm p-3 font-bold",
+          "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
+          "tracking-wider text-sm p-4 font-bold",
+          "tracking-wider text-sm p-4 font-bold",
+          "tracking-wider text-sm p-4 font-bold",
+          "tracking-wider text-sm p-4 font-bold",
+          "tracking-wider text-sm p-4 font-bold",
         ]}
         headerCellClasses={[
           "tracking-wider font-semibold text-sm p-3 w-20",
@@ -105,6 +144,7 @@ const Activity = ({ data }: Props) => {
         headers={headers}
         data={fakeData}
         renderCell={renderCell}
+        renderCellMobile={renderCellMobile}
       />
 
       {/* <div className="flex justify-center items-center h-full">
