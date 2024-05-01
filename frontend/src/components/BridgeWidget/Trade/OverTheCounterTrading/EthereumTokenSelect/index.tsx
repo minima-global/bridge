@@ -41,7 +41,7 @@ const EthereumTokenSelect = ({ setToken, token }: Props) => {
     <div
       onClick={promptDropdown}
       ref={dropdownRef}
-      className="relative bg-white dark:bg-black dark:bg-opacity-10 p-2 pl-5 flex justify-center items-center hover:bg-opacity-50"
+      className="relative bg-white dark:bg-black dark:bg-opacity-10 p-2 pl-5 grid grid-cols-[1fr_auto] items-center hover:bg-opacity-50"
     >
       <div className="flex flex-col pr-2 justify-center items-center">
         <img
@@ -57,7 +57,7 @@ const EthereumTokenSelect = ({ setToken, token }: Props) => {
       {active && (
         <animated.div
           style={springProps}
-          className="origin-top-right z-[50] w-[105px] absolute right-0 top-[70px] mt-2 rounded-r-sm shadow-lg bg-white dark:bg-opacity-30 dark:bg-[#1B1B1B]"
+          className="origin-top-right z-[50] w-[105px] absolute right-0 top-[70px] mt-2 rounded-r-sm shadow-lg bg-white dark:bg-opacity-100 dark:bg-[#1B1B1B]"
           role="menu"
           aria-orientation="vertical"
           aria-labelledby="options-menu"
@@ -83,7 +83,7 @@ const EthereumTokenSelect = ({ setToken, token }: Props) => {
         </animated.div>
       )}
 
-      <div>
+      <div className="flex items-center justify-center">
         <CaretIcon />
       </div>
     </div>

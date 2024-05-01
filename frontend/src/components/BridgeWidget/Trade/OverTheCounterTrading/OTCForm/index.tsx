@@ -92,13 +92,15 @@ const OTCForm = () => {
           <InputWrapper
             errors={errors && errors.uid && touched && touched.uid ? errors.uid : false}
             inputProps={{ placeholder: "uid", ...getFieldProps("uid") }}
-            action={
+            action={ 
+              <div className="flex items-center justify-center">
               <button
                 type="button"
-                className="hover:animate-pulse text-sm flex items-center"
+                className="hover:animate-pulse text-sm flex items-center text-center"
               >
                 <FavoriteIcon fill="currentColor" />
               </button>
+              </div>
             }
             label="Your Counterparty"
           />
@@ -109,7 +111,7 @@ const OTCForm = () => {
             inputProps={{ placeholder: "0.0", ...getFieldProps("native") }}
             label="Native Offering"
             action={
-              <div className="pr-1 pt-1">
+              <div className="flex items-center justify-center">
                 <NativeMinima display={true} />
               </div>
             }
@@ -136,7 +138,7 @@ const OTCForm = () => {
           <button
             disabled={!isValid}
             type="submit"
-            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-opacity-5"
+            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-opacity-5 disabled:dark:text-opacity-30"
           >
             Trade
           </button>
