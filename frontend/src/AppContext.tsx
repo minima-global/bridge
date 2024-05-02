@@ -318,6 +318,14 @@ const AppProvider = ({ children }: IProps) => {
   ) => {
     let rpcUrl = networks && networks[network] ? networks[network].rpc : null;
 
+    // SYNC BACKEND + FRONTEND 
+    const message = {
+      action: network === 'sepolia' ? 'SWITCHSEPOLIA' : 'SWITCHMAINNET'
+    }
+    setNetwork(network);
+    
+    handleActionViaBackend(message);
+
     if (rpcUrl) {
       // Check if the RPC URL is an Infura URL
       const isInfura = rpcUrl.includes("infura.io");
@@ -357,16 +365,6 @@ const AppProvider = ({ children }: IProps) => {
     const updatedData = {
       default: name,
     };
-
-    const message = {
-      action: name === 'sepolia' ? 'SWITCHSEPOLIA' : 'SWITCHMAINNET'
-    }
-
-    console.log('change', name);
-    setNetwork(name, (change) => {
-      console.log(change);
-    });
-    handleActionViaBackend(message);
 
 
     // Fetch all saved networks

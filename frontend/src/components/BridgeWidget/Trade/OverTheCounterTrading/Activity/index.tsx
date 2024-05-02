@@ -62,7 +62,7 @@ const renderCell = (cellData) => {
         <div className="bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max">
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
-            src="/assets/tether.svg"
+            src={token.tokenName === 'wMinima' ? "./assets/token.svg" : "./assets/tether.svg"}
           />
           <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
             {token.amount}
@@ -106,7 +106,7 @@ const renderCellMobile = (cellData) => {
         <div className="bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max">
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
-            src="/assets/tether.svg"
+            src={token.tokenName === 'wMinima' ? "./assets/token.svg" : "./assets/tether.svg"}
           />
           <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
             {token.amount}
