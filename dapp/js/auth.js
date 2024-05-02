@@ -7,7 +7,7 @@ import { createDB } from "./sql";
 /**
  * Get the user Public key and Wallet address
  */
-export function _getUserMaximaPublicKey(callback){
+function _getUserMaximaPublicKey(callback){
 	MDS.cmd("maxima",function(max){
 		callback(max.response.publickey);
 	});	
@@ -87,7 +87,7 @@ function isBridgeInited(callback){
 	});
 }
 
-export function initBridgeSystemsStartup(callback){
+function initBridgeSystemsStartup(callback){
 	
 	MDS.log("Initialising base bridge systems..");
 	
@@ -149,3 +149,7 @@ function initBridgeSystems(callback){
 		});
 	});
 }
+
+
+
+export { _getUserMaximaPublicKey, initBridgeSystemsStartup };

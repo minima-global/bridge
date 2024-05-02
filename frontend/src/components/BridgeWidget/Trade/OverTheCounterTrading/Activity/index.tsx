@@ -1,42 +1,42 @@
 import { useEffect, useState } from "react";
 import MostResponsiveTableEver from "../../../../UI/MostResponsiveTableEver";
-import { checkForCurrentSwaps } from "../../../../../../../dapp/js/apiminima.js";
+import { checkForCurrentSwaps, getCoinHTLCData } from"../../../../../../../dapp/js/apiminima.js";
 
 const headers = ["UID", "Native", "Request", "TimeLock", "Action"];
-const fakeData = [
-  {
-    uid: "0x7775C567A42978C72F4BEB79D3139CC72354B0895C0E836BBA3F8EEDC3F8B042",
-    native: "100",
-    token: {
-      tokenName: "wMinima",
-      amount: "200",
-    },
-    timelock: "150",
-    action: "Locked",
-  },
-  {
-    uid: "0x1234567890123456789012345678901234567890123456789012345678901234",
-    native: "150",
-    token: {
-      tokenName: "wEth",
-      amount: "300",
-    },
-    timelock: "200",
-    action: "Unlocked",
-  },
-  {
-    uid: "0xAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAA",
-    native: "200",
-    token: {
-      tokenName: "wBTC",
-      amount: "400",
-    },
-    timelock: "250",
-    action: "Locked",
-  },
-];
+// const fakeData = [
+//   {
+//     uid: "0x7775C567A42978C72F4BEB79D3139CC72354B0895C0E836BBA3F8EEDC3F8B042",
+//     native: "100",
+//     token: {
+//       tokenName: "wMinima",
+//       amount: "200",
+//     },
+//     timelock: "150",
+//     action: "Locked",
+//   },
+//   {
+//     uid: "0x1234567890123456789012345678901234567890123456789012345678901234",
+//     native: "150",
+//     token: {
+//       tokenName: "wEth",
+//       amount: "300",
+//     },
+//     timelock: "200",
+//     action: "Unlocked",
+//   },
+//   {
+//     uid: "0xAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAA",
+//     native: "200",
+//     token: {
+//       tokenName: "wBTC",
+//       amount: "400",
+//     },
+//     timelock: "250",
+//     action: "Locked",
+//   },
+// ];
 
-type ACTION_STATES = "LOADING" | "LOCKED" | "ACCEPT" | "ACCEPTED";
+// type ACTION_STATES = "LOADING" | "LOCKED" | "ACCEPT" | "ACCEPTED";
 
 const renderCell = (cellData) => {
   const { uid, native, token, timelock, action } = cellData;
@@ -127,6 +127,7 @@ const renderCellMobile = (cellData) => {
   );
 };
 
+
 // Activity can be loading, Locked, Accept or Accepted
 const Activity = () => {
   const [deals, setDeals] = useState<any[]>([]);
@@ -134,7 +135,28 @@ const Activity = () => {
   useEffect(() => {
     checkForCurrentSwaps(true, (swaps) => {
       console.log(swaps);
-      setDeals([...swaps.owner, ...swaps.receiver]);
+
+      const ownerDeals = swaps.owner.map(c => ({
+        uid: getCoinHTLCData(c, "owner"),
+        native: getCoinHTLCData(c, "amount"),
+        token: {
+          tokenName: getCoinHTLCData(c, "requesttokentype"),
+          amount: getCoinHTLCData(c, "requestamount")
+        }        
+      }));
+      
+      const receiverDeals = swaps.receiver.map(c => ({
+        uid: getCoinHTLCData(c, "owner"),
+        native: getCoinHTLCData(c, "amount"),
+        token: {
+          tokenName: getCoinHTLCData(c, "requesttokentype"),
+          amount: getCoinHTLCData(c, "requestamount")
+        }
+      }));
+      console.log('ownerDeals', ownerDeals);
+      console.log('receiverDeals', receiverDeals);
+
+      setDeals([...ownerDeals, ...receiverDeals]);
     });
   }, []);
 
@@ -162,7 +184,7 @@ const Activity = () => {
             "tracking-wider font-semibold text-sm p-3 w-40 text-right",
           ]}
           headers={headers}
-          data={fakeData}
+          data={deals}
           renderCell={renderCell}
           renderCellMobile={renderCellMobile}
         />

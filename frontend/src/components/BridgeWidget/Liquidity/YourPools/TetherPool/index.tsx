@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import Decimal from "decimal.js";
 import { PoolType } from "../../../../../types/Pool.js";
-import useOrderBook from "../../../../../hooks/useOrderbook.js";
+import useOrderBook from "../../../../../hooks/useOrderBook";
 import { appContext } from "../../../../../AppContext.js";
 
 const TetherPool = () => {

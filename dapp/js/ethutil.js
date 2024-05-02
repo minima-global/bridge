@@ -25,7 +25,7 @@ var GAS_API = {};
 /**
  * Initialise the ETH Address - this is DONE ONCE ONLY
  */
-export function initialiseETHAddress(priv, callback){
+function initialiseETHAddress(priv, callback){
 	
 	//Create a wallet..
 	var wallet = new ethers.Wallet(priv);
@@ -559,4 +559,4 @@ function boostTransaction(transactionid,callback){
 
 
 
-export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI };
+export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI, initialiseETHAddress };

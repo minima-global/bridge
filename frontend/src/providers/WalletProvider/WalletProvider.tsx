@@ -6,7 +6,7 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Wallet, parseUnits, formatEther, Contract,  Signer } from "ethers";
+import { Wallet, parseUnits, formatEther,  Signer } from "ethers";
 import { appContext } from "../../AppContext";
 import { GasFeeCalculated } from "../../types/GasFeeInterface";
 import { TransactionResponse } from "ethers";

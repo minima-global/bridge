@@ -7,18 +7,64 @@ import * as yup from "yup";
 import { useContext } from "react";
 import { appContext } from "../../../../../AppContext";
 import Decimal from "decimal.js";
+import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
+import { _defaults } from "../../../../../constants";
 
 const OTCForm = () => {
-  const { _minimaBalance } = useContext(appContext);
+  const { _minimaBalance, handleActionViaBackend, notify } = useContext(appContext);
+  const { _network } = useWalletContext();
+
+  console.log('CURRENT NETWORK', _network);
+  
   return (
     <Formik
       initialValues={{
         uid: "",
         native: 0,
-        token: { name: "wminima", amount: "" },
+        token: { name: "WMINIMA", amount: "" },
       }}
-      onSubmit={(data) => {
-        console.log(data);
+      onSubmit={async (data, {resetForm}) => {
+        // Need to send this to the backend to handle..
+        /**
+         * 		//Send to the backend..
+		var message 			= {};
+		message.action			= "STARTMINIMASWAP";
+		message.sendamount 		= sendamount;
+		message.requestamount 	= reqamount;
+		message.contractaddress	= "ETH:"+contractaddress;
+		message.reqpublickey	= reqpublickey;
+		message.otc				= true;
+         */
+
+        const { uid, native, token } = data;
+        try {
+
+          console.log(token.name);
+          console.log(_network);
+          console.log( "ETH:"+_defaults[token.name.includes("WMINIMA") ? 'wMinima' : 'Tether'][_network])
+          const message = {
+            action: "STARTMINIMASWAP",
+            sendamount: native,
+            requestamount: token.amount,
+            contractaddress: "ETH:"+_defaults[token.name.includes("WMINIMA") ? 'wMinima' : 'Tether'][_network].toUpperCase(),
+            reqpublickey: uid,
+            otc: true,
+          }
+
+          const res = await handleActionViaBackend(message);
+
+          notify("OTC Swap requested!");
+          resetForm();
+
+          console.log(res);
+
+        } catch (error) {
+          
+        }
+
+
+
+
       }}
       validationSchema={yup.object().shape({
         uid: yup
@@ -111,7 +157,7 @@ const OTCForm = () => {
             inputProps={{ placeholder: "0.0", ...getFieldProps("native") }}
             label="Native Offering"
             action={
-              <div className="flex items-center justify-center">
+              <div className="flex items-center justify-center pb-1 sm:pb-0">
                 <NativeMinima display={true} />
               </div>
             }

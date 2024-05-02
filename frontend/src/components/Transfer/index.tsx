@@ -1,5 +1,4 @@
-import { formatEther, parseUnits } from "ethers";
-import { getAddress } from "ethers";
+import {  parseUnits } from "ethers";
 import { Formik } from "formik";
 import { useContext, useState } from "react";
 import * as yup from "yup";
@@ -23,7 +22,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _network } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
-  const [step, setStep] = useState(1);
+  const [_, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | false>(false);
 
@@ -98,7 +97,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           }),
       })}
       onSubmit={async (
-        { amount, asset, address },
+        { amount, asset },
         { setStatus, resetForm }
       ) => {
         setError(false);
@@ -156,17 +155,12 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
     >
       {({
         handleSubmit,
-        setFieldValue,
         isSubmitting,
         getFieldProps,
-        handleChange,
-        handleBlur,
         touched,
         errors,
-        values,
         isValid,
         dirty,
-        resetForm,
         status,
       }) => (
         <form onSubmit={handleSubmit}>

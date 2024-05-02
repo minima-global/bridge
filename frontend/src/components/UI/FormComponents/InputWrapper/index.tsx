@@ -19,7 +19,6 @@ const InputWrapper = ({
 
   const hasAction = !!action;
 
-  console.log({ ...inputProps });
 
   return (
     <div>

@@ -6,7 +6,7 @@ import OTCForm from "./OTCForm";
 import Activity from "./Activity";
 
 const OverTheCounterTrading = () => {
-  const { _currentTradeWindow } = useContext(appContext);
+  const { _currentTradeWindow, _userDetails } = useContext(appContext);
 
   if (_currentTradeWindow !== "otc") {
     return null;
@@ -27,7 +27,7 @@ const OverTheCounterTrading = () => {
         <div className="mt-4">
           <Identity
             fullAddress
-            _address="0x7775C567A42978C72F4BEB79D3139CC72354B0895C0E836BBA3F8EEDC3F8B042"
+            _address={_userDetails.otcuid}
           />
         </div>
       </div>

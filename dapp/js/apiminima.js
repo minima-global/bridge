@@ -1,4 +1,5 @@
 import { HTLC_ADDRESS } from "./scripts";
+import { USDTContractAddress, wMinimaContractAddress } from "./htlcvars";
 /**
  * Get the current Minima block
  */
@@ -122,15 +123,15 @@ function getCoinHTLCData(coin,dataparam){
 	}else if(dataparam == "requesttokentype"){
 		
 		//First get the token
-		var token = getCoinHTLCData(coin,"requesttoken");
-		
+		var token = getCoinHTLCData(coin,"requesttoken");				
+
 		//Now decipher to plain speak
-		if(token == wMinimaContractAddress){
+		if(token.toLowerCase() == wMinimaContractAddress.toLowerCase()){
 			return "wMinima";
-		}else if(token == USDTContractAddress){
+		}else if(token.toLowerCase() == USDTContractAddress.toLowerCase()){
 			return "USDT";
 		}
-		
+		console.log("unkonwn..");
 		return "UNKNOWN";
 		
 	}else if(dataparam == "hashlock"){
@@ -661,4 +662,4 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 
 
 
-export { sendMinima, checkForCurrentSwaps };
+export { sendMinima, checkForCurrentSwaps, getCoinHTLCData };

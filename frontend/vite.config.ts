@@ -3,6 +3,9 @@ import react from "@vitejs/plugin-react-swc";
 import { createHtmlPlugin } from "vite-plugin-html";
 import legacy from "@vitejs/plugin-legacy";
 
+import { viteStaticCopy } from 'vite-plugin-static-copy'
+
+
 export default ({ mode }) => {
   let devEnv = "";
   const env = Object.assign(
@@ -31,6 +34,17 @@ export default ({ mode }) => {
       legacy({
         targets: ["defaults", "not IE 11", "Android >= 9"],
       }),
+      viteStaticCopy({
+        targets: [
+          { src: '../dapp/js/*', dest: './js', transform(content, path) {
+            const modifiedContent = content.replace(/^(?:import .*?;|export .*?;)\s*/gm, '');                      
+            
+            return modifiedContent;
+          }},
+          { src: '../dapp/service.js', dest: '.'},
+          { src: '../dapp/abi', dest: '.'},
+        ]
+      }),
       createHtmlPlugin({
         inject: {
           data: {
@@ -41,3 +55,5 @@ export default ({ mode }) => {
     ],
   });
 };
+
+

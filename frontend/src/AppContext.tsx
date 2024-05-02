@@ -1,7 +1,4 @@
 import { createContext, useRef, useEffect, useState } from "react";
-
-import { initBridgeSystemsStartup } from "../../dapp/js/auth.js";
-import { setInfuraApiKeys, getInfuraGASAPI } from "../../dapp/js/ethutil.js";
 import { JsonRpcProvider } from "ethers";
 import { Networks } from "./types/Network.js";
 import { sql } from "./utils/SQL/index.js";
@@ -10,6 +7,13 @@ import defaultAssetsStored, { _defaults } from "./constants/index.js";
 import { CoinStats } from "./types/MinimaBalance.js";
 import { toast } from "react-toastify";
 
+
+import { initBridgeSystemsStartup } from "../../dapp/js/auth.js";
+import { setInfuraApiKeys, getInfuraGASAPI } from "../../dapp/js/ethutil.js";
+import { sendBackendMSG } from "../../dapp/js/jslib.js";
+import { setNetwork } from "../../dapp/js/htlcvars.js";
+
+export var USER_DETAILS;
 export const appContext = createContext({} as any);
 
 interface IProps {
@@ -34,6 +38,11 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptJsonRpcSetup, setPromptJsonRpcSetup] = useState<null | boolean>(
     false
   );
+  // Select Network
+  const [_promptSelectNetwork, setSelectNetwork] = useState(false);
+  // Settings
+  const [_promptSettings, setPromptSettings] = useState(false);
+
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState('mainnet');
   // Default ERC 20 Assets
@@ -117,6 +126,9 @@ const AppProvider = ({ children }: IProps) => {
               if (response.response.mode === "WRITE") {
                 initBridgeSystemsStartup(function (userdets) {
                   console.log(userdets);
+                  // @ts-ignore
+                  window.USER_DETAILS = userdets;
+                  Object.freeze(USER_DETAILS);
                   setUserDetails(userdets);
 
                   const { mxaddress } = userdets.minimaaddress;
@@ -323,11 +335,11 @@ const AppProvider = ({ children }: IProps) => {
         cachedApiKeys.apiKey,
         cachedApiKeys.apiKeySecret,
         preAuth,
-        function (setresp) {
+        function () {
           //Now test
           getInfuraGASAPI(function (gas) {
             if (gas.response.length > 10) {
-              alert("API Keys Work!\n\n" + JSON.stringify(gas));
+              // alert("API Keys Work!\n\n" + JSON.stringify(gas));
             }
           });
         }
@@ -339,6 +351,51 @@ const AppProvider = ({ children }: IProps) => {
     } else {
       console.error("Network configuration not found.");
     }
+  };
+
+  const updatePreferredNetwork = async (name: string) => {
+    const updatedData = {
+      default: name,
+    };
+
+    const message = {
+      action: name === 'sepolia' ? 'SWITCHSEPOLIA' : 'SWITCHMAINNET'
+    }
+
+    console.log('change', name);
+    setNetwork(name, (change) => {
+      console.log(change);
+    });
+    handleActionViaBackend(message);
+
+
+    // Fetch all saved networks
+    const defaultNetworks: any = await sql(
+      `SELECT * FROM cache WHERE name = 'DEFAULTNETWORKS'`
+    );
+
+    setRPCNetwork(name, JSON.parse(defaultNetworks.DATA), _userKeys);
+
+    const rows = await sql(
+      `SELECT * FROM cache WHERE name = 'CURRENT_NETWORK'`
+    );
+
+    if (!rows) {
+      await sql(
+        `INSERT INTO cache (name, data) VALUES ('CURRENT_NETWORK', '${JSON.stringify(
+          updatedData
+        )}')`
+      );
+    } else {
+      await sql(
+        `UPDATE cache SET data = '${JSON.stringify(
+          updatedData
+        )}' WHERE name = 'CURRENT_NETWORK'`
+      );
+    }
+
+    promptSelectNetwork();
+    promptSettings();
   };
 
   const updateApiKeys = async (apiKey: string, apiKeySecret: string) => {
@@ -369,6 +426,16 @@ const AppProvider = ({ children }: IProps) => {
     }
   };
 
+  const handleActionViaBackend = async (action: any) => {    
+    console.log('sending message to backend', action);
+    return new Promise((resolve) => {
+      sendBackendMSG(action, (resp) => {
+        console.log(resp);
+        resolve(resp);
+      });
+    });
+  }
+
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
   };
@@ -381,6 +448,14 @@ const AppProvider = ({ children }: IProps) => {
     setPromptWithdraw((prevState) => !prevState);
   };
 
+  const promptSelectNetwork = () => {
+    setSelectNetwork((prevState) => !prevState);
+  };
+
+  const promptSettings = () => {
+    setPromptSettings((prevState) => !prevState);
+  };
+
   const notify = (message: string) => toast(message, { position: 'bottom-right', theme: 'dark'});
 
   return (
@@ -388,10 +463,20 @@ const AppProvider = ({ children }: IProps) => {
       value={{
         isWorking,
 
+        handleActionViaBackend,
+
         _provider,
 
         _promptWithdraw,
         promptWithdraw,
+
+        _promptSettings,
+        promptSettings,
+
+        updatePreferredNetwork,
+
+        _promptSelectNetwork,
+        promptSelectNetwork,
 
         _promptDeposit,
         promptDeposit,

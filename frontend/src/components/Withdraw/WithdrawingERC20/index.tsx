@@ -11,7 +11,7 @@ const WithdrawingERC20 = () => {
 
     async function withdrawToken({amount, action, address}) {    
         
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => {
             const message = {
                 amount,
                 address,

@@ -75,7 +75,6 @@ function getNetwork(callback){
 }
 
 function setNetwork(network,callback){
-	
 	//Check valid network
 	if(network != "mainnet" && network != "sepolia"){
 		MDS.log("ERROR - Attempt to switch to incorrect ETH Network! "+network);
@@ -99,10 +98,8 @@ function setNetwork(network,callback){
 
 function switchNetwork(network){
 
-	MDS.log("Set ETH network to "+network);
-
 	if(network == "mainnet"){
-		
+
 		//MAIN NET RPC
 		USE_API_KEYS			= true;
 		ETH_INFURA_HOST 		= "https://mainnet.infura.io/v3/";
@@ -118,7 +115,6 @@ function switchNetwork(network){
 		HTLCContractAddress 	= "0x"+("67376c3bf3b5a336b14398920cfbc292013718ea".toUpperCase());
 	
 	}else{
-		
 		//SEPOLIA RPC and Contract settings
 		USE_API_KEYS			= true;
 		ETH_INFURA_HOST 		= "https://sepolia.infura.io/v3/";
@@ -135,4 +131,4 @@ function switchNetwork(network){
 	}
 }
 
-export { ETH_INFURA_GASAPI_HOST, MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE };
+export { ETH_INFURA_GASAPI_HOST, MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, wMinimaContractAddress, USDTContractAddress, setNetwork};

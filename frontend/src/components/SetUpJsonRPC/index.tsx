@@ -1,6 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { appContext } from "../../AppContext";
 import { JsonRpcProvider } from "ethers";
+import { config, useSpring, animated } from "react-spring";
 
 const SetUpJsonRPC = () => {
   const {
@@ -44,6 +45,11 @@ const SetUpJsonRPC = () => {
 
   const [apiKey, setApiKey] = useState("");
   const [apiKeySecret, setApiKeySecret] = useState("");
+
+  const springProps = useSpring({
+    opacity: _promptJsonRpcSetup ? 1 : 0,
+    config: config.default,
+  });
 
   useEffect(() => {
     (async () => {
@@ -146,7 +152,7 @@ const SetUpJsonRPC = () => {
   }
 
   return (
-    <div className="bg-gray-200 dark:bg-black fixed left-0 right-0 bottom-0 top-0 z-[20000] overflow-y-scroll">
+    <animated.div style={springProps} className="bg-gray-200 dark:bg-black fixed left-0 right-0 bottom-0 top-0 z-[20000] overflow-y-scroll">
       {step === SETUPSTATE["INTRO"] && (
         <div className={`px-4 grid grid-rows-[56px_1fr_86px] h-full md:h-max`}>
           <header className="grid grid-cols-[1fr_minmax(0,_560px)_1fr]">
@@ -540,7 +546,7 @@ const SetUpJsonRPC = () => {
           </footer>
         </div>
       )}
-    </div>
+    </animated.div>
   );
 };
 

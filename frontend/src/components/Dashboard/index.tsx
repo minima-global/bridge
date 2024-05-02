@@ -1,14 +1,18 @@
+import AppLoading from "../AppLoading";
 import BridgeWidget from "../BridgeWidget";
 import Navigation from "../BridgeWidget/Navigation";
+import Settings from "../Settings";
 import ContentGrid from "../UI/ContentGrid";
 
-import { ToastContainer, toast } from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Dashboard = () => {
   return (
     <main className="h-full">
       <ToastContainer />
+      <Settings />
+      <AppLoading />
       <ContentGrid>
         <Navigation />
         <BridgeWidget />
