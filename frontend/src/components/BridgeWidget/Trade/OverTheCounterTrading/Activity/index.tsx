@@ -26,10 +26,9 @@ const getReceiversActions = async (coin) => {
 };
 
 const renderCell = (cellData) => {
-  const { uid, native, token, timelock, action } = cellData;
+  const { uid, native, token, timelock, action, coinid } = cellData;
   const [_timeLock, setTimeLock] = useState<null | string>(null);
-  const { _currentBlock } = useContext(appContext);
-
+  const { _currentBlock, promptAcceptOTC } = useContext(appContext);
   useEffect(() => {
     setTimeLock(
       timelock && _currentBlock
@@ -78,13 +77,14 @@ const renderCell = (cellData) => {
         />
       </td>
       <td className="p-3 w-40">
-      {action === "LOCKED" && (
+        {action === "LOCKED" && (
           <p className="bg-yellow-300 mx-auto tracking-wider rounded-full px-4 w-max text-xs py-2 text-black font-bold">
             LOCKED
           </p>
         )}
         {action === "ACCEPT" && (
           <button
+            onClick={() => promptAcceptOTC({ uid, native, token, timelock, action, coinid })}
             type="button"
             className="bg-teal-300 py-1 text-black hover:bg-opacity-80 font-bold w-full"
           >
@@ -145,9 +145,9 @@ const renderCell = (cellData) => {
   );
 };
 const renderCellMobile = (cellData) => {
-  const { uid, native, token, timelock, action } = cellData;
+  const { uid, native, token, timelock, action, coinid } = cellData;
   const [_timeLock, setTimeLock] = useState<null | string>(null);
-  const { _currentBlock } = useContext(appContext);
+  const { _currentBlock, promptAcceptOTC } = useContext(appContext);
 
   useEffect(() => {
     setTimeLock(
@@ -204,6 +204,7 @@ const renderCellMobile = (cellData) => {
         )}
         {action === "ACCEPT" && (
           <button
+            onClick={() => promptAcceptOTC({ uid, native, token, timelock, action, coinid })}
             type="button"
             className="bg-teal-300 text-black hover:bg-opacity-80 font-bold w-full"
           >
@@ -267,7 +268,7 @@ const renderCellMobile = (cellData) => {
 // Activity can be loading, Locked, Accept or Accepted
 const Activity = () => {
   const [deals, setDeals] = useState<any[]>([]);
-  const { _currentBlock} = useContext(appContext);
+  const { _currentBlock } = useContext(appContext);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -276,6 +277,7 @@ const Activity = () => {
     checkForCurrentSwaps(true, async (swaps) => {
       const ownerDeals = swaps.owner.map((c) => ({
         uid: getCoinHTLCData(c, "owner"),
+        coinid: c.coinid,
         native: getCoinHTLCData(c, "amount"),
         timelock: getCoinHTLCData(c, "timelock"),
         token: {
@@ -288,6 +290,7 @@ const Activity = () => {
       const receiverDeals = await Promise.all(
         swaps.receiver.map(async (c) => ({
           uid: getCoinHTLCData(c, "owner"),
+          coinid: c.coinid,
           native: getCoinHTLCData(c, "amount"),
           timelock: getCoinHTLCData(c, "timelock"),
           token: {
@@ -303,8 +306,6 @@ const Activity = () => {
       setLoading(false);
     });
   }, [_currentBlock]);
-
-  console.log(deals.length);
 
   return (
     <div className="bg-gray-100 bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg">

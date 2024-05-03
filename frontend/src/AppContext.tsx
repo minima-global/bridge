@@ -7,11 +7,11 @@ import defaultAssetsStored, { _defaults } from "./constants/index.js";
 import { CoinStats } from "./types/MinimaBalance.js";
 import { toast } from "react-toastify";
 
-
 import { initBridgeSystemsStartup } from "../../dapp/js/auth.js";
 import { setInfuraApiKeys, getInfuraGASAPI } from "../../dapp/js/ethutil.js";
 import { sendBackendMSG } from "../../dapp/js/jslib.js";
 import { setNetwork } from "../../dapp/js/htlcvars.js";
+import { OTCDeal } from "./types/OTCDeal.js";
 
 export var USER_DETAILS;
 export const appContext = createContext({} as any);
@@ -22,15 +22,18 @@ interface IProps {
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
 
-  // current Minima block height
-  const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
-
   // Loading App
   const [isWorking, setWorking] = useState(false);
   // App's navigation
   const [_currentNavigation, setCurrentNavigation] = useState("balance");
   // Trading Method Navigation
-  const [_currentTradeWindow, setCurrentTradeWindow] = useState<'otc' | 'orderbook' | null>(null);
+  const [_currentTradeWindow, setCurrentTradeWindow] = useState<
+    "otc" | "orderbook" | null
+  >(null);
+  // current Minima block height
+  const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
+  // Accept OTC dialog
+  const [_promptAcceptOTC, setPromptAcceptOTC] = useState<null | OTCDeal>(null);
   // Deposit Modal
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
@@ -47,13 +50,15 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptSettings, setPromptSettings] = useState(false);
 
   // Current Network
-  const [_currentNetwork, setCurrentNetwork] = useState('mainnet');
+  const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
   // Default ERC 20 Assets
   const [_defaultAssets, setDefaultAssets] = useState<{ assets: Asset[] }>({
     assets: [],
   });
   // Default ERC 20 Assets
-  const [_defaultNetworks, setDefaultNetworks] = useState<Networks | null>(null);
+  const [_defaultNetworks, setDefaultNetworks] = useState<Networks | null>(
+    null
+  );
   // Generated Key by MDS seedrandom generator
   const [_generatedKey, setGeneratedKey] = useState("");
   // JSON RPC Network Provider
@@ -152,8 +157,13 @@ const AppProvider = ({ children }: IProps) => {
                           ' LET roundedtotal=FLOOR(total)"';
 
                         (window as any).MDS.cmd(add, function (respo) {
-                          const total = respo.response.variables.roundedtotal;                         
-                          setMinimaBalance({confirmed, unconfirmed, total, coins});
+                          const total = respo.response.variables.roundedtotal;
+                          setMinimaBalance({
+                            confirmed,
+                            unconfirmed,
+                            total,
+                            coins,
+                          });
                         });
                       }
                     }
@@ -260,7 +270,6 @@ const AppProvider = ({ children }: IProps) => {
               // set all networks saved
               setDefaultNetworks(JSON.parse(defaultNetworks.DATA));
             } else {
-
               // Initialize networks
               await sql(
                 `INSERT INTO cache (name, data) VALUES ('DEFAULTNETWORKS', '${JSON.stringify(
@@ -313,9 +322,9 @@ const AppProvider = ({ children }: IProps) => {
         }
 
         if (msg.event === "NEWBLOCK") {
-          (window as any).MDS.cmd("block", (resp) => {            
+          (window as any).MDS.cmd("block", (resp) => {
             setCurrentBlock(resp.response.block);
-          })
+          });
         }
       });
     }
@@ -328,12 +337,12 @@ const AppProvider = ({ children }: IProps) => {
   ) => {
     let rpcUrl = networks && networks[network] ? networks[network].rpc : null;
 
-    // SYNC BACKEND + FRONTEND 
+    // SYNC BACKEND + FRONTEND
     const message = {
-      action: network === 'sepolia' ? 'SWITCHSEPOLIA' : 'SWITCHMAINNET'
-    }
+      action: network === "sepolia" ? "SWITCHSEPOLIA" : "SWITCHMAINNET",
+    };
     setNetwork(network);
-    
+
     handleActionViaBackend(message);
 
     if (rpcUrl) {
@@ -365,7 +374,6 @@ const AppProvider = ({ children }: IProps) => {
 
       setProvider(networkToConnect);
       setCurrentNetwork(network);
-
     } else {
       console.error("Network configuration not found.");
     }
@@ -375,7 +383,6 @@ const AppProvider = ({ children }: IProps) => {
     const updatedData = {
       default: name,
     };
-
 
     // Fetch all saved networks
     const defaultNetworks: any = await sql(
@@ -434,24 +441,24 @@ const AppProvider = ({ children }: IProps) => {
     }
   };
 
-  const handleActionViaBackend = async (action: any) => {    
-    console.log('sending message to backend', action);
+  const handleActionViaBackend = async (action: any) => {
+    console.log("sending message to backend", action);
     return new Promise((resolve) => {
       sendBackendMSG(action, (resp) => {
         console.log(resp);
         resolve(resp);
       });
     });
-  }
+  };
 
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
   };
-  
+
   const promptDeposit = () => {
     setPromptDeposit((prevState) => !prevState);
   };
-  
+
   const promptWithdraw = () => {
     setPromptWithdraw((prevState) => !prevState);
   };
@@ -464,7 +471,14 @@ const AppProvider = ({ children }: IProps) => {
     setPromptSettings((prevState) => !prevState);
   };
 
-  const notify = (message: string) => toast(message, { position: 'bottom-right', theme: 'dark'});
+  const promptAcceptOTC = (deal: OTCDeal) => {
+    setPromptAcceptOTC((prevState) =>
+      prevState ? null : deal
+    );
+  };
+
+  const notify = (message: string) =>
+    toast(message, { position: "bottom-right", theme: "dark" });
 
   return (
     <appContext.Provider
@@ -472,6 +486,9 @@ const AppProvider = ({ children }: IProps) => {
         isWorking,
 
         _currentBlock,
+
+        _promptAcceptOTC,
+        promptAcceptOTC,
 
         handleActionViaBackend,
 
@@ -511,7 +528,7 @@ const AppProvider = ({ children }: IProps) => {
         _userDetails,
         updateApiKeys,
 
-        notify
+        notify,
       }}
     >
       {children}
