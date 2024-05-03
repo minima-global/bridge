@@ -24,29 +24,14 @@ const OTCForm = () => {
         token: { name: "WMINIMA", amount: "" },
       }}
       onSubmit={async (data, {resetForm}) => {
-        // Need to send this to the backend to handle..
-        /**
-         * 		//Send to the backend..
-		var message 			= {};
-		message.action			= "STARTMINIMASWAP";
-		message.sendamount 		= sendamount;
-		message.requestamount 	= reqamount;
-		message.contractaddress	= "ETH:"+contractaddress;
-		message.reqpublickey	= reqpublickey;
-		message.otc				= true;
-         */
-
+        
         const { uid, native, token } = data;
-        try {
-
-          console.log(token.name);
-          console.log(_network);
-          console.log( "ETH:"+_defaults[token.name.includes("WMINIMA") ? 'wMinima' : 'Tether'][_network])
+        try {          
           const message = {
             action: "STARTMINIMASWAP",
             sendamount: native,
             requestamount: token.amount,
-            contractaddress: "ETH:"+_defaults[token.name.includes("WMINIMA") ? 'wMinima' : 'Tether'][_network].toUpperCase(),
+            contractaddress: "ETH:"+"0x"+_defaults[token.name.includes("WMINIMA") ? 'wMinima' : 'Tether'][_network].slice(2).toUpperCase(),
             reqpublickey: uid,
             otc: true,
           }
@@ -61,10 +46,6 @@ const OTCForm = () => {
         } catch (error) {
           
         }
-
-
-
-
       }}
       validationSchema={yup.object().shape({
         uid: yup

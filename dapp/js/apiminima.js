@@ -126,12 +126,12 @@ function getCoinHTLCData(coin,dataparam){
 		var token = getCoinHTLCData(coin,"requesttoken");				
 
 		//Now decipher to plain speak
-		if(token.toLowerCase() == wMinimaContractAddress.toLowerCase()){
+		if(token == wMinimaContractAddress){
 			return "wMinima";
-		}else if(token.toLowerCase() == USDTContractAddress.toLowerCase()){
+		}else if(token == USDTContractAddress){
 			return "USDT";
 		}
-		console.log("unkonwn..");
+
 		return "UNKNOWN";
 		
 	}else if(dataparam == "hashlock"){

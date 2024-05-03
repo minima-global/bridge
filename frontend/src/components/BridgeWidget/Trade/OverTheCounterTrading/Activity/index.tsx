@@ -1,45 +1,42 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import MostResponsiveTableEver from "../../../../UI/MostResponsiveTableEver";
-import { checkForCurrentSwaps, getCoinHTLCData } from"../../../../../../../dapp/js/apiminima.js";
+import {
+  checkForCurrentSwaps,
+  getCoinHTLCData,
+} from "../../../../../../../dapp/js/apiminima.js";
+import { haveSentCounterPartyTxn } from "../../../../../../../dapp/js/sql.js";
+import { appContext } from "../../../../../AppContext.js";
+import Decimal from "decimal.js";
 
 const headers = ["UID", "Native", "Request", "TimeLock", "Action"];
-// const fakeData = [
-//   {
-//     uid: "0x7775C567A42978C72F4BEB79D3139CC72354B0895C0E836BBA3F8EEDC3F8B042",
-//     native: "100",
-//     token: {
-//       tokenName: "wMinima",
-//       amount: "200",
-//     },
-//     timelock: "150",
-//     action: "Locked",
-//   },
-//   {
-//     uid: "0x1234567890123456789012345678901234567890123456789012345678901234",
-//     native: "150",
-//     token: {
-//       tokenName: "wEth",
-//       amount: "300",
-//     },
-//     timelock: "200",
-//     action: "Unlocked",
-//   },
-//   {
-//     uid: "0xAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAABBCCDDEEFFAA",
-//     native: "200",
-//     token: {
-//       tokenName: "wBTC",
-//       amount: "400",
-//     },
-//     timelock: "250",
-//     action: "Locked",
-//   },
-// ];
 
-// type ACTION_STATES = "LOADING" | "LOCKED" | "ACCEPT" | "ACCEPTED";
+const getReceiversActions = async (coin) => {
+  return new Promise((resolve) => {
+    if (new Decimal(coin.age).lt(2)) {
+      resolve("PENDING");
+    } else {
+      const hashlock = getCoinHTLCData(coin, "hashlock");
+      haveSentCounterPartyTxn(hashlock, (sent) => {
+        if (!sent) resolve("ACCEPT");
+
+        return resolve("ACCEPTED");
+      });
+    }
+  });
+};
 
 const renderCell = (cellData) => {
   const { uid, native, token, timelock, action } = cellData;
+  const [_timeLock, setTimeLock] = useState<null | string>(null);
+  const { _currentBlock } = useContext(appContext);
+
+  useEffect(() => {
+    setTimeLock(
+      timelock && _currentBlock
+        ? new Decimal(timelock).minus(_currentBlock).toString()
+        : null
+    );
+  }, [_currentBlock]);
 
   return (
     <>
@@ -62,7 +59,11 @@ const renderCell = (cellData) => {
         <div className="bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max">
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
-            src={token.tokenName === 'wMinima' ? "./assets/token.svg" : "./assets/tether.svg"}
+            src={
+              token.tokenName === "wMinima"
+                ? "./assets/token.svg"
+                : "./assets/tether.svg"
+            }
           />
           <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
             {token.amount}
@@ -73,17 +74,88 @@ const renderCell = (cellData) => {
         <input
           readOnly
           className="bg-transparent w-10 focus:outline-none truncate font-mono text-sm text-center"
-          value={timelock}
+          value={_timeLock && new Decimal(_timeLock).gt(0) ? _timeLock : "-"}
         />
       </td>
       <td className="p-3 w-40">
-        <p className="my-auto text-right text-xs">{action}</p>
+      {action === "LOCKED" && (
+          <p className="bg-yellow-300 mx-auto tracking-wider rounded-full px-4 w-max text-xs py-2 text-black font-bold">
+            LOCKED
+          </p>
+        )}
+        {action === "ACCEPT" && (
+          <button
+            type="button"
+            className="bg-teal-300 py-1 text-black hover:bg-opacity-80 font-bold w-full"
+          >
+            Accept
+          </button>
+        )}
+        {action === "ACCEPTED" && (
+          <div className="bg-teal-400 mx-auto py-2 flex items-center px-3 rounded-full w-max">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="none"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z"
+                stroke-width="0"
+                fill="#0d9488"
+              />
+            </svg>
+            <p className="rounded-full tracking-wider pl-1 w-max text-xs text-white dark:text-black font-bold">
+              Accepted
+            </p>
+          </div>
+        )}
+        {action === "PENDING" && (
+          <div className="mx-auto bg-yellow-500 rounded-full px-4 w-max py-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="animate-spin"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="#FFFFFF"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M10 20.777a8.942 8.942 0 0 1 -2.48 -.969" />
+              <path d="M14 3.223a9.003 9.003 0 0 1 0 17.554" />
+              <path d="M4.579 17.093a8.961 8.961 0 0 1 -1.227 -2.592" />
+              <path d="M3.124 10.5c.16 -.95 .468 -1.85 .9 -2.675l.169 -.305" />
+              <path d="M6.907 4.579a8.954 8.954 0 0 1 3.093 -1.356" />
+              <path d="M12 9l-2 3h4l-2 3" />
+            </svg>
+          </div>
+        )}
       </td>
     </>
   );
 };
 const renderCellMobile = (cellData) => {
   const { uid, native, token, timelock, action } = cellData;
+  const [_timeLock, setTimeLock] = useState<null | string>(null);
+  const { _currentBlock } = useContext(appContext);
+
+  useEffect(() => {
+    setTimeLock(
+      timelock && _currentBlock
+        ? new Decimal(timelock).minus(_currentBlock).toString()
+        : null
+    );
+  }, [_currentBlock]);
 
   return (
     <>
@@ -106,7 +178,11 @@ const renderCellMobile = (cellData) => {
         <div className="bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max">
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
-            src={token.tokenName === 'wMinima' ? "./assets/token.svg" : "./assets/tether.svg"}
+            src={
+              token.tokenName === "wMinima"
+                ? "./assets/token.svg"
+                : "./assets/tether.svg"
+            }
           />
           <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
             {token.amount}
@@ -117,48 +193,116 @@ const renderCellMobile = (cellData) => {
         <input
           readOnly
           className="bg-transparent w-full focus:outline-none truncate font-mono text-xs"
-          value={timelock}
+          value={_timeLock && new Decimal(_timeLock).gt(0) ? _timeLock : "-"}
         />
       </div>
-      <div className="p-4 pt-5">
-        <p className="my-auto text-xs">{action}</p>
+      <div className={`p-4 ${action === "!ACCEPT" ? "pt-0" : "pt-3"}`}>
+        {action === "LOCKED" && (
+          <p className="bg-yellow-300 tracking-wider rounded-full px-4 w-max text-xs py-2 text-black font-bold">
+            LOCKED
+          </p>
+        )}
+        {action === "ACCEPT" && (
+          <button
+            type="button"
+            className="bg-teal-300 text-black hover:bg-opacity-80 font-bold w-full"
+          >
+            Accept
+          </button>
+        )}
+        {action === "ACCEPTED" && (
+          <div className="bg-teal-400 py-2 flex items-center px-3 rounded-full w-max">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              stroke-width="2.5"
+              stroke="none"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path
+                d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z"
+                stroke-width="0"
+                fill="#0d9488"
+              />
+            </svg>
+            <p className="rounded-full tracking-wider pl-1 w-max text-xs text-white dark:text-black font-bold">
+              Accepted
+            </p>
+          </div>
+        )}
+        {action === "PENDING" && (
+          <div className="bg-yellow-500 rounded-full px-4 w-max py-1">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="animate-spin"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              strokeWidth="2.5"
+              stroke="#FFFFFF"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M10 20.777a8.942 8.942 0 0 1 -2.48 -.969" />
+              <path d="M14 3.223a9.003 9.003 0 0 1 0 17.554" />
+              <path d="M4.579 17.093a8.961 8.961 0 0 1 -1.227 -2.592" />
+              <path d="M3.124 10.5c.16 -.95 .468 -1.85 .9 -2.675l.169 -.305" />
+              <path d="M6.907 4.579a8.954 8.954 0 0 1 3.093 -1.356" />
+              <path d="M12 9l-2 3h4l-2 3" />
+            </svg>
+          </div>
+        )}
       </div>
     </>
   );
 };
 
-
 // Activity can be loading, Locked, Accept or Accepted
 const Activity = () => {
   const [deals, setDeals] = useState<any[]>([]);
+  const { _currentBlock} = useContext(appContext);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    checkForCurrentSwaps(true, (swaps) => {
-      console.log(swaps);
+    setLoading(true);
 
-      const ownerDeals = swaps.owner.map(c => ({
+    checkForCurrentSwaps(true, async (swaps) => {
+      const ownerDeals = swaps.owner.map((c) => ({
         uid: getCoinHTLCData(c, "owner"),
         native: getCoinHTLCData(c, "amount"),
+        timelock: getCoinHTLCData(c, "timelock"),
         token: {
           tokenName: getCoinHTLCData(c, "requesttokentype"),
-          amount: getCoinHTLCData(c, "requestamount")
-        }        
+          amount: getCoinHTLCData(c, "requestamount"),
+        },
+        action: "LOCKED",
       }));
-      
-      const receiverDeals = swaps.receiver.map(c => ({
-        uid: getCoinHTLCData(c, "owner"),
-        native: getCoinHTLCData(c, "amount"),
-        token: {
-          tokenName: getCoinHTLCData(c, "requesttokentype"),
-          amount: getCoinHTLCData(c, "requestamount")
-        }
-      }));
-      console.log('ownerDeals', ownerDeals);
-      console.log('receiverDeals', receiverDeals);
+
+      const receiverDeals = await Promise.all(
+        swaps.receiver.map(async (c) => ({
+          uid: getCoinHTLCData(c, "owner"),
+          native: getCoinHTLCData(c, "amount"),
+          timelock: getCoinHTLCData(c, "timelock"),
+          token: {
+            tokenName: getCoinHTLCData(c, "requesttokentype"),
+            amount: getCoinHTLCData(c, "requestamount"),
+          },
+          action: await getReceiversActions(c),
+        }))
+      );
 
       setDeals([...ownerDeals, ...receiverDeals]);
+
+      setLoading(false);
     });
-  }, []);
+  }, [_currentBlock]);
 
   console.log(deals.length);
 
@@ -192,7 +336,9 @@ const Activity = () => {
 
       {!deals.length && (
         <div className="flex justify-center items-center h-full">
-          <p className="text-sm !text-opacity-30 dark:text-white py-16 md:py-0">No active deals</p>
+          <p className="text-sm !text-opacity-30 dark:text-white py-16 md:py-0">
+            No active deals
+          </p>
         </div>
       )}
     </div>

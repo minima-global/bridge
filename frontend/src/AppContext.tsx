@@ -22,6 +22,9 @@ interface IProps {
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
 
+  // current Minima block height
+  const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
+
   // Loading App
   const [isWorking, setWorking] = useState(false);
   // App's navigation
@@ -117,6 +120,7 @@ const AppProvider = ({ children }: IProps) => {
     if (!loaded.current) {
       loaded.current = true;
       (window as any).MDS.init((msg: any) => {
+        console.log(msg);
         //Do initialisation
         if (msg.event == "inited") {
           // Check if read or write mode
@@ -307,6 +311,12 @@ const AppProvider = ({ children }: IProps) => {
             }
           }
         }
+
+        if (msg.event === "NEWBLOCK") {
+          (window as any).MDS.cmd("block", (resp) => {            
+            setCurrentBlock(resp.response.block);
+          })
+        }
       });
     }
   }, [loaded]);
@@ -460,6 +470,8 @@ const AppProvider = ({ children }: IProps) => {
     <appContext.Provider
       value={{
         isWorking,
+
+        _currentBlock,
 
         handleActionViaBackend,
 
