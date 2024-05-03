@@ -316,7 +316,9 @@ const AppProvider = ({ children }: IProps) => {
             if (comms.action == "FRONTENDMSG") {
               console.log(comms);
               //Show the message
-              alert(JSON.stringify(comms, null, 2));
+              globalNotify(JSON.stringify(comms));
+
+              // alert(JSON.stringify(comms, null, 2));
             }
           }
         }
@@ -479,6 +481,9 @@ const AppProvider = ({ children }: IProps) => {
 
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
+  
+  const globalNotify = (message: string) =>
+    toast(message, { position: "top-center", theme: "dark" });
 
   return (
     <appContext.Provider

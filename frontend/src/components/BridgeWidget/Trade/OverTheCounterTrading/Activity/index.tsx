@@ -269,7 +269,7 @@ const renderCellMobile = (cellData) => {
 const Activity = () => {
   const [deals, setDeals] = useState<any[]>([]);
   const { _currentBlock } = useContext(appContext);
-  const [loading, setLoading] = useState(false);
+  const [_, setLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);

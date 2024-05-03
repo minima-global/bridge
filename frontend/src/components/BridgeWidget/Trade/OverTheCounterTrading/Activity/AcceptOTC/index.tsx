@@ -1,27 +1,54 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { appContext } from "../../../../../../AppContext";
 import AnimatedDialog from "../../../../../UI/AnimatedDialog";
 import DoubleArrowIcon from "../../../../../UI/DoubleArrow";
 
 const AcceptOTC = () => {
-  const { _promptAcceptOTC, promptAcceptOTC } = useContext(appContext);
+  const { _promptAcceptOTC, promptAcceptOTC, handleActionViaBackend, notify } =
+    useContext(appContext);
 
-  console.log("ACCEPT OTC?", _promptAcceptOTC);
+  const [loading, setLoading] = useState(false);
+
+  const handleAccept = async () => {
+    setLoading(true);
+    try {
+      const message = {
+        action: "ACCEPTOTCSWAP",
+        coinid:
+          _promptAcceptOTC && _promptAcceptOTC.coinid
+            ? _promptAcceptOTC.coinid
+            : null,
+      };
+
+      await handleActionViaBackend(message);
+      notify("Accepted OTC deal!");
+      promptAcceptOTC(null);
+    } catch (error) {
+      notify("Failed to collect OTC deal...");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <AnimatedDialog
       position="items-center h-screen w-full"
       extraClass=""
       isOpen={_promptAcceptOTC}
-      onClose={() => promptAcceptOTC()}
+      onClose={() => !loading ? promptAcceptOTC() : null}
     >
       <div>
         <div className="flex justify-between items-center pr-4">
           <h3 className="font-bold ml-4">Accept OTC?</h3>
           <div />
-        </div>       
+        </div>
         <div className="my-2">
-            <p className="px-4">Swapping Native Minima to {_promptAcceptOTC && _promptAcceptOTC.token ? _promptAcceptOTC.token.tokenName : "-"}</p>
+          <p className="px-4">
+            Swapping Native Minima to{" "}
+            {_promptAcceptOTC && _promptAcceptOTC.token
+              ? _promptAcceptOTC.token.tokenName
+              : "-"}
+          </p>
         </div>
         <div className="grid grid-cols-[1fr_minmax(0,_260px)_1fr] my-6">
           <div />
@@ -62,11 +89,19 @@ const AcceptOTC = () => {
         </div>
 
         <div className="grid grid-cols-2 mt-16">
-            <div />
-            <div className="grid grid-cols-2 gap-1 pr-4">
-                <button onClick={promptAcceptOTC}>Dismiss</button>
-                <button className="bg-black hover:bg-opacity-80 dark:bg-teal-300 text-white dark:text-black font-bold">Accept</button>
-            </div>
+          <div />
+          <div className="grid grid-cols-2 gap-1 pr-4">
+            <button disabled={loading} onClick={promptAcceptOTC}>
+              Dismiss
+            </button>
+            <button
+              disabled={loading}
+              onClick={handleAccept}
+              className="bg-black hover:bg-opacity-80 dark:bg-teal-300 text-white dark:text-black font-bold disabled:bg-opacity-50"
+            >
+              Accept
+            </button>
+          </div>
         </div>
       </div>
     </AnimatedDialog>

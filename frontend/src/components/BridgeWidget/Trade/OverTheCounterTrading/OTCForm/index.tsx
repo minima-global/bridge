@@ -13,8 +13,6 @@ import { _defaults } from "../../../../../constants";
 const OTCForm = () => {
   const { _minimaBalance, handleActionViaBackend, notify } = useContext(appContext);
   const { _network } = useWalletContext();
-
-  console.log('CURRENT NETWORK', _network);
   
   return (
     <Formik
