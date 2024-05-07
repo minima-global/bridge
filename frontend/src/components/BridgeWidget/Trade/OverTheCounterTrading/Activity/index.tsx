@@ -26,16 +26,7 @@ const getReceiversActions = async (coin) => {
 };
 
 const renderCell = (cellData) => {
-  const { uid, native, token, timelock, action, coinid } = cellData;
-  const [_timeLock, setTimeLock] = useState<null | string>(null);
-  const { _currentBlock, promptAcceptOTC } = useContext(appContext);
-  useEffect(() => {
-    setTimeLock(
-      timelock && _currentBlock
-        ? new Decimal(timelock).minus(_currentBlock).toString()
-        : null
-    );
-  }, [_currentBlock]);
+  const { uid, native, token, timelock, action, coinid, promptAcceptOTC } = cellData;
 
   return (
     <>
@@ -73,7 +64,7 @@ const renderCell = (cellData) => {
         <input
           readOnly
           className="bg-transparent w-10 focus:outline-none truncate font-mono text-sm text-center"
-          value={_timeLock && new Decimal(_timeLock).gt(0) ? _timeLock : "-"}
+          value={timelock && new Decimal(timelock).gt(0) ? timelock : "-"}
         />
       </td>
       <td className="p-3 w-40">
@@ -98,7 +89,7 @@ const renderCell = (cellData) => {
               width="20"
               height="20"
               viewBox="0 0 24 24"
-              stroke-width="2.5"
+              strokeWidth="2.5"
               stroke="none"
               fill="none"
               strokeLinecap="round"
@@ -107,7 +98,7 @@ const renderCell = (cellData) => {
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path
                 d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z"
-                stroke-width="0"
+                strokeWidth="0"
                 fill="#0d9488"
               />
             </svg>
@@ -145,17 +136,7 @@ const renderCell = (cellData) => {
   );
 };
 const renderCellMobile = (cellData) => {
-  const { uid, native, token, timelock, action, coinid } = cellData;
-  const [_timeLock, setTimeLock] = useState<null | string>(null);
-  const { _currentBlock, promptAcceptOTC } = useContext(appContext);
-
-  useEffect(() => {
-    setTimeLock(
-      timelock && _currentBlock
-        ? new Decimal(timelock).minus(_currentBlock).toString()
-        : null
-    );
-  }, [_currentBlock]);
+  const { uid, native, token, timelock, action, coinid, promptAcceptOTC } = cellData;
 
   return (
     <>
@@ -193,7 +174,7 @@ const renderCellMobile = (cellData) => {
         <input
           readOnly
           className="bg-transparent w-full focus:outline-none truncate font-mono text-xs"
-          value={_timeLock && new Decimal(_timeLock).gt(0) ? _timeLock : "-"}
+          value={timelock && new Decimal(timelock).gt(0) ? timelock : "-"}
         />
       </div>
       <div className={`p-4 ${action === "!ACCEPT" ? "pt-0" : "pt-3"}`}>
@@ -218,7 +199,7 @@ const renderCellMobile = (cellData) => {
               width="20"
               height="20"
               viewBox="0 0 24 24"
-              stroke-width="2.5"
+              strokeWidth="2.5"
               stroke="none"
               fill="none"
               strokeLinecap="round"
@@ -227,7 +208,7 @@ const renderCellMobile = (cellData) => {
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path
                 d="M17 3.34a10 10 0 1 1 -14.995 8.984l-.005 -.324l.005 -.324a10 10 0 0 1 14.995 -8.336zm-1.293 5.953a1 1 0 0 0 -1.32 -.083l-.094 .083l-3.293 3.292l-1.293 -1.292l-.094 -.083a1 1 0 0 0 -1.403 1.403l.083 .094l2 2l.094 .083a1 1 0 0 0 1.226 0l.094 -.083l4 -4l.083 -.094a1 1 0 0 0 -.083 -1.32z"
-                stroke-width="0"
+                strokeWidth="0"
                 fill="#0d9488"
               />
             </svg>
@@ -268,23 +249,22 @@ const renderCellMobile = (cellData) => {
 // Activity can be loading, Locked, Accept or Accepted
 const Activity = () => {
   const [deals, setDeals] = useState<any[]>([]);
-  const { _currentBlock } = useContext(appContext);
-  const [_, setLoading] = useState(false);
+  const { _currentBlock, promptAcceptOTC} = useContext(appContext);
 
   useEffect(() => {
-    setLoading(true);
 
     checkForCurrentSwaps(true, async (swaps) => {
       const ownerDeals = swaps.owner.map((c) => ({
         uid: getCoinHTLCData(c, "owner"),
         coinid: c.coinid,
         native: getCoinHTLCData(c, "amount"),
-        timelock: getCoinHTLCData(c, "timelock"),
+        timelock: getCoinHTLCData(c, "timelock") ? new Decimal(getCoinHTLCData(c, "timelock")).minus(_currentBlock).toString() : null,
         token: {
           tokenName: getCoinHTLCData(c, "requesttokentype"),
           amount: getCoinHTLCData(c, "requestamount"),
         },
         action: "LOCKED",
+        promptAcceptOTC: promptAcceptOTC
       }));
 
       const receiverDeals = await Promise.all(
@@ -292,18 +272,17 @@ const Activity = () => {
           uid: getCoinHTLCData(c, "owner"),
           coinid: c.coinid,
           native: getCoinHTLCData(c, "amount"),
-          timelock: getCoinHTLCData(c, "timelock"),
+          timelock: getCoinHTLCData(c, "timelock") ? new Decimal(getCoinHTLCData(c, "timelock")).minus(_currentBlock).toString() : null,
           token: {
             tokenName: getCoinHTLCData(c, "requesttokentype"),
             amount: getCoinHTLCData(c, "requestamount"),
           },
           action: await getReceiversActions(c),
+          promptAcceptOTC: promptAcceptOTC
         }))
       );
 
       setDeals([...ownerDeals, ...receiverDeals]);
-
-      setLoading(false);
     });
   }, [_currentBlock]);
 

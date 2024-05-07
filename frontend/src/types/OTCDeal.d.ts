@@ -9,4 +9,5 @@ export interface OTCDeal {
     token: RequestToken;
     timelock: string;
     action: string;
+    coinid: string;
 }

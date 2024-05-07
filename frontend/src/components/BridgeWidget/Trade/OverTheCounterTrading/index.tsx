@@ -31,7 +31,7 @@ const OverTheCounterTrading = () => {
           />
         </div>
       </div>
-      <div className="grid grid-rows-[auto_auto_1fr] md:grid-rows-[1fr_auto_1fr]">
+      <div className="grid grid-rows-[auto_auto_1fr]">
         <OTCForm />
 
         <div className="flex items-center justify-center">

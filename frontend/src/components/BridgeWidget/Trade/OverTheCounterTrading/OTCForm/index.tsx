@@ -163,7 +163,7 @@ const OTCForm = () => {
           <button
             disabled={!isValid}
             type="submit"
-            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-opacity-5 disabled:dark:text-opacity-30"
+            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 disabled:bg-opacity-5"
           >
             Trade
           </button>

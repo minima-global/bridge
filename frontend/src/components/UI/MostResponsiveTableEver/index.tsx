@@ -20,6 +20,7 @@ const MostResponsiveTableEver = ({
   renderCell,
   renderCellMobile,
 }: Props) => {
+
   return (
     <>
       <table className="w-full hidden md:block">
@@ -38,14 +39,14 @@ const MostResponsiveTableEver = ({
           </tr>
         </thead>
         <tbody>
-          {data.map((row, rowIndex) => (
+          {data ? data.map((row, rowIndex) => (
             <tr key={rowIndex}>{renderCell(row)}</tr>
-          ))}
+          )): null}
         </tbody>
       </table>
 
       <div className="block md:hidden w-full">
-        {data.map((cell, cellIndex) => (
+        {data ? data.map((cell, cellIndex) => (
           <div className={`${headerClassesMobile} grid grid-cols-[auto_1fr]`} key={cellIndex}>
             <div className="divide-x dark:divide-teal-300">
               {headers.map((header, headerIndex) => (
@@ -54,7 +55,7 @@ const MostResponsiveTableEver = ({
             </div>
             <div className="bg-gray-200 dark:bg-black !bg-opacity-10">{renderCellMobile(cell)}</div>
           </div>
-        ))}
+        )): null}
       </div>
     </>
   );
