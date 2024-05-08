@@ -7,7 +7,6 @@ import {
   addFavourites,
   removeFavourite,
   getFavourites,
-  removeAllFavourites,
 } from "../../../../dapp/js/sql.js";
 import { Favorite } from "../../types/Favorite.js";
 import Bear from "../UI/Avatars/Bear/index.js";
@@ -17,6 +16,7 @@ import RubbishIcon from "../UI/Icons/RubbishIcon/index.js";
 import DoneIcon from "../UI/Icons/DoneIcon/index.js";
 import CloseIcon from "../UI/Icons/CloseIcon/index.js";
 import PlusIcon from "../UI/Icons/PlusIcon/index.js";
+import { useFormikContext } from "formik";
 
 const Favorites = () => {
   const { _promptFavorites, promptFavorites, notify } = useContext(appContext);
@@ -25,6 +25,8 @@ const Favorites = () => {
 
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
   const [favToAdd, setFavToAdd] = useState({ name: "", uid: "" });
+
+  const formik: any = useFormikContext();
 
   useEffect(() => {
     if (_promptFavorites) {
@@ -208,6 +210,10 @@ const Favorites = () => {
             {favorites
               ? favorites.map((f) => (
                   <li
+                    onClick={() => {
+                      formik.setFieldValue("uid", f.BRIDGEUID);
+                      promptFavorites();
+                    }}
                     className={`grid ${
                       mode !== "delete"
                         ? "grid-cols-[46px_1fr]"

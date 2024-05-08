@@ -9,6 +9,7 @@ import { appContext } from "../../../../../AppContext";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
 import { _defaults } from "../../../../../constants";
+import Favorites from "../../../../Favorites";
 
 const OTCForm = () => {
   const { _minimaBalance, handleActionViaBackend, notify, promptFavorites } = useContext(appContext);
@@ -24,9 +25,6 @@ const OTCForm = () => {
       onSubmit={async (data, {resetForm}) => {
         
         const { uid, native, token } = data;
-
-        console.log('NATIVE', native);
-        console.log('REQUEST AMOUNT', token.amount);
         try {          
           const message = {
             action: "STARTMINIMASWAP",
@@ -128,6 +126,7 @@ const OTCForm = () => {
                 className="hover:animate-pulse text-sm flex items-center text-center"
               >
                 <FavoriteIcon fill="currentColor" />
+                <Favorites />
               </button>
               </div>
             }
