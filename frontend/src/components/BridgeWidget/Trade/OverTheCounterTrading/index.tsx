@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../../../AppContext";
-import SwapIcon from "../../../UI/SwapIcon";
+import SwapIcon from "../../../UI/Icons/SwapIcon";
 import Identity from "./Identity";
 import OTCForm from "./OTCForm";
 import Activity from "./Activity";

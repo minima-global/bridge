@@ -3,7 +3,7 @@ import { appContext } from "../../../AppContext";
 import TokenList from "../../TokenList";
 import NativeMinima from "../../NativeMinima";
 import InfoTooltip from "../../UI/InfoTooltip";
-import WalletIcon from "../../UI/WalletIcon";
+import WalletIcon from "../../UI/Icons/WalletIcon";
 
 const Balance = () => {
   const { _currentNavigation, promptDeposit, promptWithdraw } = useContext(appContext);

@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../../AppContext";
-import PoolIcon from "../../UI/PoolIcon/index.js";
+import PoolIcon from "../../UI/Icons/PoolIcon/index.js";
 import YourPools from "./YourPools/index.js";
 
 const Liquidity = () => {

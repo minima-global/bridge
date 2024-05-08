@@ -1,8 +1,8 @@
 import { useContext } from "react";
 import { appContext } from "../../../../AppContext";
-import TradeIcon from "../../../UI/TradeIcon";
-import OTCIcon from "../../../UI/OTCIcon";
-import OrderBookIcon from "../../../UI/OrderBookIcon";
+import TradeIcon from "../../../UI/Icons/TradeIcon";
+import OTCIcon from "../../../UI/Icons/OTCIcon";
+import OrderBookIcon from "../../../UI/Icons/OrderBookIcon";
 
 const ChooseMethod = () => {
   const { setCurrentTradeWindow } = useContext(appContext);

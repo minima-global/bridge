@@ -1,7 +1,7 @@
 import { useContext, useState } from "react";
 import { appContext } from "../../../../../../AppContext";
 import AnimatedDialog from "../../../../../UI/AnimatedDialog";
-import DoubleArrowIcon from "../../../../../UI/DoubleArrow";
+import DoubleArrowIcon from "../../../../../UI/Icons/DoubleArrow";
 
 const AcceptOTC = () => {
   const { _promptAcceptOTC, promptAcceptOTC, handleActionViaBackend, notify } =

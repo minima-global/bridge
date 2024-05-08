@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import AnimatedDialog from "../UI/AnimatedDialog";
 import { appContext } from "../../AppContext";
-import FavoriteIcon from "../UI/FavoriteIcon";
+import FavoriteIcon from "../UI/Icons/FavoriteIcon/index.js";
 
 import {
   addFavourites,
@@ -11,10 +11,12 @@ import {
 } from "../../../../dapp/js/sql.js";
 import { Favorite } from "../../types/Favorite.js";
 import Bear from "../UI/Avatars/Bear/index.js";
-import AddIcon from "../UI/AddIcon/index.js";
-import RemoveIcon from "../UI/RemoveIcon/index.js";
-import RubbishIcon from "../UI/RubbishIcon/index.js";
-import DoneIcon from "../UI/DoneIcon/index.js";
+import AddIcon from "../UI/Icons/AddIcon/index.js";
+import RemoveIcon from "../UI/Icons/RemoveIcon/index.js";
+import RubbishIcon from "../UI/Icons/RubbishIcon/index.js";
+import DoneIcon from "../UI/Icons/DoneIcon/index.js";
+import CloseIcon from "../UI/Icons/CloseIcon/index.js";
+import PlusIcon from "../UI/Icons/PlusIcon/index.js";
 
 const Favorites = () => {
   const { _promptFavorites, promptFavorites, notify } = useContext(appContext);
@@ -22,17 +24,13 @@ const Favorites = () => {
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
 
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
+  const [favToAdd, setFavToAdd] = useState({ name: "", uid: "" });
 
   useEffect(() => {
     if (_promptFavorites) {
       getFavourites((favs) => {
-        console.log("MY FAVS!", favs);
         setFavorites(favs.rows);
       });
-
-      //   addFavourites("Jimmy", "0xC546BAE990FABA6893A73A8ED50F3FB1368DC1AB8E9E5C26A94EBDFB2CE4C724", (resp) => {
-      //       console.log('ADDED NEW FAV!', resp);
-      //   });
     }
   }, [_promptFavorites]);
 
@@ -44,10 +42,26 @@ const Favorites = () => {
     } else {
       setFavToDelete([]);
     }
+  };
 
-  }
+  const handleAddChange = (evt) => {
+    const { name, value } = evt.target;
 
-  const handleDelete = async () => {
+    setFavToAdd((prevState) => ({ ...prevState, [name]: value }));
+  };
+
+  const handleAdd = () => {
+    addFavourites(favToAdd.name, favToAdd.uid, () => {
+      //
+    });
+    setFavToAdd({ name: "", uid: "" });
+    notify("Added new favorite!");
+    getFavourites((favs) => {
+      setFavorites(favs.rows);
+    });
+  };
+
+  const handleDelete = async () => {    
     await Promise.all(
       favToDelete.map(
         (id) =>
@@ -92,7 +106,13 @@ const Favorites = () => {
         <div className="flex justify-between items-center pr-4">
           <div className="grid grid-cols-[auto_1fr] ml-2">
             <FavoriteIcon fill="currentColor" />
-            <h3 className="my-auto font-bold ml-2">Favorites</h3>
+            <h3 className="my-auto font-bold ml-2">
+              {mode === "add"
+                ? "Add New"
+                : mode === "none"
+                ? "Favorites"
+                : "Delete"}
+            </h3>
           </div>
           <svg
             onClick={promptFavorites}
@@ -113,14 +133,21 @@ const Favorites = () => {
         </div>
 
         <hr className="h-1 mt-3 border-teal-300 border-1" />
-        <div className="px-2 py-2 dark:bg-[#1B1B1B] grid grid-cols-2">
+        <div className="px-2 py-2 dark:bg-[#1B1B1B] grid grid-cols-2 gap-1">
           <div className="flex gap-1">
             {mode === "delete" && (
               <div className="flex gap-1">
                 <div className="mx-1">
-                  <input disabled={favorites.length === 0} type="checkbox" onClick={handleSelectAll} />
+                  <input
+                    disabled={favorites.length === 0}
+                    type="checkbox"
+                    onClick={handleSelectAll}
+                  />
                 </div>
-                <div className={`${favorites.length === 0 && "opacity-50"}`} onClick={favorites.length > 0 ? handleDelete : () => null}>
+                <div
+                  className={`${favorites.length === 0||favToDelete.length===0 && "opacity-50"}`}
+                  onClick={favorites.length > 0 && favToDelete.length>0 ? handleDelete : () => null}
+                >
                   <RubbishIcon fill="currentColor" />
                 </div>
                 <div onClick={() => setMode("none")}>
@@ -128,19 +155,55 @@ const Favorites = () => {
                 </div>
               </div>
             )}
-            {mode !== "delete" && (
+            {mode === "none" && (
               <div className="flex gap-1">
-                <AddIcon fill="currentColor" />
+                <div onClick={() => setMode("add")}>
+                  <AddIcon fill="currentColor" />
+                </div>
                 <div onClick={() => setMode("delete")}>
                   <RemoveIcon fill="currentColor" />
                 </div>
               </div>
             )}
+
+            {mode === "add" && (
+              <div className="grid grid-cols-[32px_1fr]">
+                <div onClick={() => setMode("none")} className="m-auto">
+                  <CloseIcon fill="currentColor" />
+                </div>
+                <input
+                  onChange={handleAddChange}
+                  value={favToAdd.uid}
+                  name="uid"
+                  type="text"
+                  placeholder="Enter UID"
+                  className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
+                />
+              </div>
+            )}
           </div>
-          <div />
+          <div className="grid grid-cols-[1fr_32px]">
+            {mode === "add" && (
+              <>
+                <input
+                  onChange={handleAddChange}
+                  value={favToAdd.name}
+                  type="text"
+                  name="name"
+                  placeholder="Enter Name"
+                  className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
+                />
+                <div onClick={handleAdd} className="m-auto rounded-full">
+                  <PlusIcon fill="currentColor" />
+                </div>
+              </>
+            )}
+          </div>
         </div>
-        {favorites.length === 0 && <p className="text-sm text-center py-3">No favorites yet!</p>}
-        <div className="h-[calc(100%_-_60px)] overflow-y-scroll">
+        {favorites.length === 0 && (
+          <p className="text-sm text-center py-3">No favorites yet!</p>
+        )}
+        <div className={`${mode !== 'add' ? 'h-[calc(100%_-_60px)]' : 'h-[calc(100%_-_80px)]'} overflow-y-scroll`}>
           <ul>
             {favorites
               ? favorites.map((f) => (
@@ -166,7 +229,11 @@ const Favorites = () => {
                       <Bear extraClass="w-[46px]" input={f.BRIDGEUID} />
                     </div>
                     <div className="pt-2">
-                      <h6 className="text-sm font-bold">{f.NAME}</h6>
+                      <input
+                        readOnly
+                        value={f.NAME}
+                        className="bg-transparent cursor-default focus:outline-none w-full truncate font-bold"
+                      />                      
                       <input
                         onClick={(e) => e.stopPropagation()}
                         readOnly

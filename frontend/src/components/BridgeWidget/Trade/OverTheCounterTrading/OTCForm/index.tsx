@@ -1,5 +1,5 @@
 import InputWrapper from "../../../../UI/FormComponents/InputWrapper";
-import FavoriteIcon from "../../../../UI/FavoriteIcon";
+import FavoriteIcon from "../../../../UI/Icons/FavoriteIcon";
 import NativeMinima from "../../../../NativeMinima";
 import EthereumTokenSelect from "../EthereumTokenSelect";
 import { Formik } from "formik";

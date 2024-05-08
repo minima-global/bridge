@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import CaretIcon from "../../../../UI/CaretIcon";
+import CaretIcon from "../../../../UI/Icons/CaretIcon";
 import { animated, config, useSpring } from "react-spring";
 
 interface Props {
