@@ -6,12 +6,11 @@ import React, {
   useMemo,
   useState,
 } from "react";
-import { Wallet, parseUnits, formatEther,  Signer } from "ethers";
+import { Wallet, parseUnits, formatEther, Signer } from "ethers";
 import { appContext } from "../../AppContext";
 import { GasFeeCalculated } from "../../types/GasFeeInterface";
 import { TransactionResponse } from "ethers";
-
-
+import { _defaults } from "../../constants";
 
 type Props = {
   children: React.ReactNode;
@@ -24,7 +23,12 @@ type Context = {
   _balance: string;
   step: number;
   setStep: Dispatch<SetStateAction<number>>;
-  transfer: (address: string, amount: string, gas: GasFeeCalculated) => Promise<TransactionResponse>;
+  transfer: (
+    address: string,
+    amount: string,
+    gas: GasFeeCalculated
+  ) => Promise<TransactionResponse>;
+  getTokenType: (tokeName: string, currentNetwork: string) => string;
 };
 
 const WalletContext = createContext<Context | null>(null);
@@ -51,11 +55,10 @@ export const WalletContextProvider = ({ children }: Props) => {
     setNetwork(network.name);
     setAddress(address);
     setChainId(network.chainId);
-
   }, [_provider, _generatedKey]);
 
   /**
-   * 
+   *
    * @param address receiver address
    * @param amount amount (ether)
    * @param gas suggested gas fee
@@ -66,13 +69,12 @@ export const WalletContextProvider = ({ children }: Props) => {
     amount: string,
     gas: GasFeeCalculated
   ): Promise<TransactionResponse> => {
-    
     const tx = await _wallet!
       .sendTransaction({
         to: address,
         value: parseUnits(amount, "ether"),
         maxPriorityFeePerGas: parseUnits(gas.priorityFee, "gwei"), // wei
-        maxFeePerGas: parseUnits(gas.baseFee, "gwei"), // wei      
+        maxFeePerGas: parseUnits(gas.baseFee, "gwei"), // wei
       })
       .catch((err) => {
         throw err;
@@ -81,7 +83,27 @@ export const WalletContextProvider = ({ children }: Props) => {
     return tx;
   };
 
+  const getTokenType = (token: string): string => {
+      if (token.startsWith("ETH:")) {
+          const contractAddress = token.replace("ETH:", "").toUpperCase();
+          console.log('checking', contractAddress);
+          
+          const wMinimaMainnet = _defaults['wMinima'].mainnet.toUpperCase();
+          const wMinimaSepolia = _defaults['wMinima'].sepolia.toUpperCase();
+          const tetherMainnet = _defaults['Tether'].mainnet.toUpperCase();
+          const tetherSepolia = _defaults['Tether'].sepolia.toUpperCase();
 
+          if ([wMinimaMainnet, wMinimaSepolia].includes(contractAddress)) {
+            return 'wMinima';
+          }
+          
+          if ([tetherMainnet, tetherSepolia].includes(contractAddress)) {
+            return 'Tether';
+          }
+      }
+  
+      return "Minima";
+  };
 
   return (
     <WalletContext.Provider
@@ -94,6 +116,8 @@ export const WalletContextProvider = ({ children }: Props) => {
         transfer,
         step,
         setStep,
+
+        getTokenType,
       }}
     >
       {children}

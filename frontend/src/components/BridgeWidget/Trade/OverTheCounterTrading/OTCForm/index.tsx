@@ -24,6 +24,9 @@ const OTCForm = () => {
       onSubmit={async (data, {resetForm}) => {
         
         const { uid, native, token } = data;
+
+        console.log('NATIVE', native);
+        console.log('REQUEST AMOUNT', token.amount);
         try {          
           const message = {
             action: "STARTMINIMASWAP",

@@ -48,6 +48,8 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptSelectNetwork, setSelectNetwork] = useState(false);
   // Settings
   const [_promptSettings, setPromptSettings] = useState(false);
+  // Settings
+  const [_promptLogs, setPromptLogs] = useState(false);
 
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
@@ -479,6 +481,10 @@ const AppProvider = ({ children }: IProps) => {
     );
   };
 
+  const promptLogs = () => {
+    setPromptLogs((prevState) => !prevState);
+  }
+
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
   
@@ -501,6 +507,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptWithdraw,
         promptWithdraw,
+
+        _promptLogs,
+        promptLogs,
 
         _promptSettings,
         promptSettings,

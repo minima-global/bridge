@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../AppContext";
+import MainActivity from "../MainActivity";
 
 const Header = () => {
   const { promptSettings } = useContext(appContext);
@@ -15,6 +16,8 @@ const Header = () => {
             onClick={(e) => e.stopPropagation()}
             className="flex items-center"
           >
+            <MainActivity />
+            
             <svg
               onClick={promptSettings}
               className="hover:cursor-pointer hover:animate-spin"
@@ -36,6 +39,8 @@ const Header = () => {
                 fill="currentColor"
               />
             </svg>
+
+            
           </div>
         </div>
       </header>      

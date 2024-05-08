@@ -11,6 +11,8 @@ const AcceptOTC = () => {
 
   const handleAccept = async () => {
     setLoading(true);
+
+    console.log(_promptAcceptOTC);
     try {
       const message = {
         action: "ACCEPTOTCSWAP",
