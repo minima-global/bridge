@@ -44,6 +44,10 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptJsonRpcSetup, setPromptJsonRpcSetup] = useState<null | boolean>(
     false
   );
+  // Set up API Keys
+  const [_promptFavorites, setPromptFavorites] = useState(
+    false
+  );
   // Select Network
   const [_promptSelectNetwork, setSelectNetwork] = useState(false);
   // Settings
@@ -485,6 +489,10 @@ const AppProvider = ({ children }: IProps) => {
     setPromptLogs((prevState) => !prevState);
   }
 
+  const promptFavorites = () => {
+    setPromptFavorites((prevState) => !prevState);
+  }
+
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
   
@@ -510,6 +518,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptLogs,
         promptLogs,
+
+        _promptFavorites,
+        promptFavorites,
 
         _promptSettings,
         promptSettings,

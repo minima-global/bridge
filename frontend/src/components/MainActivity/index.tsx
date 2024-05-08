@@ -293,14 +293,12 @@ const MainActivity = () => {
   useEffect(() => {
     if (_promptLogs) {
       getAllEvents(MAX, 0, (events) => {
-        console.log("events", events);
 
         const _evts = events.map((event) => ({
           ...event,
           getTokenType,
           _network,
         }));
-        console.log("evts", _evts);
 
         setData(_evts);
       });

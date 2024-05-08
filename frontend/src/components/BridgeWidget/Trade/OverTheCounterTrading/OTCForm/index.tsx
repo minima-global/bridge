@@ -11,7 +11,7 @@ import { useWalletContext } from "../../../../../providers/WalletProvider/Wallet
 import { _defaults } from "../../../../../constants";
 
 const OTCForm = () => {
-  const { _minimaBalance, handleActionViaBackend, notify } = useContext(appContext);
+  const { _minimaBalance, handleActionViaBackend, notify, promptFavorites } = useContext(appContext);
   const { _network } = useWalletContext();
   
   return (
@@ -123,6 +123,7 @@ const OTCForm = () => {
             action={ 
               <div className="flex items-center justify-center">
               <button
+                onClick={promptFavorites}
                 type="button"
                 className="hover:animate-pulse text-sm flex items-center text-center"
               >

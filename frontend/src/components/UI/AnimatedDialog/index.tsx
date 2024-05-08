@@ -33,7 +33,7 @@ const AnimatedDialog = ({
       {isOpen &&
         createPortal(
           <Dialog extraClass={extraClass} dismiss={onClose}>
-            <div className={`h-full grid ${position}`}>
+            <div className={`h-screen grid ${position}`}>
               <animated.div style={springProps}>
                 <div
                   onClick={(e) => e.stopPropagation() }

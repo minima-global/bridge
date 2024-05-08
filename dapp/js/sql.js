@@ -359,4 +359,4 @@ function getFavourites(callback){
 
 
 
-export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents };
+export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getFavourites, addFavourites, removeFavourite, removeAllFavourites };
