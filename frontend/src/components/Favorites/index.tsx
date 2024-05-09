@@ -214,8 +214,9 @@ const Favorites = () => {
         <div className={`${mode !== 'add' ? 'h-[calc(100%_-_60px)]' : 'h-[calc(100%_-_80px)]'} overflow-y-scroll`}>
           <ul>
             {favorites
-              ? favorites.map((f) => (
+              ? favorites.map((f, index) => (
                   <li
+                    key={index+f.BRIDGEUID}
                     onClick={() => {
                       formik.setFieldValue("uid", f.BRIDGEUID);
                       promptFavorites();

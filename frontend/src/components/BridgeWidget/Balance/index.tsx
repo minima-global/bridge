@@ -14,11 +14,11 @@ const Balance = () => {
 
   useEffect(() => {
     if (_currentNavigation === "balance") {
-      if (new Decimal(_minimaBalance.confirmed).lt(1)) {
+      if (_minimaBalance && new Decimal(_minimaBalance.confirmed).lt(1)) {
         setRunningLow(prevState => ({...prevState, minima: true}));
       } 
       
-      if (new Decimal(etherBalance).lt(1)) {
+      if (etherBalance && new Decimal(etherBalance).lt(1)) {
         setRunningLow(prevState => ({...prevState, ethereum: true}));
       }
     }

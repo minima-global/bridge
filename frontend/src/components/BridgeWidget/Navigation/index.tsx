@@ -2,7 +2,7 @@ import { useContext } from "react";
 import { appContext } from "../../../AppContext";
 
 const Navigation = () => {
-  const { _currentNavigation, setCurrentNavigation } = useContext(appContext);
+  const { _currentNavigation, setCurrentNavigation, _currentTradeWindow, setCurrentTradeWindow } = useContext(appContext);
 
   const isActive = (_current: string) => {
     return _currentNavigation === _current
@@ -20,7 +20,12 @@ const Navigation = () => {
           Balance
         </a>
         <a
-          onClick={() => setCurrentNavigation("trade")}
+          onClick={() => {
+            if (_currentTradeWindow !== null) {
+              setCurrentTradeWindow(null);
+            }
+            setCurrentNavigation("trade");
+          }}
           className={`${isActive("trade")}`}
         >
           Trade
