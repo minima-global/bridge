@@ -69,6 +69,10 @@ const OTCForm = () => {
                 throw new Error("Amount is required");
               }
 
+              if (new Decimal(val).lt(1)) {
+                throw new Error("You are running low on funds");
+              }
+
               return true;
             } catch (error) {
               if (error instanceof Error) {
@@ -168,7 +172,7 @@ const OTCForm = () => {
           <button
             disabled={!isValid}
             type="submit"
-            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 disabled:bg-opacity-5"
+            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
           >
             Trade
           </button>
