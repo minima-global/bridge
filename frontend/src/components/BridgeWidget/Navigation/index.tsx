@@ -21,7 +21,7 @@ const Navigation = () => {
         </a>
         <a
           onClick={() => {
-            if (_currentTradeWindow !== null) {
+            if (_currentTradeWindow !== null && _currentNavigation === 'trade') {
               setCurrentTradeWindow(null);
             }
             setCurrentNavigation("trade");
