@@ -49,7 +49,6 @@ const useAllowanceChecker = () => {
   };
 
   useEffect(() => {
-    console.log('Check allowances');
     const tetherContractAddress = _defaults["Tether"][currentNetwork];
     const wMinimaContractAddress = _defaults["wMinima"][currentNetwork];
 

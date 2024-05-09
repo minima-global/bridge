@@ -69,7 +69,7 @@ const OTCForm = () => {
                 throw new Error("Amount is required");
               }
 
-              if (new Decimal(val).lt(1)) {
+              if (new Decimal(_minimaBalance.confirmed).lt(1)) {
                 throw new Error("You are running low on funds");
               }
 
