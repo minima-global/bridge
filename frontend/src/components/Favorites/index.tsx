@@ -18,6 +18,8 @@ import CloseIcon from "../UI/Icons/CloseIcon/index.js";
 import PlusIcon from "../UI/Icons/PlusIcon/index.js";
 import { useFormikContext } from "formik";
 
+import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
+
 const Favorites = () => {
   const { _promptFavorites, promptFavorites, notify } = useContext(appContext);
   const [favorites, setFavorites] = useState<Favorite[]>([]);
@@ -53,7 +55,7 @@ const Favorites = () => {
   };
 
   const handleAdd = () => {
-    addFavourites(favToAdd.name, favToAdd.uid, () => {
+    addFavourites(sanitizeSQLInput(favToAdd.name), sanitizeSQLInput(favToAdd.uid), () => {
       //
     });
     setFavToAdd({ name: "", uid: "" });
@@ -95,6 +97,10 @@ const Favorites = () => {
       setFavToDelete((prevState) => prevState.filter((item) => item !== id));
     }
   };
+
+  const hexRegExp = /^0x[0-9a-fA-F]+$/;
+  const sqlInjectionPattern = /['";]/; // Example pattern, you might need to adjust it
+  const disableForm = (favToAdd.name.length === 0 || favToAdd.uid.length === 0) || sqlInjectionPattern.test(favToAdd.name) || sqlInjectionPattern.test(favToAdd.uid) || !hexRegExp.test(favToAdd.uid);
 
   return (
     <AnimatedDialog
@@ -195,7 +201,7 @@ const Favorites = () => {
                   placeholder="Enter Name"
                   className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
                 />
-                <div onClick={handleAdd} className="m-auto rounded-full">
+                <div onClick={disableForm ? () => null : handleAdd} className={`m-auto rounded-full ${disableForm ? 'opacity-50' : ''}`}>
                   <PlusIcon fill="currentColor" />
                 </div>
               </>
