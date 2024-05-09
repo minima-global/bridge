@@ -89,8 +89,8 @@ const TetherPool = () => {
 
   return (
     <div
-      className={`bg-slate-100 dark:bg-[#1B1B1B] border border-[#1B1B1B] rounded-lg p-4 ${
-        f && "outline outline-yellow-300"
+      className={`bg-transparent dark:bg-[#1B1B1B] border border-[#1B1B1B] rounded-lg p-4 ${
+        f && "outline dark:outline-yellow-300"
       }`}
     >
       <div className="mb-2 grid grid-cols-[1fr_auto_1fr] items-center">
@@ -116,7 +116,7 @@ const TetherPool = () => {
         <div />
       </div>
       <hr className="border-teal-300 mb-4" />
-      <div className="grid grid-cols-2 bg-slate-300 dark:bg-[#1B1B1B] relative">
+      <div className="grid grid-cols-2 dark:bg-[#1B1B1B] relative">
         <div className="relative">
           <div className="absolute inset-y-0 left-0 bg-teal-300 w-1" />
 
@@ -131,7 +131,7 @@ const TetherPool = () => {
               onFocus={() => setF(true)}
               onBlur={() => setF(false)}
               value={_def.buy}
-              className="dark:bg-[#1B1B1B] rounded font-mono focus:outline-none truncate"
+              className="bg-transparent dark:bg-[#1B1B1B] rounded font-mono focus:outline-none truncate"
               placeholder="0"
             />
             <span className="text-[12px] font-bold pr-2">USDT</span>
@@ -151,7 +151,7 @@ const TetherPool = () => {
               onFocus={() => setF(true)}
               onBlur={() => setF(false)}
               value={_def.sell}
-              className="bg-slate-300 dark:bg-[#1B1B1B] font-mono rounded focus:outline-none truncate"
+              className="bg-transparent dark:bg-[#1B1B1B] font-mono rounded focus:outline-none truncate"
               placeholder="0"
             />
             <span className="text-[12px] font-bold">USDT</span>
