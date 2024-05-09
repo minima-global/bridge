@@ -1,3 +1,6 @@
+import { ERC20_ABI } from "../abi/erc20abi";
+import { getETHERUMAddress, ethCallCommand } from "./ethutil.js";
+
 /**
  * ERC20 ABI interface
  */
@@ -110,3 +113,5 @@ function erc20Allowance(erc20contract, contractaddress, callback){
 		callback(bal);	
 	}); 
 }
+
+export { erc20Allowance };

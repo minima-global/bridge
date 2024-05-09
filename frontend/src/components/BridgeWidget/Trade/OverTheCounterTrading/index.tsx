@@ -4,9 +4,12 @@ import SwapIcon from "../../../UI/Icons/SwapIcon";
 import Identity from "./Identity";
 import OTCForm from "./OTCForm";
 import Activity from "./Activity";
+import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
 
 const OverTheCounterTrading = () => {
   const { _currentTradeWindow, _userDetails } = useContext(appContext);
+
+  useAllowanceChecker();
 
   if (_currentTradeWindow !== "otc") {
     return null;

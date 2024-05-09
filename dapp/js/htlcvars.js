@@ -131,4 +131,4 @@ function switchNetwork(network){
 	}
 }
 
-export { ETH_INFURA_GASAPI_HOST, MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, wMinimaContractAddress, USDTContractAddress, setNetwork};
+export { ETH_INFURA_GASAPI_HOST, MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, wMinimaContractAddress, USDTContractAddress, HTLCContractAddress, USE_API_KEYS, ETH_INFURA_HOST, setNetwork};

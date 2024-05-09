@@ -1,6 +1,7 @@
 import "./ethers-4.0.31.min";
 
-import { ETH_INFURA_GASAPI_HOST }from "./htlcvars";
+import { ETH_INFURA_GASAPI_HOST, USE_API_KEYS, ETH_INFURA_HOST }from "./htlcvars";
+import { sendFrontendMSG } from "./jslib.js";
 
 /**
  * the Main ETH Wallet address
@@ -559,4 +560,4 @@ function boostTransaction(transactionid,callback){
 
 
 
-export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI, initialiseETHAddress };
+export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI, initialiseETHAddress, ethCallCommand };

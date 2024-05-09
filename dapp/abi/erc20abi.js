@@ -313,3 +313,5 @@ var ERC20_ABI = [
       "type": "function"
     }
 ];
+
+export {ERC20_ABI};

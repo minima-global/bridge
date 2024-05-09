@@ -3,9 +3,12 @@ import { appContext } from "../../../../AppContext";
 import TradeIcon from "../../../UI/Icons/TradeIcon";
 import OTCIcon from "../../../UI/Icons/OTCIcon";
 import OrderBookIcon from "../../../UI/Icons/OrderBookIcon";
+import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
 
 const ChooseMethod = () => {
   const { setCurrentTradeWindow } = useContext(appContext);
+
+  useAllowanceChecker();
 
   return (
     <>
@@ -30,11 +33,11 @@ const ChooseMethod = () => {
         </div>
 
         <div className="hidden md:flex items-center justify-center">
-          <hr className="border border-violet-400 h-6 w-1 absolute left-0 top-0 animate-pulse" />
+          <hr className="border border-violet-400 h-6 w-1 absolute left-0 top-0 animate-pulse block md:hidden" />
           <span className="mx-4 text-sm text-black dark:text-yellow-300 font-semibold">
             Or
           </span>
-          <hr className="border border-violet-400 h-6 w-1 absolute left-0 bottom-0 animate-pulse" />
+          <hr className="border border-violet-400 h-6 w-1 absolute left-0 bottom-0 animate-pulse block md:hidden" />
         </div>
 
         <div className="flex md:hidden items-center justify-center">

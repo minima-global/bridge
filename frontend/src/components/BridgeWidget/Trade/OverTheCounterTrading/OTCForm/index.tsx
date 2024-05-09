@@ -14,6 +14,7 @@ import Favorites from "../../../../Favorites";
 const OTCForm = () => {
   const { _minimaBalance, handleActionViaBackend, notify, promptFavorites } = useContext(appContext);
   const { _network } = useWalletContext();
+
   
   return (
     <Formik
@@ -21,6 +22,7 @@ const OTCForm = () => {
         uid: "",
         native: 0,
         token: { name: "WMINIMA", amount: "" },
+        locked: false
       }}
       onSubmit={async (data, {resetForm}) => {
         

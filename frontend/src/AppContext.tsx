@@ -38,6 +38,8 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
   const [_promptWithdraw, setPromptWithdraw] = useState(false);
+  // Withdraw Modal
+  const [_promptAllowance, setPromptAllowance] = useState(false);
   // Is App in Read or Write Mode
   const [_promptReadMode, setReadMode] = useState<null | boolean>(null);
   // Set up API Keys
@@ -493,6 +495,10 @@ const AppProvider = ({ children }: IProps) => {
     setPromptFavorites((prevState) => !prevState);
   }
 
+  const promptAllowance = () => {
+    setPromptAllowance((prevState) => !prevState);
+  }
+
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
   
@@ -512,6 +518,9 @@ const AppProvider = ({ children }: IProps) => {
         handleActionViaBackend,
 
         _provider,
+
+        _promptAllowance,
+        promptAllowance,
 
         _promptWithdraw,
         promptWithdraw,

@@ -86,7 +86,6 @@ export const WalletContextProvider = ({ children }: Props) => {
   const getTokenType = (token: string): string => {
       if (token.startsWith("ETH:")) {
           const contractAddress = token.replace("ETH:", "").toUpperCase();
-          console.log('checking', contractAddress);
           
           const wMinimaMainnet = _defaults['wMinima'].mainnet.toUpperCase();
           const wMinimaSepolia = _defaults['wMinima'].sepolia.toUpperCase();
