@@ -12,6 +12,8 @@ import { setInfuraApiKeys, getInfuraGASAPI } from "../../dapp/js/ethutil.js";
 import { sendBackendMSG } from "../../dapp/js/jslib.js";
 import { setNetwork } from "../../dapp/js/htlcvars.js";
 import { OTCDeal } from "./types/OTCDeal.js";
+import { Favorite } from "./types/Favorite.js";
+import { getFavourites } from "../../dapp/js/sql.js";
 
 export var USER_DETAILS;
 export const appContext = createContext({} as any);
@@ -80,6 +82,8 @@ const AppProvider = ({ children }: IProps) => {
   const [_userDetails, setUserDetails] = useState<any>(null);
   // Native Minima Balance
   const [_minimaBalance, setMinimaBalance] = useState<null | CoinStats>(null);
+  // User Favorite Traders
+  const [_favorites, setFavorites] = useState<Favorite[]>([]);
 
   useEffect(() => {
     (async () => {
@@ -451,6 +455,12 @@ const AppProvider = ({ children }: IProps) => {
     }
   };
 
+  const getAndSetFavorites = () => {
+    getFavourites((favs) => {
+      setFavorites(favs.rows);
+    });
+  }
+
   const handleActionViaBackend = async (action: any) => {
     console.log("sending message to backend", action);
     return new Promise((resolve) => {
@@ -514,6 +524,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptAcceptOTC,
         promptAcceptOTC,
+
+        _favorites,
+        getAndSetFavorites,
 
         handleActionViaBackend,
 

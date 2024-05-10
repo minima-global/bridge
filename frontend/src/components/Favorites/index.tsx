@@ -5,10 +5,8 @@ import FavoriteIcon from "../UI/Icons/FavoriteIcon/index.js";
 
 import {
   addFavourites,
-  removeFavourite,
-  getFavourites,
+  removeFavourite  
 } from "../../../../dapp/js/sql.js";
-import { Favorite } from "../../types/Favorite.js";
 import Bear from "../UI/Avatars/Bear/index.js";
 import AddIcon from "../UI/Icons/AddIcon/index.js";
 import RemoveIcon from "../UI/Icons/RemoveIcon/index.js";
@@ -21,8 +19,7 @@ import { useFormikContext } from "formik";
 import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
 
 const Favorites = () => {
-  const { _promptFavorites, promptFavorites, notify } = useContext(appContext);
-  const [favorites, setFavorites] = useState<Favorite[]>([]);
+  const { _promptFavorites, promptFavorites, notify, getAndSetFavorites, _favorites: favorites } = useContext(appContext);  
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
 
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
@@ -32,9 +29,7 @@ const Favorites = () => {
 
   useEffect(() => {
     if (_promptFavorites) {
-      getFavourites((favs) => {
-        setFavorites(favs.rows);
-      });
+      getAndSetFavorites();
     }
   }, [_promptFavorites]);
 
@@ -60,9 +55,7 @@ const Favorites = () => {
     });
     setFavToAdd({ name: "", uid: "" });
     notify("Added new favorite!");
-    getFavourites((favs) => {
-      setFavorites(favs.rows);
-    });
+    getAndSetFavorites();
   };
 
   const handleDelete = async () => {    
@@ -80,9 +73,7 @@ const Favorites = () => {
     notify("Deleted " + favToDelete.length + " contacts!");
     setFavToDelete([]);
 
-    getFavourites((favs) => {
-      setFavorites(favs.rows);
-    });
+    getAndSetFavorites();
   };
 
   const handleDeleteSelectChange = (evt) => {

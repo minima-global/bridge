@@ -9,7 +9,6 @@ interface Props {
   position: string;
   children: any;
   dialogStyles?: string;
-  animationStyle?: string;
 }
 const AnimatedDialog = ({
   isOpen,
@@ -17,15 +16,14 @@ const AnimatedDialog = ({
   extraClass,
   position,
   children,
-  dialogStyles,
-  animationStyle
+  dialogStyles
 }: Props) => {
   const springProps = useSpring({
     opacity: isOpen ? 1 : 0,
     transform: isOpen
       ? "translateY(0%) scale(1)"
       : "translateY(-50%) scale(0.8)",
-    config: config[animationStyle ? animationStyle : "wobbly"],
+    config: config.gentle,
   });
 
   return (

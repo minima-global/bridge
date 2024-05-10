@@ -4,7 +4,6 @@ import { useWalletContext } from "../../providers/WalletProvider/WalletProvider"
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
-// import DepositIcon from "../UI/DepositIcon";
 
 const TokenList = () => {
   const { _currentNavigation } = useContext(appContext);
@@ -15,20 +14,19 @@ const TokenList = () => {
   }
 
   return (
-    <div className="text-left">
-      <h3 className="font-bold mb-2">ERC-20 Tokens</h3>
-
+    <div>
+      <h3 className="font-bold mb-2">Ethereum Tokens</h3>
       <ul>
         {tokens.map((token) => (
           <li
             // onClick={() => promptTokenDetails(token)}
             key={token.address}
-            className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md dark:bg-[#1B1B1B] bg-opacity-30 p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
+            className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
           >
             {_defaults["wMinima"][_network] === token.address ? (
               <img
                 alt="token-icon"
-                src="./assets/token.svg"
+                src="./assets/wtoken.svg"
                 className="w-[36px] h-[36px] rounded-full"
               />
             ) : _defaults["Tether"][_network] === token.address ? (
@@ -72,14 +70,13 @@ const TokenList = () => {
             </g>
           </svg>
 
-          <div className="flex justify-between ml-2 text-left">
+          <div className="flex justify-between ml-2">
             <div>
               <h3 className="font-bold ">Ethereum</h3>
               <p className="font-mono text-sm">{_balance}</p>
             </div>
           </div>
         </li>
-
       </ul>
     </div>
   );

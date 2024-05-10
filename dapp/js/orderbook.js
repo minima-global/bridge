@@ -703,4 +703,4 @@ function getEmptyOrderBook(){
 }
 
 
-export { setUserOrderBook, getMyOrderBook };
+export { setUserOrderBook, getMyOrderBook, getCompleteOrderBook };
