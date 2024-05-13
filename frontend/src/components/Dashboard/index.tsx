@@ -1,6 +1,7 @@
 import AppLoading from "../AppLoading";
 import BridgeWidget from "../BridgeWidget";
 import Navigation from "../BridgeWidget/Navigation";
+import Favorites from "../Favorites";
 import Settings from "../Settings";
 import ContentGrid from "../UI/ContentGrid";
 
@@ -12,6 +13,7 @@ const Dashboard = () => {
     <main className="h-full">
       <ToastContainer />
       <Settings />
+      <Favorites form={false} />
       <AppLoading />
       <ContentGrid>
         <Navigation />

@@ -137,7 +137,7 @@ const OTCForm = () => {
                 className="hover:animate-pulse text-sm flex items-center text-center"
               >
                 <FavoriteIcon fill="currentColor" />
-                <Favorites />
+                <Favorites form={true} />
               </button>
               </div>
             }

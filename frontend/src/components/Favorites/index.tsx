@@ -18,17 +18,23 @@ import { useFormikContext } from "formik";
 
 import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
 
-const Favorites = () => {
+interface IProps {
+  form: boolean;
+}
+const Favorites = ({form = false}: IProps) => {
   const { _promptFavorites, promptFavorites, notify, getAndSetFavorites, _favorites: favorites } = useContext(appContext);  
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
 
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
   const [favToAdd, setFavToAdd] = useState({ name: "", uid: "" });
 
-  const formik: any = useFormikContext();
+  let formik: any;
+  if (form) {
+    formik = useFormikContext();
+  }
 
   useEffect(() => {
-    if (_promptFavorites) {
+    if (_promptFavorites || !form) {
       getAndSetFavorites();
     }
   }, [_promptFavorites]);
@@ -209,8 +215,10 @@ const Favorites = () => {
                   <li
                     key={index+f.BRIDGEUID}
                     onClick={() => {
-                      formik.setFieldValue("uid", f.BRIDGEUID);
-                      promptFavorites();
+                      if (form) {
+                        formik.setFieldValue("uid", f.BRIDGEUID);
+                        promptFavorites();
+                      }
                     }}
                     className={`grid ${
                       mode !== "delete"
