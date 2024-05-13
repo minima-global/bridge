@@ -62,14 +62,18 @@ const TetherPool = () => {
     const value = e.target.value;
 
     try {
-      if (!new Decimal(value)) {
-        throw new Error();
+      if (value.trim() === '') {
+        setDefault((prevState) => ({ ...prevState, [name]: '' }));
+      } else {
+        if (!new Decimal(value)) {
+          throw new Error();
+        }
+        
+        setDefault((prevState) => ({
+          ...prevState,
+          [name]: new Decimal(value).toNumber(),
+        }));
       }
-
-      setDefault((prevState) => ({
-        ...prevState,
-        [name]: new Decimal(value).toNumber(),
-      }));
     } catch (error) {
       setDefault((prevState) => ({ ...prevState, [name]: 0 }));
     }
@@ -79,6 +83,11 @@ const TetherPool = () => {
     if (_def.buy === 0 || _def.sell === 0) {
       return setIsButtonEnabled(false);
     }
+
+    if (!_def.buy || !_def.sell) {
+      return setIsButtonEnabled(false);
+    }
+
 
     const userUpdatedValues =
       JSON.stringify(_def) !== JSON.stringify(tetherPool);

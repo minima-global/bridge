@@ -208,7 +208,7 @@ const WrappedPool = () => {
                       I will give
                     </label>
                     <input
-                      onFocus={(e) => {
+                      onFocus={() => {
                         setF(true);
                       }}
                       onBlur={(e) => {

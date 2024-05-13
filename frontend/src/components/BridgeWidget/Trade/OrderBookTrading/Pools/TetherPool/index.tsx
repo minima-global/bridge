@@ -16,7 +16,6 @@ import {
   calculateAmount
 } from "../../../../../../../../dapp/js/orderbookutil.js";
 import { Data } from "../../../../../../types/Order.js";
-import SelectFavorites from "../SelectFavorites/index.js";
 import Toolbar from "../Toolbar/index.js";
 
 const TetherPool = () => {
@@ -209,7 +208,7 @@ const TetherPool = () => {
                       I will give
                     </label>
                     <input
-                      onFocus={(e) => {
+                      onFocus={() => {
                         setF(true);
                       }}
                       onBlur={(e) => {

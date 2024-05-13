@@ -14,7 +14,7 @@ const RefreshNonce = () => {
   };
 
   const handleRefreshNonce = () => {
-    sendSimpleBackendMSG("REFRESHNONCE", (resp) => {
+    sendSimpleBackendMSG("REFRESHNONCE", () => {
         notify("Resetting your nonce...");
         toggleDialog();
     });
