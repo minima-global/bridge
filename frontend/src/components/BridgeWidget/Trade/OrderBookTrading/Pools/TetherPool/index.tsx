@@ -90,6 +90,14 @@ const TetherPool = () => {
                 throw new Error("Enter your offer");
               }
 
+              if (new Decimal(val).gt(1000)) {
+                throw new Error("Exceeds max trade of 1000");
+              }
+              
+              if (new Decimal(val).lt(10)) {
+                throw new Error("Minimum order is 10");
+              }
+
               if (_currentNavigation === "Buy") {
                 if (new Decimal(val).gt(_minimaBalance.confirmed)) {
                   throw new Error("Insufficient funds");

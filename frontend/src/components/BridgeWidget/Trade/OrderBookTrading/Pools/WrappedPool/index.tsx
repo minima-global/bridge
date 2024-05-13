@@ -80,13 +80,21 @@ const WrappedPool = () => {
         offerPrice: yup
           .string()
           .matches(/^\d*\.?\d+$/, "Enter a valid amount")
-          .required("Enter your offer")
+          .required("Enter your offer")          
           .test("valid amount", function (val) {
             const { path, createError } = this;
 
             try {
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your offer");
+              }
+
+              if (new Decimal(val).gt(1000)) {
+                throw new Error("Exceeds max trade of 1000");
+              }
+              
+              if (new Decimal(val).lt(10)) {
+                throw new Error("Minimum order is 10");
               }
 
               if (_currentNavigation === "Buy") {
