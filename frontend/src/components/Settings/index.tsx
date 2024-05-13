@@ -4,6 +4,7 @@ import Dialog from "../UI/Dialog";
 import { createPortal } from "react-dom";
 import { useSpring, animated, config } from "react-spring";
 import SelectNetwork from "../SelectNetwork";
+import RefreshNonce from "../RefreshNonce";
 
 const Settings = () => {
   const { _promptSettings, promptSettings, promptJsonRpcSetup } =
@@ -74,6 +75,8 @@ const Settings = () => {
                     </span>
                     <p className="font-bold pl-2">Setup API Keys</p>
                   </div>
+
+                  <RefreshNonce />
                 </div>
               </animated.div>
             </div>
