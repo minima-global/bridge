@@ -157,13 +157,13 @@ const Order = ({ data, favorites }: IProps) => {
                     <div className="text-center border-r dark:border-teal-300">
                       <h6 className="text-xs font-bold">Buying</h6>
                       <p className="font-mono text-sm">
-                        {data.data.orderbook.usdt.buy}
+                        {data.data.orderbook.wminima.buy}
                       </p>
                     </div>
                     <div className="text-center">
                       <h6 className="text-xs font-bold">Selling</h6>
                       <p className="font-mono text-sm">
-                        {data.data.orderbook.usdt.sell}
+                        {data.data.orderbook.wminima.sell}
                       </p>
                     </div>
                   </div>

@@ -21,6 +21,7 @@ const CompleteOrderBook = () => {
   return (
     <div>
       <ul>
+        {!orderBook || !orderBook.length && <p className="text-center">No orderbook found</p>}
         {orderBook?.map((order) => (
           <Order data={order} favorites={_favorites} key={order.maximapublickey} />
         ))}

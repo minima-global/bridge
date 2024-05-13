@@ -42,7 +42,11 @@ export default ({ mode }) => {
             return modifiedContent;
           }},
           { src: '../dapp/service.js', dest: '.'},
-          { src: '../dapp/abi', dest: '.'},
+          { src: '../dapp/abi/*', dest: './abi', transform(content, path) {
+            const modifiedContent = content.replace(/^(?:import .*?;|export .*?;)\s*/gm, '');                      
+            
+            return modifiedContent;
+          }},
         ]
       }),
       createHtmlPlugin({
