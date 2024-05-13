@@ -80,7 +80,7 @@ const AcceptOTC = () => {
                   src={
                     _promptAcceptOTC &&
                     _promptAcceptOTC.token.tokenName === "wMinima"
-                      ? "./assets/token.svg"
+                      ? "./assets/wtoken.svg"
                       : "./assets/tether.svg"
                   }
                 />
