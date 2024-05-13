@@ -32,6 +32,8 @@ const AppProvider = ({ children }: IProps) => {
   const [_currentTradeWindow, setCurrentTradeWindow] = useState<
     "otc" | "orderbook" | null
   >(null);
+  // Current order book trade pool
+  const [_currentOrderPoolTrade, setCurrentOrderPoolTrade] = useState('wminima');
   // current Minima block height
   const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
   // Accept OTC dialog
@@ -561,6 +563,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _currentTradeWindow,
         setCurrentTradeWindow,
+
+        _currentOrderPoolTrade,
+        setCurrentOrderPoolTrade,
 
         _currentNavigation,
         setCurrentNavigation,

@@ -1,3 +1,6 @@
+import { toFixedNumber } from "./jslib";
+import { getCompleteOrderBook} from "./orderbook";
+import { getFavourites } from "./sql";
 
 /**
  * Broadcast the JSON orderbook to the network
@@ -392,11 +395,12 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 		return;
 	}
 	
+	
 	//MDS.log("Found valid orders : "+validorders.length);
 	
 	//Pick a random one..
 	var finalorder = validorders[Math.floor(Math.random()*validorders.length)];
-
+	
 	//Send it back..
 	callback(true,finalorder);
 }
@@ -458,3 +462,6 @@ function calculatePrice(action, token, orderbook){
 	//Calculate the amount of wMinima.. 
 	return 0;
 }
+
+
+export { calculateAmount, calculatePrice, searchAllorFavsOrderBooks };

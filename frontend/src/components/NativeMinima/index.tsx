@@ -15,7 +15,7 @@ const NativeMinima = ({ display = false, external }: Props) => {
 
   return (
     <div
-      className={`grid grid-cols-[40px,_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 ${external && "dark:bg-opacity-10"} mb-2 ${display ? "!flex !flex-col !pb-0 hover:!bg-transparent !mb-0 !p-0" : ""}`}
+      className={`shadow-sm dark:shadow-none grid grid-cols-[40px,_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 ${external && "dark:bg-opacity-10"} mb-2 ${display ? "!flex !flex-col !pb-0 hover:!bg-transparent !mb-0 !p-0" : ""}`}
     >
       <img
         alt="token-icon"

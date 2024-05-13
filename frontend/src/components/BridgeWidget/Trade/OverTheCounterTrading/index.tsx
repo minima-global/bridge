@@ -38,11 +38,11 @@ const OverTheCounterTrading = () => {
         <OTCForm />
 
         <div className="flex items-center justify-center">
-          <hr className="border border-violet-400 my-6 w-[120px]" />
+          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
           <span className="mx-4 text-sm text-black dark:text-white font-bold">
             Activity
           </span>
-          <hr className="border border-violet-400 my-6 w-[120px]" />
+          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
         </div>
         
         <Activity />

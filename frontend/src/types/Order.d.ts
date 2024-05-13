@@ -10,7 +10,7 @@ interface Balance {
     total: number;
 }
 
-interface Data {
+export interface Data {
     publickey: string;
     ethpublickey: string;
     orderbook: {

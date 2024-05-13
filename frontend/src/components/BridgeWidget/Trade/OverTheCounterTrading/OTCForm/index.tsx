@@ -45,7 +45,12 @@ const OTCForm = () => {
           console.log(res);
 
         } catch (error) {
-          
+          console.error(error);
+          if (error instanceof Error) {
+            return notify("Error : "+ error.message);
+          }
+
+          notify("Error, something went wrong!");
         }
       }}
       validationSchema={yup.object().shape({

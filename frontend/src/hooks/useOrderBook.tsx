@@ -46,7 +46,7 @@ const useOrderBook = () => {
   const wminima = _currentOrderBook?.wminima;
   const usdt = _currentOrderBook?.usdt;
 
-  return { getBook, setBook, wrappedPool: wminima, tetherPool: usdt };
+  return { getBook, setBook, wrappedPool: wminima, tetherPool: usdt, _currentOrderBook };
 };
 
 export default useOrderBook;
