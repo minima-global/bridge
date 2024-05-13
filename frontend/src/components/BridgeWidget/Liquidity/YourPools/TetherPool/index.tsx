@@ -89,7 +89,7 @@ const TetherPool = () => {
 
   return (
     <div
-      className={`bg-transparent dark:bg-[#1B1B1B] border border-[#1B1B1B] rounded ${
+      className={`shadow-sm dark:shadow-none bg-transparent dark:bg-[#1B1B1B] rounded ${
         f && "outline dark:outline-yellow-300"
       }`}
     >
