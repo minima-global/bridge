@@ -21,7 +21,7 @@ const ChooseMethod = () => {
         </div>
         <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />
       </div>
-      <div className="grid md:grid-cols-[1fr_auto_1fr]">
+      <div className="grid md:grid-cols-[1fr_auto_1fr] md:divide-x divide-violet-300">
         <div className="flex justify-center">
           <button
             type="button"
@@ -34,7 +34,7 @@ const ChooseMethod = () => {
 
         <div className="hidden md:flex items-center justify-center">
           <hr className="border border-violet-400 h-6 w-1 absolute left-0 top-0 animate-pulse block md:hidden" />
-          <span className="mx-4 text-sm text-black dark:text-yellow-300 font-semibold">
+          <span className="mx-4 text-sm text-black dark:text-yellow-300 font-semibold block md:hidden">
             Or
           </span>
           <hr className="border border-violet-400 h-6 w-1 absolute left-0 bottom-0 animate-pulse block md:hidden" />

@@ -9,6 +9,7 @@ import { useWalletContext } from "../../providers/WalletProvider/WalletProvider.
 import Decimal from "decimal.js";
 
 import * as utils from "../../utils";
+import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 
 const renderCell = (cellData) => {
   const {
@@ -293,7 +294,6 @@ const MainActivity = () => {
   useEffect(() => {
     if (_promptLogs) {
       getAllEvents(MAX, 0, (events) => {
-
         const _evts = events.map((event) => ({
           ...event,
           getTokenType,
@@ -307,8 +307,8 @@ const MainActivity = () => {
 
   return (
     <>
-      <span onClick={promptLogs} className="mx-3 text-xs text-yellow-300">
-        Activity
+      <span onClick={promptLogs} className="mr-2 text-xs text-yellow-300 cursor-pointer">
+        <ActivityIcon fill="currentColor" />
       </span>
       {_promptLogs &&
         createPortal(

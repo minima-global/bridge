@@ -28,7 +28,7 @@ const SelectNetwork = () => {
   return (
     <>
       <div
-        className="mx-4 my-4 bg-violet-100 text-black p-2 px-3 rounded-full hover:bg-violet-200 hover:cursor-pointer grid grid-cols-[1fr_auto]"
+        className="my-4 p-2 px-3 hover:cursor-pointer bg-gray-50 bg-opacity-80 dark:bg-[#1B1B1B] hover:bg-opacity-30 dark:bg-opacity-50 grid grid-cols-[1fr_auto]"
         onClick={promptSelectNetwork}
       >
         {_network === "mainnet" && <EthereumNetwork />}
@@ -38,7 +38,7 @@ const SelectNetwork = () => {
 
       {_promptSelectNetwork &&
         createPortal(
-          <Dialog extraClass="z-[22]" dismiss={promptSelectNetwork}>
+          <Dialog extraClass="z-[22] max-w-sm mx-auto" dismiss={promptSelectNetwork}>
             <div onClick={(e) => e.stopPropagation() } className="h-full grid items-center">
               <animated.div style={springProps}>
                 <div className="bg-white shadow-lg  shadow-slate-300 dark:shadow-none dark:bg-black w-[calc(100%_-_16px)] md:w-full p-4 px-0 mt-20 rounded mx-auto">
