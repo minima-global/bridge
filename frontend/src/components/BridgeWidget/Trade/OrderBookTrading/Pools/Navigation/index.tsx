@@ -17,8 +17,9 @@ const DetailsNavigation = ({
   return (
     <div>
       <nav className={`shadow-sm dark:shadow-none dark:bg-black dark:bg-opacity-20 rounded-lg grid grid-cols-${navigation.length} max-w-sm mx-auto text-center`}>
-        {navigation.map((n) => (
+        {navigation.map((n, index) => (
           <div
+            key={index}
             onClick={() => setCurrentNavigation(n)}
             className={`${isActive(n)}`}
           >
