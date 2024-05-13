@@ -91,8 +91,8 @@ const Order = ({ data, favorites }: IProps) => {
 
             {_currentNavigation === "orders" && (
               <div className="grid grid-rows-2 h-[250px]">
-                <div className="my-auto">
-                  <div className="grid border-b-[1px] bg-gray-50 dark:border-teal-300 grid-cols-[1fr_auto_1fr] items-center dark:bg-[#1B1B1B] p-1 py-3 rounded-full dark:bg-opacity-10 rounded-b-none">
+                <div className={`my-auto ${!data.data.orderbook.usdt.enable && "opacity-50"}`}>
+                  <div className="grid bg-gray-50 grid-cols-[1fr_auto_1fr] items-center dark:bg-[#1B1B1B] py-2 dark:bg-opacity-10">
                     <div />
                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                       <h3 className="text-xs font-bold text-center">Native</h3>
@@ -114,15 +114,15 @@ const Order = ({ data, favorites }: IProps) => {
                     </div>
                     <div />
                   </div>
-                  <div className="grid grid-cols-2 bg-gray-50 dark:bg-[#1B1B1B] dark:bg-opacity-10 p-2 rounded-full rounded-t-none">
+                  <div className="grid grid-cols-2 bg-gray-50 bg-opacity-30 dark:bg-[#1B1B1B] dark:bg-opacity-50 p-2">
                     <div className="text-center border-r dark:border-teal-300">
-                      <h6 className="text-xs">Buying</h6>
+                      <h6 className="text-xs font-bold">Buying</h6>
                       <p className="font-mono text-sm">
                         {data.data.orderbook.usdt.buy}
                       </p>
                     </div>
                     <div className="text-center">
-                      <h6 className="text-xs">Selling</h6>
+                      <h6 className="text-xs font-bold">Selling</h6>
                       <p className="font-mono text-sm">
                         {data.data.orderbook.usdt.sell}
                       </p>
@@ -130,8 +130,8 @@ const Order = ({ data, favorites }: IProps) => {
                   </div>
                 </div>
 
-                <div className="my-auto">
-                  <div className="grid border-b-[1px] bg-gray-50 dark:border-teal-300 grid-cols-[1fr_auto_1fr] items-center dark:bg-[#1B1B1B] p-1 py-3 dark:bg-opacity-10 rounded-full rounded-b-none">
+                <div  className={`my-auto ${!data.data.orderbook.wminima.enable && "opacity-50"}`}>
+                  <div className="grid bg-gray-50 grid-cols-[1fr_auto_1fr] items-center dark:bg-[#1B1B1B] py-2 dark:bg-opacity-10">
                     <div />
                     <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                       <h3 className="text-xs font-bold text-center">Native</h3>
@@ -153,15 +153,15 @@ const Order = ({ data, favorites }: IProps) => {
                     </div>
                     <div />
                   </div>
-                  <div className="grid grid-cols-2 bg-gray-50 dark:bg-[#1B1B1B] dark:bg-opacity-10 p-2 rounded-full rounded-t-none">
+                  <div className="grid grid-cols-2 bg-gray-50 bg-opacity-30 dark:bg-[#1B1B1B] dark:bg-opacity-50 p-2">
                     <div className="text-center border-r dark:border-teal-300">
-                      <h6 className="text-xs">Buying</h6>
+                      <h6 className="text-xs font-bold">Buying</h6>
                       <p className="font-mono text-sm">
                         {data.data.orderbook.usdt.buy}
                       </p>
                     </div>
                     <div className="text-center">
-                      <h6 className="text-xs">Selling</h6>
+                      <h6 className="text-xs font-bold">Selling</h6>
                       <p className="font-mono text-sm">
                         {data.data.orderbook.usdt.sell}
                       </p>
