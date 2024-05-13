@@ -16,7 +16,6 @@ import {
   calculateAmount
 } from "../../../../../../../../dapp/js/orderbookutil.js";
 import { Data } from "../../../../../../types/Order.js";
-import SelectFavorites from "../SelectFavorites/index.js";
 import Toolbar from "../Toolbar/index.js";
 
 const WrappedPool = () => {
@@ -188,7 +187,7 @@ const WrappedPool = () => {
               </span>
             </div>
             <div className="grid grid-cols-2 divide-x-2 divide-teal-300 px-4">
-              <div className={`px-4 border-l-2 border-red-300`}>
+              <div className="px-4 border-l-2 border-red-300">
                 <div className="grid grid-cols-[1fr_36px]">
                   <div
                     className={`${

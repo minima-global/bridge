@@ -16,7 +16,7 @@ const DetailsNavigation = ({
 
   return (
     <div>
-      <nav className={`dark:bg-black dark:bg-opacity-20 rounded-lg grid grid-cols-${navigation.length} max-w-sm mx-auto text-center`}>
+      <nav className={`shadow-sm dark:shadow-none dark:bg-black dark:bg-opacity-20 rounded-lg grid grid-cols-${navigation.length} max-w-sm mx-auto text-center`}>
         {navigation.map((n) => (
           <div
             onClick={() => setCurrentNavigation(n)}

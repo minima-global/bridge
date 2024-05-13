@@ -26,7 +26,7 @@ const Settings = () => {
       {_promptSettings &&
         createPortal(
           <Dialog dismiss={promptSettings}>
-            <div onClick={(e) => e.stopPropagation() } className="h-full grid items-start">
+            <div onClick={(e) => e.stopPropagation() } className="h-full max-w-sm mx-auto grid items-start">
               <animated.div style={springProps}>
                 <div className="bg-white min-h-[50vh] shadow-lg mt-[80px] shadow-slate-300  dark:shadow-none dark:bg-black w-[calc(100%_-_16px)] md:w-full p-4 px-0 rounded mx-auto">
                   <div className="flex justify-between items-center pr-4">

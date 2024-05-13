@@ -3,6 +3,7 @@ import Decimal from "decimal.js";
 import { PoolType } from "../../../../../types/Pool.js";
 import useOrderBook from "../../../../../hooks/useOrderBook";
 import { appContext } from "../../../../../AppContext.js";
+import Toolbar from "../Toolbar/index.js";
 
 const TetherPool = () => {
   const { notify } = useContext(appContext);
@@ -16,7 +17,6 @@ const TetherPool = () => {
   });
   const [f, setF] = useState(false);
   const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(false);
-
 
   useEffect(() => {
     if (tetherPool) {
@@ -47,7 +47,7 @@ const TetherPool = () => {
         buy: 0,
         sell: 0,
         maximum: 0,
-        minimum: 0
+        minimum: 0,
       },
       wminima: {
         ...wrappedPool!,
@@ -89,77 +89,71 @@ const TetherPool = () => {
 
   return (
     <div
-      className={`bg-transparent dark:bg-[#1B1B1B] border border-[#1B1B1B] rounded-lg p-4 ${
+      className={`bg-transparent dark:bg-[#1B1B1B] border border-[#1B1B1B] rounded ${
         f && "outline dark:outline-yellow-300"
       }`}
     >
-      <div className="mb-2 grid grid-cols-[1fr_auto_1fr] items-center">
-        <div />
-        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-          <h3 className="text-lg font-bold text-center">Native</h3>
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            strokeWidth="2.5"
-            stroke="currentColor"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path d="M7 10h14l-4 -4" />
-            <path d="M17 14h-14l4 4" />
-          </svg>
-          <h3 className="text-lg font-bold text-center">USDT</h3>
-        </div>
-        <div />
-      </div>
-      <hr className="border-teal-300 mb-4" />
-      <div className="grid grid-cols-2 dark:bg-[#1B1B1B] relative">
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 bg-teal-300 w-1" />
+      <Toolbar token="USDT" />
 
-          <label className="text-sm font-bold mb-1 pl-4 text-opacity-50">
-            I want to buy Minima for
-          </label>
-          <div className="grid grid-cols-[1fr_auto] items-center pl-4">
-            <input
-              id="buy"
-              type="number"
-              onChange={handleChange}
-              onFocus={() => setF(true)}
-              onBlur={() => setF(false)}
-              value={_def.buy}
-              className="bg-transparent dark:bg-[#1B1B1B] rounded font-mono focus:outline-none truncate"
-              placeholder="0"
-            />
-            <span className="text-[12px] font-bold pr-2">USDT</span>
-          </div>
-        </div>
-        {/* Vertical separator */}
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 bg-orange-300 w-1" />
-          <label className="text-sm font-bold mb-1 pl-4 text-opacity-50">
-            I want to sell Minima for
-          </label>
-          <div className="grid grid-cols-[1fr_auto] items-center pl-4">
-            <input
-              id="sell"
-              type="number"
-              onChange={handleChange}
-              onFocus={() => setF(true)}
-              onBlur={() => setF(false)}
-              value={_def.sell}
-              className="bg-transparent dark:bg-[#1B1B1B] font-mono rounded focus:outline-none truncate"
-              placeholder="0"
-            />
-            <span className="text-[12px] font-bold">USDT</span>
+      <div className="grid grid-rows-[16px_1fr]">
+        <div />
+        <div className="px-4">
+          <div className="grid grid-cols-2 bg-transparent  dark:bg-[#1B1B1B] relative divide-x-2 divide-red-300">
+            <div className="relative border-l-2 border-teal-300 grid grid-cols-[1fr_auto]">
+              <div className="grid grid-cols-[1fr_auto]">
+                <div className="pl-4">
+                  <label className="text-xs font-bold mb-1 text-opacity-50">
+                    I want to buy Minima for
+                  </label>
+                  <input
+                    id="buy"
+                    type="number"
+                    onChange={handleChange}
+                    onFocus={() => setF(true)}
+                    onBlur={() => setF(false)}
+                    value={_def.buy}
+                    className="bg-transparent w-full rounded font-mono focus:outline-none truncate"
+                    placeholder="0"
+                  />
+                </div>
+                <div className="my-auto pr-4">
+                  <img
+                    className="rounded-full w-[36px] h-[36px] my-auto"
+                    alt="wrappedtoken"
+                    src="./assets/tether.svg"
+                  />
+                </div>
+              </div>
+            </div>
+            <div className="relative grid grid-cols-[1fr_auto]">
+              <div className="pl-4">
+                <label className="text-xs font-bold mb-1 text-opacity-50">
+                  I want to sell Minima for
+                </label>
+                <input
+                  id="sell"
+                  type="number"
+                  onChange={handleChange}
+                  onFocus={() => setF(true)}
+                  onBlur={() => setF(false)}
+                  value={_def.sell}
+                  className="bg-transparent w-full font-mono rounded focus:outline-none truncate"
+                  placeholder="0"
+                />
+              </div>
+              <div className="my-auto">
+                <img
+                  className="rounded-full w-[36px] h-[36px] my-auto"
+                  alt="wrappedtoken"
+                  src="./assets/tether.svg"
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 px-4 mb-3">
         {_def && !_def.enable && (
           <button
             onClick={updateBook}
