@@ -12,9 +12,7 @@ import { searchAllorFavsOrderBooks } from "../../../../../../../../dapp/js/order
 import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
-import {
-  calculateAmount
-} from "../../../../../../../../dapp/js/orderbookutil.js";
+import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
 
@@ -36,7 +34,7 @@ const TetherPool = () => {
         matchingOrder: false,
         order: null,
         price: null,
-        favorites: false
+        favorites: false,
       }}
       onSubmit={async (formData, { setFieldError, resetForm }) => {
         const { offerPrice, order } = formData;
@@ -46,7 +44,8 @@ const TetherPool = () => {
             return setFieldError("matchingOrder", "No matching order");
           }
 
-          const ERC20Contract = "0x"+_defaults['Tether'][_network].slice(2).toUpperCase();
+          const ERC20Contract =
+            "0x" + _defaults["Tether"][_network].slice(2).toUpperCase();
           const message = {
             action: "STARTETHSWAP",
             reqpublickey: (order as Data).ethpublickey,
@@ -92,7 +91,7 @@ const TetherPool = () => {
               if (new Decimal(val).gt(1000)) {
                 throw new Error("Exceeds max trade of 1000");
               }
-              
+
               if (new Decimal(val).lt(10)) {
                 throw new Error("Minimum order is 10");
               }
@@ -185,7 +184,9 @@ const TetherPool = () => {
           <div className="grid grid-rows-[16px_1fr]">
             <div className="flex flex-end justify-end px-8 text-gray-100">
               <span className="text-xs text-gray-100 text-opacity-50">
-                {values.order && (values.order as Data).orderbook && (values.order as Data).orderbook.usdt
+                {values.order &&
+                (values.order as Data).orderbook &&
+                (values.order as Data).orderbook.usdt
                   ? "x" +
                     (values.order as Data).orderbook.usdt[
                       _currentNavigation === "Buy" ? "sell" : "buy"
@@ -234,14 +235,17 @@ const TetherPool = () => {
                       className="rounded-full w-[36px] h-[36px] my-auto"
                     />
                     <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Sell"
-                        ? new Decimal(_minimaBalance.confirmed).toFixed(0)
-                        : new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
+                      {_currentNavigation === "Sell" &&
+                        _minimaBalance &&
+                        new Decimal(_minimaBalance.confirmed).toFixed(0)}
+                      {_currentNavigation === "Buy" &&
+                        relevantToken &&
+                        new Decimal(
+                          formatUnits(
+                            relevantToken!.balance,
+                            relevantToken!.decimals
+                          )
+                        ).toFixed(0)}
                     </p>
                   </div>
                 </div>
@@ -271,14 +275,17 @@ const TetherPool = () => {
                       className="rounded-full w-[36px] h-[36px] my-auto"
                     />
                     <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Buy"
-                        ? new Decimal(_minimaBalance.confirmed).toFixed(0)
-                        : new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
+                      {_currentNavigation === "Buy" &&
+                        _minimaBalance &&
+                        new Decimal(_minimaBalance.confirmed).toFixed(0)}
+                      {_currentNavigation === "Sell" &&
+                        relevantToken &&
+                        new Decimal(
+                          formatUnits(
+                            relevantToken!.balance,
+                            relevantToken!.decimals
+                          )
+                        ).toFixed(0)}
                     </p>
                   </div>
                 </div>
@@ -290,7 +297,7 @@ const TetherPool = () => {
             <button
               disabled={!isValid}
               type="submit"
-              className="mt-4 w-full bg-black py-3 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
+              className="mt-4 w-full bg-black py-3 text-white dark:bg-orange-600 font-bold disabled:text-red-300 dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
             >
               {isValid && "Swap"}
               {!isValid && errors.offerPrice

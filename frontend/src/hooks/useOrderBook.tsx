@@ -1,30 +1,47 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import {
   getMyOrderBook,
   setUserOrderBook,
 } from "../../../dapp/js/orderbook.js";
 import { PoolData } from "../types/Pool.js";
 
+type OrderBookContext = {
+  _currentOrderBook: PoolData | null;
+  updateBook: (book: PoolData) => void;
+}
+// Create a context for the order book
+const OrderBookContext = createContext<OrderBookContext | null>(null);
 
-const useOrderBook = () => {
-  const [_currentOrderBook, setOrderBook] = useState<PoolData | null>();
+export const useOrderBookContext = () => {
+  const context = useContext(OrderBookContext);
 
+  if (!context)
+    throw new Error(
+      "WalletContext must be called from within the WalletContextProvider"
+    );
+
+  return context;
+};
+
+// Provider component to manage the order book state
+export const OrderBookProvider = ({ children }) => {
+  const [_currentOrderBook, setOrderBook] = useState<PoolData | null>(null);
+
+  // Fetch the order book on component mount
   useEffect(() => {
     getBook();
   }, []);
 
+  // Function to fetch the order book
   const getBook = () => {
     getMyOrderBook(function (orderBook) {
       setOrderBook(orderBook);
     });
   };
 
-  const setBook = (orderBook: PoolData) => {
+  // Function to update the order book
+  const updateBook = (orderBook: PoolData) => {
     const { wminima, usdt } = orderBook;
-
-    console.log('current wminima order', wminima);
-    console.log('current usdt order', usdt);
-    
     setUserOrderBook(
       wminima.enable,
       wminima.buy,
@@ -37,16 +54,15 @@ const useOrderBook = () => {
       usdt.minimum,
       usdt.maximum,
       function (resp) {
-        console.log(resp);
+        console.log("CURRENT FROM KEYPAIR ORDER BOOK", JSON.parse(resp.value));
         setOrderBook(orderBook);
       }
     );
-  };  
+  };
 
-  const wminima = _currentOrderBook?.wminima;
-  const usdt = _currentOrderBook?.usdt;
-
-  return { getBook, setBook, wrappedPool: wminima, tetherPool: usdt, _currentOrderBook };
+  return (
+    <OrderBookContext.Provider value={{ _currentOrderBook, updateBook }}>
+      {children}
+    </OrderBookContext.Provider>
+  );
 };
-
-export default useOrderBook;

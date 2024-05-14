@@ -12,9 +12,7 @@ import { searchAllorFavsOrderBooks } from "../../../../../../../../dapp/js/order
 import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
-import {
-  calculateAmount
-} from "../../../../../../../../dapp/js/orderbookutil.js";
+import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
 
@@ -36,7 +34,7 @@ const WrappedPool = () => {
         matchingOrder: false,
         order: null,
         price: null,
-        favorites: false
+        favorites: false,
       }}
       onSubmit={async (formData, { setFieldError, resetForm }) => {
         const { offerPrice, order } = formData;
@@ -46,7 +44,8 @@ const WrappedPool = () => {
             return setFieldError("matchingOrder", "No matching order");
           }
 
-          const ERC20Contract = "0x"+_defaults['wMinima'][_network].slice(2).toUpperCase();
+          const ERC20Contract =
+            "0x" + _defaults["wMinima"][_network].slice(2).toUpperCase();
           const message = {
             action: "STARTETHSWAP",
             reqpublickey: (order as Data).ethpublickey,
@@ -61,7 +60,7 @@ const WrappedPool = () => {
           };
           console.log("Final message payload", message);
 
-          const res: any = await handleActionViaBackend(message);                    
+          const res: any = await handleActionViaBackend(message);
 
           notify("Executed a swap!");
           resetForm();
@@ -80,7 +79,7 @@ const WrappedPool = () => {
         offerPrice: yup
           .string()
           .matches(/^\d*\.?\d+$/, "Enter a valid amount")
-          .required("Enter your offer")          
+          .required("Enter your offer")
           .test("valid amount", function (val) {
             const { path, createError } = this;
 
@@ -92,7 +91,7 @@ const WrappedPool = () => {
               if (new Decimal(val).gt(1000)) {
                 throw new Error("Exceeds max trade of 1000");
               }
-              
+
               if (new Decimal(val).lt(10)) {
                 throw new Error("Minimum order is 10");
               }
@@ -174,7 +173,7 @@ const WrappedPool = () => {
           onSubmit={handleSubmit}
         >
           <Toolbar />
-          
+
           <div className="py-2 px-4">
             <Navigation
               navigation={["Buy", "Sell"]}
@@ -182,10 +181,13 @@ const WrappedPool = () => {
               setCurrentNavigation={setCurrentNavigation}
             />
           </div>
+
           <div className="grid grid-rows-[16px_1fr]">
             <div className="flex flex-end justify-end px-8 text-gray-100">
               <span className="text-xs text-black dark:text-gray-100 dark:text-opacity-50">
-                {values.order && (values.order as Data).orderbook && (values.order as Data).orderbook.wminima
+                {values.order &&
+                (values.order as Data).orderbook &&
+                (values.order as Data).orderbook.wminima
                   ? "x" +
                     (values.order as Data).orderbook.wminima[
                       _currentNavigation === "Buy" ? "sell" : "buy"
@@ -234,14 +236,17 @@ const WrappedPool = () => {
                       className="rounded-full w-[36px] h-[36px] my-auto"
                     />
                     <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Sell"
-                        ? new Decimal(_minimaBalance.confirmed).toFixed(0)
-                        : new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
+                      {_currentNavigation === "Sell" &&
+                        _minimaBalance &&
+                        new Decimal(_minimaBalance.confirmed).toFixed(0)}
+                      {_currentNavigation === "Buy" &&
+                        relevantToken &&
+                        new Decimal(
+                          formatUnits(
+                            relevantToken!.balance,
+                            relevantToken!.decimals
+                          )
+                        ).toFixed(0)}
                     </p>
                   </div>
                 </div>
@@ -271,14 +276,17 @@ const WrappedPool = () => {
                       className="rounded-full w-[36px] h-[36px] my-auto"
                     />
                     <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Buy"
-                        ? new Decimal(_minimaBalance.confirmed).toFixed(0)
-                        : new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
+                      {_currentNavigation === "Buy" &&
+                        _minimaBalance &&
+                        new Decimal(_minimaBalance.confirmed).toFixed(0)}
+                      {_currentNavigation === "Sell" &&
+                        relevantToken &&
+                        new Decimal(
+                          formatUnits(
+                            relevantToken!.balance,
+                            relevantToken!.decimals
+                          )
+                        ).toFixed(0)}
                     </p>
                   </div>
                 </div>
@@ -290,7 +298,7 @@ const WrappedPool = () => {
             <button
               disabled={!isValid}
               type="submit"
-              className="mt-4 w-full bg-black py-3 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
+              className="mt-4 w-full bg-black py-3 text-white dark:bg-orange-600 font-bold disabled:text-red-300 dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
             >
               {isValid && "Swap"}
               {!isValid && errors.offerPrice

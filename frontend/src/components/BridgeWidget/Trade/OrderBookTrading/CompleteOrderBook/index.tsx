@@ -7,15 +7,17 @@ import { appContext } from "../../../../../AppContext.js";
 
 const CompleteOrderBook = () => {
   const [orderBook, setOrderBook] = useState<OrderInterface[]>();
-  const { _favorites , getAndSetFavorites, _userDetails} = useContext(appContext);
+  const { _favorites , getAndSetFavorites, _userDetails, _currentNavigation} = useContext(appContext);
 
   useEffect(() => {
-    getCompleteOrderBook((resp) => {
-      setOrderBook(resp.filter(o => o.maximapublickey !== _userDetails.maximapublickey));
-    });
-
-    getAndSetFavorites();
-  }, []);
+    if (_currentNavigation === "trade") {
+      getCompleteOrderBook((resp) => {
+        setOrderBook(resp.filter(o => o.maximapublickey !== _userDetails.maximapublickey));
+      });
+  
+      getAndSetFavorites();
+    }
+  }, [_currentNavigation]);
 
   return (
     <div>

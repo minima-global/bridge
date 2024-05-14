@@ -143,7 +143,6 @@ const AppProvider = ({ children }: IProps) => {
     if (!loaded.current) {
       loaded.current = true;
       (window as any).MDS.init((msg: any) => {
-        console.log(msg);
         //Do initialisation
         if (msg.event == "inited") {
           // Check if read or write mode
@@ -152,7 +151,6 @@ const AppProvider = ({ children }: IProps) => {
               // If in write mode, generate & set key
               if (response.response.mode === "WRITE") {
                 initBridgeSystemsStartup(function (userdets) {
-                  console.log(userdets);
                   // @ts-ignore
                   window.USER_DETAILS = userdets;
                   Object.freeze(USER_DETAILS);
@@ -332,7 +330,6 @@ const AppProvider = ({ children }: IProps) => {
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
-              console.log(comms);
               //Show the message
               globalNotify(JSON.stringify(comms));
 
@@ -497,7 +494,6 @@ const AppProvider = ({ children }: IProps) => {
   const handleActionViaBackend = async (action: any) => {    
     return new Promise((resolve) => {
       sendBackendMSG(action, (resp) => {
-        console.log('ACTION VIA BACKEND', resp);
         resolve(resp);
       });
     });

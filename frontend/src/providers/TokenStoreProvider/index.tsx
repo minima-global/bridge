@@ -79,7 +79,7 @@ export const TokenStoreContextProvider = ({ children }: Props) => {
 
   useEffect(() => {
     setTokens([]);
-    if (_defaultAssets && _defaultAssets.assets.length > 0 && _currentNavigation === "balance") {
+    if (_defaultAssets && _defaultAssets.assets.length > 0 && (_currentNavigation === 'balance' || _currentNavigation === 'trade')) {
       (async () => {
         try {
           const calcBalance = await Promise.all(

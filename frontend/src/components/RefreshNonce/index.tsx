@@ -74,7 +74,7 @@ const RefreshNonce = () => {
         className="my-4 p-2 pl-3 py-3 hover:cursor-pointer bg-gray-50 bg-opacity-80 dark:bg-[#1B1B1B] hover:bg-opacity-30 dark:bg-opacity-50 grid grid-cols-[auto_1fr] items-center gap-1"
         onClick={toggleDialog}
       >
-        <RefreshIcon fill="currentColor" />
+        <RefreshIcon extraClass="" fill="currentColor" />
         <span className="font-bold pl-3">Refresh Nonce</span>
       </div>
     </>

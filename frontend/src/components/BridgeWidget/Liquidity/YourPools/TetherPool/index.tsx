@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import Decimal from "decimal.js";
 import { PoolType } from "../../../../../types/Pool.js";
-import useOrderBook from "../../../../../hooks/useOrderBook";
 import { appContext } from "../../../../../AppContext.js";
 import Toolbar from "../Toolbar/index.js";
+import { useOrderBookContext } from "../../../../../hooks/useOrderBook.js";
 
 const TetherPool = () => {
   const { notify } = useContext(appContext);
-  const { wrappedPool, setBook, tetherPool } = useOrderBook();
+  const { _currentOrderBook, updateBook } = useOrderBookContext();
   const [_def, setDefault] = useState<PoolType>({
     buy: 0,
     enable: false,
@@ -19,24 +19,22 @@ const TetherPool = () => {
   const [isButtonEnabled, setIsButtonEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (tetherPool) {
-      setDefault(tetherPool);
+    if (_currentOrderBook && _currentOrderBook.usdt) {
+      setDefault(_currentOrderBook.usdt);
     }
-  }, [tetherPool]);
+  }, [_currentOrderBook]);
 
-  const updateBook = async () => {
+  const handleUpdateBook = async () => {
     const updatedBook = {
       usdt: {
         ..._def,
-        enable: true,
-        maximum: 1000,
-        minimum: 10,
+        enable: true      
       },
       wminima: {
-        ...wrappedPool!,
+        ..._currentOrderBook?.wminima!,
       },
     };
-    setBook(updatedBook);
+    updateBook(updatedBook);
     notify("Book updated!");
   };
 
@@ -46,14 +44,14 @@ const TetherPool = () => {
         enable: false,
         buy: 0,
         sell: 0,
-        maximum: 0,
-        minimum: 0,
+        maximum: 1000,
+        minimum: 10,
       },
       wminima: {
-        ...wrappedPool!,
+        ..._currentOrderBook?.wminima!,
       },
     };
-    setBook(updatedBook);
+    updateBook(updatedBook);
     notify("Book disabled!");
   };
 
@@ -90,11 +88,11 @@ const TetherPool = () => {
 
 
     const userUpdatedValues =
-      JSON.stringify(_def) !== JSON.stringify(tetherPool);
+      JSON.stringify(_def) !== JSON.stringify(_currentOrderBook?.usdt);
 
     // Update the state of the button based on whether the user has updated values or not
     setIsButtonEnabled(userUpdatedValues);
-  }, [_def, tetherPool]);
+  }, [_def, _currentOrderBook]);
 
   return (
     <div
@@ -165,9 +163,9 @@ const TetherPool = () => {
       <div className="mt-4 px-4 mb-3">
         {_def && !_def.enable && (
           <button
-            onClick={updateBook}
+            onClick={handleUpdateBook}
             disabled={!isButtonEnabled}
-            className="hover:bg-teal-600 w-full bg-teal-500 text-[#1B1B1B] font-bold disabled:bg-opacity-20"
+            className="hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20"
           >
             Enable
           </button>
@@ -176,7 +174,7 @@ const TetherPool = () => {
         {_def && _def.enable && (
           <div className="w-full grid grid-cols-[1fr_minmax(0,_100px)] gap-1">
             <button
-              onClick={updateBook}
+              onClick={handleUpdateBook}
               disabled={!isButtonEnabled}
               className="hover:bg-teal-600 bg-teal-500 text-[#1B1B1B] font-bold disabled:bg-opacity-20"
             >

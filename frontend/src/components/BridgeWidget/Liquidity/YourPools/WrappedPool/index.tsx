@@ -1,13 +1,13 @@
 import { useContext, useEffect, useState } from "react";
 import Decimal from "decimal.js";
-import { PoolType } from "../../../../../types/Pool";
+import { PoolData, PoolType } from "../../../../../types/Pool";
 import { appContext } from "../../../../../AppContext";
-import useOrderBook from "../../../../../hooks/useOrderBook";
 import Toolbar from "../Toolbar";
+import { useOrderBookContext } from "../../../../../hooks/useOrderBook";
 
 const WrappedPool = () => {
   const { notify } = useContext(appContext);
-  const { wrappedPool, setBook, tetherPool } = useOrderBook();
+  const { _currentOrderBook, updateBook } = useOrderBookContext();
   const [_def, setDefault] = useState<PoolType>({
     buy: 0,
     enable: false,
@@ -19,22 +19,20 @@ const WrappedPool = () => {
   const [isButtonEnable, setIsButtonEnabled] = useState<boolean>(false);
 
   useEffect(() => {
-    if (wrappedPool) setDefault(wrappedPool);
-  }, [wrappedPool]);
+    if (_currentOrderBook && _currentOrderBook?.wminima) setDefault(_currentOrderBook.wminima);
+  }, [_currentOrderBook]);
 
-  const updateBook = () => {
+  const handleUpdateBook = () => {
     const updatedBook = {
       wminima: {
         ..._def,
         enable: true,
-        maximum: 1000,
-        minimum: 10,
       },
       usdt: {
-        ...tetherPool!,
+        ..._currentOrderBook?.usdt!,
       },
     };
-    setBook(updatedBook);
+    updateBook(updatedBook as PoolData);
     notify("Book updated!");
   };
 
@@ -44,14 +42,14 @@ const WrappedPool = () => {
         enable: false,
         buy: 0,
         sell: 0,
-        maximum: 0,
-        minimum: 0,
+        maximum: 1000,
+        minimum: 10,
       },
       usdt: {
-        ...tetherPool!,
+        ..._currentOrderBook?.usdt!,
       },
     };
-    setBook(updatedBook);
+    updateBook(updatedBook);
     notify("Book disabled!");
   };
 
@@ -86,11 +84,11 @@ const WrappedPool = () => {
     }
 
     const userUpdatedValues =
-      JSON.stringify(_def) !== JSON.stringify(wrappedPool);
+      JSON.stringify(_def) !== JSON.stringify(_currentOrderBook?.wminima);
 
     // Update the state of the button based on whether the user has updated values or not
     setIsButtonEnabled(userUpdatedValues);
-  }, [_def, wrappedPool]);
+  }, [_def, _currentOrderBook]);
 
   return (
     <div
@@ -162,9 +160,9 @@ const WrappedPool = () => {
       <div className="mt-4 px-4 mb-3">
         {_def && !_def.enable && (
           <button
-            onClick={updateBook}
+            onClick={handleUpdateBook}
             disabled={!isButtonEnable}
-            className="hover:bg-teal-600 w-full bg-teal-500 text-[#1B1B1B] font-bold disabled:bg-opacity-20"
+            className="hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20"
           >
             Enable
           </button>
@@ -173,7 +171,7 @@ const WrappedPool = () => {
         {_def && _def.enable && (
           <div className="w-full grid grid-cols-[1fr_minmax(0,_100px)] gap-1">
             <button
-              onClick={updateBook}
+              onClick={handleUpdateBook}
               disabled={!isButtonEnable}
               className="hover:bg-teal-600 bg-teal-500 text-[#1B1B1B] font-bold disabled:bg-opacity-20"
             >
