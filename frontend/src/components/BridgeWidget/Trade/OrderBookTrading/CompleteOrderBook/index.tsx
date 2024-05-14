@@ -7,12 +7,11 @@ import { appContext } from "../../../../../AppContext.js";
 
 const CompleteOrderBook = () => {
   const [orderBook, setOrderBook] = useState<OrderInterface[]>();
-  const { _favorites , getAndSetFavorites} = useContext(appContext);
+  const { _favorites , getAndSetFavorites, _userDetails} = useContext(appContext);
 
   useEffect(() => {
     getCompleteOrderBook((resp) => {
-        console.log(resp);
-      setOrderBook(resp);
+      setOrderBook(resp.filter(o => o.maximapublickey !== _userDetails.maximapublickey));
     });
 
     getAndSetFavorites();
@@ -21,7 +20,7 @@ const CompleteOrderBook = () => {
   return (
     <div>
       <ul>
-        {!orderBook || !orderBook.length && <p className="text-center">No orderbook found</p>}
+        {!orderBook || !orderBook.length && <p className="text-center text-xs font-bold">No orderbook found</p>}
         {orderBook?.map((order) => (
           <Order data={order} favorites={_favorites} key={order.maximapublickey} />
         ))}

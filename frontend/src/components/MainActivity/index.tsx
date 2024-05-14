@@ -82,7 +82,7 @@ const renderCell = (cellData) => {
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
-              getTokenType(TOKEN) === "wMinima" ||
+              getTokenType(TOKEN) === "wMinima" ? "./assets/wtoken.svg" :
               getTokenType(TOKEN) === "Minima"
                 ? "./assets/token.svg"
                 : "./assets/tether.svg"
@@ -214,7 +214,7 @@ const renderCellMobile = (cellData) => {
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
-              getTokenType(TOKEN) === "wMinima" ||
+              getTokenType(TOKEN) === "wMinima" ? "./assets/wtoken.svg" :
               getTokenType(TOKEN) === "Minima"
                 ? "./assets/token.svg"
                 : "./assets/tether.svg"
@@ -337,7 +337,8 @@ const MainActivity = () => {
                   <path d="M6 6l12 12" />
                 </svg>
               </div>
-
+              {!data.length && <p className="text-xs font-bold text-center">No activity yet</p>}
+              {!!data.length &&
               <MostResponsiveTableEver
                 headerClasses=""
                 headerClassesMobile="divide-y dark:divide-teal-300"
@@ -371,7 +372,8 @@ const MainActivity = () => {
                 data={data}
                 renderCell={renderCell}
                 renderCellMobile={renderCellMobile}
-              />
+              />            
+              }
             </div>
             <div className="bg-slate-100 dark:bg-black" />
           </animated.div>,

@@ -1,3 +1,6 @@
+import { USDTContractAddress } from "../../frontend/public/js/htlcvars";
+import { wMinimaContractAddress } from "../../frontend/public/js/htlcvars";
+
 /**
  * The HTLC ABI interfaces
  */
@@ -15,6 +18,7 @@ function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock,
 	
 	//How many decimla places..
 	var decimals = 18;
+	
 	if(erc20address == wMinimaContractAddress){
 		decimals = WMINIMA_DECIMALS;
 	}else if(erc20address == USDTContractAddress){

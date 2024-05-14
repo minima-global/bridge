@@ -55,7 +55,7 @@ const TokenStoreContext = createContext<Context | null>(null);
 
 export const TokenStoreContextProvider = ({ children }: Props) => {
   const [tokens, setTokens] = useState<Asset[]>([]);
-  const { _provider, _defaultAssets, _triggerBalanceUpdate } = useContext(appContext);
+  const { _provider, _defaultAssets, _triggerBalanceUpdate, _currentNavigation } = useContext(appContext);
   const { _wallet: signer, _address } = useWalletContext();
 
   const fetchTokenBalance = useCallback(
@@ -79,8 +79,7 @@ export const TokenStoreContextProvider = ({ children }: Props) => {
 
   useEffect(() => {
     setTokens([]);
-    if (_defaultAssets && _defaultAssets.assets.length > 0) {
-
+    if (_defaultAssets && _defaultAssets.assets.length > 0 && _currentNavigation === "balance") {
       (async () => {
         try {
           const calcBalance = await Promise.all(
@@ -95,14 +94,15 @@ export const TokenStoreContextProvider = ({ children }: Props) => {
               })
           );
           // Set the state with the new array of assets
-          setTokens(calcBalance);
+          setTokens(calcBalance);        
+
         } catch (error) {
           // console.error("Error fetching token balances:", error);
           // Handle error, e.g., show error message to user or retry
         }
       })();
     }
-  }, [_provider, _defaultAssets, fetchTokenBalance, _triggerBalanceUpdate]);
+  }, [_provider, _defaultAssets, fetchTokenBalance, _triggerBalanceUpdate, _currentNavigation]);
 
   const addToken = (token: Asset) => {
     setTokens((prevTokens) => [...prevTokens, token]);

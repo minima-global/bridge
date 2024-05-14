@@ -46,7 +46,7 @@ const TetherPool = () => {
             return setFieldError("matchingOrder", "No matching order");
           }
 
-          const ERC20Contract = _defaults["Tether"][_network];
+          const ERC20Contract = "0x"+_defaults['Tether'][_network].slice(2).toUpperCase();
           const message = {
             action: "STARTETHSWAP",
             reqpublickey: (order as Data).ethpublickey,
@@ -215,9 +215,10 @@ const TetherPool = () => {
                         setF(false);
                         handleBlur(e);
                       }}
-                      onChange={handleChange}
                       id="offerPrice"
                       name="offerPrice"
+                      onChange={handleChange}
+                      value={values.offerPrice}
                       className="w-full bg-transparent focus:outline-none font-mono"
                       placeholder="0.0"
                     />
@@ -227,13 +228,13 @@ const TetherPool = () => {
                       alt="token"
                       src={
                         _currentNavigation === "Buy"
-                          ? "./assets/token.svg"
-                          : "./assets/tether.svg"
+                          ? "./assets/tether.svg"
+                          : "./assets/token.svg"
                       }
                       className="rounded-full w-[36px] h-[36px] my-auto"
                     />
                     <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Buy"
+                      {_currentNavigation === "Sell"
                         ? new Decimal(_minimaBalance.confirmed).toFixed(0)
                         : new Decimal(
                             formatUnits(
@@ -264,13 +265,13 @@ const TetherPool = () => {
                       alt="token"
                       src={
                         _currentNavigation === "Sell"
-                          ? "./assets/token.svg"
-                          : "./assets/tether.svg"
+                          ? "./assets/tether.svg"
+                          : "./assets/token.svg"
                       }
                       className="rounded-full w-[36px] h-[36px] my-auto"
                     />
                     <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Sell"
+                      {_currentNavigation === "Buy"
                         ? new Decimal(_minimaBalance.confirmed).toFixed(0)
                         : new Decimal(
                             formatUnits(

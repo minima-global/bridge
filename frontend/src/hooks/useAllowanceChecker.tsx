@@ -9,7 +9,7 @@ import { useWalletContext } from "../providers/WalletProvider/WalletProvider.js"
 import Decimal from "decimal.js";
 
 const useAllowanceChecker = () => {
-  const { _provider, promptAllowance } = useContext(appContext);
+  const { _provider, setPromptAllowance } = useContext(appContext);
   const { _network: currentNetwork, _address } = useWalletContext();
 
   const checkAllowance = (
@@ -82,12 +82,15 @@ const useAllowanceChecker = () => {
 
     (async () => {
       const userAllowances = await Promise.all(allowances);
+  console.log('Checking token Allowance' , userAllowances);
 
       // If allowances for both are at zero let's max them up...      
-      const wrappedAllownace = userAllowances[0];
+      const wrappedAllowance = userAllowances[0];
       const tetherAllowance = userAllowances[1];
-      if (new Decimal(wrappedAllownace.toString()).isZero() || new Decimal(tetherAllowance.toString()).isZero()) {
-        promptAllowance();
+      if (new Decimal(wrappedAllowance.toString()).isZero() || new Decimal(tetherAllowance.toString()).isZero()) {
+        setPromptAllowance(true);
+      } else {
+        setPromptAllowance(false);
       }
     })();
   }, []);

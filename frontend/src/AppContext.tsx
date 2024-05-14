@@ -43,8 +43,10 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
   const [_promptWithdraw, setPromptWithdraw] = useState(false);
-  // Withdraw Modal
+  // Allownace Modal
   const [_promptAllowance, setPromptAllowance] = useState(false);
+  // Approving status
+  const [_approving, setApproving] = useState(false);
   // Is App in Read or Write Mode
   const [_promptReadMode, setReadMode] = useState<null | boolean>(null);
   // Set up API Keys
@@ -85,6 +87,9 @@ const AppProvider = ({ children }: IProps) => {
   const [_minimaBalance, setMinimaBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
+
+  // Trigger an Ethereum balance update
+  const [_triggerBalanceUpdate, setTriggerBalanceUpdate] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -342,7 +347,7 @@ const AppProvider = ({ children }: IProps) => {
           });
 
           (window as any).MDS.cmd(
-            `balance tokenid:0x00 address:${_userDetails.minimaaddress}`,
+            `balance tokenid:0x00 address:${(window as any).USER_DETAILS.minimaaddress}`,
             (resp: any) => {
               if (resp.status) {
                 const { confirmed, unconfirmed, coins } = resp.response[0];
@@ -489,11 +494,10 @@ const AppProvider = ({ children }: IProps) => {
     });
   };
 
-  const handleActionViaBackend = async (action: any) => {
-    console.log("sending message to backend", action);
+  const handleActionViaBackend = async (action: any) => {    
     return new Promise((resolve) => {
       sendBackendMSG(action, (resp) => {
-        console.log(resp);
+        console.log('ACTION VIA BACKEND', resp);
         resolve(resp);
       });
     });
@@ -531,10 +535,6 @@ const AppProvider = ({ children }: IProps) => {
     setPromptFavorites((prevState) => !prevState);
   };
 
-  const promptAllowance = () => {
-    setPromptAllowance((prevState) => !prevState);
-  };
-
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
 
@@ -545,6 +545,9 @@ const AppProvider = ({ children }: IProps) => {
     <appContext.Provider
       value={{
         isWorking,
+
+        _triggerBalanceUpdate,
+        setTriggerBalanceUpdate,
 
         _currentBlock,
 
@@ -559,7 +562,9 @@ const AppProvider = ({ children }: IProps) => {
         _provider,
 
         _promptAllowance,
-        promptAllowance,
+        setPromptAllowance,
+        _approving, 
+        setApproving,
 
         _promptWithdraw,
         promptWithdraw,

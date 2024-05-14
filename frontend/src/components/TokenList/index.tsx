@@ -4,18 +4,34 @@ import { useWalletContext } from "../../providers/WalletProvider/WalletProvider"
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
+import RefreshIcon from "../UI/Icons/RefreshIcon";
 
 const TokenList = () => {
-  const { _currentNavigation } = useContext(appContext);
+  const { _currentNavigation, setTriggerBalanceUpdate, _triggerBalanceUpdate } = useContext(appContext);
   const { _balance, _network } = useWalletContext();
   const { tokens } = useTokenStoreContext();
   if (_currentNavigation !== "balance") {
     return null;
   }
 
+  const handlePullBalance = () => {
+    setTriggerBalanceUpdate(true);
+    setTimeout(() => {
+      setTriggerBalanceUpdate(false);
+    }, 2000);
+  }
+
   return (
     <div>
-      <h3 className="font-bold mb-2">Ethereum Tokens</h3>
+      <div className="grid grid-cols-[1fr_auto]">
+        <h3 className="font-bold mb-2">Ethereum Tokens</h3>
+        <span onClick={handlePullBalance} className={`dark:text-sky-500`}>
+          <RefreshIcon extraClass={`${_triggerBalanceUpdate && "animate-spin"}`} fill="currentColor"/>
+        </span>
+      </div>
+      
+      {_triggerBalanceUpdate && <p className="text-center text-xs font-bold text-opacity-50 animate-pulse">Fetching balance...</p>}
+      {!_triggerBalanceUpdate &&
       <ul>
         {tokens.map((token) => (
           <li
@@ -78,6 +94,7 @@ const TokenList = () => {
           </div>
         </li>
       </ul>
+      }
     </div>
   );
 };

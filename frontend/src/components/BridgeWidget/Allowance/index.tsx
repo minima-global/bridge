@@ -14,9 +14,8 @@ const Allowance = () => {
     _wallet: signer,
     _address,
   } = useWalletContext();
-  const { _promptAllowance, promptAllowance } = useContext(appContext);
+  const { _promptAllowance, setPromptAllowance, _approving, setApproving } = useContext(appContext);
 
-  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | false>(false);
   const [step, setStep] = useState(1);  
 
@@ -27,6 +26,11 @@ const Allowance = () => {
     return null;
   }
 
+  const isDefault = !_approving && !error && step === 1;
+  const isApproved = !_approving && !error && step === 2;
+  const isError = !_approving && error;
+  const isApproving = _approving && !error;
+
 
 
   return (
@@ -34,40 +38,40 @@ const Allowance = () => {
       <div className="backdrop-blur-sm z-10 fixed left-0 right-0 top-[90px] bottom-0"></div>
       <div className="z-20 h-[400px] overflow-y-scroll absolute w-full max-w-sm bg-white dark:bg-black rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden">
         <div className="flex justify-between py-3 items-center px-4">
-          {!loading && !error && step === 1 &&
+          {isDefault &&
           <h3 className="my-auto font-bold">Allowance Approval</h3>
           }
-          {!loading && !error && step === 2 &&
+          {isApproved &&
           <h3 className="my-auto font-bold">Allowance Approved</h3>
           }
-          {!loading && error &&
+          {isError &&
           <h3 className="my-auto font-bold">Approval Failed</h3>
           }
-          {loading && !error &&
+          {isApproving &&
           <h3 className="my-auto font-bold">Approving Allowance</h3>
           }
         </div>
         <div>
-          {!loading && !error && step === 1 &&
+          {isApproving &&
           <p className="px-4 text-sm">
             Approve wMinima & USDT allowance on the HTLC contract to start
             trading.
           </p>        
           }
-          {!loading && !error && step === 2 &&
+          {isApproved &&
           <p className="px-4 text-sm">
             Approved Allowances, ready to go!
           </p>        
           }
-          {!loading && error &&
+          {isError &&
           <p className="px-4 text-sm">
             {error}
           </p>        
           }
           
-          {loading &&
+          {_approving &&
           <p className="px-4 text-sm animate-pulse text-black dark:text-teal-300">
-            Approving...
+            Approving... Please be patient and do not refresh this page.
           </p>        
           }
         </div>
@@ -77,7 +81,7 @@ const Allowance = () => {
             
           }}
           onSubmit={async () => {
-            setLoading(true);
+            setApproving(true);
             setError(false);
 
             try {
@@ -125,7 +129,7 @@ const Allowance = () => {
 
               setError("Allowance approval failed");
             } finally {
-              setLoading(false);
+              setApproving(false);
             }
           }}
         >
@@ -154,14 +158,14 @@ const Allowance = () => {
               <div className="mx-3">
 
                 {step === 1 &&
-                <button type="submit" disabled={loading} className="disabled:bg-gray-500 hover:bg-opacity-80 w-full bg-teal-300 text-white  dark:text-black font-bold">
-                  {loading && "Approving..."}
-                  {!error && !loading && "Approve"}
-                  {error && !loading && "Re-try"}
+                <button type="submit" disabled={_approving} className="disabled:bg-gray-500 hover:bg-opacity-80 w-full bg-teal-300 text-white  dark:text-black font-bold">
+                  {_approving && "Approving..."}
+                  {isDefault && "Approve"}
+                  {isError && "Re-try"}
                 </button>              
                 }
                 {step === 2 &&
-                <button type="button" onClick={promptAllowance} className="disabled:bg-gray-500 hover:bg-opacity-80 w-full bg-teal-300 text-white  dark:text-black font-bold">
+                <button type="button" onClick={() => setPromptAllowance(false)} className="disabled:bg-gray-500 hover:bg-opacity-80 w-full bg-teal-300 text-white  dark:text-black font-bold">
                   Ready to trade
                 </button>              
                 }

@@ -51,7 +51,7 @@ const renderCell = (cellData) => {
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
               token.tokenName === "wMinima"
-                ? "./assets/token.svg"
+                ? "./assets/wtoken.svg"
                 : "./assets/tether.svg"
             }
           />
@@ -161,7 +161,7 @@ const renderCellMobile = (cellData) => {
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
               token.tokenName === "wMinima"
-                ? "./assets/token.svg"
+                ? "./assets/wtoken.svg"
                 : "./assets/tether.svg"
             }
           />
