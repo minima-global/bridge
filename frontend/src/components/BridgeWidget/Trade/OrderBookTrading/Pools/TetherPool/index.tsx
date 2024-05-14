@@ -13,6 +13,7 @@ import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
 import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
+import { MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE } from "../../../../../../../../dapp/js/htlcvars.js";
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
 
@@ -88,22 +89,22 @@ const TetherPool = () => {
                 throw new Error("Enter your offer");
               }
 
-              if (new Decimal(val).gt(1000)) {
-                throw new Error("Exceeds max trade of 1000");
+              if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
+                throw new Error("Exceeds max trade of "+MAXIMUM_MINIMA_TRADE);
               }
 
-              if (new Decimal(val).lt(10)) {
-                throw new Error("Minimum order is 10");
+              if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
+                throw new Error("Minimum order is "+MINIMUM_MINIMA_TRADE);
               }
 
-              if (_currentNavigation === "Buy") {
+              if (_currentNavigation === "Sell") {
                 if (new Decimal(val).gt(_minimaBalance.confirmed)) {
                   throw new Error("Insufficient funds");
                 }
-              } else {
+              } else {                
                 const balance = formatUnits(
                   relevantToken!.balance,
-                  relevantToken!.decimals
+                  _network === 'mainnet' ? 6 : 18
                 ).toString();
                 if (new Decimal(val).gt(balance)) {
                   throw new Error("Insufficient funds");
@@ -243,7 +244,7 @@ const TetherPool = () => {
                         new Decimal(
                           formatUnits(
                             relevantToken!.balance,
-                            relevantToken!.decimals
+                            _network === 'mainnet' ? 6 : 18
                           )
                         ).toFixed(0)}
                     </p>

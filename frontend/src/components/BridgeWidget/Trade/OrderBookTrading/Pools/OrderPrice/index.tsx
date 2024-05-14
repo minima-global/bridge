@@ -26,6 +26,7 @@ const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
           token,
           userPublicKey,
           function (_, order) {     
+            console.log('order found',order);
             setFieldValue("order", order);          
             resolve(order);
           }
