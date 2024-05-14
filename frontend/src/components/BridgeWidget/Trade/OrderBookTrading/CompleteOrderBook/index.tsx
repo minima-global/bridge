@@ -19,10 +19,11 @@ const CompleteOrderBook = () => {
     }
   }, [_currentNavigation]);
 
+
   return (
     <div>
       <ul>
-        {!orderBook || !orderBook.length && <p className="text-center text-xs font-bold">No orderbook found</p>}
+        {!orderBook || !orderBook.filter(o => o.maximapublickey !== _userDetails.maximapublickey).length && <p className="text-center text-xs font-bold">No orderbook found</p>}        
         {orderBook?.map((order) => (
           <Order data={order} favorites={_favorites} key={order.maximapublickey} />
         ))}

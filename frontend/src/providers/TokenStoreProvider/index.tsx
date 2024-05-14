@@ -79,7 +79,7 @@ export const TokenStoreContextProvider = ({ children }: Props) => {
 
   useEffect(() => {
     setTokens([]);
-    if (_defaultAssets && _defaultAssets.assets.length > 0 && (_currentNavigation === 'balance' || _currentNavigation === 'trade')) {
+    if (_defaultAssets && _defaultAssets.assets.length > 0) {
       (async () => {
         try {
           const calcBalance = await Promise.all(
@@ -102,7 +102,7 @@ export const TokenStoreContextProvider = ({ children }: Props) => {
         }
       })();
     }
-  }, [_provider, _defaultAssets, fetchTokenBalance, _triggerBalanceUpdate, _currentNavigation]);
+  }, [_provider, _defaultAssets, fetchTokenBalance, _triggerBalanceUpdate]);
 
   const addToken = (token: Asset) => {
     setTokens((prevTokens) => [...prevTokens, token]);
