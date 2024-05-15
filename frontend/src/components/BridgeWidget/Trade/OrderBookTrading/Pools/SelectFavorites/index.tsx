@@ -1,6 +1,6 @@
 import { useFormikContext } from "formik";
 import AnimatedDialog from "../../../../../UI/AnimatedDialog";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import FavoriteIcon from "../../../../../UI/Icons/FavoriteIcon";
 
 const SelectFavorites = () => {
@@ -8,6 +8,8 @@ const SelectFavorites = () => {
   const [info, setInfo] = useState(false);
   const { favorites } = formik.values;
   const toggleFavorite = () => {
+    (window as any).MDS.keypair.set("_orderfavs", !favorites, () => null);
+
     formik.setFieldValue("favorites", !favorites);
   };
 
@@ -15,11 +17,18 @@ const SelectFavorites = () => {
     setInfo((prevState) => !prevState);
   };
 
+  useEffect(() => {
+    (window as any).MDS.keypair.get("_orderfavs", (resp) => {
+      const status = resp.value;
+      formik.setFieldValue("favorites", status === "true" ? true : false);
+    });
+  }, []);
+
   return (
     <>
       <AnimatedDialog
         onClose={() => {
-          toggleInfo();          
+          toggleInfo();
         }}
         isOpen={info}
         position="items-start mt-20"
@@ -54,7 +63,8 @@ const SelectFavorites = () => {
           <div className="px-4 py-3 text-sm flex flex-col justify-between h-full">
             <p>
               This feature will set up your trades with your favorite contacts{" "}
-              <b>only</b>. Do you want to switch this feature {!favorites ?"on?": 'off?'}
+              <b>only</b>. Do you want to switch this feature{" "}
+              {!favorites ? "on?" : "off?"}
             </p>
             <div className="grid grid-cols-[1fr_auto] pb-3">
               <div />
@@ -73,7 +83,10 @@ const SelectFavorites = () => {
         </>
       </AnimatedDialog>
 
-      <label onClick={(e) => e.stopPropagation()} className="inline-flex items-center cursor-pointer">
+      <label
+        onClick={(e) => e.stopPropagation()}
+        className="inline-flex items-center cursor-pointer"
+      >
         <input
           checked={favorites}
           onChange={toggleInfo}
@@ -83,7 +96,7 @@ const SelectFavorites = () => {
         />
         <label
           htmlFor="favoriteCheckbox"
-          className="flex items-center cursor-pointer"        
+          className="flex items-center cursor-pointer"
         >
           <span className={`mr-2 ${favorites && "animate-pulse"}`}>
             <FavoriteIcon fill={favorites ? "#5ECED4" : "currentColor"} />
