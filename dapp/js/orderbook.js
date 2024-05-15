@@ -1,4 +1,5 @@
 import { toFixedNumber } from "./jslib.js";
+import { getFavsOrderBook } from "./orderbookutil.js";
 import {MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE} from "./htlcvars.js";
 
 //The Bridge order book address
@@ -644,7 +645,7 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 	orderbook.usdt.enable 		= usdtenable;
 	if(usdtenable){
 		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
-		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
+ 		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
 		orderbook.usdt.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
 		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
 		
@@ -703,4 +704,4 @@ function getEmptyOrderBook(){
 }
 
 
-export { setUserOrderBook, getMyOrderBook, getCompleteOrderBook };
+export { setUserOrderBook, getMyOrderBook, getCompleteOrderBook, getSimpleOrderBookTotals, createFavsOrderBookSimpleTotals };

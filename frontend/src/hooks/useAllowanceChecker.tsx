@@ -82,7 +82,6 @@ const useAllowanceChecker = () => {
 
     (async () => {
       const userAllowances = await Promise.all(allowances);
-  console.log('Checking token Allowance' , userAllowances);
 
       // If allowances for both are at zero let's max them up...      
       const wrappedAllowance = userAllowances[0];

@@ -277,7 +277,7 @@ const AppProvider = ({ children }: IProps) => {
                 );
               }
             } else {
-              console.log("Keys are not cached, prompt set up");
+              // console.log("Keys are not cached, prompt set up");
               // No default api keys.. let's set up
               promptJsonRpcSetup();
             }

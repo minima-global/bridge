@@ -464,4 +464,4 @@ function calculatePrice(action, token, orderbook){
 }
 
 
-export { calculateAmount, calculatePrice, searchAllorFavsOrderBooks };
+export { calculateAmount, calculatePrice, searchAllorFavsOrderBooks, getFavsOrderBook };

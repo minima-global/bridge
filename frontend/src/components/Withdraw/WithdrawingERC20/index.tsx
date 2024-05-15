@@ -19,7 +19,7 @@ const WithdrawingERC20 = () => {
             }
 
             sendBackendMSG(message, (resp) => {
-                console.log(resp);
+                // console.log(resp);
                 resolve(resp);
             });
         });

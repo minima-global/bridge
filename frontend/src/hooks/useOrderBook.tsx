@@ -53,8 +53,8 @@ export const OrderBookProvider = ({ children }) => {
       usdt.sell,
       usdt.minimum,
       usdt.maximum,
-      function (resp) {
-        console.log("CURRENT FROM KEYPAIR ORDER BOOK", JSON.parse(resp.value));
+      function () {
+        // console.log("CURRENT FROM KEYPAIR ORDER BOOK", JSON.parse(resp.value));
         setOrderBook(orderBook);
       }
     );

@@ -42,7 +42,7 @@ const OTCForm = () => {
           notify("OTC Swap requested!");
           resetForm();
 
-          console.log(res);
+          // console.log(res);
 
         } catch (error) {
           console.error(error);

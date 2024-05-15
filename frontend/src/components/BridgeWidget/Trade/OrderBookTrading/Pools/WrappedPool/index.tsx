@@ -13,9 +13,13 @@ import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
 import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
-import { MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE } from "../../../../../../../../dapp/js/htlcvars.js";
+import {
+  MINIMUM_MINIMA_TRADE,
+  MAXIMUM_MINIMA_TRADE,
+} from "../../../../../../../../dapp/js/htlcvars.js";
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
+import Charts from "../../Charts/index.js";
 
 const WrappedPool = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
@@ -59,14 +63,14 @@ const WrappedPool = () => {
             ),
             amount: offerPrice,
           };
-          console.log("Final message payload", message);
+          // console.log("Final message payload", message);
 
           const res: any = await handleActionViaBackend(message);
 
           notify("Executed a swap!");
           resetForm();
 
-          console.log("transaction response", res);
+          // console.log("transaction response", res);
         } catch (error) {
           console.error(error);
           if (error instanceof Error) {
@@ -90,14 +94,12 @@ const WrappedPool = () => {
               }
 
               if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
-                throw new Error("Exceeds max trade of "+MAXIMUM_MINIMA_TRADE);
+                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE);
               }
 
               if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is "+MINIMUM_MINIMA_TRADE);
+                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE);
               }
-
-
 
               if (_currentNavigation === "Sell") {
                 if (new Decimal(val).gt(_minimaBalance.confirmed)) {
@@ -167,151 +169,161 @@ const WrappedPool = () => {
         errors,
         values,
       }) => (
-        <form
-          className={`shadow-sm dark:shadow-none dark:bg-[#1B1B1B] rounded ${
-            _f && "outline dark:outline-yellow-300"
-          } ${errors.matchingOrder && "!outline outline-blue-300"} ${
-            errors.offerPrice && "!outline !outline-red-300"
-          } `}
-          onSubmit={handleSubmit}
-        >
-          <Toolbar />
+        <>
+          <form
+            className={`shadow-sm dark:shadow-none dark:bg-[#1B1B1B] rounded ${
+              _f && "outline dark:outline-yellow-300"
+            } ${errors.matchingOrder && "!outline outline-blue-300"} ${
+              errors.offerPrice && "!outline !outline-red-300"
+            } `}
+            onSubmit={handleSubmit}
+          >
+            <Toolbar />
 
-          <div className="py-2 px-4">
-            <Navigation
-              navigation={["Buy", "Sell"]}
-              _currentNavigation={_currentNavigation}
-              setCurrentNavigation={setCurrentNavigation}
-            />
-          </div>
+            <div className="mb-4">
+              <Charts
+                fav={values.favorites}
+                book="wminima"
+                type={_currentNavigation.toLowerCase()}
+              />
+            </div>
 
-          <div className="grid grid-rows-[16px_1fr]">
-            <div className="flex flex-end justify-end px-8 text-gray-100">
-              <span className="text-xs text-black dark:text-gray-100 dark:text-opacity-50">
-                {values.order &&
-                (values.order as Data).orderbook &&
-                (values.order as Data).orderbook.wminima
-                  ? "x" +
-                    (values.order as Data).orderbook.wminima[
-                      _currentNavigation === "Buy" ? "sell" : "buy"
-                    ] +
-                    " each"
+            <div className="py-2 px-4">
+              <Navigation
+                navigation={["Buy", "Sell"]}
+                _currentNavigation={_currentNavigation}
+                setCurrentNavigation={setCurrentNavigation}
+              />
+            </div>
+
+            <div className="grid grid-rows-[16px_1fr]">
+              <div className="flex flex-end justify-end px-8 text-gray-100">
+                <span className="text-xs text-black dark:text-gray-100 dark:text-opacity-50">
+                  {values.order &&
+                  (values.order as Data).orderbook &&
+                  (values.order as Data).orderbook.wminima
+                    ? "x" +
+                      (values.order as Data).orderbook.wminima[
+                        _currentNavigation === "Buy" ? "sell" : "buy"
+                      ] +
+                      " each"
+                    : null}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 divide-x-2 divide-teal-300 px-4">
+                <div className="px-4 border-l-2 border-red-300">
+                  <div className="grid grid-cols-[1fr_36px]">
+                    <div
+                      className={`${
+                        errors.offerPrice &&
+                        !errors.offerPrice.includes("Insufficient") &&
+                        "animate-pulse"
+                      }`}
+                    >
+                      <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
+                        I will give
+                      </label>
+                      <input
+                        onFocus={() => {
+                          setF(true);
+                        }}
+                        onBlur={(e) => {
+                          setF(false);
+                          handleBlur(e);
+                        }}
+                        id="offerPrice"
+                        name="offerPrice"
+                        onChange={handleChange}
+                        value={values.offerPrice}
+                        className="w-full bg-transparent focus:outline-none font-mono"
+                        placeholder="0.0"
+                      />
+                    </div>
+                    <div>
+                      <img
+                        alt="token"
+                        src={
+                          _currentNavigation === "Buy"
+                            ? "./assets/wtoken.svg"
+                            : "./assets/token.svg"
+                        }
+                        className="rounded-full w-[36px] h-[36px] my-auto"
+                      />
+                      <p className="text-xs text-center font-bold font-mono truncate">
+                        {_currentNavigation === "Sell" &&
+                          _minimaBalance &&
+                          new Decimal(_minimaBalance.confirmed).toFixed(0)}
+                        {_currentNavigation === "Buy" &&
+                          relevantToken &&
+                          new Decimal(
+                            formatUnits(
+                              relevantToken!.balance,
+                              relevantToken!.decimals
+                            )
+                          ).toFixed(0)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="px-4">
+                  <div className="grid grid-cols-[1fr_36px]">
+                    <div>
+                      <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
+                        I will receive
+                      </label>
+
+                      <OrderPrice
+                        orderType={_currentNavigation}
+                        token="wminima"
+                        userPublicKey={_userDetails.publickey}
+                      />
+                    </div>
+                    <div>
+                      <img
+                        alt="token"
+                        src={
+                          _currentNavigation === "Sell"
+                            ? "./assets/wtoken.svg"
+                            : "./assets/token.svg"
+                        }
+                        className="rounded-full w-[36px] h-[36px] my-auto"
+                      />
+                      <p className="text-xs text-center font-bold font-mono truncate">
+                        {_currentNavigation === "Buy" &&
+                          _minimaBalance &&
+                          new Decimal(_minimaBalance.confirmed).toFixed(0)}
+                        {_currentNavigation === "Sell" &&
+                          relevantToken &&
+                          new Decimal(
+                            formatUnits(
+                              relevantToken!.balance,
+                              relevantToken!.decimals
+                            )
+                          ).toFixed(0)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="px-4 pb-3">
+              <button
+                disabled={!isValid}
+                type="submit"
+                className="mt-4 w-full bg-black py-3 text-white dark:bg-orange-600 font-bold disabled:text-red-300 dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
+              >
+                {isValid && "Swap"}
+                {!isValid && errors.offerPrice
+                  ? errors.offerPrice
+                  : errors && errors.matchingOrder
+                  ? errors.matchingOrder
                   : null}
-              </span>
+              </button>
             </div>
-            <div className="grid grid-cols-2 divide-x-2 divide-teal-300 px-4">
-              <div className="px-4 border-l-2 border-red-300">
-                <div className="grid grid-cols-[1fr_36px]">
-                  <div
-                    className={`${
-                      errors.offerPrice &&
-                      !errors.offerPrice.includes("Insufficient") &&
-                      "animate-pulse"
-                    }`}
-                  >
-                    <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
-                      I will give
-                    </label>
-                    <input
-                      onFocus={() => {
-                        setF(true);
-                      }}
-                      onBlur={(e) => {
-                        setF(false);
-                        handleBlur(e);
-                      }}
-                      id="offerPrice"
-                      name="offerPrice"
-                      onChange={handleChange}
-                      value={values.offerPrice}
-                      className="w-full bg-transparent focus:outline-none font-mono"
-                      placeholder="0.0"
-                    />
-                  </div>
-                  <div>
-                    <img
-                      alt="token"
-                      src={
-                        _currentNavigation === "Buy"
-                          ? "./assets/wtoken.svg"
-                          : "./assets/token.svg"
-                      }
-                      className="rounded-full w-[36px] h-[36px] my-auto"
-                    />
-                    <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Sell" &&
-                        _minimaBalance &&
-                        new Decimal(_minimaBalance.confirmed).toFixed(0)}
-                      {_currentNavigation === "Buy" &&
-                        relevantToken &&
-                        new Decimal(
-                          formatUnits(
-                            relevantToken!.balance,
-                            relevantToken!.decimals
-                          )
-                        ).toFixed(0)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="px-4">
-                <div className="grid grid-cols-[1fr_36px]">
-                  <div>
-                    <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
-                      I will receive
-                    </label>
-
-                    <OrderPrice
-                      orderType={_currentNavigation}
-                      token="wminima"
-                      userPublicKey={_userDetails.publickey}
-                    />
-                  </div>
-                  <div>
-                    <img
-                      alt="token"
-                      src={
-                        _currentNavigation === "Sell"
-                          ? "./assets/wtoken.svg"
-                          : "./assets/token.svg"
-                      }
-                      className="rounded-full w-[36px] h-[36px] my-auto"
-                    />
-                    <p className="text-xs text-center font-bold font-mono truncate">
-                      {_currentNavigation === "Buy" &&
-                        _minimaBalance &&
-                        new Decimal(_minimaBalance.confirmed).toFixed(0)}
-                      {_currentNavigation === "Sell" &&
-                        relevantToken &&
-                        new Decimal(
-                          formatUnits(
-                            relevantToken!.balance,
-                            relevantToken!.decimals
-                          )
-                        ).toFixed(0)}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="px-4 pb-3">
-            <button
-              disabled={!isValid}
-              type="submit"
-              className="mt-4 w-full bg-black py-3 text-white dark:bg-orange-600 font-bold disabled:text-red-300 dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
-            >
-              {isValid && "Swap"}
-              {!isValid && errors.offerPrice
-                ? errors.offerPrice
-                : errors && errors.matchingOrder
-                ? errors.matchingOrder
-                : null}
-            </button>
-          </div>
-        </form>
+          </form>
+        </>
       )}
     </Formik>
   );

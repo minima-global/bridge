@@ -13,9 +13,13 @@ import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
 import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
-import { MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE } from "../../../../../../../../dapp/js/htlcvars.js";
+import {
+  MINIMUM_MINIMA_TRADE,
+  MAXIMUM_MINIMA_TRADE,
+} from "../../../../../../../../dapp/js/htlcvars.js";
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
+import Charts from "../../Charts/index.js";
 
 const TetherPool = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
@@ -59,14 +63,14 @@ const TetherPool = () => {
             ),
             amount: offerPrice,
           };
-          console.log("Final message payload", message);
+          // console.log("Final message payload", message);
 
           const res = await handleActionViaBackend(message);
 
           notify("Executed a swap!");
           resetForm();
 
-          console.log("transaction response", res);
+          // console.log("transaction response", res);
         } catch (error) {
           console.error(error);
           if (error instanceof Error) {
@@ -90,21 +94,21 @@ const TetherPool = () => {
               }
 
               if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
-                throw new Error("Exceeds max trade of "+MAXIMUM_MINIMA_TRADE);
+                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE);
               }
 
               if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is "+MINIMUM_MINIMA_TRADE);
+                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE);
               }
 
               if (_currentNavigation === "Sell") {
                 if (new Decimal(val).gt(_minimaBalance.confirmed)) {
                   throw new Error("Insufficient funds");
                 }
-              } else {                
+              } else {
                 const balance = formatUnits(
                   relevantToken!.balance,
-                  _network === 'mainnet' ? 6 : 18
+                  _network === "mainnet" ? 6 : 18
                 ).toString();
                 if (new Decimal(val).gt(balance)) {
                   throw new Error("Insufficient funds");
@@ -175,6 +179,14 @@ const TetherPool = () => {
         >
           <Toolbar />
 
+          <div className="mb-4 px-4">
+            <Charts
+              fav={values.favorites}
+              book="usdt"
+              type={_currentNavigation.toLowerCase()}
+            />
+          </div>
+
           <div className="py-2 px-4">
             <Navigation
               navigation={["Buy", "Sell"]}
@@ -244,7 +256,7 @@ const TetherPool = () => {
                         new Decimal(
                           formatUnits(
                             relevantToken!.balance,
-                            _network === 'mainnet' ? 6 : 18
+                            _network === "mainnet" ? 6 : 18
                           )
                         ).toFixed(0)}
                     </p>
