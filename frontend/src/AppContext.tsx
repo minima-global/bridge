@@ -493,9 +493,13 @@ const AppProvider = ({ children }: IProps) => {
   };
 
   const handleActionViaBackend = async (action: any) => {    
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
       sendBackendMSG(action, (resp) => {
-        resolve(resp);
+        if (resp.status) {
+          resolve(resp);
+        }
+
+        reject(resp && resp.message ? resp.message : "Something went wrong, pls try again...");
       });
     });
   };

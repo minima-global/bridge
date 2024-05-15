@@ -37,20 +37,18 @@ const OTCForm = () => {
             otc: true,
           }
 
-          const res = await handleActionViaBackend(message);
+          await handleActionViaBackend(message);
 
           notify("OTC Swap requested!");
           resetForm();
 
-          // console.log(res);
-
-        } catch (error) {
+        } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
             return notify("Error : "+ error.message);
           }
 
-          notify("Error, something went wrong!");
+          notify(error.message ? error.message : "Error, something went wrong!");
         }
       }}
       validationSchema={yup.object().shape({

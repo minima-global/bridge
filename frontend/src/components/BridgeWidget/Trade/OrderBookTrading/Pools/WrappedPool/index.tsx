@@ -63,21 +63,20 @@ const WrappedPool = () => {
             ),
             amount: offerPrice,
           };
-          // console.log("Final message payload", message);
 
-          const res: any = await handleActionViaBackend(message);
+          await handleActionViaBackend(message);
 
           notify("Executed a swap!");
           resetForm();
 
           // console.log("transaction response", res);
-        } catch (error) {
+        } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
-            return notify("Error : " + error.message);
+            return notify("Error : "+ error.message);
           }
 
-          notify("Error, something went wrong!");
+          notify(error.message ? error.message : "Error, something went wrong!");
         }
       }}
       validationSchema={yup.object().shape({
