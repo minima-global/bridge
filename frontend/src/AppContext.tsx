@@ -224,6 +224,7 @@ const AppProvider = ({ children }: IProps) => {
             // USER PREFERENCES
             if (cachedApiKeys) {
               console.log("Keys are cached", JSON.parse(cachedApiKeys.DATA));
+              
               setUserKeys(JSON.parse(cachedApiKeys.DATA));
 
               // DEFAULT NETWORK
@@ -540,6 +541,7 @@ const AppProvider = ({ children }: IProps) => {
   return (
     <appContext.Provider
       value={{
+        loaded,
         isWorking,
 
         _triggerBalanceUpdate,

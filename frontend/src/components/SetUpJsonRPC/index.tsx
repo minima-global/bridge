@@ -10,7 +10,7 @@ const SetUpJsonRPC = () => {
     promptJsonRpcSetup,
     _promptJsonRpcSetup,
     updateApiKeys,
-    userKeys,
+    _userKeys,
   } = useContext(appContext);
   const [checkboxes, setCheckboxes] = useState({
     ethereum: false,
@@ -51,14 +51,12 @@ const SetUpJsonRPC = () => {
     config: config.default,
   });
 
-  useEffect(() => {
-    (async () => {
-      if (loaded && loaded.current && userKeys !== null) {
-        setApiKey(userKeys.apiKey);
-        setApiKeySecret(userKeys.apiKeySecret);
-      }
-    })();
-  }, [loaded, userKeys]);
+  useEffect(() => {    
+    if (loaded && loaded.current && _userKeys) {
+      setApiKey(_userKeys.apiKey);
+      setApiKeySecret(_userKeys.apiKeySecret);
+    }
+  }, [loaded, _userKeys, _promptJsonRpcSetup]);
 
   const handleCheckboxChange = (event) => {
     const { id, checked } = event.target;
