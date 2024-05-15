@@ -82,8 +82,9 @@ const renderCell = (cellData) => {
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
-              getTokenType(TOKEN) === "wMinima" ? "./assets/wtoken.svg" :
-              getTokenType(TOKEN) === "Minima"
+              getTokenType(TOKEN) === "wMinima"
+                ? "./assets/wtoken.svg"
+                : getTokenType(TOKEN) === "Minima"
                 ? "./assets/token.svg"
                 : "./assets/tether.svg"
             }
@@ -214,8 +215,9 @@ const renderCellMobile = (cellData) => {
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
-              getTokenType(TOKEN) === "wMinima" ? "./assets/wtoken.svg" :
-              getTokenType(TOKEN) === "Minima"
+              getTokenType(TOKEN) === "wMinima"
+                ? "./assets/wtoken.svg"
+                : getTokenType(TOKEN) === "Minima"
                 ? "./assets/token.svg"
                 : "./assets/tether.svg"
             }
@@ -227,17 +229,19 @@ const renderCellMobile = (cellData) => {
       </div>
       <div className="p-4 pt-2">
         {isEthereumEvent && (
-          <a
-            className="text-xs text-violet-600"
-            target="_blank"
-            href={`${
-              network === "mainnet"
-                ? "https://etherscan.io/tx/" + TXNHASH
-                : "https://sepolia.etherscan.io/tx/" + TXNHASH
-            }`}
-          >
-            {TXNHASH}
-          </a>
+          <input
+            onClick={() => {
+              window.open(
+                network === "mainnet"
+                  ? "https://etherscan.io/tx/" + TXNHASH
+                  : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                window.innerWidth < 568 ? "_self" : "_blank"
+              );
+            }}
+            readOnly
+            className="cursor-pointer hover:text-opacity-80 text-violet-600 text-xs bg-transparent focus:outline-none w-full !truncate font-mono"
+            value={TXNHASH}
+          />
         )}
 
         {isMinimaEvent && TXNHASH.includes("0x") && (
@@ -257,7 +261,7 @@ const renderCellMobile = (cellData) => {
               );
             }}
             readOnly
-            className="cursor-pointer hover:text-opacity-80 text-orange-600 text-xs bg-transparent focus:outline-none w-full truncate font-mono"
+            className="cursor-pointer hover:text-opacity-80 text-orange-600 text-xs bg-transparent focus:outline-none w-full !truncate font-mono"
             value={TXNHASH}
           />
         )}
@@ -284,6 +288,8 @@ const MainActivity = () => {
   const { _promptLogs, promptLogs } = useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
 
+  const [offset, setOffset] = useState(0);
+
   const [data, setData] = useState<any[]>([]);
 
   const springProps = useSpring({
@@ -291,9 +297,17 @@ const MainActivity = () => {
     config: config.gentle,
   });
 
+  const handleNext = () => {
+    setOffset(prevState => prevState+20);
+  }
+  
+  const handlePrev = () => {
+    setOffset(prevState => prevState-20);
+  }
+
   useEffect(() => {
     if (_promptLogs) {
-      getAllEvents(MAX, 0, (events) => {
+      getAllEvents(MAX, offset, (events) => {
         const _evts = events.map((event) => ({
           ...event,
           getTokenType,
@@ -303,11 +317,14 @@ const MainActivity = () => {
         setData(_evts);
       });
     }
-  }, [_promptLogs]);
+  }, [_promptLogs, offset]);
 
   return (
     <>
-      <span onClick={promptLogs} className="mr-2 text-xs text-yellow-300 cursor-pointer">
+      <span
+        onClick={promptLogs}
+        className="mr-2 text-xs text-yellow-300 cursor-pointer"
+      >
         <ActivityIcon fill="currentColor" />
       </span>
       {_promptLogs &&
@@ -337,43 +354,50 @@ const MainActivity = () => {
                   <path d="M6 6l12 12" />
                 </svg>
               </div>
-              {!data.length && <p className="text-xs font-bold text-center">No activity yet</p>}
-              {!!data.length &&
-              <MostResponsiveTableEver
-                headerClasses=""
-                headerClassesMobile="divide-y dark:divide-teal-300"
-                headerCellClassesMobile={[
-                  "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
-                  "tracking-wider text-sm p-4 font-bold",
-                  "tracking-wider text-sm p-4 font-bold",
-                  "tracking-wider text-sm p-4 font-bold",
-                  "tracking-wider text-sm p-4 font-bold",
-                  "tracking-wider text-sm p-4 font-bold",
-                  "tracking-wider text-sm p-4 font-bold",
-                  "tracking-wider text-sm p-4 font-bold",
-                ]}
-                headerCellClasses={[
-                  "tracking-wider font-semibold text-sm p-3 w-10",
-                  "tracking-wider font-semibold text-sm p-3 w-40",
-                  "tracking-wider font-semibold text-sm p-3 w-[25px]",
-                  "tracking-wider font-semibold text-sm p-3 w-40",
-                  "tracking-wider font-semibold text-sm p-3 w-20",
-                  "tracking-wider font-semibold text-sm p-3 w-40",
-                  "tracking-wider font-semibold text-sm p-3 w-40 text-right",
-                ]}
-                headers={[
-                  "ID",
-                  "Event",
-                  "HashLock",
-                  "Token",
-                  "TXNHash",
-                  "Timestamp",
-                ]}
-                data={data}
-                renderCell={renderCell}
-                renderCellMobile={renderCellMobile}
-              />            
-              }
+              {!data.length && (
+                <p className="text-xs font-bold text-center">No activity yet</p>
+              )}
+              {!!data.length && (
+                <MostResponsiveTableEver
+                  headerClasses=""
+                  headerClassesMobile="divide-y dark:divide-teal-300"
+                  headerCellClassesMobile={[
+                    "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
+                    "tracking-wider text-sm p-4 font-bold",
+                    "tracking-wider text-sm p-4 font-bold",
+                    "tracking-wider text-sm p-4 font-bold",
+                    "tracking-wider text-sm p-4 font-bold",
+                    "tracking-wider text-sm p-4 font-bold",
+                    "tracking-wider text-sm p-4 font-bold",
+                    "tracking-wider text-sm p-4 font-bold",
+                  ]}
+                  headerCellClasses={[
+                    "tracking-wider font-semibold text-sm p-3 w-10",
+                    "tracking-wider font-semibold text-sm p-3 w-40",
+                    "tracking-wider font-semibold text-sm p-3 w-[25px]",
+                    "tracking-wider font-semibold text-sm p-3 w-40",
+                    "tracking-wider font-semibold text-sm p-3 w-20",
+                    "tracking-wider font-semibold text-sm p-3 w-40",
+                    "tracking-wider font-semibold text-sm p-3 w-40 text-right",
+                  ]}
+                  headers={[
+                    "ID",
+                    "Event",
+                    "HashLock",
+                    "Token",
+                    "TXNHash",
+                    "Timestamp",
+                  ]}
+                  data={data}
+                  renderCell={renderCell}
+                  renderCellMobile={renderCellMobile}
+                />
+              )}
+
+              <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
+                <button onClick={handlePrev} disabled={offset === 0} type="button" className="bg-gray-100 dark:bg-gray-200 dark:text-black bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300">Prev</button>
+                <button onClick={handleNext} disabled={data.length < 20} type="button" className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300">Next</button>
+              </div>
             </div>
             <div className="bg-slate-100 dark:bg-black" />
           </animated.div>,

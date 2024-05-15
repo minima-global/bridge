@@ -53,7 +53,7 @@ const MostResponsiveTableEver = ({
                 <div key={headerIndex} className={headerCellClassesMobile ? headerCellClassesMobile[headerIndex] : ""}>{header}</div>
               ))}
             </div>
-            <div className="bg-gray-200 dark:bg-black !bg-opacity-10">{renderCellMobile(cell)}</div>
+            <div className="bg-gray-200 dark:bg-black !bg-opacity-10 overflow-hidden">{renderCellMobile(cell)}</div>
           </div>
         )): null}
       </div>
