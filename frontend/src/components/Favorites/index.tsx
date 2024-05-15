@@ -22,7 +22,7 @@ interface IProps {
   form: boolean;
 }
 const Favorites = ({form = false}: IProps) => {
-  const { _promptFavorites, promptFavorites, notify, getAndSetFavorites, _favorites: favorites } = useContext(appContext);  
+  const { _promptFavorites, promptFavorites, notify, getAndSetFavorites, _favorites: favorites, loaded } = useContext(appContext);  
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
 
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
@@ -34,7 +34,7 @@ const Favorites = ({form = false}: IProps) => {
   }
 
   useEffect(() => {
-    if (_promptFavorites || !form) {
+    if ((loaded && loaded.current) && (_promptFavorites || !form)) {
       getAndSetFavorites();
     }
   }, [_promptFavorites]);
