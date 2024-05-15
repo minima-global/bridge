@@ -10,7 +10,7 @@ const Header = () => {
     <>
       <header className="px-2 grid grid-cols-[1fr_minmax(0_,860px)_1fr]">
         <div />
-        <div className="grid grid-cols-2">
+        <div className="grid grid-cols-3">
           <div>
             <div className="my-auto">
               <img
@@ -19,6 +19,9 @@ const Header = () => {
                 className="w-[100px] h-[36px]"
               />
             </div>
+          </div>
+          <div className="mb-auto">
+            <p className="text-center tracking-tighter text-sky-400 font-bold shadow-violet-300 dark:text-yellow-100  shadow-sm dark:shadow-yellow-300 max-w-max mx-auto px-4">TESTING PURPOSE ONLY</p>
           </div>
           <div className="flex justify-end">
             <div
