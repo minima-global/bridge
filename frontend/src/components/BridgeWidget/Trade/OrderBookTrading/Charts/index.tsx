@@ -43,7 +43,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
   useEffect(() => {
     if (!fav) {
       getSimpleOrderBookTotals((totals) => {
-        const bk = totals[book][`${type}book`];
+        
+        const bk = totals.length ? totals[book][`${type}book`] : [];
 
         if (bk.length === 0) {
           return setChart({
@@ -68,7 +69,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
     } else {
       createFavsOrderBookSimpleTotals(_userDetails, (totals) => {
         
-        const bk = totals[book][`${type}book`];
+        const bk = totals.length ? totals[book][`${type}book`] : [];
 
         if (bk.length === 0) {
           return setChart({

@@ -223,7 +223,7 @@ const AppProvider = ({ children }: IProps) => {
 
             // USER PREFERENCES
             if (cachedApiKeys) {
-              console.log("Keys are cached", JSON.parse(cachedApiKeys.DATA));
+              // console.log("Keys are cached", JSON.parse(cachedApiKeys.DATA));
               
               setUserKeys(JSON.parse(cachedApiKeys.DATA));
 
