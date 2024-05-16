@@ -81,7 +81,7 @@ const SelectAsset = () => {
           (_defaults["wMinima"][_network] === formik.values.asset.address ? (
             <img
               alt="token-icon"
-              src="./assets/token.svg"
+              src="./assets/wtoken.svg"
               className="w-[36px] h-[36px] rounded-full"
             />
           ) : _defaults["Tether"][_network] === formik.values.asset.address ? (
@@ -142,7 +142,7 @@ const SelectAsset = () => {
                 {_defaults["wMinima"][_network] === token.address ? (
                   <img
                     alt="token-icon"
-                    src="./assets/token.svg"
+                    src="./assets/wtoken.svg"
                     className="w-[36px] h-[36px] rounded-full"
                   />
                 ) : _defaults["Tether"][_network] === token.address ? (

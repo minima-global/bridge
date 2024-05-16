@@ -47,7 +47,7 @@ const EthereumTokenSelect = ({ setToken, token }: Props) => {
         <img
           alt="token-icon"
           src={
-            token === "WMINIMA" ? "./assets/token.svg" : "./assets/tether.svg"
+            token === "WMINIMA" ? "./assets/wtoken.svg" : "./assets/tether.svg"
           }
           className="w-[30px] h-[30px] rounded-full"
         />
@@ -63,21 +63,31 @@ const EthereumTokenSelect = ({ setToken, token }: Props) => {
           aria-labelledby="options-menu"
         >
           <ul className="grid grid-rows-2 divide-y divide-teal-100">
-            <li onClick={() => setToken("USDT")} className="hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1">
-              <img
-                alt="token-icon"
-                src={"./assets/tether.svg"}
-                className="w-[22px] h-[22px] rounded-full"
-              />
-              <p className="text-xs font-bold">Tether</p>
+            <li
+              onClick={() => setToken("USDT")}
+              className="hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1"
+            >
+              <div className="my-3 flex">
+                <img
+                  alt="token-icon"
+                  src={"./assets/tether.svg"}
+                  className="w-[22px] my-auto rounded-full"
+                />
+                <p className="text-xs font-bold my-auto ml-2">Tether</p>
+              </div>
             </li>
-            <li onClick={() => setToken("WMINIMA")} className="px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer py-3 grid grid-cols-[auto_1fr] items-center gap-1">
-              <img
-                alt="token-icon"
-                src={"./assets/token.svg"}
-                className="w-[22px] h-[24px] rounded-full"
-              />
-              <p className="text-xs font-bold">wMinima</p>
+            <li
+              onClick={() => setToken("WMINIMA")}
+              className="px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1"
+            >
+              <div className="my-3 flex">
+                <img
+                  alt="token-icon"
+                  src={"./assets/wtoken.svg"}
+                  className="w-[22px] my-auto rounded-full"
+                />
+                <p className="text-xs font-bold my-auto ml-2">wMinima</p>
+              </div>
             </li>
           </ul>
         </animated.div>

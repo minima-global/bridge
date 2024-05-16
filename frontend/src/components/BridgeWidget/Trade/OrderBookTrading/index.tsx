@@ -21,7 +21,7 @@ const OrderBookTrading = () => {
           <div className="flex gap-1 items-center">
             <SwapIcon />
             <h1 className="text-lg dark:text-white font-bold">
-              Order Book DEX
+              Order Book
             </h1>
           </div>
         </div>
