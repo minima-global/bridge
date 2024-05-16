@@ -105,7 +105,7 @@ const NativeAddress = () => {
             errors,
             status,
           }) => (
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} className="px-4">
               {_mainBalance !== null && (
                 <NativeMinima
                   display={false}

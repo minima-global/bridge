@@ -205,7 +205,7 @@ const WrappedPool = () => {
                 <div className="relative grid grid-cols-[1fr_auto]">
                   <div className="pl-4">
                     <label className="text-xs font-bold mb-1 text-opacity-50">
-                      I want to 1 sell Minima for
+                      I want to sell 1 Minima for
                     </label>
                     <input
                       id="sell"
