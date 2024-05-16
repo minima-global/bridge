@@ -22,6 +22,7 @@ const Liquidity = () => {
         <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />
       </div>
       <div>
+        <p className="text-sm mb-3">You can choose to provide liquidity to the orderbook for other users to trade with. All  <b>native Minima</b> and <b>WMINIMA</b> (or <b>USDT</b>) in your Swap wallet will be made available for other users. You will make a margin based on your buy/sell prices. Trades will only execute at your chosen buy/sell prices.</p>
         <YourPools />
       </div>
     </div>

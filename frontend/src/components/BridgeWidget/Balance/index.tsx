@@ -34,9 +34,9 @@ const Balance = () => {
         <div className="flex justify-between items-center">
           <div className="flex gap-1 items-center">
             <WalletIcon />
-            <h1 className="text-lg dark:text-white font-bold">Bridge Wallet</h1>
+            <h1 className="text-lg dark:text-white font-bold">Swap Wallet</h1>
           </div>
-          <InfoTooltip message="The Bridge wallet is separated from your main Native Minima and Ethereum Wallets." />
+          <InfoTooltip message="The Swap wallet is separated from your main Native Minima and Ethereum Wallets." />
         </div>
         <hr className="border border-gray-500 dark:border-teal-300 mt-2 w-full mx-auto" />
       </div>

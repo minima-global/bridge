@@ -62,7 +62,7 @@ const SelectFavorites = () => {
           </div>
           <div className="px-4 py-3 text-sm flex flex-col justify-between h-full">
             <p>
-              This feature will set up your trades with your favorite contacts{" "}
+              This feature will set up your trades with your favorite counter-parties{" "}
               <b>only</b>. Do you want to switch this feature{" "}
               {!favorites ? "on?" : "off?"}
             </p>

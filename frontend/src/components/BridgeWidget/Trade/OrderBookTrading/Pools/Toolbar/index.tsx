@@ -38,7 +38,10 @@ const Toolbar = () => {
   }, []);
 
   return (
-    <div onClick={() => promptDropdown()} className="grid grid-cols-[1fr_auto_1fr] items-center bg-gray-100 bg-opacity-30 dark:bg-black dark:bg-opacity-20 py-2 hover:bg-gray-300 hover:dark:bg-black">
+    <div
+      onClick={() => promptDropdown()}
+      className="grid grid-cols-[1fr_auto_1fr] items-center bg-gray-100 bg-opacity-30 dark:bg-black dark:bg-opacity-20 py-2 hover:bg-gray-300 hover:dark:bg-black"
+    >
       <div />
       <div ref={dropdownRef} className="relative grid grid-cols-[1fr_auto]">
         {active && (
@@ -52,33 +55,41 @@ const Toolbar = () => {
             <ul className="grid grid-rows-2 divide-y divide-teal-100">
               <li
                 onClick={() => setCurrentOrderPoolTrade("usdt")}
-                className={`hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${_currentOrderPoolTrade === 'usdt' && "bg-gray-100 dark:bg-black"} `}
+                className={`hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${
+                  _currentOrderPoolTrade === "usdt" &&
+                  "bg-gray-100 dark:bg-black"
+                } `}
               >
-                <img
-                  alt="token-icon"
-                  src={"./assets/tether.svg"}
-                  className="w-[22px] h-[22px] rounded-full"
-                />
-                <p className="text-xs font-bold">Tether</p>
+                <div className="my-3 flex">
+                  <img
+                    alt="token-icon"
+                    src={"./assets/tether.svg"}
+                    className="w-[22px] my-auto rounded-full"
+                  />
+                  <p className="text-xs font-bold my-auto ml-2">Tether</p>
+                </div>
               </li>
               <li
                 onClick={() => setCurrentOrderPoolTrade("wminima")}
-                className={`px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer py-3 grid grid-cols-[auto_1fr] items-center gap-1 ${_currentOrderPoolTrade === 'wminima' && "bg-gray-100 dark:bg-black"} `}
+                className={`px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${
+                  _currentOrderPoolTrade === "wminima" &&
+                  "bg-gray-100 dark:bg-black"
+                } `}
               >
-                <img
-                  alt="token-icon"
-                  src={"./assets/token.svg"}
-                  className="w-[22px] h-[24px] rounded-full"
-                />
-                <p className="text-xs font-bold">wMinima</p>
+                <div className="my-3 flex">
+                  <img
+                    alt="token-icon"
+                    src={"./assets/wtoken.svg"}
+                    className="w-[22px] my-auto rounded-full"
+                  />
+                  <p className="text-xs font-bold my-auto ml-2">wMinima</p>
+                </div>
               </li>
             </ul>
           </animated.div>
         )}
 
-        <div          
-          className="grid grid-cols-[1fr_auto_1fr] items-center gap-2"
-        >
+        <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
           <h3 className="text-sm  font-bold text-center">Native</h3>
           <svg
             xmlns="http://www.w3.org/2000/svg"

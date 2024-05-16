@@ -24,7 +24,13 @@ const WrappedPool = () => {
 
       updateBook({
         usdt: { ..._currentOrderBook.usdt },
-        wminima: { minimum: MINIMUM_MINIMA_TRADE, maximum: MAXIMUM_MINIMA_TRADE, buy:0, sell:0, enable: false },
+        wminima: {
+          minimum: MINIMUM_MINIMA_TRADE,
+          maximum: MAXIMUM_MINIMA_TRADE,
+          buy: 0,
+          sell: 0,
+          enable: false,
+        },
       });
       notify("Book disabled!");
     } catch (error) {
@@ -45,7 +51,6 @@ const WrappedPool = () => {
         minimum: MINIMUM_MINIMA_TRADE || 0.0001,
       }}
       onSubmit={(values) => {
-        
         try {
           if (!_currentOrderBook) {
             throw new Error("Order book not available");
@@ -69,15 +74,23 @@ const WrappedPool = () => {
           .test("valid amount", function (val) {
             const { path, createError, parent } = this;
 
+
             try {
               if (!_currentOrderBook) {
                 throw new Error("Order book not available");
+              }   
+              
+              if (val === null) {
+                throw new Error();
               }
 
-              if (new Decimal(val).equals(_currentOrderBook?.wminima.sell) && new Decimal(parent.buy).equals(_currentOrderBook?.wminima.buy)) {
+              if (
+                new Decimal(val).equals(_currentOrderBook?.wminima.sell) && parent.buy &&
+                new Decimal(parent.buy).equals(_currentOrderBook?.wminima.buy)
+              ) {
                 throw new Error("Enter new values");
               }
-              
+
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your sell offer");
               }
@@ -88,6 +101,7 @@ const WrappedPool = () => {
 
               return true;
             } catch (error) {
+              console.error(error);
               if (error instanceof Error) {
                 return createError({
                   path,
@@ -107,8 +121,12 @@ const WrappedPool = () => {
               if (!_currentOrderBook) {
                 throw new Error("Order book not available");
               }
-
-              if (new Decimal(val).equals(_currentOrderBook?.wminima.buy) && new Decimal(parent.sell).equals(_currentOrderBook?.wminima.sell)) {
+              
+                            
+              if (
+                new Decimal(val).equals(_currentOrderBook?.wminima.buy) && parent.sell &&
+                new Decimal(parent.sell).equals(_currentOrderBook?.wminima.sell)
+              ) {
                 throw new Error("Enter new values");
               }
 
@@ -122,6 +140,7 @@ const WrappedPool = () => {
 
               return true;
             } catch (error) {
+              console.error(error);
               if (error instanceof Error) {
                 return createError({
                   path,
@@ -157,7 +176,7 @@ const WrappedPool = () => {
                   <div className="grid grid-cols-[1fr_auto]">
                     <div className="pl-4">
                       <label className="text-xs font-bold mb-1 text-opacity-50">
-                        I want to buy Minima for
+                        I want to buy 1 Minima for
                       </label>
                       <input
                         id="buy"
@@ -186,7 +205,7 @@ const WrappedPool = () => {
                 <div className="relative grid grid-cols-[1fr_auto]">
                   <div className="pl-4">
                     <label className="text-xs font-bold mb-1 text-opacity-50">
-                      I want to sell Minima for
+                      I want to 1 sell Minima for
                     </label>
                     <input
                       id="sell"
@@ -215,6 +234,21 @@ const WrappedPool = () => {
             </div>
           </div>
 
+          <div className="px-4">
+            {!!values.sell &&
+              !!values.buy &&
+              values.sell > 0 &&
+              values.buy > 0 && (
+                <p className="text-xs mt-4">
+                  <b>Example:</b> You would receive{" "}
+                  {new Decimal(100).dividedBy(values.buy).toFixed(0)}{" "}
+                  <b>Minima</b> for 100 <b>WMINIMA</b> and you would receive{" "}
+                  {new Decimal(100).times(values.sell).toFixed(0)}{" "}
+                  <b>WMINIMA</b> for 100 <b>Minima</b>
+                </p>
+              )}
+          </div>
+
           <div className="mt-4 px-4 mb-3">
             {!values.enable && (
               <button
@@ -226,9 +260,9 @@ const WrappedPool = () => {
                   "hover:bg-red-100 bg-red-100 !text-red-300"
                 }`}
               >
-                {errors.sell && errors.buy && errors.buy}                                    
-                  {errors.sell && !errors.buy && errors.sell}
-                  {!errors.sell && errors.buy && errors.buy}
+                {errors.sell && errors.buy && errors.buy}
+                {errors.sell && !errors.buy && errors.sell}
+                {!errors.sell && errors.buy && errors.buy}
                 {!errors.sell && !errors.buy && "Enable"}
               </button>
             )}
@@ -238,14 +272,14 @@ const WrappedPool = () => {
                 <button
                   type="submit"
                   disabled={!isValid}
-                  className={`hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20 ${                  
+                  className={`hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20 ${
                     (errors.sell || errors.buy) &&
                     "hover:bg-red-100 bg-red-100 !text-red-300"
                   }`}
                 >
-                  {errors.sell && errors.buy && errors.buy}                                    
+                  {errors.sell && errors.buy && errors.buy}
                   {errors.sell && !errors.buy && errors.sell}
-                  {!errors.sell && errors.buy && errors.buy}                
+                  {!errors.sell && errors.buy && errors.buy}
                   {!errors.sell && !errors.buy && "Update"}
                 </button>
                 <button
