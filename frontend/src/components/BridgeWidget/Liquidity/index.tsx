@@ -16,7 +16,7 @@ const Liquidity = () => {
         <div className="flex justify-between items-center">
           <div className="flex gap-1 items-center">
             <PoolIcon />
-            <h1 className="text-lg dark:text-white font-bold">Pools</h1>
+            <h1 className="text-lg dark:text-white font-bold">Liquidity</h1>
           </div>
         </div>
         <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />

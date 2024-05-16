@@ -393,7 +393,7 @@ const MainActivity = () => {
                   renderCellMobile={renderCellMobile}
                 />
               )}
-              {data.length && (
+              {!!data.length && (
                 <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
                   <button
                     onClick={handlePrev}

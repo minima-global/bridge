@@ -43,7 +43,7 @@ const WalletAddress = ({ fullAddress = false, _address }) => {
           onKeyDown={handleKeyDown}
           onDoubleClick={handleDoubleClick}
           className="p-2 text-left font-bold rounded-full focus:bg-teal-200 pr-10 truncate focus:outline-teal-600 dark:focus:text-black px-3 text-sm !w-max !max-w-max bg-teal-300"
-          value={_address ? _address : "N/A"}
+          value={_address&&typeof _address === 'string'? _address : "N/A"}
         />
       )}
       {!fullAddress && (
@@ -54,7 +54,7 @@ const WalletAddress = ({ fullAddress = false, _address }) => {
           onDoubleClick={handleDoubleClick}
           className="p-2 text-left font-bold rounded-full focus:bg-teal-200 focus:outline-teal-600 dark:focus:text-black px-3 text-sm !w-max !max-w-max bg-teal-300"
           value={
-            _address
+            _address && typeof _address === 'string'
               ? _address.substring(0, 8) +
                 "..." +
                 _address.substring(_address.length - 8, _address.length)

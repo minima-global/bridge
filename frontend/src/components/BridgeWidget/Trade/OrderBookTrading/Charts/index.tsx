@@ -43,8 +43,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
   useEffect(() => {
     if (!fav) {
       getSimpleOrderBookTotals((totals) => {
-        
-        const bk = totals.length ? totals[book][`${type}book`] : [];
+        const bk = totals[book][`${type}book`];
 
         if (bk.length === 0) {
           return setChart({
@@ -68,8 +67,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
       });
     } else {
       createFavsOrderBookSimpleTotals(_userDetails, (totals) => {
-        
-        const bk = totals.length ? totals[book][`${type}book`] : [];
+        const bk = totals[book][`${type}book`];
 
         if (bk.length === 0) {
           return setChart({
@@ -104,7 +102,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
       )}
       {!!hasOrderBook && (
         <Bar
-          className="!w-full !h-full relative dark:bg-[#1B1B1B] rounded-lg p-1"
+          className="!w-full !h-full max-h-[250px] relative dark:bg-[#1B1B1B] rounded-lg p-1"
           data={{
             labels: chart.quantity,
             datasets: [

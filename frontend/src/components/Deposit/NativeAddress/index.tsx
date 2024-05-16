@@ -10,18 +10,20 @@ const NativeAddress = () => {
   if (_userDetails === null) {
     return <ProgressIcon />;
   }
-
   return (
     <div className="my-4">
       <div className="grid grid-cols-[1fr_auto_1fr]">
         <div />
         <div className="flex flex-col gap-3 items-center">
-          
-            <QRCode
-              className="rounded-lg"
-              size={200}
-              value={_userDetails.minimaaddress}
-            />
+          {_userDetails &&
+            _userDetails.minimaaddress &&
+            typeof _userDetails.minimaaddress.mxaddress === "string" && (
+              <QRCode
+                className="rounded-lg"
+                size={200}
+                value={_userDetails.minimaaddress.mxaddress}
+              />
+            )}
 
           <WalletAddress
             _address={_userDetails.minimaaddress.mxaddress}
