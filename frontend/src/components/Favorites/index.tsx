@@ -208,7 +208,7 @@ const Favorites = ({form = false}: IProps) => {
         {favorites.length === 0 && (
           <p className="text-sm text-center py-3">No favorites yet!</p>
         )}
-        <div className={`${mode !== 'add' ? 'h-[calc(100%_-_60px)]' : 'h-[calc(100%_-_80px)]'} overflow-y-scroll`}>
+        <div className={`${mode !== 'add' ? 'h-[calc(100%_-_60px)]' : 'h-[calc(100%_-_80px)]'} overflow-y-auto`}>
           <ul>
             {favorites
               ? favorites.map((f, index) => (
