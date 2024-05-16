@@ -148,6 +148,10 @@ const AppProvider = ({ children }: IProps) => {
       (window as any).MDS.init((msg: any) => {
         //Do initialisation
         if (msg.event == "inited") {
+          (window as any).MDS.cmd("block", (resp) => {
+            setCurrentBlock(resp.response.block);
+          });
+
           // Check if read or write mode
           (window as any).MDS.cmd(`checkmode`, function (response: any) {
             if (response.status) {

@@ -254,25 +254,26 @@ const Activity = () => {
   useEffect(() => {
 
     checkForCurrentSwaps(true, async (swaps) => {
-      const ownerDeals = swaps.owner.map((c) => ({
+
+      const ownerDeals = swaps.owner.length ? swaps.owner.map((c) => ({
         uid: getCoinHTLCData(c, "owner"),
         coinid: c.coinid,
         native: getCoinHTLCData(c, "amount"),
-        timelock: getCoinHTLCData(c, "timelock") ? new Decimal(getCoinHTLCData(c, "timelock")).minus(_currentBlock).toString() : null,
+        timelock: getCoinHTLCData(c, "timelock") && _currentBlock ? new Decimal(getCoinHTLCData(c, "timelock")).minus(_currentBlock).toString() : null,
         token: {
           tokenName: getCoinHTLCData(c, "requesttokentype"),
           amount: getCoinHTLCData(c, "requestamount"),
         },
         action: "LOCKED",
         promptAcceptOTC: promptAcceptOTC
-      }));
+      })) : [];
 
       const receiverDeals = await Promise.all(
         swaps.receiver.map(async (c) => ({
           uid: getCoinHTLCData(c, "owner"),
           coinid: c.coinid,
           native: getCoinHTLCData(c, "amount"),
-          timelock: getCoinHTLCData(c, "timelock") ? new Decimal(getCoinHTLCData(c, "timelock")).minus(_currentBlock).toString() : null,
+          timelock: getCoinHTLCData(c, "timelock") && _currentBlock ? new Decimal(getCoinHTLCData(c, "timelock")).minus(_currentBlock).toString() : null,
           token: {
             tokenName: getCoinHTLCData(c, "requesttokentype"),
             amount: getCoinHTLCData(c, "requestamount"),
