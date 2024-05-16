@@ -22,9 +22,9 @@ ChartJS.register(
 
 import { getSimpleOrderBookTotals } from "../../../../../../../dapp/js/orderbook.js";
 import { createFavsOrderBookSimpleTotals } from "../../../../../../../dapp/js/orderbook.js";
+import { PRICE_BOOK_STEPS } from "../../../../../../../dapp/js/htlcvars.js";
 
 import { appContext } from "../../../../../AppContext.js";
-import { PRICE_BOOK_STEPS } from "../../../../../constants/index.js";
 
 interface IProps {
   fav: boolean;

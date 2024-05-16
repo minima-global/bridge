@@ -1,6 +1,6 @@
 import { toFixedNumber } from "./jslib.js";
 import { getFavsOrderBook } from "./orderbookutil.js";
-import {MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE} from "./htlcvars.js";
+import {MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, PRICE_BOOK_STEPS} from "./htlcvars.js";
 
 //The Bridge order book address
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
@@ -179,7 +179,6 @@ function createFavsOrderBookSimpleTotals(userdets,callback){
 	});
 }
 
-var PRICE_BOOK_STEPS = 100;
 function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 	
 	var totals 					= {};

@@ -9,6 +9,8 @@ var MINIMA_BLOCK_TIME = 50;
 var ORDERBOOK_UPDATE_TIME_MINUTES = 30;
 var ORDERBOOK_DEPTH = Math.floor((60 * (ORDERBOOK_UPDATE_TIME_MINUTES*2)) / MINIMA_BLOCK_TIME); 
 
+var PRICE_BOOK_STEPS = 20;
+
 //The ETH block time
 var ETH_BLOCK_TIME = 15;
 
@@ -131,4 +133,4 @@ function switchNetwork(network){
 	}
 }
 
-export { ETH_INFURA_GASAPI_HOST, MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, wMinimaContractAddress, USDTContractAddress, HTLCContractAddress, USE_API_KEYS, ETH_INFURA_HOST, setNetwork};
+export { ETH_INFURA_GASAPI_HOST, MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, PRICE_BOOK_STEPS, wMinimaContractAddress, USDTContractAddress, HTLCContractAddress, USE_API_KEYS, ETH_INFURA_HOST, setNetwork};

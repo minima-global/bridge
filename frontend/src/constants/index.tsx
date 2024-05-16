@@ -94,6 +94,6 @@ export const _defaults = {
   }
 };
 
-export const PRICE_BOOK_STEPS = 100;
+export const PRICE_BOOK_STEPS = 20;
 
 export default defaultAssetsStored;
