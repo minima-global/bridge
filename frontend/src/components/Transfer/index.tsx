@@ -1,4 +1,4 @@
-import {  parseUnits } from "ethers";
+import { parseUnits } from "ethers";
 import { Formik } from "formik";
 import { useContext, useState } from "react";
 import * as yup from "yup";
@@ -18,9 +18,12 @@ type FormState = {
 };
 const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _balance } = useWalletContext();
-  const { _currentNetwork, _defaultNetworks, _minimaBalance } = useContext(appContext);
+  const { _currentNetwork, _defaultNetworks, _minimaBalance } =
+    useContext(appContext);
   const { _network } = useWalletContext();
   const { tokens } = useTokenStoreContext();
+
+  const [f, setF] = useState(false);
 
   const [_, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -67,25 +70,26 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 ) {
                   throw new Error();
                 }
-                
+
                 const assetBalance = parent.asset.balance;
                 // TO-DO
-                const decimals = parent.asset.name === 'Tether' ? 6 : 18;
+                const decimals = parent.asset.name === "Tether" ? 6 : 18;
                 if (
                   parent.asset.type === "erc20" &&
-                  (new Decimal(parseUnits(val, decimals).toString()).gt(assetBalance) ||
+                  (new Decimal(parseUnits(val, decimals).toString()).gt(
+                    assetBalance
+                  ) ||
                     new Decimal(assetBalance).isZero())
                   // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
                 ) {
                   throw new Error();
                 }
               }
-              if (type === 'native') {
+              if (type === "native") {
                 if (new Decimal(val).gt(_minimaBalance.confirmed)) {
                   throw new Error();
                 }
               }
-
 
               return true;
             } catch (error) {
@@ -96,10 +100,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
             }
           }),
       })}
-      onSubmit={async (
-        { amount, asset },
-        { setStatus, resetForm }
-      ) => {
+      onSubmit={async ({ amount, asset }, { setStatus, resetForm }) => {
         setError(false);
         setLoading(true);
         setStatus(undefined);
@@ -155,8 +156,10 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
     >
       {({
         handleSubmit,
+        handleChange,
+        handleBlur,
         isSubmitting,
-        getFieldProps,
+        values,
         touched,
         errors,
         isValid,
@@ -166,41 +169,36 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">{type === "erc20" && <SelectAsset />}</div>
           <div>
-            <div className="flex items-center space-x-2">
+            <div
+              className={`flex space-x-2 bg-black ${f && "!bg-white"} rounded ${
+                f && !errors.amount && "outline outline-violet-300" 
+              } ${
+                touched.amount && errors.amount
+                  ? "!border-4 !outline-none !border-red-500"
+                  : ""
+              }`}
+            >
               <input
                 disabled={isSubmitting}
+                onBlur={(e) => {
+                  handleBlur(e);
+                  setF(false);
+                }}
+                onChange={handleChange}
+                value={values.amount}
+                id="amount"
+                name="amount"
+                onFocus={() => setF(true)}
                 required
-                {...getFieldProps("amount")}
                 type="text"
                 autoFocus
                 placeholder="Amount"
-                className={`focus:outline-violet-600 disabled:bg-opacity-10 font-mono bg-black dark:bg-white focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-black focus:text-black dark:placeholder:text-black focus:font-extralight font-bold w-full py-3 rounded-lg px-4 ${
-                  touched.amount && errors.amount
-                    ? "!border-4 !outline-none !border-red-500"
-                    : ""
-                }`}
+                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-black focus:text-black dark:placeholder:text-black font-bold w-full py-3 rounded-lg px-4`}
               />
-              {/* <span className="border text-center border-slate-700 text-sm font-bold border-l-0 border-r-0 py-2 px-3">
-                {values !== null ? values.asset.symbol : values}
-                <button
-                  onClick={() =>
-                    setFieldValue(
-                      "amount",
-                      values.asset.type !== "erc20"
-                        ? values.asset.balance
-                        : formatEther(values.asset.balance)
-                    )
-                  }
-                  type="button"
-                  className="p-0 text-black border-slate-600 dark:text-white w-full bg-transparent border text-sm dark:border-teal-300 hover:bg-black dark:hover:bg-white hover:text-white dark:hover:text-black"
-                >
-                  Max
-                </button>
-              </span> */}
             </div>
 
             {errors.amount && (
-              <div className="mb-2 bg-red-500 text-white rounded px-4 py-1 my-2">
+              <div className="p-2 bg-red-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2 outline outline-red-500">
                 {errors.amount}
               </div>
             )}

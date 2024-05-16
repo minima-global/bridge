@@ -4,9 +4,10 @@ import Decimal from "decimal.js";
 
 interface Props {
   display: boolean;
-  external?: number;
+  external?: number|string;
+  full?: boolean;
 }
-const NativeMinima = ({ display = false, external }: Props) => {
+const NativeMinima = ({ display = false, full=true, external }: Props) => {
   const { _minimaBalance } = useContext(appContext);
 
   if (_minimaBalance === null) {
@@ -33,7 +34,7 @@ const NativeMinima = ({ display = false, external }: Props) => {
           }
           {external &&
           <p className={`font-mono text-sm truncate bg-transparent focus:outline-none ${display ? "text-[11px]" : ""}`}>
-            {new Decimal(external).toFixed(1)}
+            {full ? new Decimal(external).toFixed(1) : new Decimal(external).toString()}
           </p>        
           }
         </div>

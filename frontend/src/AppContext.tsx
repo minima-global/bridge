@@ -83,8 +83,10 @@ const AppProvider = ({ children }: IProps) => {
   } | null>(null);
   // User Details Sync with Backend
   const [_userDetails, setUserDetails] = useState<any>(null);
-  // Native Minima Balance
+  // Native Minima Balance (BRIDGE WALLET)
   const [_minimaBalance, setMinimaBalance] = useState<null | CoinStats>(null);
+  // Main Minima Balance 
+  const [_mainBalance, setMainBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
 
@@ -93,6 +95,7 @@ const AppProvider = ({ children }: IProps) => {
 
   // Trigger an Ethereum balance update
   const [_triggerBalanceUpdate, setTriggerBalanceUpdate] = useState(false);
+
 
   useEffect(() => {
     (async () => {
@@ -354,9 +357,14 @@ const AppProvider = ({ children }: IProps) => {
         }
 
         if (msg.event === "NEWBLOCK") {
+          // Keep up to date for the Deposits..
+          getMainMinimaBalance();
+
+          
           (window as any).MDS.cmd("block", (resp) => {
             setCurrentBlock(resp.response.block);
           });
+
 
           (window as any).MDS.cmd(
             `balance tokenid:0x00 address:${(window as any).USER_DETAILS.minimaaddress}`,
@@ -518,6 +526,15 @@ const AppProvider = ({ children }: IProps) => {
     });
   };
 
+  const getMainMinimaBalance = () => {
+    (window as any).MDS.cmd("balance", (resp) => {
+      if (resp.status) {
+        const { confirmed, unconfirmed, sendable, coins, total} = resp.status ? resp.response[0] : null;
+        setMainBalance({confirmed, unconfirmed, sendable, total, coins});        
+      }
+    })
+  }
+
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
   };
@@ -585,6 +602,9 @@ const AppProvider = ({ children }: IProps) => {
         setPromptAllowance,
         _approving, 
         setApproving,
+
+        _mainBalance,
+        getMainMinimaBalance,
 
         _promptWithdraw,
         promptWithdraw,

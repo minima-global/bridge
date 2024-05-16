@@ -28,7 +28,7 @@ const Withdraw = () => {
     >
       <h2 className="text-center text-lg font-bold pb-1">Withdraw</h2>
       <div className="px-3">
-        <nav className="bg-violet-800 rounded-lg grid grid-cols-2 max-w-sm mx-auto text-center px-2">
+        <nav className="bg-violet-800 rounded-lg grid grid-cols-2 max-w-sm mx-auto text-center">
           <a
             onClick={() => setView("native")}
             className={`${isActive("native")}`}
