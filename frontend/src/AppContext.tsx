@@ -88,6 +88,9 @@ const AppProvider = ({ children }: IProps) => {
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
 
+  // display db locked, ask for unlock
+  const [_promptDatabaseLocked, setPromptDatabaseLocked] = useState(false);
+
   // Trigger an Ethereum balance update
   const [_triggerBalanceUpdate, setTriggerBalanceUpdate] = useState(false);
 
@@ -190,6 +193,13 @@ const AppProvider = ({ children }: IProps) => {
                 (window as any).MDS.cmd(
                   "seedrandom modifier:ethbridge",
                   (resp) => {
+                    
+                    if (!resp.status) {
+                      if (resp.error && resp.error.includes("DB locked!")) {
+                        return setPromptDatabaseLocked(true);
+                      }
+                    }
+
                     setGeneratedKey(resp.response.seedrandom);
                   }
                 );
@@ -535,6 +545,10 @@ const AppProvider = ({ children }: IProps) => {
   const promptFavorites = () => {
     setPromptFavorites((prevState) => !prevState);
   };
+ 
+  const promptDatabaseLocked = () => {
+    setPromptDatabaseLocked((prevState) => !prevState);
+  };
 
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
@@ -579,6 +593,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptSettings,
         promptSettings,
+
+        _promptDatabaseLocked,
+        promptDatabaseLocked,
 
         updatePreferredNetwork,
 

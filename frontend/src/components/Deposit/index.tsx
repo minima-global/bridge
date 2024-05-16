@@ -20,18 +20,28 @@ const Deposit = () => {
   };
 
   return (
-    <AnimatedDialog position="items-start my-16" isOpen={_promptDeposit} onClose={() => promptDeposit()} extraClass="">
-      <nav className="bg-violet-800 rounded-lg grid grid-cols-2 max-w-sm mx-auto text-center">
-        <a
-          onClick={() => setView("native")}
-          className={`${isActive("native")}`}
-        >
-          Native
-        </a>
-        <a onClick={() => setView("erc20")} className={`${isActive("erc20")}`}>
-          Ethereum
-        </a>
-      </nav>
+    <AnimatedDialog
+      position="items-start my-16"
+      isOpen={_promptDeposit}
+      onClose={() => promptDeposit()}
+      extraClass=""
+    >
+      <div className="px-3">
+        <nav className="bg-violet-800 rounded-lg grid grid-cols-2 max-w-sm mx-auto text-center">
+          <a
+            onClick={() => setView("native")}
+            className={`${isActive("native")}`}
+          >
+            Native
+          </a>
+          <a
+            onClick={() => setView("erc20")}
+            className={`${isActive("erc20")}`}
+          >
+            Ethereum
+          </a>
+        </nav>
+      </div>
       {view === "native" && <NativeAddress />}
       {view === "erc20" && <EthereumAddress />}
     </AnimatedDialog>

@@ -1,6 +1,7 @@
 import AppLoading from "../AppLoading";
 import BridgeWidget from "../BridgeWidget";
 import Navigation from "../BridgeWidget/Navigation";
+import DatabaseLocked from "../DatabaseLocked";
 import Favorites from "../Favorites";
 import ReadMode from "../ReadMode";
 import Settings from "../Settings";
@@ -15,6 +16,7 @@ const Dashboard = () => {
       <ReadMode />
       <ToastContainer />
       <Settings />
+      <DatabaseLocked />
       <Favorites form={false} />
       <AppLoading />
       <ContentGrid>

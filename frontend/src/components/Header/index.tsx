@@ -24,7 +24,7 @@ const Header = () => {
               <img
                 alt="brand"
                 src="./assets/miniswap.svg"
-                className="w-[100px] h-[36px]"
+                className="w-[100px] h-[36px] mt-2"
               />
             </div>
           </div>

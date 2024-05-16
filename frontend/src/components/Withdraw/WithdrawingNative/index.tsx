@@ -32,7 +32,7 @@ const WithdrawingNative = () => {
 
 
   return (
-    <div className="max-w-sm mx-auto my-4">
+    <div className="max-w-sm mx-auto my-4 px-2">
       <NativeMinima display={false} />
       <Transfer type="native" submitForm={withdrawMinima} onCancel={promptWithdraw} />
     </div>

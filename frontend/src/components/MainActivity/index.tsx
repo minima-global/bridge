@@ -298,12 +298,12 @@ const MainActivity = () => {
   });
 
   const handleNext = () => {
-    setOffset(prevState => prevState+20);
-  }
-  
+    setOffset((prevState) => prevState + 20);
+  };
+
   const handlePrev = () => {
-    setOffset(prevState => prevState-20);
-  }
+    setOffset((prevState) => prevState - 20);
+  };
 
   useEffect(() => {
     if (_promptLogs) {
@@ -393,11 +393,26 @@ const MainActivity = () => {
                   renderCellMobile={renderCellMobile}
                 />
               )}
-
-              <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
-                <button onClick={handlePrev} disabled={offset === 0} type="button" className="bg-gray-100 dark:bg-gray-200 dark:text-black bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300">Prev</button>
-                <button onClick={handleNext} disabled={data.length < 20} type="button" className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300">Next</button>
-              </div>
+              {data.length && (
+                <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
+                  <button
+                    onClick={handlePrev}
+                    disabled={offset === 0}
+                    type="button"
+                    className="bg-gray-100 dark:bg-gray-200 dark:text-black bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
+                  >
+                    Prev
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    disabled={data.length < 20}
+                    type="button"
+                    className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
             </div>
             <div className="bg-slate-100 dark:bg-black" />
           </animated.div>,
