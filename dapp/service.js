@@ -35,7 +35,7 @@ var USER_DETAILS 	= {};
 var BRIDGE_INITED = false;
 
 //DEBUG LOGS
-var LOGS_ENABLED = true;
+var LOGS_ENABLED = false;
 
 //We send the orderbook every 20 mins..
 var ORDERSEND_COUNTER = 0;
