@@ -3,6 +3,7 @@ import BridgeWidget from "../BridgeWidget";
 import Navigation from "../BridgeWidget/Navigation";
 import DatabaseLocked from "../DatabaseLocked";
 import Favorites from "../Favorites";
+import Help from "../Help";
 import ReadMode from "../ReadMode";
 import Settings from "../Settings";
 import ContentGrid from "../UI/ContentGrid";
@@ -14,6 +15,7 @@ const Dashboard = () => {
   return (
     <main className="h-full">
       <ReadMode />
+      <Help />
       <ToastContainer />
       <Settings />
       <DatabaseLocked />

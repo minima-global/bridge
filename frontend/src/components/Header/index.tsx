@@ -3,9 +3,10 @@ import { appContext } from "../../AppContext";
 import MainActivity from "../MainActivity";
 import SettingsIcon from "../UI/Icons/SettingsIcon";
 import FavoriteIcon from "../UI/Icons/FavoriteIcon";
+import HelpIcon from "../UI/Icons/HelpIcon";
 
 const Header = () => {
-  const { promptSettings, promptFavorites } = useContext(appContext);
+  const { promptSettings, promptFavorites, promptHelp } = useContext(appContext);
   return (
     <>
       <header
@@ -42,6 +43,10 @@ const Header = () => {
 
               <span className="pr-2 text-red-400" onClick={promptFavorites}>
                 <FavoriteIcon fill="currentColor" />
+              </span>
+              
+              <span className="pr-2 text-teal-600" onClick={promptHelp}>
+                <HelpIcon fill="currentColor" />
               </span>
 
               <span
