@@ -60,6 +60,8 @@ const AppProvider = ({ children }: IProps) => {
   // Settings
   const [_promptSettings, setPromptSettings] = useState(false);
   // Settings
+  const [_promptHelp, setPromptHelp] = useState(false);
+  // Settings
   const [_promptLogs, setPromptLogs] = useState(false);
 
   // Current Network
@@ -554,6 +556,10 @@ const AppProvider = ({ children }: IProps) => {
   const promptSettings = () => {
     setPromptSettings((prevState) => !prevState);
   };
+  
+  const promptHelp = () => {
+    setPromptHelp((prevState) => !prevState);
+  };
 
   const promptAcceptOTC = (deal: OTCDeal) => {
     setPromptAcceptOTC((prevState) => (prevState ? null : deal));
@@ -614,6 +620,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptFavorites,
         promptFavorites,
+
+        _promptHelp,
+        promptHelp,
 
         _promptSettings,
         promptSettings,
