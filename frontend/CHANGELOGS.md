@@ -14,3 +14,7 @@
 ##### [2.0.12] - 04 June 24
 
 - Add help section
+
+##### [2.0.13] - 05 June 24
+
+- Design tweaks for help section
