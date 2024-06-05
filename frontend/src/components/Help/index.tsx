@@ -3,6 +3,7 @@ import { appContext } from "../../AppContext";
 import Dialog from "../UI/Dialog";
 import { createPortal } from "react-dom";
 import { useSpring, animated, config } from "react-spring";
+import RightArrow from "../UI/Icons/RightArrow";
 
 const Help = () => {
   const { _promptHelp, promptHelp } = useContext(appContext);
@@ -148,20 +149,20 @@ const Help = () => {
                       }`}
                     >
                       <p className="px-4 font-semibold">
-                        Alice wants to swap 100 Minima for 100 wMinima with Bob.
+                        Alice wants to swap 100 <span className="font-bold">Minima</span> for 100 <span className="font-bold">wMinima</span> with Bob.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Alice asks Bob for his public key.
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Alice asks Bob for his public key.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Bob asks Alice for her public key.
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                      <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob asks Alice for her public key.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Alice then creates a random secret that only she knows
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Alice then creates a random secret that only she knows
                         and hashes that secret.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Alice then sends 100 Minima (on the Minima network) to
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Alice then sends 100 Minima (on the Minima network) to
                         a contracts that has that hash and Bob's public key.
                       </p>
                       <p className="px-4 font-semibold">
@@ -170,17 +171,17 @@ const Help = () => {
                         same as the hash Alice added) for the next 2 hours.
                         Alice cannot touch the funds for 2 hours.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Bob sees the contract but does not yet know the secret
-                        - so cannot collect. He thinks.. How can I make Alice
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob sees the contract but does not yet know the secret
+                        so cannot collect. He thinks.. How can I make Alice
                         reveal the secret.. ?
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Bob send 100 wMinima (on the ETH network) to a
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob send 100 wMinima (on the ETH network) to a
                         contract that has that same hash and Alice's public key.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Bob send 100 wMinima (on the ETH network) to a
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob send 100 wMinima (on the ETH network) to a
                         contract that has that same hash and Alice's public key.
                       </p>
                       <p className="px-4 font-semibold">
@@ -189,27 +190,17 @@ const Help = () => {
                         same as the hash Bob added) for the next 1 hour. Bob
                         cannot touch the funds for 1 hour.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Alice sees the contract BUT she knows the secret!.. So
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Alice sees the contract BUT she knows the secret!.. So
                         she collects the 100 wMinima by signing and revealing
                         the secret.
                       </p>
-                      <p className="px-4 font-semibold">
-                        - Bob sees Alice collect the 100 wMinima and sees the
+                      <p className="px-4 font-semibold flex gap-2 items-center">
+                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob sees Alice collect the 100 wMinima and sees the
                         secret.. So now he knows the secret! He signs and
                         collects the 100 Minima..
                       </p>
-
-                      {!isExpanded && (
-                        <div className="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-end">
-                          <p className=" bg-black z-[25] text-white dark:text-black dark:bg-white px-3 shadow-lg text-xs py-1">
-                            Scroll to read More
-                          </p>
-                        </div>
-                      )}
-                    </div>
-
-                    <div className="my-3">
+                      <div className="my-3">
                       <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
                         <hr></hr>
                         <p className="text-xs opacity-80 tracking-wider">
@@ -219,10 +210,7 @@ const Help = () => {
                       </div>
                     </div>
 
-                    <div
-                      className={`relative text-sm flex flex-col gap-2 tracking-wide overflow-y-scroll`}
-                    >
-                      <p className="px-4 font-semibold">
+                    <p className="px-4 font-semibold">
                         No-one other than Alice and Bob are involved in this
                         trade.
                       </p>
@@ -250,7 +238,17 @@ const Help = () => {
                         Yes - it is secure, trustless, non-custodial and
                         completely decentralised..
                       </p>
+
+                      {!isExpanded && (
+                        <div className="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-end">
+                          <p className=" bg-black z-[25] text-white dark:text-black dark:bg-white px-3 shadow-lg text-xs py-1">
+                            Scroll to read More
+                          </p>
+                        </div>
+                      )}
                     </div>
+
+
                   </div>
                 </div>
               </animated.div>
