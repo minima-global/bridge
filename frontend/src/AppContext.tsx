@@ -87,7 +87,7 @@ const AppProvider = ({ children }: IProps) => {
   const [_userDetails, setUserDetails] = useState<any>(null);
   // Native Minima Balance (BRIDGE WALLET)
   const [_minimaBalance, setMinimaBalance] = useState<null | CoinStats>(null);
-  // Main Minima Balance 
+  // Main Minima Balance
   const [_mainBalance, setMainBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
@@ -98,6 +98,67 @@ const AppProvider = ({ children }: IProps) => {
   // Trigger an Ethereum balance update
   const [_triggerBalanceUpdate, setTriggerBalanceUpdate] = useState(false);
 
+  useEffect(() => {
+    if (loaded && loaded.current && _userKeys !== null && _userKeys.apiKey) {
+      // Check if read or write mode
+      (window as any).MDS.cmd(`checkmode`, function (response: any) {
+        if (response.status) {
+          // If in write mode, generate & set key
+          if (response.response.mode === "WRITE") {
+            initBridgeSystemsStartup(function (userdets) {
+              // @ts-ignore
+              window.USER_DETAILS = userdets;
+              Object.freeze(USER_DETAILS);
+              setUserDetails(userdets);
+
+              const { mxaddress } = userdets.minimaaddress;
+              (window as any).MDS.cmd(
+                `balance tokenid:0x00 address:${mxaddress}`,
+                (resp: any) => {
+                  if (resp.status) {
+                    const { confirmed, unconfirmed, coins } = resp.response[0];
+
+                    // Use Minima Maths to calculate total of confirmed + unconfirmed
+                    const add =
+                      'runscript script:"LET total=' +
+                      confirmed +
+                      "+" +
+                      unconfirmed +
+                      ' LET roundedtotal=FLOOR(total)"';
+
+                    (window as any).MDS.cmd(add, function (respo) {
+                      const total = respo.response.variables.roundedtotal;
+                      setMinimaBalance({
+                        confirmed,
+                        unconfirmed,
+                        total,
+                        coins,
+                      });
+                    });
+                  }
+                }
+              );
+            });
+
+            // Generate key for Eth Wallet
+            (window as any).MDS.cmd("seedrandom modifier:ethbridge", (resp) => {
+              if (!resp.status) {
+                if (resp.error && resp.error.includes("DB locked!")) {
+                  return setPromptDatabaseLocked(true);
+                }
+              }
+
+              setGeneratedKey(resp.response.seedrandom);
+            });
+          }
+
+          return setReadMode(response.response.mode === "READ");
+        }
+
+        return setReadMode(false);
+      });
+    }
+  }, [loaded, _userKeys]);
 
   useEffect(() => {
     (async () => {
@@ -157,69 +218,6 @@ const AppProvider = ({ children }: IProps) => {
             setCurrentBlock(resp.response.block);
           });
 
-          // Check if read or write mode
-          (window as any).MDS.cmd(`checkmode`, function (response: any) {
-            if (response.status) {
-              // If in write mode, generate & set key
-              if (response.response.mode === "WRITE") {
-                initBridgeSystemsStartup(function (userdets) {
-                  // @ts-ignore
-                  window.USER_DETAILS = userdets;
-                  Object.freeze(USER_DETAILS);
-                  setUserDetails(userdets);
-
-                  const { mxaddress } = userdets.minimaaddress;
-                  (window as any).MDS.cmd(
-                    `balance tokenid:0x00 address:${mxaddress}`,
-                    (resp: any) => {
-                      if (resp.status) {
-                        const { confirmed, unconfirmed, coins } =
-                          resp.response[0];
-
-                        // Use Minima Maths to calculate total of confirmed + unconfirmed
-                        const add =
-                          'runscript script:"LET total=' +
-                          confirmed +
-                          "+" +
-                          unconfirmed +
-                          ' LET roundedtotal=FLOOR(total)"';
-
-                        (window as any).MDS.cmd(add, function (respo) {
-                          const total = respo.response.variables.roundedtotal;
-                          setMinimaBalance({
-                            confirmed,
-                            unconfirmed,
-                            total,
-                            coins,
-                          });
-                        });
-                      }
-                    }
-                  );
-                });
-
-                // Generate key for Eth Wallet
-                (window as any).MDS.cmd(
-                  "seedrandom modifier:ethbridge",
-                  (resp) => {
-                    
-                    if (!resp.status) {
-                      if (resp.error && resp.error.includes("DB locked!")) {
-                        return setPromptDatabaseLocked(true);
-                      }
-                    }
-
-                    setGeneratedKey(resp.response.seedrandom);
-                  }
-                );
-              }
-
-              return setReadMode(response.response.mode === "READ");
-            }
-
-            return setReadMode(false);
-          });
-
           (async () => {
             setWorking(true);
             // Initialize cache-ing table
@@ -243,7 +241,7 @@ const AppProvider = ({ children }: IProps) => {
             // USER PREFERENCES
             if (cachedApiKeys) {
               // console.log("Keys are cached", JSON.parse(cachedApiKeys.DATA));
-              
+
               setUserKeys(JSON.parse(cachedApiKeys.DATA));
 
               // DEFAULT NETWORK
@@ -362,14 +360,14 @@ const AppProvider = ({ children }: IProps) => {
           // Keep up to date for the Deposits..
           getMainMinimaBalance();
 
-          
           (window as any).MDS.cmd("block", (resp) => {
             setCurrentBlock(resp.response.block);
           });
 
-
           (window as any).MDS.cmd(
-            `balance tokenid:0x00 address:${(window as any).USER_DETAILS.minimaaddress}`,
+            `balance tokenid:0x00 address:${
+              (window as any).USER_DETAILS.minimaaddress
+            }`,
             (resp: any) => {
               if (resp.status) {
                 const { confirmed, unconfirmed, coins } = resp.response[0];
@@ -516,14 +514,18 @@ const AppProvider = ({ children }: IProps) => {
     });
   };
 
-  const handleActionViaBackend = async (action: any) => {    
+  const handleActionViaBackend = async (action: any) => {
     return new Promise((resolve, reject) => {
       sendBackendMSG(action, (resp) => {
         if (resp.status) {
           resolve(resp);
         }
 
-        reject(resp && resp.message ? resp.message : "Something went wrong, pls try again...");
+        reject(
+          resp && resp.message
+            ? resp.message
+            : "Something went wrong, pls try again..."
+        );
       });
     });
   };
@@ -531,11 +533,13 @@ const AppProvider = ({ children }: IProps) => {
   const getMainMinimaBalance = () => {
     (window as any).MDS.cmd("balance", (resp) => {
       if (resp.status) {
-        const { confirmed, unconfirmed, sendable, coins, total} = resp.status ? resp.response[0] : null;
-        setMainBalance({confirmed, unconfirmed, sendable, total, coins});        
+        const { confirmed, unconfirmed, sendable, coins, total } = resp.status
+          ? resp.response[0]
+          : null;
+        setMainBalance({ confirmed, unconfirmed, sendable, total, coins });
       }
-    })
-  }
+    });
+  };
 
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
@@ -556,7 +560,7 @@ const AppProvider = ({ children }: IProps) => {
   const promptSettings = () => {
     setPromptSettings((prevState) => !prevState);
   };
-  
+
   const promptHelp = () => {
     setPromptHelp((prevState) => !prevState);
   };
@@ -572,7 +576,7 @@ const AppProvider = ({ children }: IProps) => {
   const promptFavorites = () => {
     setPromptFavorites((prevState) => !prevState);
   };
- 
+
   const promptDatabaseLocked = () => {
     setPromptDatabaseLocked((prevState) => !prevState);
   };
@@ -606,7 +610,7 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptAllowance,
         setPromptAllowance,
-        _approving, 
+        _approving,
         setApproving,
 
         _mainBalance,
