@@ -18,3 +18,7 @@
 ##### [2.0.13] - 05 June 24
 
 - Design tweaks for help section
+
+##### [2.1.0] - 06 June 24
+
+- Syncrhonize ReadMode to appear only after Eth api is setup up
