@@ -51,6 +51,7 @@ const TetherPool = () => {
 
           const ERC20Contract =
             "0x" + _defaults["Tether"][_network].slice(2).toUpperCase();
+          console.log('offerPrice..', offerPrice);
           const message = {
             action: "STARTETHSWAP",
             reqpublickey: (order as Data).ethpublickey,
@@ -63,7 +64,7 @@ const TetherPool = () => {
             ),
             amount: offerPrice,
           };
-          
+          console.log('Message to send tether...', message);
           await handleActionViaBackend(message);
 
           notify("Executed a swap!");

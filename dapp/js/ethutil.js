@@ -407,7 +407,7 @@ function createRAWSendTxn(toaddress, ethamount){
 /**
  * Create a RAW unsigned Contract Call Transaction
  */
-function (contractAddress, functionData, gaslimit){
+function createRAWContractCallTxn(contractAddress, functionData, gaslimit){
 	
 	//WE USE the MEDIUM GAS
 	var usegas 			= GAS_API.medium;

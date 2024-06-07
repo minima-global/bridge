@@ -38,6 +38,11 @@ const renderCell = (cellData) => {
         />
       </td>
       <td className="p-3">
+        {EVENT.includes("WITHDRAW") && (
+          <div className="bg-sky-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
+            {EVENT}
+          </div>
+        )}   
         {EVENT.includes("STARTED") && (
           <div className="bg-blue-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
             {EVENT}
@@ -139,7 +144,7 @@ const renderCell = (cellData) => {
         )}
       </td>
       <td className="p-4 text-right">
-        <div className="text-sm">
+        <div className="text-xs">
           {format(parseInt(EVENTDATE), "MMMM dd, yyyy hh:mm a")}
         </div>
       </td>
@@ -173,6 +178,11 @@ const renderCellMobile = (cellData) => {
         />
       </div>
       <div className="p-4 pt-3">
+        {EVENT.includes("WITHDRAW") && (
+          <div className="bg-sky-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
+            {EVENT}
+          </div>
+        )}      
         {EVENT.includes("STARTED") && (
           <div className="bg-blue-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
             {EVENT}
@@ -202,7 +212,7 @@ const renderCellMobile = (cellData) => {
       <div className="p-4 pt-3">
         <input
           readOnly
-          className="w-full bg-transparent focus:outline-none truncate font-mono text-xs text-center"
+          className="w-full bg-transparent focus:outline-none truncate font-mono text-xs text-left"
           value={HASH}
         />
       </div>
@@ -275,7 +285,7 @@ const renderCellMobile = (cellData) => {
       </div>
 
       <div className="p-4">
-        <div className="text-sm">
+        <div className="text-xs">
           {format(parseInt(EVENTDATE), "MMMM dd, yyyy hh:mm a")}
         </div>
       </div>
@@ -308,6 +318,7 @@ const MainActivity = () => {
   useEffect(() => {
     if (_promptLogs) {
       getAllEvents(MAX, offset, (events) => {
+        console.log('events', events);
         const _evts = events.map((event) => ({
           ...event,
           getTokenType,

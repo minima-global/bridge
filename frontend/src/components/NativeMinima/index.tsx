@@ -29,7 +29,7 @@ const NativeMinima = ({ display = false, full=true, external }: Props) => {
           {!display && <h3 className="font-bold ">Minima</h3>}
           {!external &&
           <p className={`font-mono text-sm truncate bg-transparent focus:outline-none ${display ? "text-[11px]" : ""}`}>
-            {new Decimal(_minimaBalance.confirmed).toFixed(1)} {new Decimal(_minimaBalance.unconfirmed).gt(0) && !display  ? "/ "+new Decimal(_minimaBalance.unconfirmed).toFixed(1) : ""}
+            {new Decimal(_minimaBalance.confirmed).toString()} {new Decimal(_minimaBalance.unconfirmed).gt(0) && !display  ? "/ "+new Decimal(_minimaBalance.unconfirmed).toString() : ""}
           </p>        
           }
           {external &&

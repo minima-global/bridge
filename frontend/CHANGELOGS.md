@@ -27,4 +27,6 @@
 
 - refreshNonce after approving contracts
 - update backend set nonce code
+- Withdraw event fixed, add hash & fix layout
+- Remove rounding for Minima, discrepancies when trying to withdraw..
 - bug fixes

@@ -63,8 +63,8 @@ const WrappedPool = () => {
             ),
             amount: offerPrice,
           };
-
-          await handleActionViaBackend(message);
+          console.log('message', message);
+          // await handleActionViaBackend(message);
 
           notify("Executed a swap!");
           resetForm();
