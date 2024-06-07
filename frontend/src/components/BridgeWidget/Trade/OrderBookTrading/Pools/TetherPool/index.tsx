@@ -195,7 +195,7 @@ const TetherPool = () => {
           </div>
           <div className="grid grid-rows-[16px_1fr]">
             <div className="flex flex-end justify-end px-8 text-gray-100">
-              <span className="text-xs text-gray-100 text-opacity-50">
+              <span className="text-xs text-black dark:text-gray-100 dark:text-opacity-50">
                 {values.order &&
                 (values.order as Data).orderbook &&
                 (values.order as Data).orderbook.usdt
@@ -295,7 +295,7 @@ const TetherPool = () => {
                         new Decimal(
                           formatUnits(
                             relevantToken!.balance,
-                            relevantToken!.decimals
+                            _network === "mainnet" ? 6 : 18
                           )
                         ).toFixed(0)}
                     </p>

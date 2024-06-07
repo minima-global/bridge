@@ -26,7 +26,6 @@ const Help = () => {
 
     return () => {
       if (scrollContainer) {
-        console.log("Unsub event listeners");
         scrollContainer.removeEventListener("scroll", handleScroll);
       }
     };

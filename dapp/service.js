@@ -35,7 +35,7 @@ var USER_DETAILS 	= {};
 var BRIDGE_INITED = false;
 
 //DEBUG LOGS
-var LOGS_ENABLED = false;
+var LOGS_ENABLED = true;
 
 //We send the orderbook every 20 mins..
 var ORDERSEND_COUNTER = 0;
@@ -132,22 +132,17 @@ MDS.init(function(msg){
 			return;
 		}
 		
-		//Check the Nonce.. 0 is valid
-		if(NONCE_TRACK != 0){
-			if(!checkIsPositiveNumber(NONCE_TRACK)){
-			
-				//REDO the NONCE
-				setNonceAuto(function(nonce){});
-				
-				//And check again..	
-				if(NONCE_TRACK != 0){
-					if(!checkIsPositiveNumber(NONCE_TRACK)){
-						MDS.log("ERROR Nonce not valid..");
-						return;
-					}	
-				}
-			}
-		}
+		//Has nonce been set
+        if(NONCE_TRACK == -1){
+            //REDO the NONCE
+            setNonceAuto(function(nonce){});
+            
+            //And check again..    
+            if(NONCE_TRACK == -1){
+                MDS.log("ERROR Nonce not valid..");
+                return;    
+            }
+        }
 		
 		//Get the current ETH block
 		var ethblock = 0;

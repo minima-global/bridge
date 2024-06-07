@@ -22,3 +22,9 @@
 ##### [2.1.0] - 06 June 24
 
 - Syncrhonize ReadMode to appear only after Eth api is setup up
+
+##### [2.2.0] - 07 June 24
+
+- refreshNonce after approving contracts
+- update backend set nonce code
+- bug fixes

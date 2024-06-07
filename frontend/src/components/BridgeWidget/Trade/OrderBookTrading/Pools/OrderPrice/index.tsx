@@ -26,7 +26,7 @@ const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
           token,
           userPublicKey,
           function (_, order) {     
-            // console.log('order found',order);
+            console.log('order found', order);
             setFieldValue("order", order);          
             resolve(order);
           }
@@ -34,9 +34,11 @@ const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
       });
       
       if (!order || !order.orderbook) return;
-
-      const orderPrice = calculateAmount(orderType.toLowerCase(), offerPrice, "wminima", order.orderbook);
-      
+      console.log('orderType', orderType.toLowerCase());
+      console.log('offerPrice', offerPrice);
+      console.log('order', order.orderbook);
+      const orderPrice = calculateAmount(orderType.toLowerCase(), offerPrice, token, order.orderbook);
+      console.log('orderPrice', orderPrice);
       if (!isNaN(orderPrice)) {
           setFieldValue("orderPrice", orderPrice);
       } else {
