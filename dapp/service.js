@@ -133,7 +133,7 @@ MDS.init(function(msg){
 		}
 		
 		//Check the Nonce.. 0 is valid
-		if(NONCE_TRACK != 0){
+		/*if(NONCE_TRACK != 0){
 			if(!checkIsPositiveNumber(NONCE_TRACK)){
 			
 				//REDO the NONCE
@@ -146,6 +146,18 @@ MDS.init(function(msg){
 						return;
 					}	
 				}
+			}
+		}*/
+		
+		//Has nonce been set
+		if(NONCE_TRACK == -1){
+			//REDO the NONCE
+			setNonceAuto(function(nonce){});
+			
+			//And check again..	
+			if(NONCE_TRACK == -1){
+				MDS.log("ERROR Nonce not valid..");
+				return;	
 			}
 		}
 		
