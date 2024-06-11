@@ -90,19 +90,27 @@ const TetherPool = () => {
           .matches(/^\d*\.?\d+$/, "Enter a valid amount")
           .required("Enter your offer")
           .test("valid amount", function (val) {
-            const { path, createError } = this;
+            const { path, createError, parent } = this;
 
             try {
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your offer");
               }
 
-              if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
-                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE);
+              if (_currentNavigation === 'Sell' && new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
+                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA");
               }
 
-              if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE);
+              if (_currentNavigation === 'Sell' && new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
+                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
+              }
+              
+              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).lt(MINIMUM_MINIMA_TRADE)) {
+                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
+              }
+              
+              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(MAXIMUM_MINIMA_TRADE)) {
+                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA" );
               }
 
               if (_currentNavigation === "Sell") {
