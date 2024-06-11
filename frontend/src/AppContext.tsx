@@ -347,12 +347,15 @@ const AppProvider = ({ children }: IProps) => {
           //Make sure is a private message
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
-            if (comms.action == "FRONTENDMSG") {
-              return;
+            if (comms.action == "FRONTENDMSG") {              
               //Show the message
-              globalNotify(JSON.stringify(comms));
+              // globalNotify(JSON.stringify(comms));             
 
-              // alert(JSON.stringify(comms, null, 2));
+              if (comms.message.includes("insufficient funds for gas")) {
+                notify("Failed to execute Ethereum transaction, top up more ETH to complete the transaction.");
+              } else {
+                notify(comms.message);
+              }
             }
           }
         }
@@ -585,8 +588,8 @@ const AppProvider = ({ children }: IProps) => {
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
 
-  const globalNotify = (message: string) =>
-    toast(message, { position: "top-center", theme: "dark" });
+  // const globalNotify = (message: string) =>
+  //   toast(message, { position: "top-center", theme: "dark" });
 
   return (
     <appContext.Provider

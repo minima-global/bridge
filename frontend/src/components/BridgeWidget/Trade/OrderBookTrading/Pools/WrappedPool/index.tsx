@@ -12,7 +12,6 @@ import { searchAllorFavsOrderBooks } from "../../../../../../../../dapp/js/order
 import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
-import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
 import {
   MINIMUM_MINIMA_TRADE,
   MAXIMUM_MINIMA_TRADE,
@@ -42,34 +41,38 @@ const WrappedPool = () => {
         favorites: false,
       }}
       onSubmit={async (formData, { setFieldError, resetForm }) => {
-        const { offerPrice, order } = formData;
+        const { offerPrice, order, orderPrice } = formData;
 
         try {
           if (!order) {
             return setFieldError("matchingOrder", "No matching order");
           }
-
+          let message = {};
           const ERC20Contract =
             "0x" + _defaults["wMinima"][_network].slice(2).toUpperCase();
-          const message = {
-            action: "STARTETHSWAP",
-            reqpublickey: (order as Data).ethpublickey,
-            erc20contract: ERC20Contract,
-            reqamount: calculateAmount(
-              _currentNavigation.toLowerCase(),
-              offerPrice,
-              "wminima",
-              (order as Data).orderbook
-            ),
-            amount: offerPrice,
-          };
-          console.log('message', message);
-          // await handleActionViaBackend(message);
 
-          notify("Executed a swap!");
+            if (_currentNavigation === "Buy") {
+              message = {
+                action: "STARTETHSWAP",
+                reqpublickey: (order as Data).ethpublickey,
+                erc20contract: ERC20Contract,
+                reqamount: orderPrice,
+                amount: offerPrice
+              };
+            } else {
+
+              message = {
+                action: "STARTMINIMASWAP",
+                reqpublickey: (order as Data).publickey,
+                contractaddress: "ETH:"+ERC20Contract,
+                requestamount: orderPrice,
+                sendamount: offerPrice
+              };
+            }
+
+          await handleActionViaBackend(message);
+          notify("Order requested...");
           resetForm();
-
-          // console.log("transaction response", res);
         } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
@@ -282,9 +285,9 @@ const WrappedPool = () => {
                       <img
                         alt="token"
                         src={
-                          _currentNavigation === "Sell"
-                            ? "./assets/wtoken.svg"
-                            : "./assets/token.svg"
+                          _currentNavigation === "Buy"
+                            ? "./assets/token.svg"
+                            : "./assets/wtoken.svg"
                         }
                         className="rounded-full w-[36px] h-[36px] my-auto"
                       />

@@ -30,3 +30,8 @@
 - Withdraw event fixed, add hash & fix layout
 - Remove rounding for Minima, discrepancies when trying to withdraw..
 - bug fixes
+
+##### [2.2.1] - 10 June 24
+
+- Bug fixes on Order book widget
+- Backend Message STARTETHSWAP bug fix

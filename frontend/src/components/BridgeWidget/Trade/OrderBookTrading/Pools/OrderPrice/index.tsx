@@ -2,6 +2,7 @@ import { useFormikContext } from "formik";
 import { useEffect } from "react";
 
 import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
+import { calculatePrice } from "../../../../../../../../dapp/js/orderbookutil.js";
 import { searchAllorFavsOrderBooks } from "../../../../../../../../dapp/js/orderbookutil.js";
 
 interface IProps {
@@ -16,6 +17,7 @@ const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
 
   useEffect(() => {
     if (!offerPrice) return;
+
 
     (async () => {
       const order: any = await new Promise((resolve) => {
@@ -34,11 +36,22 @@ const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
       });
       
       if (!order || !order.orderbook) return;
-      console.log('orderType', orderType.toLowerCase());
-      console.log('offerPrice', offerPrice);
-      console.log('order', order.orderbook);
+      console.log('order Type', orderType);
+      
+      if (orderType.toLowerCase() === 'buy') {
+        console.log('User wants to buy Native Minima');
+      }
+      if (orderType.toLowerCase() === 'sell') {
+        console.log('User wants to sell Native Minima');
+      }
       const orderPrice = calculateAmount(orderType.toLowerCase(), offerPrice, token, order.orderbook);
-      console.log('orderPrice', orderPrice);
+      const price = calculatePrice(orderType.toLowerCase(),token,order.orderbook);
+
+      console.log('price available', price);
+
+      console.log('I will give', offerPrice);
+      console.log('I will receive', orderPrice);
+      
       if (!isNaN(orderPrice)) {
           setFieldValue("orderPrice", orderPrice);
       } else {

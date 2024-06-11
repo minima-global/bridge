@@ -415,7 +415,6 @@ function calculateAmount(action, amount, token, orderbook){
 		if(token == "wminima"){
 			var price 	= toFixedNumber(orderbook.wminima.sell);	
 			calcamount	= useamount * price;
-		
 		}else if(token == "usdt"){
 			var price 	= toFixedNumber(orderbook.usdt.sell);	
 			calcamount	= useamount * price;

@@ -562,7 +562,14 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
 	
 	//Create a txn to collect this coin..
-	var finalamount = +coin.amount - 0.0001;
+	// var finalamount = +coin.amount - 0.0001;
+	var AMOUNT_DEFINED_IN_SCRIPT = 0.0001;
+	var finalamount = new Decimal(coin.amount).minus(AMOUNT_DEFINED_IN_SCRIPT).toString();
+
+	
+
+	MDS.log('coinamount: ' + coin.amount);
+	MDS.log('finalamount: ' + (+coin.amount - 0.0001));	
 			
 	var cmd = "txncreate id:"+txnid+";"
 	
@@ -587,6 +594,8 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			//AND POST!
 			+"txnpost id:"+txnid+" mine:true auto:true txndelete:true;";
 	
+	MDS.log('collection string, ' +  cmd);
+
 	//Run it.. 
 	MDS.cmd(cmd,function(resp){
 		

@@ -1,5 +1,6 @@
 
 //Load required files..
+MDS.load("./js/decimal.js");
 MDS.load("./js/puresha1.js");
 MDS.load("./js/jslib.js");
 MDS.load("./js/scripts.js");
@@ -308,7 +309,7 @@ MDS.init(function(msg){
 				});
 			
 			}else if(comms.action == "STARTETHSWAP"){
-				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(ethresp){
+				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.amount, comms.reqamount, function(ethresp){
 					sendFrontendMSG(comms.action,ethresp);
 				});
 			
