@@ -171,7 +171,6 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 			
 			//And send from the native wallet..
 			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
-				MDS.log(JSON.stringify(resp));
 				//If success put in DB
 				if(resp.status){
 					
@@ -179,7 +178,6 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid,function(){
 						//Insert these details so you know in future if right amount sent
 						insertNewHTLCContract(hash,requestamount,reqtoken,function(resp){
-							MDS.log(JSON.stringify(resp));
 							callback(resp);	
 						});
 					});
@@ -566,10 +564,6 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 	var AMOUNT_DEFINED_IN_SCRIPT = 0.0001;
 	var finalamount = new Decimal(coin.amount).minus(AMOUNT_DEFINED_IN_SCRIPT).toString();
 
-	
-
-	MDS.log('coinamount: ' + coin.amount);
-	MDS.log('finalamount: ' + (+coin.amount - 0.0001));	
 			
 	var cmd = "txncreate id:"+txnid+";"
 	

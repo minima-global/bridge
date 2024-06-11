@@ -35,3 +35,14 @@
 
 - Bug fixes on Order book widget
 - Backend Message STARTETHSWAP bug fix
+
+##### [2.2.2] - 11 June 24
+
+- Fix JS Maths Precision with decimal.js
+- Clean up global messages
+- Add "Ethereum transaction failed, top up message"
+- Show full balance of Native Minima when no unconfirmed, to 4 decimal places when unconf is 0
+- Min/Max on Orderbook set only for MINIMA (order book)
+- Design tweaks
+- Add more info on Help
+- Bug fixes

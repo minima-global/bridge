@@ -193,8 +193,8 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 type="text"
                 autoFocus
                 placeholder="Amount"
-                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-black focus:text-black dark:placeholder:text-black font-bold w-full py-3 rounded-lg px-4`}
-              />
+                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
+              />              
             </div>
 
             {errors.amount && (

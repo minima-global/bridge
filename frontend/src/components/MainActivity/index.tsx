@@ -318,7 +318,6 @@ const MainActivity = () => {
   useEffect(() => {
     if (_promptLogs) {
       getAllEvents(MAX, offset, (events) => {
-        console.log('events', events);
         const _evts = events.map((event) => ({
           ...event,
           getTokenType,
