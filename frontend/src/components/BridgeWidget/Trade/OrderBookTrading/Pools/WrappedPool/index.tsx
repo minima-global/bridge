@@ -102,11 +102,11 @@ const WrappedPool = () => {
                 throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
               }
               
-              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).lt(MINIMUM_MINIMA_TRADE)) {
+              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(0) && new Decimal(parent.orderPrice).lt(MINIMUM_MINIMA_TRADE)) {
                 throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
               }
               
-              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(MAXIMUM_MINIMA_TRADE)) {
+              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(0) &&  new Decimal(parent.orderPrice).gt(MAXIMUM_MINIMA_TRADE)) {
                 throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA" );
               }
 
@@ -126,6 +126,10 @@ const WrappedPool = () => {
                 if (new Decimal(val).gt(balance)) {
                   throw new Error("Insufficient funds");
                 }
+              }
+
+              if (new Decimal(parent.orderPrice).isZero()) {
+                throw new Error("Order unavailable");
               }
 
               return true;

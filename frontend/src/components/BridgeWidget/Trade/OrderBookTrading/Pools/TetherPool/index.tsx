@@ -95,7 +95,8 @@ const TetherPool = () => {
             try {
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your offer");
-              }
+              }              
+              
 
               if (_currentNavigation === 'Sell' && new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
                 throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA");
@@ -105,11 +106,11 @@ const TetherPool = () => {
                 throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
               }
               
-              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).lt(MINIMUM_MINIMA_TRADE)) {
+              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(0) && new Decimal(parent.orderPrice).lt(MINIMUM_MINIMA_TRADE)) {
                 throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
               }
               
-              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(MAXIMUM_MINIMA_TRADE)) {
+              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(0) &&  new Decimal(parent.orderPrice).gt(MAXIMUM_MINIMA_TRADE)) {
                 throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA" );
               }
 
@@ -125,6 +126,10 @@ const TetherPool = () => {
                 if (new Decimal(val).gt(balance)) {
                   throw new Error("Insufficient funds");
                 }
+              }
+
+              if (new Decimal(parent.orderPrice).isZero()) {
+                throw new Error("Order unavailable");
               }
 
               return true;
@@ -166,6 +171,7 @@ const TetherPool = () => {
                   }
                 );
               });
+              
               return result; // Return the result of the Promise
             } catch (error) {
               return createError({ path, message: "No matching order" }); // Return false if an error occurs during validation

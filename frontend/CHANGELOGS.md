@@ -46,3 +46,8 @@
 - Design tweaks
 - Add more info on Help
 - Bug fixes
+
+##### [2.3.0] - 11 June 24
+
+- Fix regression bug from min/max
+- Add another validation on order book
