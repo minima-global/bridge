@@ -351,10 +351,14 @@ const AppProvider = ({ children }: IProps) => {
               //Show the message
               // globalNotify(JSON.stringify(comms));             
 
-              if (comms.message.includes("insufficient funds for gas")) {
-                notify("Failed to execute Ethereum transaction, top up more ETH to complete the transaction.");
+              if (comms.message) {
+                if (comms.message.includes("insufficient funds for gas")) {
+                  notify("Failed to execute Ethereum transaction, top up more ETH to complete the transaction.");
+                } else {
+                  notify(comms.message);
+                }
               } else {
-                notify(comms.message);
+                notify(msg.data.message);
               }
             }
           }
