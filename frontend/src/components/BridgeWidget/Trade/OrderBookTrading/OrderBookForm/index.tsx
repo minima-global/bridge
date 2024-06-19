@@ -2,6 +2,7 @@ import { useContext } from "react";
 import TetherPool from "../Pools/TetherPool";
 import WrappedPool from "../Pools/WrappedPool";
 import { appContext } from "../../../../../AppContext";
+import OrderHistory from "../OrderHistory";
 
 // import { getCompleteOrderBook } from "../../../../../../../dapp/js/orderbook.js";
 
@@ -21,6 +22,9 @@ const OrderBookForm = () => {
     <div>
       {_currentOrderPoolTrade === "wminima" && <WrappedPool />}
       {_currentOrderPoolTrade === "usdt" && <TetherPool />}
+
+
+      <OrderHistory />
     </div>
   );
 };

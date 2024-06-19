@@ -100,8 +100,12 @@ export const WalletContextProvider = ({ children }: Props) => {
             return 'Tether';
           }
       }
+
+      if (token === 'minima') {
+        return 'Minima';
+      }
   
-      return "Minima";
+      return "Other";
   };
 
   return (

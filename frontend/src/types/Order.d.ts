@@ -29,3 +29,27 @@ export interface Order {
     maximapublickey: string;
     data: Data;
 }
+
+export interface OrderActivityEvent {
+    MYHTLC_ID: string;
+    HASH: string;
+    REQAMOUNT: string;
+    MYHTLC_REQTOKEN: string;
+    MYHTLC_EVENTDATE: string;
+    COUNTERPARTY_ID: string;
+    EVENT: string;
+    HTLC_INFO: string;
+    COUNTERPARTY_TOKEN: string;
+    AMOUNT: string;
+    TXNHASH: string;
+    COUNTERPARTY_EVENTDATE: string;
+}
+
+export interface HTLC_INFO {
+    timelock: number;
+    amount: string;
+    token: string;
+    requestamount: number;
+    requesttoken: string;
+    otc: boolean | null;
+  }

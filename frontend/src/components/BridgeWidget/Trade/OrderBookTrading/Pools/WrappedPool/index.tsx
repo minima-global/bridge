@@ -19,6 +19,9 @@ import {
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
 import Charts from "../../Charts/index.js";
+import PricePerToken from "../PricePerToken/index.js";
+import WidgetInputWrapper from "../../../../../UI/FormComponents/WidgetInputWrapper/index.js";
+import WrappedToken from "./WrappedToken/index.js";
 
 const WrappedPool = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
@@ -51,23 +54,23 @@ const WrappedPool = () => {
           const ERC20Contract =
             "0x" + _defaults["wMinima"][_network].slice(2).toUpperCase();
 
-            if (_currentNavigation === "Buy") {
-              message = {
-                action: "STARTETHSWAP",
-                reqpublickey: (order as Data).ethpublickey,
-                erc20contract: ERC20Contract,
-                reqamount: orderPrice,
-                amount: offerPrice
-              };
-            } else {
-              message = {
-                action: "STARTMINIMASWAP",
-                reqpublickey: (order as Data).publickey,
-                contractaddress: "ETH:"+ERC20Contract,
-                requestamount: orderPrice,
-                sendamount: offerPrice
-              };
-            }
+          if (_currentNavigation === "Buy") {
+            message = {
+              action: "STARTETHSWAP",
+              reqpublickey: (order as Data).ethpublickey,
+              erc20contract: ERC20Contract,
+              reqamount: orderPrice,
+              amount: offerPrice,
+            };
+          } else {
+            message = {
+              action: "STARTMINIMASWAP",
+              reqpublickey: (order as Data).publickey,
+              contractaddress: "ETH:" + ERC20Contract,
+              requestamount: orderPrice,
+              sendamount: offerPrice,
+            };
+          }
 
           await handleActionViaBackend(message);
           notify("Order requested...");
@@ -75,10 +78,12 @@ const WrappedPool = () => {
         } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
-            return notify("Error : "+ error.message);
+            return notify("Error : " + error.message);
           }
 
-          notify(error.message ? error.message : "Error, something went wrong!");
+          notify(
+            error.message ? error.message : "Error, something went wrong!"
+          );
         }
       }}
       validationSchema={yup.object().shape({
@@ -94,39 +99,28 @@ const WrappedPool = () => {
                 throw new Error("Enter your offer");
               }
 
-              if (_currentNavigation === 'Sell' && new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
-                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA");
+              if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
+                throw new Error("Minimum order is "+MINIMUM_MINIMA_TRADE+" MINIMA");
               }
 
-              if (_currentNavigation === 'Sell' && new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
+              if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
+                throw new Error("Exceeds maximum order of "+MAXIMUM_MINIMA_TRADE+" MINIMA");
               }
               
-              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(0) && new Decimal(parent.orderPrice).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
-              }
-              
-              if (_currentNavigation === 'Buy' && new Decimal(parent.orderPrice).gt(0) &&  new Decimal(parent.orderPrice).gt(MAXIMUM_MINIMA_TRADE)) {
-                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE + " MINIMA" );
+              if (new Decimal(val).gt(_minimaBalance.confirmed)) {
+                throw new Error("Insufficient funds");
               }
 
-              if (_currentNavigation === 'Sell' && new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE + " MINIMA");
-              }
 
-              if (_currentNavigation === "Sell") {
-                if (new Decimal(val).gt(_minimaBalance.confirmed)) {
-                  throw new Error("Insufficient funds");
-                }
-              } else {
+              if (_currentNavigation === 'Buy') {
                 const balance = formatUnits(
                   relevantToken!.balance,
                   relevantToken!.decimals
                 ).toString();
-                if (new Decimal(val).gt(balance)) {
+                if (new Decimal(parent.orderPrice).gt(balance)) {
                   throw new Error("Insufficient funds");
-                }
-              }
+                }                            
+              }                        
 
               if (new Decimal(parent.orderPrice).isZero()) {
                 throw new Error("Order unavailable");
@@ -214,115 +208,31 @@ const WrappedPool = () => {
             </div>
 
             <div className="grid grid-rows-[16px_1fr]">
-              <div className="flex flex-end justify-end px-8 text-gray-100">
-                <span className="text-xs text-black dark:text-gray-100 dark:text-opacity-50">
-                  {values.order &&
-                  (values.order as Data).orderbook &&
-                  (values.order as Data).orderbook.wminima
-                    ? "x" +
-                      (values.order as Data).orderbook.wminima[
-                        _currentNavigation === "Buy" ? "sell" : "buy"
-                      ] +
-                      " each"
-                    : null}
-                </span>
+              <div className="flex flex-end justify-end px-6 text-gray-100">
+                <PricePerToken
+                  order={values.order}
+                  tradingSide={_currentNavigation}
+                  token="wminima"
+                />
               </div>
-              <div className="grid grid-cols-2 divide-x-2 divide-teal-300 px-4">
-                <div className="px-4 border-l-2 border-red-300">
-                  <div className="grid grid-cols-[1fr_36px]">
-                    <div
-                      className={`${
-                        errors.offerPrice &&
-                        !errors.offerPrice.includes("Insufficient") &&
-                        "animate-pulse"
-                      }`}
-                    >
-                      <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
-                        I will give
-                      </label>
-                      <input
-                        onFocus={() => {
-                          setF(true);
-                        }}
-                        onBlur={(e) => {
-                          setF(false);
-                          handleBlur(e);
-                        }}
-                        id="offerPrice"
-                        name="offerPrice"
-                        onChange={handleChange}
-                        value={values.offerPrice}
-                        className="w-full bg-transparent focus:outline-none font-mono"
-                        placeholder="0.0"
-                      />
-                    </div>
-                    <div>
-                      <img
-                        alt="token"
-                        src={
-                          _currentNavigation === "Buy"
-                            ? "./assets/wtoken.svg"
-                            : "./assets/token.svg"
-                        }
-                        className="rounded-full w-[36px] h-[36px] my-auto"
-                      />
-                      <p className="text-xs text-center font-bold font-mono truncate">
-                        {_currentNavigation === "Sell" &&
-                          _minimaBalance &&
-                          new Decimal(_minimaBalance.confirmed).toFixed(0)}
-                        {_currentNavigation === "Buy" &&
-                          relevantToken &&
-                          new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="px-4">
-                  <div className="grid grid-cols-[1fr_36px]">
-                    <div>
-                      <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
-                        I will receive
-                      </label>
-
-                      <OrderPrice
-                        orderType={_currentNavigation}
-                        token="wminima"
-                        userPublicKey={_userDetails.publickey}
-                      />
-                    </div>
-                    <div>
-                      <img
-                        alt="token"
-                        src={
-                          _currentNavigation === "Buy"
-                            ? "./assets/token.svg"
-                            : "./assets/wtoken.svg"
-                        }
-                        className="rounded-full w-[36px] h-[36px] my-auto"
-                      />
-                      <p className="text-xs text-center font-bold font-mono truncate">
-                        {_currentNavigation === "Buy" &&
-                          _minimaBalance &&
-                          new Decimal(_minimaBalance.confirmed).toFixed(0)}
-                        {_currentNavigation === "Sell" &&
-                          relevantToken &&
-                          new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <WidgetInputWrapper
+                tradeSide={_currentNavigation.toLowerCase() as 'buy'|'sell'}
+                value={values.offerPrice}
+                errors={
+                  !!(
+                    errors.offerPrice &&
+                    !errors.offerPrice.includes("Insufficient")
+                  )
+                }
+                tokenComponent={<WrappedToken />}
+                calculatedOrderComponent={
+                  <OrderPrice orderType={_currentNavigation} token="wminima" />
+                }
+                setFocus={setF}
+                handleBlur={handleBlur}
+                handleChange={handleChange}
+              />
             </div>
 
             <div className="px-4 pb-3">

@@ -10,7 +10,7 @@ function wipeDB(callback){
 
 
 function createDB(callback){
-	
+
 	//Create the DB if not exists
 	var initsql = "CREATE TABLE IF NOT EXISTS `secrets` ( "
 				+"  `id` bigint auto_increment, "
@@ -39,6 +39,7 @@ function createDB(callback){
 					+"  `hash` varchar(128) NOT NULL, "
 					+"  `reqamount` varchar(128) NOT NULL, "
 					+"  `token` varchar(128) NOT NULL, "
+					+"  `htlc_info` varchar(256) NOT NULL, "
 					+"  `eventdate` bigint NOT NULL "
 					+" )";
 			
@@ -51,22 +52,29 @@ function createDB(callback){
 						+"  `status` varchar(64) NOT NULL, "
 						+"  `eventdate` bigint NOT NULL "
 						+" )";
-				
-				MDS.sql(ethcontracts,function(ethmsg){
-					
-					var favourites = "CREATE TABLE IF NOT EXISTS `favs` ( "
-						+"  `id` bigint auto_increment, "
-						+"  `name` varchar(128) NOT NULL, "
-						+"  `bridgeuid` varchar(1024) NOT NULL "
-						+" )";
-				
-					MDS.sql(favourites,function(ethmsg){
+
+
+				var createIndexOnHTLCHash = "CREATE INDEX IF NOT EXISTS idx_myhtlc_hash ON myhtlc(hash);";
+				var createIndexOnCPHash = "CREATE INDEX IF NOT EXISTS idx_counterparty_hash ON counterparty(hash)";
+
+				MDS.sql(createIndexOnHTLCHash+createIndexOnCPHash, function(ethmsg) {
+					MDS.sql(ethcontracts,function(ethmsg){
 						
-						if(callback){
-							callback(ethmsg);
-						}	
+						var favourites = "CREATE TABLE IF NOT EXISTS `favs` ( "
+							+"  `id` bigint auto_increment, "
+							+"  `name` varchar(128) NOT NULL, "
+							+"  `bridgeuid` varchar(1024) NOT NULL "
+							+" )";
+					
+						MDS.sql(favourites,function(ethmsg){					
+							
+							if(callback){
+								callback(ethmsg);
+							}	
+						});
 					});
-				});
+				})
+				
 			});	
 		});
 	});
@@ -162,14 +170,14 @@ function getRequestFromHash(hash, callback){
 	});
 }
 
-function insertNewHTLCContract(hashlock, reqamount, token, callback){
+function insertNewHTLCContract(hashlock, reqamount, token, htlc_info, callback){
 	
 	//the date
 	var recdate = new Date();
 
-	//Insert into the DB
-	var sql = "INSERT INTO myhtlc(hash,reqamount,token,eventdate) "
-					+"VALUES ('"+hashlock+"','"+reqamount+"','"+token+"',"+recdate.getTime()+")";
+	//Insert into the DB	
+	var sql = "INSERT INTO myhtlc(hash,reqamount,token,htlc_info,eventdate) "
+					+"VALUES ('"+hashlock+"','"+reqamount+"','"+token+"','"+htlc_info+"',"+recdate.getTime()+")";
 	MDS.sql(sql,function(msg){
 		if(callback){
 			callback(msg);	
@@ -267,6 +275,22 @@ function getAllEvents(limit, offset, callback){
 		callback(sqlmsg.rows);
 	});
 }
+// Get our created HTLC contract and all related events...
+function getAllOrderStatus(callback){
+	var query = `SELECT m.id AS myhtlc_id, m.hash, m.reqamount, m.token AS myhtlc_reqtoken, m.htlc_info, m.eventdate AS myhtlc_eventdate, c.id AS counterparty_id, c.event, c.token AS counterparty_token, c.amount, c.txnhash, c.eventdate AS counterparty_eventdate FROM myhtlc m LEFT JOIN counterparty c ON m.hash = c.hash ORDER BY m.hash`;
+
+	MDS.sql(query, function(sqlmsg){
+		callback(sqlmsg.rows);
+	});
+}
+
+function getAllOrders(callback){
+
+	const query = `SELECT * FROM myhtlc ORDER BY id DESC limit 20`;
+	MDS.sql(query, function(sqlmsg){
+		callback(sqlmsg.rows);
+	});
+}
 
 function getSingleEvent(hash,callback){
 	MDS.sql("SELECT * FROM counterparty WHERE hash='"+hash+"' ORDER BY id", function(sqlmsg){
@@ -359,4 +383,4 @@ function getFavourites(callback){
 
 
 
-export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getFavourites, addFavourites, removeFavourite, removeAllFavourites };
+export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllOrders, getAllOrderStatus, getFavourites, addFavourites, removeFavourite, removeAllFavourites };

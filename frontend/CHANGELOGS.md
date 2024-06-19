@@ -51,3 +51,10 @@
 
 - Fix regression bug from min/max
 - Add another validation on order book
+
+##### [2.4.0] - 19 June 24
+
+- Re-work UX with Order book widget
+- Add Order History
+- Update communication messages while trading order book
+- Bug fixes

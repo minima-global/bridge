@@ -156,8 +156,9 @@ function getHTLCContractAsOwner(fomBlockHEX, toBlockHEX, callback){
 					 	toBlock:toBlockHEX+"",
 					 	
 						topics:[
-								//Use the function SHA address, and your pub key in the index filter	
+								//Use the newContract function SHA address, and your pub key in the index filter	
 								"0x241f395d4e943ea32c5c6e0b8c523cb6fbf735af15880f21756155e7a5d576eb",
+								
 								// This is the contractID - we don't care
 								null, 
 								// This is the OWNER

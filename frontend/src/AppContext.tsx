@@ -15,6 +15,12 @@ import { OTCDeal } from "./types/OTCDeal.js";
 import { Favorite } from "./types/Favorite.js";
 import { getFavourites } from "../../dapp/js/sql.js";
 
+import {
+  getAllOrderStatus,
+} from "../../dapp/js/sql.js";
+import * as utils from "./utils";
+import { OrderActivityEvent } from "./types/Order.js";
+
 export var USER_DETAILS;
 export const appContext = createContext({} as any);
 
@@ -35,6 +41,8 @@ const AppProvider = ({ children }: IProps) => {
   // Current order book trade pool
   const [_currentOrderPoolTrade, setCurrentOrderPoolTrade] =
     useState("wminima");
+  // get all orders
+  const [orders, setOrders] = useState<OrderActivityEvent[]>([]);
   // current Minima block height
   const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
   // Accept OTC dialog
@@ -347,18 +355,41 @@ const AppProvider = ({ children }: IProps) => {
           //Make sure is a private message
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
-            if (comms.action == "FRONTENDMSG") {              
-              //Show the message
-              // globalNotify(JSON.stringify(comms));             
+            if (comms.action == "FRONTENDMSG") {
 
-              if (comms.message) {
+              // get Latest orders               
+              getAllOrders();
+
+              console.log(comms);
+
+              if (comms.title === 'STARTETHSWAP') {
+                if (comms.message && comms.message.status && comms.message.networkstatus) {
+                  return notify("Started an Ethereum swap!");
+                }
+              }
+
+              if (typeof comms.message === "string") {
                 if (comms.message.includes("insufficient funds for gas")) {
-                  notify("Failed to execute Ethereum transaction, top up more ETH to complete the transaction.");
+                  notify(
+                    "Failed to execute Ethereum transaction, top up more ETH to complete the transaction."
+                  );
                 } else {
                   notify(comms.message);
                 }
+              } else if (
+                typeof comms.message === "object" &&
+                comms.message !== null
+              ) {
+                if (
+                  comms.message.message &&
+                  typeof comms.message.message === "string"
+                ) {
+                  notify(comms.message.message);
+                } else {
+                  notify("Received an unknown message format.");
+                }
               } else {
-                notify(msg.data.message);
+                notify("Received an unknown message format.");
               }
             }
           }
@@ -548,6 +579,13 @@ const AppProvider = ({ children }: IProps) => {
       }
     });
   };
+  const getAllOrders = () => {
+    getAllOrderStatus((orderstatus) => {   
+      const ordered = utils.orderEventByStatus(orderstatus);
+
+      setOrders(ordered);
+    });
+  }
 
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
@@ -600,6 +638,9 @@ const AppProvider = ({ children }: IProps) => {
       value={{
         loaded,
         isWorking,
+        
+        orders,
+        getAllOrders,
 
         _triggerBalanceUpdate,
         setTriggerBalanceUpdate,

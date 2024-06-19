@@ -1,16 +1,18 @@
 import { useFormikContext } from "formik";
-import { useEffect } from "react";
+import { useContext, useEffect } from "react";
 
 import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
 import { searchAllorFavsOrderBooks } from "../../../../../../../../dapp/js/orderbookutil.js";
+import { appContext } from "../../../../../../AppContext.js";
+
 
 interface IProps {
   orderType: string;
   token: string;
-  userPublicKey: string;
 }
-const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
+const OrderPrice = ({orderType, token}: IProps) => {
   const formik: any = useFormikContext();
+  const { _userDetails } = useContext(appContext);
   const { setFieldValue } = formik;
   const { offerPrice, orderPrice, favorites } = formik.values;
 
@@ -20,18 +22,21 @@ const OrderPrice = ({orderType, token, userPublicKey}: IProps) => {
 
     (async () => {
       const order: any = await new Promise((resolve) => {
+        console.log('userPublicKey', _userDetails);
         searchAllorFavsOrderBooks(
           favorites,
           orderType.toLowerCase(),
           offerPrice,
           token,
-          userPublicKey,
+          _userDetails.minimapublickey,
           function (_, order) {     
             setFieldValue("order", order);          
             resolve(order);
           }
         );
       });
+
+      console.log('Found Order', order);
       
       if (!order || !order.orderbook) return;
       

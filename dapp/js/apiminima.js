@@ -171,13 +171,22 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 			
 			//And send from the native wallet..
 			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
+
+				var htlc_info = JSON.stringify({
+                    timelock: timelock,
+					amount: amount,
+					token: 'minima',
+                    requestamount: requestamount,
+                    requesttoken: reqtoken,
+                    otc: otc
+				});
+
 				//If success put in DB
 				if(resp.status){
 					
 					//Log it..
 					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid,function(){
-						//Insert these details so you know in future if right amount sent
-						insertNewHTLCContract(hash,requestamount,reqtoken,function(resp){
+						insertNewHTLCContract(hash,requestamount,reqtoken, htlc_info,function(){
 							callback(resp);	
 						});
 					});
@@ -327,7 +336,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						MDS.log('WMINIMA_DECIMALS: ' + WMINIMA_DECIMALS);
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", 0, "Incorrect amount", function(sqlresp){});	
+						collectHTLC(hash, "minima", reqamount.REQAMOUNT, "Counterparty sent incorrect amount", function(sqlresp){});	
 						
 						return;
 					}
@@ -341,7 +350,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Is it correct
 					if(token != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", 0, "Incorrect token", function(sqlresp){});	
+						collectHTLC(hash, "minima", reqamount.REQAMOUNT, "Counterparty sent incorrect token", function(sqlresp){});	
 						return;
 					}
 				}

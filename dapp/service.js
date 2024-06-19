@@ -36,7 +36,7 @@ var USER_DETAILS 	= {};
 var BRIDGE_INITED = false;
 
 //DEBUG LOGS
-var LOGS_ENABLED = false;
+var LOGS_ENABLED = true;
 
 //We send the orderbook every 20 mins..
 var ORDERSEND_COUNTER = 0;
@@ -309,7 +309,7 @@ MDS.init(function(msg){
 				});
 			
 			}else if(comms.action == "STARTETHSWAP"){
-				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.amount, comms.reqamount, function(ethresp){
+				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(ethresp){
 					sendFrontendMSG(comms.action,ethresp);
 				});
 			
