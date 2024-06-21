@@ -6,7 +6,6 @@ import { useTokenStoreContext } from "../../../../../../providers/TokenStoreProv
 import { formatUnits } from "ethers";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 import Decimal from "decimal.js";
-import TokenExchange from "../../../OrderBookTrading/OrderHistory/TokenExchange";
 
 const AcceptOTC = () => {
   const { _promptAcceptOTC, promptAcceptOTC, handleActionViaBackend, notify } =
