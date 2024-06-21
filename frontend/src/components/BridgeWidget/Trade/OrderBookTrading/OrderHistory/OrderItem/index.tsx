@@ -1,10 +1,10 @@
-import { HTLC_INFO, OrderActivityEvent } from "../../../../../../types/Order";
+import { OrderActivityEvent } from "../../../../../../types/Order";
 import { format } from "date-fns";
 import TokenExchange from "../TokenExchange";
 import { useState } from "react";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
-import * as utils from "../../../../../../utils";
 import DoneIcon from "../../../../../UI/Icons/DoneIcon";
+import * as utils from "../../../../../../utils";
 import CloseIcon from "../../../../../UI/Icons/CloseIcon";
 
 // Type safe the date
@@ -13,6 +13,30 @@ function formatDate(eventDate) {
     return format(parseInt(eventDate, 10), "MMM dd, yyyy 'at' hh:mm a");
   }
   return "N/A";
+}
+
+function _getTokenExchange(order: {[keys: string] : OrderActivityEvent}): any {
+
+  /**
+   * Get amount from order.AMOUNT & the token from order.TOKEN
+   * then the TXNHASH has to have the actual opposite token&amount
+   */
+
+  const _o = Object.values(order).find(order => order.EVENT === 'CPTXN_SENT' || order.EVENT === 'HTLC_STARTED');
+
+  if (!_o) {
+    return null;
+  }
+
+  const amount = _o.AMOUNT;
+  const token = _o.TOKEN;
+  const requestamount = _o.TXNHASH.split('-')[2];
+  const requesttoken = _o.TXNHASH.split('-')[1];
+
+  return {
+    amount, token, requestamount, requesttoken
+  }
+
 }
 
 const getOrderStatus = (event) => {
@@ -30,13 +54,19 @@ const getOrderStatus = (event) => {
 };
 
 interface IProps {
-  order: OrderActivityEvent;
+  order: {[key: string] :OrderActivityEvent};
 }
 const OrderItem = ({ order }: IProps) => {
   const [_f, setF] = useState(false);
   const { _network } = useWalletContext();
+
+
+  if (!order) {
+    return null;
+  }
+
   return (
-    <li className="grid grid-rows-[auto_1fr] bg-white dark:bg-black bg-opacity-40my-2">
+    <li className="grid grid-rows-[auto_1fr] bg-white dark:bg-black bg-opacity-40 pb-2">
       <div className="bg-slate-300 dark:bg-[#1B1B1B] dark:bg-opacity-30 py-1">
         <p className="truncate text-xs text-black font-mono dark:text-teal-300 text-left px-3">
           <span className="text-black dark:text-white">id:</span>
@@ -46,42 +76,42 @@ const OrderItem = ({ order }: IProps) => {
             readOnly
             value={
               _f
-                ? order.HASH
-                : order.HASH.substring(0, 8) +
+                ? order[0].HASH
+                : order[0].HASH.substring(0, 8) +
                   "..." +
-                  order.HASH.substring(order.HASH.length - 8, order.HASH.length)
+                  order[0].HASH.substring(order[0].HASH.length - 8, order[0].HASH.length)
             }
             className={`truncate font-semibold bg-transparent focus:outline-none`}
           />
         </p>
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr_0.5fr] gap-1">
+      <div className="grid grid-cols-[1fr_2fr_1fr] gap-1">
         <div className="truncate my-auto text-xs grid ml-3">
-          <p className="opacity-80">Status</p>
+          <p className="opacity-80 mt-2">Status</p>
 
           <div className="flex items-center">
-            <p className="text-xs font-bold">{getOrderStatus(order.EVENT)}</p>
-            {order.EVENT === "CPTXN_COLLECT" &&
-              order.TXNHASH.includes("0x") && (
+            <p className="text-xs font-bold">{getOrderStatus(order[0].EVENT)}</p>
+            {order[0].EVENT === "CPTXN_COLLECT" &&
+              order[0].TXNHASH.includes("0x") && (
                 <span className="ml-1 text-teal-600 dark:text-teal-300">
                   <DoneIcon size={16} fill="currentColor" />
                 </span>
               )}
-            {order.EVENT === "CPTXN_COLLECT" &&
-              !order.TXNHASH.includes("0x") && (
+            {order[0].EVENT === "CPTXN_COLLECT" &&
+              !order[0].TXNHASH.includes("0x") && (
                 <span className="ml-1 text-red-600 border-red-600 dark:text-red-300 rounded-full dark:border-red-300 border-2">
                   <CloseIcon size={10} fill="currentColor" />
                 </span>
               )}
           </div>
 
-          {order.TXNHASH.includes("0x") && order.TXNHASH !== '0x00' && (
+          {order[0].TXNHASH.includes("0x") && order[0].TXNHASH !== '0x00' && (
             <a
               target="_blank"
               onClick={async (e) => {
 
-                if (order.COUNTERPARTY_TOKEN === 'minima') {           
+                if (order[0].TOKEN === 'minima') {           
                   e.preventDefault();       
                   const link = await utils.dAppLink("Block");
                   await new Promise((resolve) => setTimeout(resolve, 150));
@@ -101,8 +131,8 @@ const OrderItem = ({ order }: IProps) => {
                   Android.openExternalBrowser(
                     `${
                       _network === "mainnet"
-                        ? "https://etherscan.io/tx/" + order.TXNHASH
-                        : "https://sepolia.etherscan.io/tx/" + order.TXNHASH
+                        ? "https://etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
+                        : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
                     }`,
                     "_blank"
                   );
@@ -110,30 +140,33 @@ const OrderItem = ({ order }: IProps) => {
               }}
               href={`${
                 _network === "mainnet"
-                  ? "https://etherscan.io/tx/" + order.TXNHASH
-                  : "https://sepolia.etherscan.io/tx/" + order.TXNHASH
+                  ? "https://etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
+                  : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
               }`}
               className="truncate"
             >
-              {order.TXNHASH.substring(0, 8) + "..."}
+              {order[0].TXNHASH.substring(0, 8) + "..."}
             </a>
           )}
 
-          {!order.TXNHASH.includes("0x") && (
+          {!order[0].TXNHASH.includes("0x") && (
             <input
               readOnly
-              value={order.TXNHASH}
+              value={order[0].TXNHASH}
               className="truncate font-bold bg-transparent focus:outline-none"
             />
           )}
         </div>
         <div className="my-auto">
-          <TokenExchange {...(JSON.parse(order.HTLC_INFO) as HTLC_INFO)} />
+          {_getTokenExchange(order) === null && <p>-</p>}
+          { _getTokenExchange(order) !== null &&
+            <TokenExchange {..._getTokenExchange(order)} />          
+          }          
         </div>
 
         <div className="text-right my-auto">
           <p className="text-xs font-bold dark:text-yellow-300 mr-3">
-            {formatDate(order.MYHTLC_EVENTDATE)}
+            {formatDate(order[0].EVENTDATE)}
           </p>
         </div>
       </div>

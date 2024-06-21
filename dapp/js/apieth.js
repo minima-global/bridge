@@ -9,8 +9,6 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 	
 	//Create a secret
 	createSecretHash(function(hashlock){
-		MDS.log('SWAPPUBLICKEY:'+swappublickey);
-		MDS.log('MYPUBKEY:'+userdets.minimapublickey);
 
 		//Start the swap..
 		setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
@@ -28,10 +26,10 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 				
 				//Log it..
 				startedCounterPartySwap(hashlock, "ETH:"+erc20contract, 
-							amount, ethresp.result, function(){
+							amount, ethresp.result+"-minima-"+requestamount, function(){
 					
 					//Insert these details so you know in future if right amount sent
-					insertNewHTLCContract(hashlock,requestamount,"minima",htlc_info,function(sqlresp){
+					insertNewHTLCContract(hashlock,requestamount,"minima",htlc_info,function(sqlresp){						
 						callback(ethresp);		
 					});		
 				});	
@@ -504,7 +502,7 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 				
 				//If success put in DB
 				if(resp.status){
-					sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
+					sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid+"-ETH:"+htlclog.tokencontract+"-"+htlclog.amount,function(){
 						callback(resp);	
 					});
 				}else{

@@ -44,6 +44,15 @@ function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock,
 	var functiondata = HTLCInterfaceABI.functions.newContract.encode([ownerminimakey, 
 			rec , hashlock, timelock, ercaddr, sendamount, reqamount, false]);
 	
+		MDS.log('ownerminimakey '+ownerminimakey);
+		MDS.log('rec '+rec);
+		MDS.log('hashlock '+hashlock);
+		MDS.log('timelock '+timelock);
+		MDS.log('ercaddr '+ercaddr);
+		MDS.log('sendamount '+sendamount);
+		MDS.log('reqamount '+reqamount);
+
+
 	//Now create the RAW txn..
 	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 500000);
 	

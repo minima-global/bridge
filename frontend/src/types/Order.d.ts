@@ -31,25 +31,15 @@ export interface Order {
 }
 
 export interface OrderActivityEvent {
-    MYHTLC_ID: string;
+    ID: string;
     HASH: string;
-    REQAMOUNT: string;
-    MYHTLC_REQTOKEN: string;
-    MYHTLC_EVENTDATE: string;
-    COUNTERPARTY_ID: string;
     EVENT: string;
-    HTLC_INFO: string;
-    COUNTERPARTY_TOKEN: string;
+    TOKEN: string;
     AMOUNT: string;
     TXNHASH: string;
-    COUNTERPARTY_EVENTDATE: string;
+    EVENTDATE: string;
 }
 
-export interface HTLC_INFO {
-    timelock: number;
-    amount: string;
-    token: string;
-    requestamount: number;
-    requesttoken: string;
-    otc: boolean | null;
-  }
+export interface OrderActivityEventGrouped {
+    [key: string]: OrderActivityEvent[]; 
+}

@@ -182,11 +182,11 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 				});
 
 				//If success put in DB
-				if(resp.status){
-					
+				if(resp.status){					
 					//Log it..
-					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid,function(){
-						insertNewHTLCContract(hash,requestamount,reqtoken, htlc_info,function(){
+					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid+"-"+reqtoken+"-"+requestamount,function(){
+						insertNewHTLCContract(hash,requestamount,reqtoken, htlc_info,function(miniresp){
+							MDS.log(JSON.stringify(miniresp));
 							callback(resp);	
 						});
 					});
@@ -662,7 +662,8 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(ethresp.status){
-			sentCounterPartyTxn(hashlock,"ETH:"+token,amount,ethresp.result,function(){
+			
+			sentCounterPartyTxn(hashlock,"ETH:"+token,amount,ethresp.result+"-minima-"+reqamount,function(){
 				callback(ethresp);	
 			});
 		}else{

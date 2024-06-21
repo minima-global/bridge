@@ -16,10 +16,10 @@ import { Favorite } from "./types/Favorite.js";
 import { getFavourites } from "../../dapp/js/sql.js";
 
 import {
-  getAllOrderStatus,
+  getAllEvents,
 } from "../../dapp/js/sql.js";
-import * as utils from "./utils";
-import { OrderActivityEvent } from "./types/Order.js";
+import * as _ from "lodash";
+import { OrderActivityEventGrouped } from "./types/Order.js";
 
 export var USER_DETAILS;
 export const appContext = createContext({} as any);
@@ -42,7 +42,7 @@ const AppProvider = ({ children }: IProps) => {
   const [_currentOrderPoolTrade, setCurrentOrderPoolTrade] =
     useState("wminima");
   // get all orders
-  const [orders, setOrders] = useState<OrderActivityEvent[]>([]);
+  const [orders, setOrders] = useState<OrderActivityEventGrouped | null>(null);
   // current Minima block height
   const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
   // Accept OTC dialog
@@ -580,10 +580,16 @@ const AppProvider = ({ children }: IProps) => {
     });
   };
   const getAllOrders = () => {
-    getAllOrderStatus((orderstatus) => {   
-      const ordered = utils.orderEventByStatus(orderstatus);
+    getAllEvents(20, 0, (events) => {   
+      console.log(events);
+      const group = _.groupBy(events.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
 
-      setOrders(ordered);
+      const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
+
+      console.log('sorted',sortGroupedData);
+      // const ordered = utils.orderEventByStatus(orderstatus);
+
+      setOrders(sortGroupedData);
     });
   }
 

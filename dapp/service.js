@@ -310,6 +310,7 @@ MDS.init(function(msg){
 			
 			}else if(comms.action == "STARTETHSWAP"){
 				startETHSwap(USER_DETAILS, comms.reqpublickey, comms.erc20contract, comms.reqamount, comms.amount, function(ethresp){
+					MDS.log(JSON.stringify(ethresp));
 					sendFrontendMSG(comms.action,ethresp);
 				});
 			

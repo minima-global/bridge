@@ -275,17 +275,8 @@ function getAllEvents(limit, offset, callback){
 		callback(sqlmsg.rows);
 	});
 }
-// Get our created HTLC contract and all related events...
-function getAllOrderStatus(callback){
-	var query = `SELECT m.id AS myhtlc_id, m.hash, m.reqamount, m.token AS myhtlc_reqtoken, m.htlc_info, m.eventdate AS myhtlc_eventdate, c.id AS counterparty_id, c.event, c.token AS counterparty_token, c.amount, c.txnhash, c.eventdate AS counterparty_eventdate FROM myhtlc m LEFT JOIN counterparty c ON m.hash = c.hash ORDER BY m.hash`;
-
-	MDS.sql(query, function(sqlmsg){
-		callback(sqlmsg.rows);
-	});
-}
 
 function getAllOrders(callback){
-
 	const query = `SELECT * FROM myhtlc ORDER BY id DESC limit 20`;
 	MDS.sql(query, function(sqlmsg){
 		callback(sqlmsg.rows);
@@ -383,4 +374,4 @@ function getFavourites(callback){
 
 
 
-export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllOrders, getAllOrderStatus, getFavourites, addFavourites, removeFavourite, removeAllFavourites };
+export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllOrders, getFavourites, addFavourites, removeFavourite, removeAllFavourites };
