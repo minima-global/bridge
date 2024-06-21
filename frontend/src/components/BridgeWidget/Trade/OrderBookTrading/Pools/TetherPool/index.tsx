@@ -112,6 +112,10 @@ const TetherPool = () => {
                 throw new Error("Insufficient funds");
               }
 
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
+              }
+
 
               if (_currentNavigation === 'Buy') {
                 const balance = formatUnits(

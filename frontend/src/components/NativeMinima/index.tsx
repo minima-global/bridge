@@ -41,11 +41,11 @@ const NativeMinima = ({ display = false, full = true, external }: Props) => {
                 display ? "text-[11px]" : ""
               }`}
             >
-              {display && new Decimal(_minimaBalance.confirmed).toFixed(4)}
+              {display && new Decimal(_minimaBalance.confirmed).toString()}
 
               {!display &&
                 new Decimal(_minimaBalance.unconfirmed).isZero() &&
-                new Decimal(_minimaBalance.confirmed).toFixed(4)}
+                new Decimal(_minimaBalance.confirmed).toString()}
 
               {!display &&
                 new Decimal(_minimaBalance.unconfirmed).gt(0) &&
@@ -60,9 +60,8 @@ const NativeMinima = ({ display = false, full = true, external }: Props) => {
                 display ? "text-[11px]" : ""
               }`}
             >
-              {full
-                ? new Decimal(external).toFixed(4)
-                : new Decimal(external).toString()}
+              {
+               new Decimal(external).toString()}
             </p>
           )}
         </div>
