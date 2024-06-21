@@ -405,7 +405,7 @@ const AppProvider = ({ children }: IProps) => {
 
           (window as any).MDS.cmd(
             `balance tokenid:0x00 address:${
-              (window as any).USER_DETAILS.minimaaddress
+              _userDetails.minimaaddress
             }`,
             (resp: any) => {
               if (resp.status) {

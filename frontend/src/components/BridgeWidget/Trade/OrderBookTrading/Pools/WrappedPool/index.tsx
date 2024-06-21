@@ -1,6 +1,6 @@
 import { Formik } from "formik";
 import Navigation from "../Navigation";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import OrderPrice from "../OrderPrice";
 import * as yup from "yup";
 import Decimal from "decimal.js";
@@ -27,11 +27,34 @@ const WrappedPool = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
   const [_f, setF] = useState(false);
 
-  const { _minimaBalance, _userDetails, notify, handleActionViaBackend } =
+  const { _minimaBalance, _userDetails, notify, handleActionViaBackend, setTriggerBalanceUpdate } =
     useContext(appContext);
   const { tokens } = useTokenStoreContext();
   const { _network } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "wMinima");
+
+  const handlePullBalance = async () => {
+    // Pause for 3 seconds
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+  
+    // Trigger balance update
+    setTriggerBalanceUpdate(true);
+  
+    // Pause for 2 seconds before setting the trigger back to false
+    setTimeout(() => {
+      setTriggerBalanceUpdate(false);
+    }, 2000);
+  }
+
+  useEffect(() => {
+
+    (async () => {
+      await handlePullBalance();
+    })()
+
+  }, []);
 
   return (
     <Formik
@@ -73,8 +96,11 @@ const WrappedPool = () => {
           }
 
           await handleActionViaBackend(message);
+
           notify("Order requested...");
           resetForm();
+
+          await handlePullBalance();
         } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
