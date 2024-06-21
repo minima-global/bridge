@@ -5,6 +5,7 @@ import Identity from "./Identity";
 import OTCForm from "./OTCForm";
 import Activity from "./Activity";
 import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
+import OrderHistory from "../OrderBookTrading/OrderHistory";
 
 const OverTheCounterTrading = () => {
   const { _currentTradeWindow, _userDetails } = useContext(appContext);
@@ -46,6 +47,16 @@ const OverTheCounterTrading = () => {
         </div>
         
         <Activity />
+
+        <div className="flex items-center justify-center">
+          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
+          <span className="mx-4 text-sm text-black dark:text-white font-bold">
+            Orders
+          </span>
+          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
+        </div>
+
+        <OrderHistory />
       </div>
     </div>
   );

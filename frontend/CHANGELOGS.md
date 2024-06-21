@@ -52,9 +52,16 @@
 - Fix regression bug from min/max
 - Add another validation on order book
 
-##### [2.4.0] - 19 June 24
+##### [2.4.0] - 19-21 June 24
 
 - Re-work UX with Order book widget
-- Add Order History
+- Add Order History (both order book & otc)
 - Update communication messages while trading order book
+- Add max 4 decimal places on forms
+- Tweaks on OTC / insufficient funds check on deal
+- Tweak Withdraw/Deposit UX
+- Withdrawing SepoliaETH now works
+- Update design on Main Activity w/ tabbed view of all logs & orders
+- Clearer messages on Main acitivity
+- Tweak comm messages
 - Bug fixes

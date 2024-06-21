@@ -39,7 +39,6 @@ const OTCForm = () => {
 
           const resp = await handleActionViaBackend(message);
 
-          console.log(resp);
 
           notify("OTC Swap requested!");
           resetForm();

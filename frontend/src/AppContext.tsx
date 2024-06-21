@@ -72,6 +72,10 @@ const AppProvider = ({ children }: IProps) => {
   // Settings
   const [_promptLogs, setPromptLogs] = useState(false);
 
+  const [_switchLogView, setSwitchLogView] = useState<'all' | 'orders'>('all');
+
+  
+
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
   // Default ERC 20 Assets
@@ -114,7 +118,7 @@ const AppProvider = ({ children }: IProps) => {
           // If in write mode, generate & set key
           if (response.response.mode === "WRITE") {
             initBridgeSystemsStartup(function (userdets) {
-              console.log('userdets', userdets);
+
               // @ts-ignore
               window.USER_DETAILS = userdets;
               Object.freeze(USER_DETAILS);
@@ -361,7 +365,6 @@ const AppProvider = ({ children }: IProps) => {
               // get Latest orders               
               getAllOrders();
 
-              console.log(comms);
               if (comms.title === 'STARTETHSWAP') {
                 if (comms.message && comms.message.status && comms.message.networkstatus) {
                   return notify("Started an Ethereum swap!");
@@ -584,8 +587,8 @@ const AppProvider = ({ children }: IProps) => {
       }
     );
   };
-  const getAllOrders = () => {
-    getAllEvents(20, 0, (events) => {   
+  const getAllOrders = (max = 20, offset = 0) => {
+    getAllEvents(max, offset, (events) => {   
       const filterEvents = events.filter(event => event.EVENT === 'CPTXN_COLLECT'||event.EVENT==='CPTXN_SENT'||event.EVENT==='HTLC_STARTED'||event.EVENT==='CPTXN_EXPIRED');
       const group = _.groupBy(filterEvents.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
       const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
@@ -677,6 +680,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptLogs,
         promptLogs,
+
+        _switchLogView, 
+        setSwitchLogView,
 
         _promptFavorites,
         promptFavorites,

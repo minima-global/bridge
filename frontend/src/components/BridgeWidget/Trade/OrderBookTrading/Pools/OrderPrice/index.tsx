@@ -22,7 +22,6 @@ const OrderPrice = ({orderType, token}: IProps) => {
 
     (async () => {
       const order: any = await new Promise((resolve) => {
-        console.log('userPublicKey', _userDetails);
         searchAllorFavsOrderBooks(
           favorites,
           orderType.toLowerCase(),
@@ -36,7 +35,6 @@ const OrderPrice = ({orderType, token}: IProps) => {
         );
       });
 
-      console.log('Found Order', order);
       
       if (!order || !order.orderbook) return;
       

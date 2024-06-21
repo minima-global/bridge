@@ -16,7 +16,7 @@ const TetherToken = () => {
         className="rounded-full w-[36px] h-[36px] my-auto"
       />
       
-      {!relevantToken && <span className="text-black dark:text-teal-300"><RefreshIcon extraClass="w-[12px] mx-auto animate-spin" fill="currentColor" /></span>}
+      {!relevantToken && <span className="text-black dark:text-teal-300"><RefreshIcon extraClass="w-[12px] h-[16px] mx-auto animate-spin" fill="currentColor" /></span>}
       <p className="text-xs text-center font-bold font-mono truncate mt-1">
         {relevantToken &&
           new Decimal(

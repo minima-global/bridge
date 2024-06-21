@@ -10,10 +10,11 @@ import Decimal from "decimal.js";
 
 import * as utils from "../../utils";
 import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
+import Tabs from "./Tabs/index.js";
+import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
 
 const renderCell = (cellData) => {
   const {
-    ID,
     EVENT,
     EVENTDATE,
     HASH,
@@ -27,40 +28,58 @@ const renderCell = (cellData) => {
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
+  const [_f, setF] = useState(false);
+  const [_ftxnhash, setFtxnhash] = useState(false);
 
   return (
     <>
       <td className="p-3">
         <input
+          onFocus={() => setF(true)}
+          onBlur={() => setF(false)}
           readOnly
-          className="w-10 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
-          value={ID}
+          className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
+          value={
+            !_f
+              ? HASH.substring(0, 8) +
+                "..." +
+                HASH.substring(HASH.length - 8, HASH.length)
+              : HASH
+          }
         />
       </td>
       <td className="p-3">
         {EVENT.includes("WITHDRAW") && (
           <div className="bg-sky-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            {EVENT}
-          </div>
-        )}   
-        {EVENT.includes("STARTED") && (
-          <div className="bg-blue-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            {EVENT}
+            Withdrew tokens
           </div>
         )}
+
+        {EVENT.includes("STARTED") && (
+          <div className="bg-blue-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+            Created a contract
+          </div>
+        )}
+
+        {EVENT.includes("SENDETH") && (
+          <div className="bg-orange-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+            Sent ETH / ERC20
+          </div>
+        )}
+
         {EVENT.includes("COLLECT") && (
           <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            {EVENT}
+            Attempted a collect
           </div>
         )}
         {EVENT.includes("EXPIRED") && (
           <div className="bg-violet-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            {EVENT}
+            Contract expired
           </div>
         )}
         {EVENT.includes("SENT") && (
           <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            {EVENT}
+            Sent counterparty tokens
           </div>
         )}
         {EVENT.includes("APPROVE") && (
@@ -68,14 +87,6 @@ const renderCell = (cellData) => {
             {EVENT}
           </div>
         )}
-      </td>
-
-      <td className="p-3">
-        <input
-          readOnly
-          className="w-40 bg-transparent focus:outline-none truncate font-mono text-xs text-center"
-          value={HASH}
-        />
       </td>
 
       <td className="p-3">
@@ -101,21 +112,44 @@ const renderCell = (cellData) => {
       </td>
       <td className="p-3">
         {isEthereumEvent && (
-          <a
-            className="text-xs text-violet-600"
-            target="_blank"
-            href={`${
-              network === "mainnet"
-                ? "https://etherscan.io/tx/" + TXNHASH
-                : "https://sepolia.etherscan.io/tx/" + TXNHASH
-            }`}
-          >
-            {TXNHASH.substring(0, 10)}...
-          </a>
+          <input
+            onFocus={() => setFtxnhash(true)}
+            onBlur={() => setFtxnhash(false)}
+            readOnly
+            className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
+            value={
+              !_ftxnhash
+                ? TXNHASH.substring(0, 8) +
+                  "..." +
+                  TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
+                : TXNHASH
+            }
+            onClick={(e) => {
+              if (window.navigator.userAgent.includes("Minima Browser")) {
+                e.preventDefault();
+                // @ts-ignore
+                Android.openExternalBrowser(
+                  network === "mainnet"
+                    ? "https://etherscan.io/tx/" + TXNHASH
+                    : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                  "_blank"
+                );
+              }
+
+              window.open(
+                network === "mainnet"
+                  ? "https://etherscan.io/tx/" + TXNHASH
+                  : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                "_blank"
+              );
+            }}
+          />
         )}
 
         {isMinimaEvent && TXNHASH.includes("0x") && (
           <input
+          onFocus={() => setFtxnhash(true)}
+            onBlur={() => setFtxnhash(false)}
             onClick={async () => {
               if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
                 return;
@@ -131,8 +165,14 @@ const renderCell = (cellData) => {
               );
             }}
             readOnly
-            className="w-20 cursor-pointer hover:text-opacity-80 text-orange-600 text-xs bg-transparent focus:outline-none truncate font-mono text-center"
-            value={TXNHASH}
+            className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
+            value={
+              !_ftxnhash
+                ? TXNHASH.substring(0, 8) +
+                  "..." +
+                  TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
+                : TXNHASH
+            }
           />
         )}
         {isMinimaEvent && !TXNHASH.includes("0x") && (
@@ -153,7 +193,6 @@ const renderCell = (cellData) => {
 };
 const renderCellMobile = (cellData) => {
   const {
-    ID,
     EVENT,
     EVENTDATE,
     HASH,
@@ -167,54 +206,65 @@ const renderCellMobile = (cellData) => {
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
+  const [_f, setF] = useState(false);
+
 
   return (
     <>
       <div className="p-4 pt-3">
         <input
+          onFocus={() => setF(true)}
+          onBlur={() => setF(false)}
           readOnly
-          className="w-full bg-transparent focus:outline-none truncate font-mono text-xs font-bold"
-          value={ID}
+          className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
+          value={
+            !_f
+              ? HASH.substring(0, 8) +
+                "..." +
+                HASH.substring(HASH.length - 8, HASH.length)
+              : HASH
+          }
         />
       </div>
       <div className="p-4 pt-3">
         {EVENT.includes("WITHDRAW") && (
           <div className="bg-sky-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            {EVENT}
-          </div>
-        )}      
-        {EVENT.includes("STARTED") && (
-          <div className="bg-blue-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            {EVENT}
+            Withdrew tokens
           </div>
         )}
+
+        {EVENT.includes("STARTED") && (
+          <div className="bg-blue-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
+            Created a contract
+          </div>
+        )}
+
+        {EVENT.includes("SENDETH") && (
+          <div className="bg-orange-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
+            Sent ETH / ERC20
+          </div>
+        )}
+
         {EVENT.includes("COLLECT") && (
-          <div className="bg-teal-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            {EVENT}
+          <div className="bg-teal-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
+            Attempted a collect
           </div>
         )}
         {EVENT.includes("EXPIRED") && (
-          <div className="bg-violet-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            {EVENT}
+          <div className="bg-violet-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
+            Contract expired
           </div>
         )}
         {EVENT.includes("SENT") && (
-          <div className="bg-teal-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            {EVENT}
+          <div className="bg-teal-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
+            Sent counterparty tokens
           </div>
         )}
         {EVENT.includes("APPROVE") && (
-          <div className="bg-yellow-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
+          <div className="bg-yellow-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
             {EVENT}
           </div>
         )}
-      </div>
-      <div className="p-4 pt-3">
-        <input
-          readOnly
-          className="w-full bg-transparent focus:outline-none truncate font-mono text-xs text-left"
-          value={HASH}
-        />
       </div>
       <div className="p-4">
         <div
@@ -238,19 +288,32 @@ const renderCellMobile = (cellData) => {
         </div>
       </div>
       <div className="p-4 pt-2">
-        {isEthereumEvent && (
+      {isEthereumEvent && (
           <input
-            onClick={() => {
+            readOnly
+            className="w-full bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
+            value={
+              TXNHASH
+            }
+            onClick={(e) => {
+              if (window.navigator.userAgent.includes("Minima Browser")) {
+                e.preventDefault();
+                // @ts-ignore
+                Android.openExternalBrowser(
+                  network === "mainnet"
+                    ? "https://etherscan.io/tx/" + TXNHASH
+                    : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                  "_blank"
+                );
+              }
+
               window.open(
                 network === "mainnet"
                   ? "https://etherscan.io/tx/" + TXNHASH
                   : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                window.innerWidth < 568 ? "_self" : "_blank"
+                "_blank"
               );
             }}
-            readOnly
-            className="cursor-pointer hover:text-opacity-80 text-violet-600 text-xs bg-transparent focus:outline-none w-full !truncate font-mono"
-            value={TXNHASH}
           />
         )}
 
@@ -271,8 +334,10 @@ const renderCellMobile = (cellData) => {
               );
             }}
             readOnly
-            className="cursor-pointer hover:text-opacity-80 text-orange-600 text-xs bg-transparent focus:outline-none w-full !truncate font-mono"
-            value={TXNHASH}
+            className="w-full bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
+            value={
+              TXNHASH
+            }
           />
         )}
         {isMinimaEvent && !TXNHASH.includes("0x") && (
@@ -295,7 +360,8 @@ const renderCellMobile = (cellData) => {
 
 const MAX = 20;
 const MainActivity = () => {
-  const { _promptLogs, promptLogs } = useContext(appContext);
+  const { _promptLogs, promptLogs, _switchLogView } =
+    useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
 
   const [offset, setOffset] = useState(0);
@@ -318,13 +384,29 @@ const MainActivity = () => {
   useEffect(() => {
     if (_promptLogs) {
       getAllEvents(MAX, offset, (events) => {
-        const _evts = events.map((event) => ({
-          ...event,
-          getTokenType,
-          _network,
-        }));
+        const _evts = events.map((e) => {
+          if (e.TXNHASH.includes("-")) {
+            const txHash = e.TXNHASH.split("-")[0];
+            return {
+              ...e,
+              TXNHASH: txHash,
+              getTokenType,
+              _network,
+            };
+          }
+          return {
+            ...e,
+            getTokenType,
+            _network,
+          };
+        });
 
-        setData(_evts);
+        setData(
+          _evts.filter(
+            (e) =>
+              !(e.EVENT === "CPTXN_EXPIRED" && e.TXNHASH === "SECRET REVEALED")
+          )
+        );
       });
     }
   }, [_promptLogs, offset]);
@@ -341,12 +423,14 @@ const MainActivity = () => {
         createPortal(
           <animated.div
             style={springProps}
-            className="bg-slate-200 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 overflow-y-scroll grid grid-cols-[1fr_minmax(0,_860px)_1fr]"
+            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 overflow-y-scroll grid grid-cols-[1fr_minmax(0,_860px)_1fr]"
           >
             <div className="bg-slate-100 dark:bg-black" />
             <div className="overflow-scroll">
               <div className="flex justify-between items-center pr-4 my-3">
-                <h3 className="font-bold ml-4">Activity Logs</h3>
+               
+                <Tabs />
+
                 <svg
                   onClick={promptLogs}
                   xmlns="http://www.w3.org/2000/svg"
@@ -364,65 +448,65 @@ const MainActivity = () => {
                   <path d="M6 6l12 12" />
                 </svg>
               </div>
-              {!data.length && (
-                <p className="text-xs font-bold text-center">No activity yet</p>
+
+              {_switchLogView === "all" && (
+                <>
+                  {!data.length && (
+                    <p className="text-xs font-bold text-center">
+                      No activity yet
+                    </p>
+                  )}
+                  {!!data.length && (
+                    <MostResponsiveTableEver
+                      headerClasses="border-b"
+                      headerClassesMobile="divide-y dark:divide-teal-300"
+                      headerCellClassesMobile={[
+                        "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
+                        "tracking-wider text-sm p-4 font-bold",
+                        "tracking-wider text-sm p-4 font-bold",
+                        "tracking-wider text-sm p-4 font-bold",
+                        "tracking-wider text-sm p-4 font-bold",
+                        "tracking-wider text-sm p-4 font-bold",
+                        "tracking-wider text-sm p-4 font-bold",
+                      ]}
+                      headerCellClasses={[
+                        "tracking-wider font-semibold text-sm p-3 w-10",
+                        "tracking-wider font-semibold text-sm p-3 w-40",
+                        "tracking-wider font-semibold text-sm p-3 w-40",
+                        "tracking-wider font-semibold text-sm p-3 w-20",
+                        "tracking-wider font-semibold text-sm p-3 w-40",
+                        "tracking-wider font-semibold text-sm p-3 w-40 text-right",
+                      ]}
+                      headers={["ID", "Event", "Token", "TXNHash", "Timestamp"]}
+                      data={data}
+                      renderCell={renderCell}
+                      renderCellMobile={renderCellMobile}
+                    />
+                  )}
+                  {!!data.length && (
+                    <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
+                      <button
+                        onClick={handlePrev}
+                        disabled={offset === 0}
+                        type="button"
+                        className="bg-gray-100 dark:bg-gray-200 dark:text-black bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
+                      >
+                        Prev
+                      </button>
+                      <button
+                        onClick={handleNext}
+                        disabled={data.length < 20}
+                        type="button"
+                        className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </>
               )}
-              {!!data.length && (
-                <MostResponsiveTableEver
-                  headerClasses=""
-                  headerClassesMobile="divide-y dark:divide-teal-300"
-                  headerCellClassesMobile={[
-                    "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
-                    "tracking-wider text-sm p-4 font-bold",
-                    "tracking-wider text-sm p-4 font-bold",
-                    "tracking-wider text-sm p-4 font-bold",
-                    "tracking-wider text-sm p-4 font-bold",
-                    "tracking-wider text-sm p-4 font-bold",
-                    "tracking-wider text-sm p-4 font-bold",
-                    "tracking-wider text-sm p-4 font-bold",
-                  ]}
-                  headerCellClasses={[
-                    "tracking-wider font-semibold text-sm p-3 w-10",
-                    "tracking-wider font-semibold text-sm p-3 w-40",
-                    "tracking-wider font-semibold text-sm p-3 w-[25px]",
-                    "tracking-wider font-semibold text-sm p-3 w-40",
-                    "tracking-wider font-semibold text-sm p-3 w-20",
-                    "tracking-wider font-semibold text-sm p-3 w-40",
-                    "tracking-wider font-semibold text-sm p-3 w-40 text-right",
-                  ]}
-                  headers={[
-                    "ID",
-                    "Event",
-                    "HashLock",
-                    "Token",
-                    "TXNHash",
-                    "Timestamp",
-                  ]}
-                  data={data}
-                  renderCell={renderCell}
-                  renderCellMobile={renderCellMobile}
-                />
-              )}
-              {!!data.length && (
-                <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
-                  <button
-                    onClick={handlePrev}
-                    disabled={offset === 0}
-                    type="button"
-                    className="bg-gray-100 dark:bg-gray-200 dark:text-black bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
-                  >
-                    Prev
-                  </button>
-                  <button
-                    onClick={handleNext}
-                    disabled={data.length < 20}
-                    type="button"
-                    className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
-                  >
-                    Next
-                  </button>
-                </div>
-              )}
+
+              {_switchLogView === 'orders' && <OrderHistory full={true} />}
             </div>
             <div className="bg-slate-100 dark:bg-black" />
           </animated.div>,
