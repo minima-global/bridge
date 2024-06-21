@@ -18,7 +18,7 @@ type FormState = {
 };
 const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _balance } = useWalletContext();
-  const { _currentNetwork, _defaultNetworks, _minimaBalance } =
+  const { _currentNetwork, _defaultNetworks, _minimaBalance, getWalletBalance, getMainMinimaBalance, setTriggerBalanceUpdate } =
     useContext(appContext);
   const { _network } = useWalletContext();
   const { tokens } = useTokenStoreContext();
@@ -32,6 +32,31 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const initialTokenShouldBeMinimaIfExists = tokens.find(
     (token) => token.address === _defaults["wMinima"][_network]
   );
+
+  const getBalances = async () => {
+    // Wait a few secs
+    await new Promise((resolve) => {
+      setTimeout(resolve, 5000);
+    });
+
+    getWalletBalance();
+    getMainMinimaBalance();
+  };
+
+  const handlePullBalance = async () => {
+    // Pause for 3 seconds
+    await new Promise((resolve) => {
+      setTimeout(resolve, 7000);
+    });
+  
+    // Trigger balance update
+    setTriggerBalanceUpdate(true);
+  
+    // Pause for 2 seconds before setting the trigger back to false
+    setTimeout(() => {
+      setTriggerBalanceUpdate(false);
+    }, 2000);
+  }
 
   return (
     <Formik
@@ -107,11 +132,12 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
         try {
           let action;
           let address;
+          console.log(asset.name);
 
           if (type === "erc20") {
             if (asset.name === "wMinima") {
               action = "SENDWMINIMA";
-            } else if (asset.name === "Ethereum") {
+            } else if (asset.name === "Ethereum" || asset.name === 'SepoliaETH') {
               action = "SENDETH";
             } else if (asset.name === "Tether") {
               action = "SENDUSDT";
@@ -136,8 +162,16 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           await submitForm(
             type === "native" ? amount : { amount, action, address }
           );
-          resetForm();
           setStatus("Successful");
+          if (type === 'native') {
+            await getBalances();  
+          } else {
+            await handlePullBalance();
+          }
+
+
+          resetForm();
+
         } catch (error: any) {
           console.error(error);
           // display error message

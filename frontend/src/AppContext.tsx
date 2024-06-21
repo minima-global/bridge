@@ -114,6 +114,7 @@ const AppProvider = ({ children }: IProps) => {
           // If in write mode, generate & set key
           if (response.response.mode === "WRITE") {
             initBridgeSystemsStartup(function (userdets) {
+              console.log('userdets', userdets);
               // @ts-ignore
               window.USER_DETAILS = userdets;
               Object.freeze(USER_DETAILS);
@@ -554,9 +555,10 @@ const AppProvider = ({ children }: IProps) => {
   };
   
   const getWalletBalance = () => {
+    console.log('userDETAILS', _userDetails);
     (window as any).MDS.cmd(
       `balance tokenid:0x00 address:${
-        _userDetails.minimaaddress
+        _userDetails.minimaaddress.mxaddress
       }`,
       (resp: any) => {
         if (resp.status) {
