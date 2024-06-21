@@ -7,8 +7,13 @@ import Decimal from "decimal.js";
 import NativeMinima from "../../NativeMinima";
 
 const NativeAddress = () => {
-  const { _userDetails, getMainMinimaBalance, _mainBalance, promptDeposit } =
-    useContext(appContext);
+  const {
+    _userDetails,
+    getMainMinimaBalance,
+    getWalletBalance,
+    _mainBalance,
+    promptDeposit,
+  } = useContext(appContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | false>(false);
   const [f, setF] = useState(false);
@@ -16,6 +21,16 @@ const NativeAddress = () => {
   useEffect(() => {
     getMainMinimaBalance();
   }, []);
+
+  const getBalances = async () => {
+    // Wait a few secs
+    await new Promise((resolve) => {
+      setTimeout(resolve, 5000);
+    });
+
+    getWalletBalance();
+    getMainMinimaBalance();
+  };
 
   if (_userDetails === null) {
     return <ProgressIcon />;
@@ -25,7 +40,7 @@ const NativeAddress = () => {
       <div className="flex flex-col gap-3 max-w-sm mx-auto">
         <Formik
           initialValues={{ amount: 0 }}
-          onSubmit={async ({ amount }, { setStatus }) => {
+          onSubmit={async ({ amount }, { setStatus, resetForm }) => {
             setLoading(true);
             setStatus(undefined);
             try {
@@ -48,6 +63,8 @@ const NativeAddress = () => {
               });
 
               setStatus("Done!");
+              await getBalances();
+              resetForm();
             } catch (error) {
               if (error instanceof Error) {
                 return setError(error.message);
@@ -104,12 +121,14 @@ const NativeAddress = () => {
             touched,
             errors,
             status,
+            isValid,
+            dirty,
           }) => (
             <form onSubmit={handleSubmit} className="px-4">
               {_mainBalance !== null && (
                 <NativeMinima
                   display={false}
-                  external={_mainBalance.sendable}
+                  external={_mainBalance.unconfirmed != "0" ? _mainBalance.sendable+"/"+_mainBalance.unconfirmed : _mainBalance.sendable}
                   full={false}
                 />
               )}
@@ -180,28 +199,35 @@ const NativeAddress = () => {
                 </div>
               )}
 
-              <div className="grid grid-cols-2 mt-3 gap-2">
-                {loading && <div />}
-                {!loading && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      resetForm();
-                      promptDeposit();                      
-                    }}
-                    className="bg-gray-500 text-white dark:text-black font-bold"
-                  >
-                    Cancel
-                  </button>
-                )}
-                <button
-                  disabled={loading}
-                  type="submit"
-                  className="bg-orange-600 font-bold flex justify-center text-white dark:text-black disabled:bg-opacity-50"
+              <div className="grid grid-cols-1 my-4">
+                <div />
+                <div
+                  className={`gap-1 grid ${
+                    loading ? "grid-cols-1" : "grid-cols-2"
+                  }`}
                 >
-                  {!loading && "Deposit"}
-                  {loading && <ProgressIcon />}
-                </button>
+                  {loading && <div />}
+                  {!loading && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        resetForm();
+                        promptDeposit();
+                      }}
+                      className="bg-gray-500 text-white dark:text-black font-bold"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    disabled={loading || !isValid || !dirty}
+                    type="submit"
+                    className="bg-orange-600 font-bold flex justify-center text-white dark:text-black disabled:bg-opacity-50"
+                  >
+                    {!loading && "Deposit"}
+                    {loading && <ProgressIcon />}
+                  </button>
+                </div>
               </div>
             </form>
           )}

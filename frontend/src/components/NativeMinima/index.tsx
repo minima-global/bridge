@@ -60,8 +60,7 @@ const NativeMinima = ({ display = false, full = true, external }: Props) => {
                 display ? "text-[11px]" : ""
               }`}
             >
-              {
-               new Decimal(external).toString()}
+              {external}
             </p>
           )}
         </div>

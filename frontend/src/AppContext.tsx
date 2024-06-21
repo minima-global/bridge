@@ -403,34 +403,7 @@ const AppProvider = ({ children }: IProps) => {
             setCurrentBlock(resp.response.block);
           });
 
-          (window as any).MDS.cmd(
-            `balance tokenid:0x00 address:${
-              _userDetails.minimaaddress
-            }`,
-            (resp: any) => {
-              if (resp.status) {
-                const { confirmed, unconfirmed, coins } = resp.response[0];
-
-                // Use Minima Maths to calculate total of confirmed + unconfirmed
-                const add =
-                  'runscript script:"LET total=' +
-                  confirmed +
-                  "+" +
-                  unconfirmed +
-                  ' LET roundedtotal=FLOOR(total)"';
-
-                (window as any).MDS.cmd(add, function (respo) {
-                  const total = respo.response.variables.roundedtotal;
-                  setMinimaBalance({
-                    confirmed,
-                    unconfirmed,
-                    total,
-                    coins,
-                  });
-                });
-              }
-            }
-          );
+          getWalletBalance();
         }
       });
     }
@@ -579,6 +552,37 @@ const AppProvider = ({ children }: IProps) => {
       }
     });
   };
+  
+  const getWalletBalance = () => {
+    (window as any).MDS.cmd(
+      `balance tokenid:0x00 address:${
+        _userDetails.minimaaddress
+      }`,
+      (resp: any) => {
+        if (resp.status) {
+          const { confirmed, unconfirmed, coins } = resp.response[0];
+
+          // Use Minima Maths to calculate total of confirmed + unconfirmed
+          const add =
+            'runscript script:"LET total=' +
+            confirmed +
+            "+" +
+            unconfirmed +
+            ' LET roundedtotal=FLOOR(total)"';
+
+          (window as any).MDS.cmd(add, function (respo) {
+            const total = respo.response.variables.roundedtotal;
+            setMinimaBalance({
+              confirmed,
+              unconfirmed,
+              total,
+              coins,
+            });
+          });
+        }
+      }
+    );
+  };
   const getAllOrders = () => {
     getAllEvents(20, 0, (events) => {   
       console.log(events);
@@ -670,7 +674,8 @@ const AppProvider = ({ children }: IProps) => {
 
         _mainBalance,
         getMainMinimaBalance,
-
+        getWalletBalance,
+        
         _promptWithdraw,
         promptWithdraw,
 
