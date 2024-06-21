@@ -317,11 +317,7 @@ MDS.init(function(msg){
 				acceptOTCSwapCoin(USER_DETAILS, comms.coinid, function(res,message){
 					var fullmess 	 = {};
 					fullmess.res 	 = res;
-					if(res){
-						fullmess.message = JSON.parse(message);	
-					}else{
-						fullmess.message = message;
-					}
+					fullmess.message = message;
 					
 					sendFrontendMSG(comms.action,fullmess);
 				});

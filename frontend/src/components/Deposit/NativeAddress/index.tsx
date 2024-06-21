@@ -129,7 +129,6 @@ const NativeAddress = () => {
                 <NativeMinima
                   display={false}
                   external={_mainBalance.unconfirmed != "0" ? _mainBalance.sendable+"/"+_mainBalance.unconfirmed : _mainBalance.sendable}
-                  full={false}
                 />
               )}
               <div

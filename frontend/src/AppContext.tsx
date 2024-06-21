@@ -361,6 +361,7 @@ const AppProvider = ({ children }: IProps) => {
               // get Latest orders               
               getAllOrders();
 
+              console.log(comms);
               if (comms.title === 'STARTETHSWAP') {
                 if (comms.message && comms.message.status && comms.message.networkstatus) {
                   return notify("Started an Ethereum swap!");

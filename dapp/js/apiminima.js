@@ -550,13 +550,13 @@ function acceptOTCSwapCoin(userdets, coinid, callback){
 							
 							//Send the ETH counter TXN - to make him reveal the secret
 							sendCounterPartyMinimaTxn(userdets,coin,function(resp){
-								callback(resp.status,JSON.stringify(resp));	
+								callback(resp.status,"Posted counterparty transaction.");	
 							});	
 						});
 							
 					}
 				}else{
-					callback(false,"Allready sent counterparty txn..");	
+					callback(false,"Already sent counterparty transaction...");	
 				}
 			});		
 		});
