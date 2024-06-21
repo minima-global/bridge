@@ -26,8 +26,8 @@ const WidgetInputWrapper = ({
   const { _minimaBalance } = useContext(appContext);
 
   return (
-    <div className="grid grid-cols-2 divide-x-2 divide-teal-300 px-4">
-      <div className="px-4 border-l-2 border-red-300">
+    <div className={`grid grid-cols-2 divide-x-2 ${tradeSide === 'buy' ? "divide-red-300" : "divide-teal-300"} px-4`}>
+      <div className={`px-4 border-l-2 ${tradeSide === 'buy' ? "border-teal-300" : "border-red-300"}`}>
         <div className="grid grid-cols-[1fr_36px]">
           <div className={`${errors && "animate-pulse"}`}>
             <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">

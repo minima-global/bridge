@@ -43,17 +43,17 @@ const OrderHistory = () => {
 
   return (
     <div
-      className={`my-4 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
-        orders ===null && "min-h-[250px] grid grid-rows-[auto_1fr]"
+      className={`my-4 dark:outline shadow-lg dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
+        orders === null && "min-h-[250px] grid grid-rows-1"
       }`}
     >
-      <h3 className="font-bold p-3 pb-2">Order History</h3>
-      {orders===null && (
+      {/* <h3 className="font-bold p-3 pb-2">Order History</h3> */}
+      {orders === null && (
         <div className="h-full flex items-center justify-center">
           <p className="text-xs text-center">No orders available</p>
         </div>
       )}
-      {orders!==null && (
+      {orders !== null && (
         <ul className="overflow-y-auto max-h-[300px]">
           {Object.keys(orders).map((hash) => (
             <OrderItem key={hash} order={{...orders[hash]}} />
