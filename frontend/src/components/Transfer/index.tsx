@@ -20,7 +20,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _balance } = useWalletContext();
   const { _currentNetwork, _defaultNetworks, _minimaBalance, getWalletBalance, getMainMinimaBalance, setTriggerBalanceUpdate } =
     useContext(appContext);
-  const { _network } = useWalletContext();
+  const { _network, getEthereumBalance } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   const [f, setF] = useState(false);
@@ -51,6 +51,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   
     // Trigger balance update
     setTriggerBalanceUpdate(true);
+    getEthereumBalance();
   
     // Pause for 2 seconds before setting the trigger back to false
     setTimeout(() => {
@@ -132,7 +133,6 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
         try {
           let action;
           let address;
-          console.log(asset.name);
 
           if (type === "erc20") {
             if (asset.name === "wMinima") {
@@ -162,6 +162,8 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           await submitForm(
             type === "native" ? amount : { amount, action, address }
           );
+
+
           setStatus("Successful");
           if (type === 'native') {
             await getBalances();  

@@ -56,7 +56,7 @@ const WidgetInputWrapper = ({
               src="./assets/token.svg"
               className="rounded-full w-[36px] h-[36px] my-auto"
             />
-            <p className="text-xs text-center font-bold font-mono truncate">
+            <p className="text-xs text-center font-bold font-mono truncate mt-1">
               {new Decimal(_minimaBalance.confirmed).toString()}
             </p>
           </div>

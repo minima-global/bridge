@@ -30,7 +30,7 @@ const WrappedPool = () => {
   const { _minimaBalance, _userDetails, notify, handleActionViaBackend, setTriggerBalanceUpdate } =
     useContext(appContext);
   const { tokens } = useTokenStoreContext();
-  const { _network } = useWalletContext();
+  const { _network, getEthereumBalance } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "wMinima");
 
   const handlePullBalance = async () => {
@@ -41,6 +41,7 @@ const WrappedPool = () => {
   
     // Trigger balance update
     setTriggerBalanceUpdate(true);
+    getEthereumBalance();
   
     // Pause for 2 seconds before setting the trigger back to false
     setTimeout(() => {

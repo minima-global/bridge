@@ -361,8 +361,6 @@ const AppProvider = ({ children }: IProps) => {
               // get Latest orders               
               getAllOrders();
 
-              console.log(comms);
-
               if (comms.title === 'STARTETHSWAP') {
                 if (comms.message && comms.message.status && comms.message.networkstatus) {
                   return notify("Started an Ethereum swap!");
@@ -555,7 +553,7 @@ const AppProvider = ({ children }: IProps) => {
   };
   
   const getWalletBalance = () => {
-    console.log('userDETAILS', _userDetails);
+    if (_userDetails === null) return;
     (window as any).MDS.cmd(
       `balance tokenid:0x00 address:${
         _userDetails.minimaaddress.mxaddress
@@ -587,14 +585,9 @@ const AppProvider = ({ children }: IProps) => {
   };
   const getAllOrders = () => {
     getAllEvents(20, 0, (events) => {   
-      console.log(events);
-      const group = _.groupBy(events.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
-
+      const filterEvents = events.filter(event => event.EVENT === 'CPTXN_COLLECT'||event.EVENT==='CPTXN_SENT'||event.EVENT==='HTLC_STARTED'||event.EVENT==='CPTXN_EXPIRED');
+      const group = _.groupBy(filterEvents.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
       const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
-
-      console.log('sorted',sortGroupedData);
-      // const ordered = utils.orderEventByStatus(orderstatus);
-
       setOrders(sortGroupedData);
     });
   }
