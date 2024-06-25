@@ -7,10 +7,43 @@ import WalletIcon from "../../UI/Icons/WalletIcon";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../providers/WalletProvider/WalletProvider";
 
+import { differenceInSeconds } from "date-fns";
+
 const Balance = () => {
-  const { _currentNavigation, promptDeposit, promptWithdraw, _minimaBalance } = useContext(appContext);
-  const {_balance: etherBalance} = useWalletContext();
+  const { loaded, _currentNavigation, promptDeposit, promptWithdraw, _minimaBalance, getWalletBalance, setTriggerBalanceUpdate } = useContext(appContext);
+  const {_balance: etherBalance, getEthereumBalance} = useWalletContext();
+  
   const [runningLow, setRunningLow] = useState({minima: false, ethereum: false, disableEthereum: false});
+
+  const callBalance = () => {
+    setTriggerBalanceUpdate(true);
+        setTimeout(() => {
+          getEthereumBalance();
+          setTriggerBalanceUpdate(false);
+        }, 2000);
+  }
+  const handlePullBalance = () => {
+    (window as any).MDS.keypair.get("_lastethbalancecheck", (resp) => {
+      if (resp.status) {
+        const dt = JSON.parse(resp.value);
+        const now = new Date().getTime();
+
+        // Convert dt.timestamp and now to Date objects
+        const lastCheck = new Date(dt.timestamp);
+        const currentTime = new Date(now);
+
+        // Check if the difference is more than 60 seconds
+        if (differenceInSeconds(currentTime, lastCheck) > 60) {
+          
+          (window as any).MDS.keypair.set("_lastethbalancecheck", JSON.stringify({timestamp: now}), () => {})
+
+          callBalance();
+        }             
+      } else {
+        callBalance();
+      }
+    })
+  }
 
   useEffect(() => {
     if (_currentNavigation === "balance") {
@@ -25,8 +58,15 @@ const Balance = () => {
           setRunningLow(prevState => ({...prevState, disableEthereum: true}));
         }
       }
+    
+      // let's fetch Minima balance again..
+      getWalletBalance();
+      // Get Ethereum balance every 60s
+      if (loaded && loaded.current) {
+        handlePullBalance();
+      }
     }
-  }, [_currentNavigation]);
+  }, [_currentNavigation, loaded]);
 
   if (_currentNavigation !== "balance") {
     return null;
