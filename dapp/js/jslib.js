@@ -161,4 +161,4 @@ function jumpActivity(){
 	location.href="history.html?uid="+MDS.minidappuid;
 }
 
-export { sendBackendMSG, toFixedNumber, sendFrontendMSG, sendSimpleBackendMSG };
+export { sendBackendMSG, toFixedNumber, sendFrontendMSG, sendSimpleBackendMSG, min, max };

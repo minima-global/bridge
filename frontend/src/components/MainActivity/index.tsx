@@ -14,6 +14,7 @@ import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
 
 const renderCell = (cellData) => {
+  const [_f, setF] = useState(false);
   const {
     EVENT,
     EVENTDATE,
@@ -28,7 +29,6 @@ const renderCell = (cellData) => {
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
-  const [_f, setF] = useState(false);
   const [_ftxnhash, setFtxnhash] = useState(false);
 
   return (
@@ -111,76 +111,82 @@ const renderCell = (cellData) => {
         </div>
       </td>
       <td className="p-3">
-        {isEthereumEvent && (
-          <input
-            onFocus={() => setFtxnhash(true)}
-            onBlur={() => setFtxnhash(false)}
-            readOnly
-            className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
-            value={
-              !_ftxnhash
-                ? TXNHASH.substring(0, 8) +
-                  "..." +
-                  TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
-                : TXNHASH
-            }
-            onClick={(e) => {
-              if (window.navigator.userAgent.includes("Minima Browser")) {
-                e.preventDefault();
-                // @ts-ignore
-                Android.openExternalBrowser(
-                  network === "mainnet"
-                    ? "https://etherscan.io/tx/" + TXNHASH
-                    : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                  "_blank"
-                );
-              }
+        {EVENT.includes("EXPIRED") ? (
+          <p>-</p>
+        ) : (
+          <>
+            {isEthereumEvent && (
+              <input
+                onFocus={() => setFtxnhash(true)}
+                onBlur={() => setFtxnhash(false)}
+                readOnly
+                className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
+                value={
+                  !_ftxnhash
+                    ? TXNHASH.substring(0, 8) +
+                      "..." +
+                      TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
+                    : TXNHASH
+                }
+                onClick={(e) => {
+                  if (window.navigator.userAgent.includes("Minima Browser")) {
+                    e.preventDefault();
+                    // @ts-ignore
+                    Android.openExternalBrowser(
+                      network === "mainnet"
+                        ? "https://etherscan.io/tx/" + TXNHASH
+                        : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                      "_blank"
+                    );
+                  }
 
-              window.open(
-                network === "mainnet"
-                  ? "https://etherscan.io/tx/" + TXNHASH
-                  : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                "_blank"
-              );
-            }}
-          />
-        )}
+                  window.open(
+                    network === "mainnet"
+                      ? "https://etherscan.io/tx/" + TXNHASH
+                      : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                    "_blank"
+                  );
+                }}
+              />
+            )}
 
-        {isMinimaEvent && TXNHASH.includes("0x") && (
-          <input
-          onFocus={() => setFtxnhash(true)}
-            onBlur={() => setFtxnhash(false)}
-            onClick={async () => {
-              if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
-                return;
-              }
+            {isMinimaEvent && TXNHASH.includes("0x") && (
+              <input
+                onFocus={() => setFtxnhash(true)}
+                onBlur={() => setFtxnhash(false)}
+                onClick={async () => {
+                  if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
+                    return;
+                  }
 
-              const link = await utils.dAppLink("Block");
-              await new Promise((resolve) => setTimeout(resolve, 150));
-              window.open(
-                `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
-                  link.sessionid
-                }`,
-                window.innerWidth < 568 ? "_self" : "_blank"
-              );
-            }}
-            readOnly
-            className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
-            value={
-              !_ftxnhash
-                ? TXNHASH.substring(0, 8) +
-                  "..." +
-                  TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
-                : TXNHASH
-            }
-          />
-        )}
-        {isMinimaEvent && !TXNHASH.includes("0x") && (
-          <p className="text-xs text-center">{TXNHASH}</p>
-        )}
+                  const link = await utils.dAppLink("Block");
+                  await new Promise((resolve) => setTimeout(resolve, 150));
+                  window.open(
+                    `${(window as any).MDS.filehost}${
+                      link.uid
+                    }/index.html?uid=${link.sessionid}`,
+                    window.innerWidth < 568 ? "_self" : "_blank"
+                  );
+                }}
+                readOnly
+                className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
+                value={
+                  !_ftxnhash
+                    ? TXNHASH.substring(0, 8) +
+                      "..." +
+                      TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
+                    : TXNHASH
+                }
+              />
+            )}
+            {isMinimaEvent && !TXNHASH.includes("0x") && (
+              <p className="text-xs text-center">{TXNHASH}</p>
+            )}
 
-        {!isEthereumEvent && !isMinimaEvent && (
-          <p className="text-xs text-center">{TXNHASH}</p>
+            {!isEthereumEvent && !isMinimaEvent && (
+              <p className="text-xs text-center">{TXNHASH}</p>
+            )}
+          </>
         )}
       </td>
       <td className="p-4 text-right">
@@ -192,6 +198,7 @@ const renderCell = (cellData) => {
   );
 };
 const renderCellMobile = (cellData) => {
+  const [_f, setF] = useState(false);
   const {
     EVENT,
     EVENTDATE,
@@ -206,8 +213,6 @@ const renderCellMobile = (cellData) => {
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
-  const [_f, setF] = useState(false);
-
 
   return (
     <>
@@ -288,65 +293,67 @@ const renderCellMobile = (cellData) => {
         </div>
       </div>
       <div className="p-4 pt-2">
-      {isEthereumEvent && (
-          <input
-            readOnly
-            className="w-full bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
-            value={
-              TXNHASH
-            }
-            onClick={(e) => {
-              if (window.navigator.userAgent.includes("Minima Browser")) {
-                e.preventDefault();
-                // @ts-ignore
-                Android.openExternalBrowser(
-                  network === "mainnet"
-                    ? "https://etherscan.io/tx/" + TXNHASH
-                    : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                  "_blank"
-                );
-              }
-
-              window.open(
-                network === "mainnet"
-                  ? "https://etherscan.io/tx/" + TXNHASH
-                  : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                "_blank"
-              );
-            }}
-          />
-        )}
-
-        {isMinimaEvent && TXNHASH.includes("0x") && (
-          <input
-            onClick={async () => {
-              if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
-                return;
-              }
-
-              const link = await utils.dAppLink("Block");
-              await new Promise((resolve) => setTimeout(resolve, 150));
-              window.open(
-                `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
-                  link.sessionid
-                }`,
-                window.innerWidth < 568 ? "_self" : "_blank"
-              );
-            }}
-            readOnly
-            className="w-full bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
-            value={
-              TXNHASH
-            }
-          />
-        )}
-        {isMinimaEvent && !TXNHASH.includes("0x") && (
-          <p className="text-xs">{TXNHASH}</p>
-        )}
-
-        {!isEthereumEvent && !isMinimaEvent && (
-          <p className="text-xs">{TXNHASH}</p>
-        )}
+      {EVENT.includes("EXPIRED") ? (
+          <p>-</p>
+        ) : (
+          <>
+            {isEthereumEvent && (
+              <input
+                readOnly
+                className="w-full bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
+                value={TXNHASH}
+                onClick={(e) => {
+                  if (window.navigator.userAgent.includes("Minima Browser")) {
+                    e.preventDefault();
+                    // @ts-ignore
+                    Android.openExternalBrowser(
+                      network === "mainnet"
+                        ? "https://etherscan.io/tx/" + TXNHASH
+                        : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                      "_blank"
+                    );
+                  }
+    
+                  window.open(
+                    network === "mainnet"
+                      ? "https://etherscan.io/tx/" + TXNHASH
+                      : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                    "_blank"
+                  );
+                }}
+              />
+            )}
+    
+            {isMinimaEvent && TXNHASH.includes("0x") && (
+              <input
+                onClick={async () => {
+                  if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
+                    return;
+                  }
+    
+                  const link = await utils.dAppLink("Block");
+                  await new Promise((resolve) => setTimeout(resolve, 150));
+                  window.open(
+                    `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
+                      link.sessionid
+                    }`,
+                    window.innerWidth < 568 ? "_self" : "_blank"
+                  );
+                }}
+                readOnly
+                className="w-full bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
+                value={TXNHASH}
+              />
+            )}
+            {isMinimaEvent && !TXNHASH.includes("0x") && (
+              <p className="text-xs">{TXNHASH}</p>
+            )}
+    
+            {!isEthereumEvent && !isMinimaEvent && (
+              <p className="text-xs">{TXNHASH}</p>
+            )}
+            
+          </>)}
       </div>
 
       <div className="p-4">
@@ -360,8 +367,7 @@ const renderCellMobile = (cellData) => {
 
 const MAX = 20;
 const MainActivity = () => {
-  const { _promptLogs, promptLogs, _switchLogView } =
-    useContext(appContext);
+  const { _promptLogs, promptLogs, _switchLogView } = useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
 
   const [offset, setOffset] = useState(0);
@@ -428,7 +434,6 @@ const MainActivity = () => {
             <div className="bg-slate-100 dark:bg-black" />
             <div className="overflow-scroll">
               <div className="flex justify-between items-center pr-4 my-3">
-               
                 <Tabs />
 
                 <svg
@@ -453,8 +458,10 @@ const MainActivity = () => {
                 <>
                   {!data.length && (
                     <div className="h-full flex items-center justify-center">
-                    <p className="text-xs font-bold text-center">No activity yet</p>
-                  </div>
+                      <p className="text-xs font-bold text-center">
+                        No activity yet
+                      </p>
+                    </div>
                   )}
                   {!!data.length && (
                     <MostResponsiveTableEver
@@ -506,7 +513,7 @@ const MainActivity = () => {
                 </>
               )}
 
-              {_switchLogView === 'orders' && <OrderHistory full={true} />}
+              {_switchLogView === "orders" && <OrderHistory full={true} />}
             </div>
             <div className="bg-slate-100 dark:bg-black" />
           </animated.div>,

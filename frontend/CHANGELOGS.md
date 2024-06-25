@@ -68,4 +68,5 @@
 - Add low eth balance, disable message
 - Disable order book when eth < 0.1 automatically
 - Tweak Liquidity pool UX
+- Add Minimum Minima Order on Liquidity pool UX
 - Bug fixes

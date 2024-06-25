@@ -13,7 +13,6 @@ import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
 import {
-  MINIMUM_MINIMA_TRADE,
   MAXIMUM_MINIMA_TRADE,
 } from "../../../../../../../../dapp/js/htlcvars.js";
 import { Data } from "../../../../../../types/Order.js";
@@ -126,9 +125,9 @@ const WrappedPool = () => {
                 throw new Error("Enter your offer");
               }
 
-              if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is "+MINIMUM_MINIMA_TRADE+" MINIMA");
-              }
+              // if (new Decimal(val).lt(parent.order.wminima.minimum)) {
+              //   throw new Error("Minimum order is "+parent.order.wminima.minimum+" MINIMA");
+              // }
 
               if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
                 throw new Error("Exceeds maximum order of "+MAXIMUM_MINIMA_TRADE+" MINIMA");

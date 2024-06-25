@@ -402,8 +402,8 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 							MDS.log("Invalid request to BUY "+simplename+" ("+requestamount+") exceeds Minima Maximum "+MAXIMUM_MINIMA_TRADE);
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minima Maximum "+requestamount, function(sqlresp){});
 							return;	
-						}else if(requestamount < MINIMUM_MINIMA_TRADE){
-							MDS.log("Invalid request to BUY "+simplename+" ("+requestamount+") exceeds Minima Minimum "+MINIMUM_MINIMA_TRADE);
+						}else if(requestamount < ob.minimum){
+							MDS.log("Invalid request to BUY "+simplename+" ("+requestamount+") exceeds Minima Minimum "+ob.minimum);
 							collectHTLC(htlclog.hashlock, "ETH:"+htlclog.tokencontract, 0, "Exceeds Minima Minimum "+requestamount, function(sqlresp){});
 							return;	
 						}
