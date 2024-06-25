@@ -39,7 +39,7 @@ const OrderHistory = ({ full = false }) => {
     };
   }, []);
   
-
+  console.log('o', orders);
   return (
     <div
       className={`my-4 dark:outline shadow-lg dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
@@ -49,7 +49,7 @@ const OrderHistory = ({ full = false }) => {
       {/* <h3 className="font-bold p-3 pb-2">Order History</h3> */}
       {orders === null && (
         <div className="h-full flex items-center justify-center">
-          <p className="text-xs text-center">No orders available</p>
+          <p className="text-xs font-bold text-center">No orders available</p>
         </div>
       )}
       {orders !== null && (

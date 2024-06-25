@@ -365,6 +365,14 @@ const AppProvider = ({ children }: IProps) => {
               // get Latest orders               
               getAllOrders();
 
+              if (comms.title === 'DISABLEORDERBOOK') {
+                return notify("Your order book has been disabled, you need more than 0.01 ETH to fulfill orders.");
+              }
+
+              if (comms.title === 'SENDETH' || comms.title === 'SENDWMINIMA' || comms.title === 'SENDUSDT') {
+                return notify("Withdrawal requested");
+              }
+
               if (comms.title === 'STARTETHSWAP') {
                 if (comms.message && comms.message.status && comms.message.networkstatus) {
                   return notify("Started an Ethereum swap!");
@@ -589,10 +597,13 @@ const AppProvider = ({ children }: IProps) => {
   };
   const getAllOrders = (max = 20, offset = 0) => {
     getAllEvents(max, offset, (events) => {   
-      const filterEvents = events.filter(event => event.EVENT === 'CPTXN_COLLECT'||event.EVENT==='CPTXN_SENT'||event.EVENT==='HTLC_STARTED'||event.EVENT==='CPTXN_EXPIRED');
-      const group = _.groupBy(filterEvents.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
-      const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
-      setOrders(sortGroupedData);
+      if (events.length) {
+        const filterEvents = events.filter(event => event.EVENT === 'CPTXN_COLLECT'||event.EVENT==='CPTXN_SENT'||event.EVENT==='HTLC_STARTED'||event.EVENT==='CPTXN_EXPIRED');
+        const group = _.groupBy(filterEvents.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
+        const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
+        
+        setOrders(sortGroupedData);
+      }
     });
   }
 

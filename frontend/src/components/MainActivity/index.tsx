@@ -452,9 +452,9 @@ const MainActivity = () => {
               {_switchLogView === "all" && (
                 <>
                   {!data.length && (
-                    <p className="text-xs font-bold text-center">
-                      No activity yet
-                    </p>
+                    <div className="h-full flex items-center justify-center">
+                    <p className="text-xs font-bold text-center">No activity yet</p>
+                  </div>
                   )}
                   {!!data.length && (
                     <MostResponsiveTableEver

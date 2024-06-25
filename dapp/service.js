@@ -1,4 +1,3 @@
-
 //Load required files..
 MDS.load("./js/decimal.js");
 MDS.load("./js/puresha1.js");
@@ -206,6 +205,24 @@ MDS.init(function(msg){
 		//Check ETH for SWAPS
 		checkETHSwapHTLC(USER_DETAILS,ethblock, minimablock, function(ethswaps){});
 		
+		//Check ETH balance
+		getETHEREUMBalance(function (ethresp) {
+			// time to disable
+			if (ethresp < 0.01) {
+				getMyOrderBook(function (orderbook) {					
+					if (orderbook.wminima.enable || orderbook.usdt.enable) {
+						disableOrderbook(orderbook, function(set) {
+							var msg = {};
+							msg.status = true;
+							msg.message = "ETH balance below 0.01, disabled orderbook!";
+							sendFrontendMSG("DISABLEORDERBOOK", msg);
+						});
+					}					
+				});
+			}
+		});
+        
+        
 		//Do we have to send the orderbook..
 		ORDERSEND_COUNTER++;
 		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){

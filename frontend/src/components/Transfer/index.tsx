@@ -241,9 +241,10 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           </div>
 
           {status && (
-            <div className="text-center my-2 bg-teal-500 p-2 rounded">
+            <div className={`text-center my-2 bg-teal-500 p-2 rounded ${type === 'erc20' && "!bg-orange-500"}`}>
               <h6 className="font-bold text-teal-800 dark:text-black">
-                Withdrawal Successful
+                {type === 'erc20' && "Withdrawal Requested"}
+                {type !== 'erc20' && "Withdrawal Successful"}                
               </h6>
             </div>
           )}
