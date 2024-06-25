@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 
 interface Props {
   headers: string[];
@@ -7,8 +7,8 @@ interface Props {
   headerClassesMobile?: string;
   headerCellClasses?: string[];
   headerCellClassesMobile?: string[];
-  renderCell: (cellData: any) => ReactNode;
-  renderCellMobile: (cellData: any) => ReactNode;
+  renderCell: (cellData: any, index: number, handleFocus: (i: number, t: string) => void, focusStates: any, txHashFocusStates: any) => ReactNode;
+  renderCellMobile: (cellData: any, index: number, handleFocus: (i: number, t: string) => void, focusStates: any) => ReactNode;
 }
 const MostResponsiveTableEver = ({
   headers,
@@ -20,6 +20,16 @@ const MostResponsiveTableEver = ({
   renderCell,
   renderCellMobile,
 }: Props) => {
+
+  const [focusStates, setFocusStates] = useState({});
+  const [txHashFocusStates, setTxHashFocusStates] = useState({});
+  const handleFocus = (index, type) => {
+    if (type === 'hash') {
+      setFocusStates((prev) => ({ ...prev, [index]: true }));
+    } else if (type === 'txnhash') {
+      setTxHashFocusStates((prev) => ({ ...prev, [index]: true }));
+    }
+  };
 
   return (
     <>
@@ -40,7 +50,7 @@ const MostResponsiveTableEver = ({
         </thead>
         <tbody>
           {data ? data.map((row, rowIndex) => (
-            <tr key={rowIndex}>{renderCell(row)}</tr>
+            <tr key={rowIndex}>{renderCell(row, rowIndex, handleFocus, focusStates, txHashFocusStates)}</tr>
           )): null}
         </tbody>
       </table>
@@ -53,7 +63,7 @@ const MostResponsiveTableEver = ({
                 <div key={headerIndex} className={headerCellClassesMobile ? headerCellClassesMobile[headerIndex] : ""}>{header}</div>
               ))}
             </div>
-            <div className="bg-gray-200 dark:bg-black !bg-opacity-10 overflow-hidden">{renderCellMobile(cell)}</div>
+            <div className="bg-gray-200 dark:bg-black !bg-opacity-10 overflow-hidden">{renderCellMobile(cell, cellIndex, handleFocus, focusStates)}</div>
           </div>
         )): null}
       </div>

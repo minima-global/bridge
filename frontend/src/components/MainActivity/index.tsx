@@ -13,8 +13,7 @@ import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
 
-const renderCell = (cellData) => {
-  const [_f, setF] = useState(false);
+const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates) => {
   const {
     EVENT,
     EVENTDATE,
@@ -23,24 +22,23 @@ const renderCell = (cellData) => {
     AMOUNT,
     TXNHASH,
     getTokenType,
-    _network: network,
+    _network: network
   } = cellData;
 
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
-  const [_ftxnhash, setFtxnhash] = useState(false);
 
   return (
     <>
       <td className="p-3">
         <input
-          onFocus={() => setF(true)}
-          onBlur={() => setF(false)}
+          onFocus={() => handleFocus(index, 'hash')}
+          onBlur={() => handleFocus(index, 'hash')}
           readOnly
           className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={
-            !_f
+            !focusStates[index]
               ? HASH.substring(0, 8) +
                 "..." +
                 HASH.substring(HASH.length - 8, HASH.length)
@@ -112,17 +110,17 @@ const renderCell = (cellData) => {
       </td>
       <td className="p-3">
         {EVENT.includes("EXPIRED") ? (
-          <p>-</p>
+          <p className="text-xs text-center">{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</p>
         ) : (
           <>
             {isEthereumEvent && (
               <input
-                onFocus={() => setFtxnhash(true)}
-                onBlur={() => setFtxnhash(false)}
+                onFocus={() => handleFocus(index, 'txnhash')}
+                onBlur={() => handleFocus(index, 'txnhash')}
                 readOnly
                 className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
                 value={
-                  !_ftxnhash
+                  !txHashFocusStates[index]
                     ? TXNHASH.substring(0, 8) +
                       "..." +
                       TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
@@ -152,8 +150,8 @@ const renderCell = (cellData) => {
 
             {isMinimaEvent && TXNHASH.includes("0x") && (
               <input
-                onFocus={() => setFtxnhash(true)}
-                onBlur={() => setFtxnhash(false)}
+                onFocus={() => handleFocus(index, 'txnhash')}
+                onBlur={() => handleFocus(index, 'txnhash')}
                 onClick={async () => {
                   if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
                     return;
@@ -171,7 +169,7 @@ const renderCell = (cellData) => {
                 readOnly
                 className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
                 value={
-                  !_ftxnhash
+                  !txHashFocusStates[index]
                     ? TXNHASH.substring(0, 8) +
                       "..." +
                       TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
@@ -197,8 +195,7 @@ const renderCell = (cellData) => {
     </>
   );
 };
-const renderCellMobile = (cellData) => {
-  const [_f, setF] = useState(false);
+const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   const {
     EVENT,
     EVENTDATE,
@@ -218,12 +215,12 @@ const renderCellMobile = (cellData) => {
     <>
       <div className="p-4 pt-3">
         <input
-          onFocus={() => setF(true)}
-          onBlur={() => setF(false)}
+          onFocus={() => handleFocus(index, 'hash')}
+          onBlur={() => handleFocus(index, 'hash')}
           readOnly
           className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={
-            !_f
+            !focusStates[index]
               ? HASH.substring(0, 8) +
                 "..." +
                 HASH.substring(HASH.length - 8, HASH.length)
@@ -294,7 +291,7 @@ const renderCellMobile = (cellData) => {
       </div>
       <div className="p-4 pt-2">
       {EVENT.includes("EXPIRED") ? (
-          <p>-</p>
+          <p className="text-xs text-center">{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</p>
         ) : (
           <>
             {isEthereumEvent && (
@@ -369,15 +366,15 @@ const MAX = 20;
 const MainActivity = () => {
   const { _promptLogs, promptLogs, _switchLogView } = useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
-
   const [offset, setOffset] = useState(0);
-
   const [data, setData] = useState<any[]>([]);
+
 
   const springProps = useSpring({
     opacity: _promptLogs ? 1 : 0,
     config: config.gentle,
   });
+
 
   const handleNext = () => {
     setOffset((prevState) => prevState + 20);
@@ -387,31 +384,30 @@ const MainActivity = () => {
     setOffset((prevState) => prevState - 20);
   };
 
+
   useEffect(() => {
     if (_promptLogs) {
       getAllEvents(MAX, offset, (events) => {
-        const _evts = events.map((e) => {
+        const _evts = events.map((e, i) => {
+
           if (e.TXNHASH.includes("-")) {
             const txHash = e.TXNHASH.split("-")[0];
             return {
               ...e,
               TXNHASH: txHash,
               getTokenType,
-              _network,
+              _network              
             };
           }
           return {
             ...e,
             getTokenType,
-            _network,
+            _network
           };
         });
 
         setData(
-          _evts.filter(
-            (e) =>
-              !(e.EVENT === "CPTXN_EXPIRED" && e.TXNHASH === "SECRET REVEALED")
-          )
+          _evts          
         );
       });
     }
