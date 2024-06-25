@@ -176,6 +176,7 @@ function createFavsOrderBookSimpleTotals(userdets,callback){
 	});
 }
 
+//#MIN_CHANGE
 var PRICE_BOOK_STEPS = 100;
 function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 	
@@ -218,7 +219,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				var ob 	 = orderbook.wminima;
 				
 				//BUY SIDE
-				var lowbuy 	= MINIMUM_MINIMA_TRADE;
+				var lowbuy 	= ob.minimum;
 				var highbuy = toFixedNumber(balance.minima.total);
 				if(highbuy > MAXIMUM_MINIMA_TRADE){
 					highbuy = MAXIMUM_MINIMA_TRADE;
@@ -228,7 +229,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				validbuy = (highbuy > lowbuy);
 				
 				//SELL SIDE
-				var lowsell 	= MINIMUM_MINIMA_TRADE;
+				var lowsell 	= ob.minimum;
 				var highsell 	= toFixedNumber(balance.wminima / ob.buy);
 				if(highsell > MAXIMUM_MINIMA_TRADE){
 					highsell = MAXIMUM_MINIMA_TRADE;
@@ -263,7 +264,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				var ob 	 = orderbook.usdt;
 				
 				//BUY SIDE
-				var lowbuy 	= MINIMUM_MINIMA_TRADE;
+				var lowbuy 	= ob.minimum;
 				var highbuy = toFixedNumber(balance.minima.total);
 				if(highbuy > MAXIMUM_MINIMA_TRADE){
 					highbuy = MAXIMUM_MINIMA_TRADE;
@@ -273,7 +274,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				validbuy = (highbuy > lowbuy);
 				
 				//SELL SIDE
-				var lowsell 	= MINIMUM_MINIMA_TRADE;
+				var lowsell 	= ob.minimum;
 				var highsell 	= toFixedNumber(balance.usdt / ob.buy);
 				if(highsell > MAXIMUM_MINIMA_TRADE){
 					highsell = MAXIMUM_MINIMA_TRADE;
@@ -611,6 +612,7 @@ function getUniqueRecords(validrecords){
 	return orderbook;
 }
 
+//#MIN_CHANGE
 function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum, wrappedmaximum, 
 						  usdtenable, usdtbuy, usdtsell, usdtminimum, usdtmaximum, callback){
 	
@@ -623,7 +625,7 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 	if(wrappedenable){
 		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
 		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);
-		orderbook.wminima.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
+		orderbook.wminima.minimum 	= toFixedNumber(wrappedminimum);
 		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);
 		
 		//Set limits
@@ -643,7 +645,7 @@ function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum
 	if(usdtenable){
 		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
 		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
-		orderbook.usdt.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
+		orderbook.usdt.minimum 	= toFixedNumber(usdtminimum);
 		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
 		
 		//Set limits

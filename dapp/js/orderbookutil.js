@@ -336,6 +336,11 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 				continue;
 			}
 			
+			//#MIN_CHANGE
+			if(+amount < ob.minimum || +amount > ob.maximum){
+				continue;
+			}
+			
 			if(action == "buy"){
 				
 				//Check they have enough Minima - They are SELLING to you

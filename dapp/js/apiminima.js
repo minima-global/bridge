@@ -419,12 +419,13 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						}*/
 						
 						//Check global Min Max
+						//#MIN_CHANGE
 						if(sendamount > MAXIMUM_MINIMA_TRADE){
 							MDS.log("Invalid request to buy "+simplename+" ("+sendamount+") exceeds Minima Maximum "+MAXIMUM_MINIMA_TRADE);
 							sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Maximum "+sendamount,function(){});
 							return;	
-						}else if(sendamount < MINIMUM_MINIMA_TRADE){
-							MDS.log("Invalid request to buy "+simplename+" ("+sendamount+") exceeds Minima Minimum "+MINIMUM_MINIMA_TRADE);
+						}else if(sendamount < ob.minimum){
+							MDS.log("Invalid request to buy "+simplename+" ("+sendamount+") exceeds Minima Minimum "+ob.minimum);
 							sentCounterPartyTxn(hash,"ETH:"+token,0,"Exceeds Minimum "+sendamount,function(){});
 							return;	
 						}
