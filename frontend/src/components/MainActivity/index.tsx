@@ -386,7 +386,7 @@ const MainActivity = () => {
 
 
   useEffect(() => {
-    if (_promptLogs) {
+    if (_promptLogs && _switchLogView === 'all') {
       getAllEvents(MAX, offset, (events) => {
         const _evts = events.map((e, i) => {
 
@@ -411,7 +411,7 @@ const MainActivity = () => {
         );
       });
     }
-  }, [_promptLogs, offset]);
+  }, [_promptLogs, offset, _switchLogView]);
 
   return (
     <>
@@ -425,7 +425,7 @@ const MainActivity = () => {
         createPortal(
           <animated.div
             style={springProps}
-            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 overflow-y-scroll grid grid-cols-[1fr_minmax(0,_860px)_1fr]"
+            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-hidden"
           >
             <div className="bg-slate-100 dark:bg-black" />
             <div className="overflow-scroll">

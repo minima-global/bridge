@@ -1,12 +1,18 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import TetherPool from "../Pools/TetherPool";
 import WrappedPool from "../Pools/WrappedPool";
 import { appContext } from "../../../../../AppContext";
 
 
 const OrderBookForm = () => {
-  const { _currentOrderPoolTrade } =
+  const { loaded, _currentOrderPoolTrade, getWalletBalance } =
     useContext(appContext);
+
+  useEffect(() => {
+      if (loaded && loaded.current) {
+        getWalletBalance();
+      }
+  }, [loaded]);
 
   return (
     <div>

@@ -362,8 +362,6 @@ const AppProvider = ({ children }: IProps) => {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
 
-              console.log(comms);
-
               // get Latest orders               
               getAllOrders();
 

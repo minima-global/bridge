@@ -122,9 +122,6 @@ const Help = () => {
                         Swaps on the MINIMA side will cost you <span className="text-xs text-teal-300">(fee: 0.0001 MINIMA)</span> as you require to notify the user for the Ethereum secret when collecting your locked MINIMA.
                       </p>
                       <p className="px-4 font-semibold">
-                        MiniSwap V2 Wallet and ETH Wallet need to remain separate otherwise they will cause nonce issues if signing with the same key.
-                      </p>
-                      <p className="px-4 font-semibold">
                         <span className="font-bold">MiniSwap V2</span> will
                         always pick the best price for the amount you wish to
                         swap automatically.
