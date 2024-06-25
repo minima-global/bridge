@@ -52,7 +52,7 @@
 - Fix regression bug from min/max
 - Add another validation on order book
 
-##### [2.4.0] - 19-25 June 24
+##### [2.4.0 - 2.5.4] - 19-25 June 24
 
 - Re-work UX with Order book widget
 - Add Order History (both order book & otc)

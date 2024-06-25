@@ -131,8 +131,8 @@ const OrderItem = ({ order }: IProps) => {
                   Android.openExternalBrowser(
                     `${
                       _network === "mainnet"
-                        ? "https://etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
-                        : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
+                        ? "https://etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
+                        : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
                     }`,
                     "_blank"
                   );
@@ -140,8 +140,8 @@ const OrderItem = ({ order }: IProps) => {
               }}
               href={`${
                 _network === "mainnet"
-                  ? "https://etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
-                  : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
+                  ? "https://etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
+                  : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
               }`}
               className="truncate"
             >

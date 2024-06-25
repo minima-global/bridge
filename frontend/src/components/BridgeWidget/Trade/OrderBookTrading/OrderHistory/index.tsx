@@ -39,7 +39,6 @@ const OrderHistory = ({ full = false }) => {
     };
   }, []);
   
-
   return (
     <div
       className={`my-4 dark:outline shadow-lg dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
