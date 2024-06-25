@@ -4,10 +4,11 @@ import SwapIcon from "../../../UI/Icons/SwapIcon";
 import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
 import OrderBookForm from "./OrderBookForm";
 import OrderHistory from "./OrderHistory";
+import BackIcon from "../../../UI/Icons/BackIcon";
 // import CompleteOrderBook from "./CompleteOrderBook/index.js";
 
 const OrderBookTrading = () => {
-  const { _currentTradeWindow } = useContext(appContext);
+  const { _currentTradeWindow, setCurrentTradeWindow } = useContext(appContext);
 
   useAllowanceChecker();
 
@@ -20,6 +21,7 @@ const OrderBookTrading = () => {
       <div className="my-4">
         <div className="flex justify-between items-center">
           <div className="flex gap-1 items-center">
+            <span onClick={() => setCurrentTradeWindow(null)}><BackIcon fill="currentColor"/></span>
             <SwapIcon />
             <h1 className="text-lg dark:text-white font-bold">
               Order Book

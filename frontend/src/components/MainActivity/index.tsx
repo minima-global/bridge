@@ -13,7 +13,7 @@ import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
 
-const renderCell = (cellData) => {
+const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates) => {
   const {
     EVENT,
     EVENTDATE,
@@ -22,25 +22,23 @@ const renderCell = (cellData) => {
     AMOUNT,
     TXNHASH,
     getTokenType,
-    _network: network,
+    _network: network
   } = cellData;
 
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
-  const [_f, setF] = useState(false);
-  const [_ftxnhash, setFtxnhash] = useState(false);
 
   return (
     <>
       <td className="p-3">
         <input
-          onFocus={() => setF(true)}
-          onBlur={() => setF(false)}
+          onFocus={() => handleFocus(index, 'hash')}
+          onBlur={() => handleFocus(index, 'hash')}
           readOnly
           className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={
-            !_f
+            !focusStates[index]
               ? HASH.substring(0, 8) +
                 "..." +
                 HASH.substring(HASH.length - 8, HASH.length)
@@ -111,76 +109,82 @@ const renderCell = (cellData) => {
         </div>
       </td>
       <td className="p-3">
-        {isEthereumEvent && (
-          <input
-            onFocus={() => setFtxnhash(true)}
-            onBlur={() => setFtxnhash(false)}
-            readOnly
-            className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
-            value={
-              !_ftxnhash
-                ? TXNHASH.substring(0, 8) +
-                  "..." +
-                  TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
-                : TXNHASH
-            }
-            onClick={(e) => {
-              if (window.navigator.userAgent.includes("Minima Browser")) {
-                e.preventDefault();
-                // @ts-ignore
-                Android.openExternalBrowser(
-                  network === "mainnet"
-                    ? "https://etherscan.io/tx/" + TXNHASH
-                    : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                  "_blank"
-                );
-              }
+        {EVENT.includes("EXPIRED") ? (
+          <p className="text-xs text-center">{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</p>
+        ) : (
+          <>
+            {isEthereumEvent && (
+              <input
+                onFocus={() => handleFocus(index, 'txnhash')}
+                onBlur={() => handleFocus(index, 'txnhash')}
+                readOnly
+                className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
+                value={
+                  !txHashFocusStates[index]
+                    ? TXNHASH.substring(0, 8) +
+                      "..." +
+                      TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
+                    : TXNHASH
+                }
+                onClick={(e) => {
+                  if (window.navigator.userAgent.includes("Minima Browser")) {
+                    e.preventDefault();
+                    // @ts-ignore
+                    Android.openExternalBrowser(
+                      network === "mainnet"
+                        ? "https://etherscan.io/tx/" + TXNHASH
+                        : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                      "_blank"
+                    );
+                  }
 
-              window.open(
-                network === "mainnet"
-                  ? "https://etherscan.io/tx/" + TXNHASH
-                  : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                "_blank"
-              );
-            }}
-          />
-        )}
+                  window.open(
+                    network === "mainnet"
+                      ? "https://etherscan.io/tx/" + TXNHASH
+                      : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                    "_blank"
+                  );
+                }}
+              />
+            )}
 
-        {isMinimaEvent && TXNHASH.includes("0x") && (
-          <input
-          onFocus={() => setFtxnhash(true)}
-            onBlur={() => setFtxnhash(false)}
-            onClick={async () => {
-              if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
-                return;
-              }
+            {isMinimaEvent && TXNHASH.includes("0x") && (
+              <input
+                onFocus={() => handleFocus(index, 'txnhash')}
+                onBlur={() => handleFocus(index, 'txnhash')}
+                onClick={async () => {
+                  if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
+                    return;
+                  }
 
-              const link = await utils.dAppLink("Block");
-              await new Promise((resolve) => setTimeout(resolve, 150));
-              window.open(
-                `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
-                  link.sessionid
-                }`,
-                window.innerWidth < 568 ? "_self" : "_blank"
-              );
-            }}
-            readOnly
-            className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
-            value={
-              !_ftxnhash
-                ? TXNHASH.substring(0, 8) +
-                  "..." +
-                  TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
-                : TXNHASH
-            }
-          />
-        )}
-        {isMinimaEvent && !TXNHASH.includes("0x") && (
-          <p className="text-xs text-center">{TXNHASH}</p>
-        )}
+                  const link = await utils.dAppLink("Block");
+                  await new Promise((resolve) => setTimeout(resolve, 150));
+                  window.open(
+                    `${(window as any).MDS.filehost}${
+                      link.uid
+                    }/index.html?uid=${link.sessionid}`,
+                    window.innerWidth < 568 ? "_self" : "_blank"
+                  );
+                }}
+                readOnly
+                className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
+                value={
+                  !txHashFocusStates[index]
+                    ? TXNHASH.substring(0, 8) +
+                      "..." +
+                      TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
+                    : TXNHASH
+                }
+              />
+            )}
+            {isMinimaEvent && !TXNHASH.includes("0x") && (
+              <p className="text-xs text-center">{TXNHASH}</p>
+            )}
 
-        {!isEthereumEvent && !isMinimaEvent && (
-          <p className="text-xs text-center">{TXNHASH}</p>
+            {!isEthereumEvent && !isMinimaEvent && (
+              <p className="text-xs text-center">{TXNHASH}</p>
+            )}
+          </>
         )}
       </td>
       <td className="p-4 text-right">
@@ -191,7 +195,7 @@ const renderCell = (cellData) => {
     </>
   );
 };
-const renderCellMobile = (cellData) => {
+const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   const {
     EVENT,
     EVENTDATE,
@@ -206,19 +210,17 @@ const renderCellMobile = (cellData) => {
   const isEthereumEvent =
     TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
   const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
-  const [_f, setF] = useState(false);
-
 
   return (
     <>
       <div className="p-4 pt-3">
         <input
-          onFocus={() => setF(true)}
-          onBlur={() => setF(false)}
+          onFocus={() => handleFocus(index, 'hash')}
+          onBlur={() => handleFocus(index, 'hash')}
           readOnly
           className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={
-            !_f
+            !focusStates[index]
               ? HASH.substring(0, 8) +
                 "..." +
                 HASH.substring(HASH.length - 8, HASH.length)
@@ -288,65 +290,67 @@ const renderCellMobile = (cellData) => {
         </div>
       </div>
       <div className="p-4 pt-2">
-      {isEthereumEvent && (
-          <input
-            readOnly
-            className="w-full bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
-            value={
-              TXNHASH
-            }
-            onClick={(e) => {
-              if (window.navigator.userAgent.includes("Minima Browser")) {
-                e.preventDefault();
-                // @ts-ignore
-                Android.openExternalBrowser(
-                  network === "mainnet"
-                    ? "https://etherscan.io/tx/" + TXNHASH
-                    : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                  "_blank"
-                );
-              }
-
-              window.open(
-                network === "mainnet"
-                  ? "https://etherscan.io/tx/" + TXNHASH
-                  : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                "_blank"
-              );
-            }}
-          />
-        )}
-
-        {isMinimaEvent && TXNHASH.includes("0x") && (
-          <input
-            onClick={async () => {
-              if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
-                return;
-              }
-
-              const link = await utils.dAppLink("Block");
-              await new Promise((resolve) => setTimeout(resolve, 150));
-              window.open(
-                `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
-                  link.sessionid
-                }`,
-                window.innerWidth < 568 ? "_self" : "_blank"
-              );
-            }}
-            readOnly
-            className="w-full bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
-            value={
-              TXNHASH
-            }
-          />
-        )}
-        {isMinimaEvent && !TXNHASH.includes("0x") && (
-          <p className="text-xs">{TXNHASH}</p>
-        )}
-
-        {!isEthereumEvent && !isMinimaEvent && (
-          <p className="text-xs">{TXNHASH}</p>
-        )}
+      {EVENT.includes("EXPIRED") ? (
+          <p className="text-xs text-center">{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</p>
+        ) : (
+          <>
+            {isEthereumEvent && (
+              <input
+                readOnly
+                className="w-full bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
+                value={TXNHASH}
+                onClick={(e) => {
+                  if (window.navigator.userAgent.includes("Minima Browser")) {
+                    e.preventDefault();
+                    // @ts-ignore
+                    Android.openExternalBrowser(
+                      network === "mainnet"
+                        ? "https://etherscan.io/tx/" + TXNHASH
+                        : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                      "_blank"
+                    );
+                  }
+    
+                  window.open(
+                    network === "mainnet"
+                      ? "https://etherscan.io/tx/" + TXNHASH
+                      : "https://sepolia.etherscan.io/tx/" + TXNHASH,
+                    "_blank"
+                  );
+                }}
+              />
+            )}
+    
+            {isMinimaEvent && TXNHASH.includes("0x") && (
+              <input
+                onClick={async () => {
+                  if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
+                    return;
+                  }
+    
+                  const link = await utils.dAppLink("Block");
+                  await new Promise((resolve) => setTimeout(resolve, 150));
+                  window.open(
+                    `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
+                      link.sessionid
+                    }`,
+                    window.innerWidth < 568 ? "_self" : "_blank"
+                  );
+                }}
+                readOnly
+                className="w-full bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
+                value={TXNHASH}
+              />
+            )}
+            {isMinimaEvent && !TXNHASH.includes("0x") && (
+              <p className="text-xs">{TXNHASH}</p>
+            )}
+    
+            {!isEthereumEvent && !isMinimaEvent && (
+              <p className="text-xs">{TXNHASH}</p>
+            )}
+            
+          </>)}
       </div>
 
       <div className="p-4">
@@ -360,18 +364,17 @@ const renderCellMobile = (cellData) => {
 
 const MAX = 20;
 const MainActivity = () => {
-  const { _promptLogs, promptLogs, _switchLogView } =
-    useContext(appContext);
+  const { _promptLogs, promptLogs, _switchLogView } = useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
-
   const [offset, setOffset] = useState(0);
-
   const [data, setData] = useState<any[]>([]);
+
 
   const springProps = useSpring({
     opacity: _promptLogs ? 1 : 0,
     config: config.gentle,
   });
+
 
   const handleNext = () => {
     setOffset((prevState) => prevState + 20);
@@ -381,35 +384,34 @@ const MainActivity = () => {
     setOffset((prevState) => prevState - 20);
   };
 
+
   useEffect(() => {
-    if (_promptLogs) {
+    if (_promptLogs && _switchLogView === 'all') {
       getAllEvents(MAX, offset, (events) => {
         const _evts = events.map((e) => {
+
           if (e.TXNHASH.includes("-")) {
             const txHash = e.TXNHASH.split("-")[0];
             return {
               ...e,
               TXNHASH: txHash,
               getTokenType,
-              _network,
+              _network              
             };
           }
           return {
             ...e,
             getTokenType,
-            _network,
+            _network
           };
         });
 
         setData(
-          _evts.filter(
-            (e) =>
-              !(e.EVENT === "CPTXN_EXPIRED" && e.TXNHASH === "SECRET REVEALED")
-          )
+          _evts          
         );
       });
     }
-  }, [_promptLogs, offset]);
+  }, [_promptLogs, offset, _switchLogView]);
 
   return (
     <>
@@ -423,12 +425,11 @@ const MainActivity = () => {
         createPortal(
           <animated.div
             style={springProps}
-            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 overflow-y-scroll grid grid-cols-[1fr_minmax(0,_860px)_1fr]"
+            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-hidden"
           >
             <div className="bg-slate-100 dark:bg-black" />
             <div className="overflow-scroll">
               <div className="flex justify-between items-center pr-4 my-3">
-               
                 <Tabs />
 
                 <svg
@@ -453,8 +454,10 @@ const MainActivity = () => {
                 <>
                   {!data.length && (
                     <div className="h-full flex items-center justify-center">
-                    <p className="text-xs font-bold text-center">No activity yet</p>
-                  </div>
+                      <p className="text-xs font-bold text-center">
+                        No activity yet
+                      </p>
+                    </div>
                   )}
                   {!!data.length && (
                     <MostResponsiveTableEver
@@ -506,7 +509,7 @@ const MainActivity = () => {
                 </>
               )}
 
-              {_switchLogView === 'orders' && <OrderHistory full={true} />}
+              {_switchLogView === "orders" && <OrderHistory full={true} />}
             </div>
             <div className="bg-slate-100 dark:bg-black" />
           </animated.div>,

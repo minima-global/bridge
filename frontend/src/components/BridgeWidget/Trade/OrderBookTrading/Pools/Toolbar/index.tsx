@@ -3,6 +3,7 @@ import SelectFavorites from "../SelectFavorites";
 import { appContext } from "../../../../../../AppContext";
 // import CaretIcon from "../../../../../UI/Icons/CaretIcon";
 import { config, useSpring, animated } from "react-spring";
+import CaretIcon from "../../../../../UI/Icons/CaretIcon";
 
 const Toolbar = () => {
   const { _currentOrderPoolTrade, setCurrentOrderPoolTrade } =
@@ -109,7 +110,7 @@ const Toolbar = () => {
             {_currentOrderPoolTrade === "wminima" ? "WMINIMA" : "USDT"}
           </h3>
         </div>
-        {/* <CaretIcon /> */}
+        <CaretIcon />
       </div>
       <div className="flex justify-end px-1">
         <SelectFavorites />

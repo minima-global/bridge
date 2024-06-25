@@ -1,6 +1,7 @@
 import { toFixedNumber } from "./jslib.js";
-import { getFavsOrderBook } from "./orderbookutil.js";
-import {MINIMUM_MINIMA_TRADE, MAXIMUM_MINIMA_TRADE, PRICE_BOOK_STEPS} from "./htlcvars.js";
+import { getFavsOrderBook , _searchAllOrderBooksWithBook} from "./orderbookutil.js";
+import { min, max } from "./jslib.js";
+import { MAXIMUM_MINIMA_TRADE, PRICE_BOOK_STEPS} from "./htlcvars.js";
 
 //The Bridge order book address
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
@@ -220,7 +221,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				var ob 	 = orderbook.wminima;
 				
 				//BUY SIDE
-				var lowbuy 	= MINIMUM_MINIMA_TRADE;
+				var lowbuy 	= ob.minimum;
 				var highbuy = toFixedNumber(balance.minima.total);
 				if(highbuy > MAXIMUM_MINIMA_TRADE){
 					highbuy = MAXIMUM_MINIMA_TRADE;
@@ -230,7 +231,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				validbuy = (highbuy > lowbuy);
 				
 				//SELL SIDE
-				var lowsell 	= MINIMUM_MINIMA_TRADE;
+				var lowsell 	= ob.minimum;
 				var highsell 	= toFixedNumber(balance.wminima / ob.buy);
 				if(highsell > MAXIMUM_MINIMA_TRADE){
 					highsell = MAXIMUM_MINIMA_TRADE;
@@ -265,7 +266,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				var ob 	 = orderbook.usdt;
 				
 				//BUY SIDE
-				var lowbuy 	= MINIMUM_MINIMA_TRADE;
+				var lowbuy 	= ob.minimum;
 				var highbuy = toFixedNumber(balance.minima.total);
 				if(highbuy > MAXIMUM_MINIMA_TRADE){
 					highbuy = MAXIMUM_MINIMA_TRADE;
@@ -275,7 +276,7 @@ function createOrderBookSimpleTotals(userdets,completeorderbook, callback){
 				validbuy = (highbuy > lowbuy);
 				
 				//SELL SIDE
-				var lowsell 	= MINIMUM_MINIMA_TRADE;
+				var lowsell 	= ob.minimum;
 				var highsell 	= toFixedNumber(balance.usdt / ob.buy);
 				if(highsell > MAXIMUM_MINIMA_TRADE){
 					highsell = MAXIMUM_MINIMA_TRADE;
@@ -626,58 +627,58 @@ function disableOrderbook (orderbook, callback) {
 }
 
 function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum, wrappedmaximum, 
-						  usdtenable, usdtbuy, usdtsell, usdtminimum, usdtmaximum, callback){
-	
-	//Create an order book for this user
-	var orderbook 				= {};
-	
-	//wMinima
-	orderbook.wminima 			= {};
-	orderbook.wminima.enable 	= wrappedenable;
-	if(wrappedenable){
-		orderbook.wminima.buy 		= toFixedNumber(wrappedbuy);
-		orderbook.wminima.sell 		= toFixedNumber(wrappedsell);
-		orderbook.wminima.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
-		orderbook.wminima.maximum 	= toFixedNumber(wrappedmaximum);
-		
+	usdtenable, usdtbuy, usdtsell, usdtminimum, usdtmaximum, callback){
+
+		//Create an order book for this user
+		var orderbook                 = {};
+
+		//wMinima
+		orderbook.wminima             = {};
+		orderbook.wminima.enable     = wrappedenable;
+		if(wrappedenable){
+		orderbook.wminima.buy         = toFixedNumber(wrappedbuy);
+		orderbook.wminima.sell         = toFixedNumber(wrappedsell);
+		orderbook.wminima.minimum     = toFixedNumber(wrappedminimum);
+		orderbook.wminima.maximum     = toFixedNumber(wrappedmaximum);
+
 		//Set limits
 		if(orderbook.wminima.maximum > MAXIMUM_MINIMA_TRADE){
-			orderbook.wminima.maximum = MAXIMUM_MINIMA_TRADE;
-		}	
-	}else{
-		orderbook.wminima.buy 		= 0;
-		orderbook.wminima.sell 		= 0;
-		orderbook.wminima.minimum 	= 0;
-		orderbook.wminima.maximum 	= 0;
-	}
-	
-	//USDT
-	orderbook.usdt 				= {};
-	orderbook.usdt.enable 		= usdtenable;
-	if(usdtenable){
-		orderbook.usdt.buy 		= toFixedNumber(usdtbuy);
- 		orderbook.usdt.sell 	= toFixedNumber(usdtsell);
-		orderbook.usdt.minimum 	= toFixedNumber(MINIMUM_MINIMA_TRADE);
-		orderbook.usdt.maximum 	= toFixedNumber(usdtmaximum);
-		
+		orderbook.wminima.maximum = MAXIMUM_MINIMA_TRADE;
+		}    
+		}else{
+		orderbook.wminima.buy         = 0;
+		orderbook.wminima.sell         = 0;
+		orderbook.wminima.minimum     = 0;
+		orderbook.wminima.maximum     = 0;
+		}
+
+		//USDT
+		orderbook.usdt                 = {};
+		orderbook.usdt.enable         = usdtenable;
+		if(usdtenable){
+		orderbook.usdt.buy         = toFixedNumber(usdtbuy);
+		orderbook.usdt.sell     = toFixedNumber(usdtsell);
+		orderbook.usdt.minimum     = toFixedNumber(usdtminimum);
+		orderbook.usdt.maximum     = toFixedNumber(usdtmaximum);
+
 		//Set limits
 		if(orderbook.usdt.maximum > MAXIMUM_MINIMA_TRADE){
-			orderbook.usdt.maximum = MAXIMUM_MINIMA_TRADE;
-		}	
-	}else{
-		orderbook.usdt.buy 		= 0;
-		orderbook.usdt.sell 	= 0;
-		orderbook.usdt.minimum 	= 0;
-		orderbook.usdt.maximum 	= 0;
-	}
-	
-	//MDS.log("SET ORDER BOOK : "+JSON.stringify(orderbook));
-	
-	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
-		if(callback){
-			callback(setorder);
+		orderbook.usdt.maximum = MAXIMUM_MINIMA_TRADE;
+		}    
+		}else{
+		orderbook.usdt.buy         = 0;
+		orderbook.usdt.sell     = 0;
+		orderbook.usdt.minimum     = 0;
+		orderbook.usdt.maximum     = 0;
 		}
-	});
+
+		//MDS.log("SET ORDER BOOK : "+JSON.stringify(orderbook));
+
+		MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
+		if(callback){
+		callback(setorder);
+		}
+		});
 }
 
 function getMyOrderBook(callback){

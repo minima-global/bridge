@@ -1,3 +1,4 @@
+import { MAXIMUM_MINIMA_TRADE } from "./htlcvars";
 import { toFixedNumber } from "./jslib";
 import { getCompleteOrderBook} from "./orderbook";
 import { getFavourites } from "./sql";
@@ -338,6 +339,10 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 			if(!ob.enable){
 				continue;
 			}
+
+			if(+amount < ob.minimum || +amount > MAXIMUM_MINIMA_TRADE){
+                continue;
+            }
 			
 			if(action == "buy"){
 				
@@ -463,4 +468,4 @@ function calculatePrice(action, token, orderbook){
 }
 
 
-export { calculateAmount, calculatePrice, searchAllorFavsOrderBooks, getFavsOrderBook };
+export { calculateAmount, calculatePrice, searchAllorFavsOrderBooks, getFavsOrderBook, _searchAllOrderBooksWithBook };

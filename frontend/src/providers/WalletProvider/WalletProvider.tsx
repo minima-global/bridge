@@ -110,6 +110,7 @@ export const WalletContextProvider = ({ children }: Props) => {
   };
 
   const getEthereumBalance = async () => {
+    if (!_address) return;
     const balance = await _provider.getBalance(_address);
     setBalance(formatEther(balance));
   }

@@ -43,14 +43,14 @@ const NativeMinima = ({ display = false, external }: Props) => {
               {display && new Decimal(_minimaBalance.confirmed).toDecimalPlaces(4).toString()}
 
               {!display &&
-                new Decimal(_minimaBalance.unconfirmed).isZero() &&
-                new Decimal(_minimaBalance.confirmed).toString()}
+                new Decimal(_minimaBalance.unconfirmed).isZero() ?
+                new Decimal(_minimaBalance.confirmed).toString() : ""}
 
               {!display &&
-                new Decimal(_minimaBalance.unconfirmed).gt(0) &&
+                new Decimal(_minimaBalance.unconfirmed).gt(0) ?
                 new Decimal(_minimaBalance.confirmed).toString() +
                   "/" +
-                  new Decimal(_minimaBalance.unconfirmed).toString()}
+                  new Decimal(_minimaBalance.unconfirmed).toString() : ""}
             </p>
           )}
           {external && (

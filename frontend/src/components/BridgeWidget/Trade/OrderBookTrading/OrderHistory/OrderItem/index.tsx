@@ -90,9 +90,8 @@ const OrderItem = ({ order }: IProps) => {
         <div className="truncate my-auto text-xs grid ml-3">
           <p className="opacity-80 mt-2">Status</p>
 
-          <div className="flex items-center overflow-hidden">
-            <input readOnly className="text-xs font-bold truncate focus:outline-none" value={getOrderStatus(order[0].EVENT)} />
-            {/* <p className="text-xs font-bold">{getOrderStatus(order[0].EVENT)}</p> */}
+          <div className="flex overflow-hidden">
+            <p className="text-xs font-bold">{getOrderStatus(order[0].EVENT)}</p>
             {order[0].EVENT === "CPTXN_COLLECT" &&
               order[0].TXNHASH.includes("0x") && (
                 <span className="ml-1 text-teal-600 dark:text-teal-300">
@@ -132,8 +131,8 @@ const OrderItem = ({ order }: IProps) => {
                   Android.openExternalBrowser(
                     `${
                       _network === "mainnet"
-                        ? "https://etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
-                        : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
+                        ? "https://etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
+                        : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
                     }`,
                     "_blank"
                   );
@@ -141,8 +140,8 @@ const OrderItem = ({ order }: IProps) => {
               }}
               href={`${
                 _network === "mainnet"
-                  ? "https://etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
-                  : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split(":")[0]
+                  ? "https://etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
+                  : "https://sepolia.etherscan.io/tx/" + order[0].TXNHASH.split("-")[0]
               }`}
               className="truncate"
             >

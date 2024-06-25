@@ -37,7 +37,7 @@ var HTLC_SECRETS_BACKLOG_CHECK = 50 + Math.floor(HTLC_TIMELOCK_SECS / ETH_BLOCK_
 
 //The Minimum and maximum trade amounts
 var MINIMUM_MINIMA_TRADE = 0.0001;
-var MAXIMUM_MINIMA_TRADE = 1000;
+var MAXIMUM_MINIMA_TRADE = 10000;
 
 //MAIN NET RPC (Default)
 var USE_API_KEYS			= true;

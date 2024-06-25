@@ -6,9 +6,10 @@ import OTCForm from "./OTCForm";
 import Activity from "./Activity";
 import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
 import OrderHistory from "../OrderBookTrading/OrderHistory";
+import BackIcon from "../../../UI/Icons/BackIcon";
 
 const OverTheCounterTrading = () => {
-  const { _currentTradeWindow, _userDetails } = useContext(appContext);
+  const { _currentTradeWindow, _userDetails, setCurrentTradeWindow } = useContext(appContext);
 
   useAllowanceChecker();
 
@@ -22,6 +23,7 @@ const OverTheCounterTrading = () => {
       <div className="my-4">
         <div className="flex justify-between items-center">
           <div className="flex gap-1 items-center">
+          <span onClick={() => setCurrentTradeWindow(null)}><BackIcon fill="currentColor"/></span>
             <SwapIcon />
             <h1 className="text-lg dark:text-white font-bold">OTC</h1>
           </div>

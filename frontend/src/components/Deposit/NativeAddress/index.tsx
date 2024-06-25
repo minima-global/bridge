@@ -153,7 +153,7 @@ const NativeAddress = () => {
                   onFocus={() => setF(true)}
                   required
                   type="text"
-                  autoFocus
+                  autoFocus={false}
                   placeholder="Amount"
                   className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
                 />
@@ -184,7 +184,7 @@ const NativeAddress = () => {
               {status && (
                 <div className="text-center my-2 bg-teal-500 p-2 rounded">
                   <h6 className="font-bold text-teal-800 dark:text-black">
-                    Deposit Successful
+                    Deposit successful, please wait until your transaction is confirmed
                   </h6>
                 </div>
               )}

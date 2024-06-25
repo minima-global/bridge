@@ -52,7 +52,7 @@
 - Fix regression bug from min/max
 - Add another validation on order book
 
-##### [2.4.0] - 19-25 June 24
+##### [2.4.0 - 2.5.4] - 19-25 June 24
 
 - Re-work UX with Order book widget
 - Add Order History (both order book & otc)
@@ -68,4 +68,5 @@
 - Add low eth balance, disable message
 - Disable order book when eth < 0.1 automatically
 - Tweak Liquidity pool UX
+- Add Minimum Minima Order on Liquidity pool UX
 - Bug fixes

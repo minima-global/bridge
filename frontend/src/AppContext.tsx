@@ -379,7 +379,7 @@ const AppProvider = ({ children }: IProps) => {
                 }
               }
 
-              if (typeof comms.message === "string") {
+              if (comms.message && typeof comms.message === "string") {
                 if (comms.message.includes("insufficient funds for gas")) {
                   notify(
                     "Failed to execute Ethereum transaction, top up more ETH to complete the transaction."
@@ -397,10 +397,16 @@ const AppProvider = ({ children }: IProps) => {
                 ) {
                   notify(comms.message.message);
                 } else {
-                  notify("Received an unknown message format.");
+                  // console.log('Unknown message', JSON.stringify(comms.message));
+                  notify(JSON.stringify(comms.message));
+
+                  // notify("Received an unknown message format.");
                 }
               } else {
-                notify("Received an unknown message format.");
+                // console.log('Unknown message', JSON.stringify(comms.message));
+                notify(JSON.stringify(comms.message));
+
+                // notify("Received an unknown message format.");
               }
             }
           }
