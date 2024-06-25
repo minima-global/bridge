@@ -10,7 +10,7 @@ import { useWalletContext } from "../../../providers/WalletProvider/WalletProvid
 const Balance = () => {
   const { _currentNavigation, promptDeposit, promptWithdraw, _minimaBalance } = useContext(appContext);
   const {_balance: etherBalance} = useWalletContext();
-  const [runningLow, setRunningLow] = useState({minima: false, ethereum: false});
+  const [runningLow, setRunningLow] = useState({minima: false, ethereum: false, disableEthereum: false});
 
   useEffect(() => {
     if (_currentNavigation === "balance") {
@@ -20,6 +20,10 @@ const Balance = () => {
       
       if (etherBalance && new Decimal(etherBalance).lt(1)) {
         setRunningLow(prevState => ({...prevState, ethereum: true}));
+
+        if (new Decimal(etherBalance).lt(0.01)) {
+          setRunningLow(prevState => ({...prevState, disableEthereum: true}));
+        }
       }
     }
   }, [_currentNavigation]);
@@ -48,7 +52,11 @@ const Balance = () => {
         <NativeMinima display={false} />
       </div>
       <hr className="border border-violet-400 my-6"></hr>
-      {runningLow.ethereum && <div className="bg-yellow-600 dark:bg-yellow-300 text-white dark:text-black rounded-lg px-3 py-2 my-3"><p className="text-xs font-bold">You are running low on Ethereum, you should top up to fulfill orders</p></div>}
+      {runningLow.ethereum && <div className="bg-yellow-600 dark:bg-yellow-300 text-white dark:text-black rounded-lg px-3 py-2 my-3">
+        {!runningLow.disableEthereum&&<p className="text-xs font-bold">You are running low on Ethereum, you should top up to fulfill orders</p>}        
+        {!!runningLow.disableEthereum&&<p className="text-xs font-bold">You are low on funds and your order book has been disabled automatically.</p>}        
+        
+      </div>}
 
       <TokenList />
 

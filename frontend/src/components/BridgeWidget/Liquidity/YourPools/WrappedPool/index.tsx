@@ -105,7 +105,7 @@ const WrappedPool = () => {
 
               return true;
             } catch (error) {
-              console.error(error);
+              // console.error(error);
               if (error instanceof Error) {
                 return createError({
                   path,
