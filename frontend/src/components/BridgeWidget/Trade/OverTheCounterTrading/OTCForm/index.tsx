@@ -39,6 +39,7 @@ const OTCForm = () => {
 
           await handleActionViaBackend(message);
 
+
           notify("OTC Swap requested!");
           resetForm();
 
@@ -76,6 +77,10 @@ const OTCForm = () => {
                 throw new Error("You are running low on funds");
               }
 
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
+              }
+
               return true;
             } catch (error) {
               if (error instanceof Error) {
@@ -104,6 +109,10 @@ const OTCForm = () => {
               try {
                 if (new Decimal(val).isZero()) {
                   throw new Error("Amount is required");
+                }
+
+                if (new Decimal(val).decimalPlaces() > 4) {
+                  throw new Error("Can't exceed more than 4 decimal places");
                 }
 
                 return true;

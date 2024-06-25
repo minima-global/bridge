@@ -18,9 +18,9 @@ type FormState = {
 };
 const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _balance } = useWalletContext();
-  const { _currentNetwork, _defaultNetworks, _minimaBalance } =
+  const { _currentNetwork, _defaultNetworks, _minimaBalance, getWalletBalance, getMainMinimaBalance, setTriggerBalanceUpdate } =
     useContext(appContext);
-  const { _network } = useWalletContext();
+  const { _network, getEthereumBalance } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   const [f, setF] = useState(false);
@@ -32,6 +32,32 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const initialTokenShouldBeMinimaIfExists = tokens.find(
     (token) => token.address === _defaults["wMinima"][_network]
   );
+
+  const getBalances = async () => {
+    // Wait a few secs
+    await new Promise((resolve) => {
+      setTimeout(resolve, 5000);
+    });
+
+    getWalletBalance();
+    getMainMinimaBalance();
+  };
+
+  const handlePullBalance = async () => {
+    // Pause for 3 seconds
+    await new Promise((resolve) => {
+      setTimeout(resolve, 7000);
+    });
+  
+    // Trigger balance update
+    setTriggerBalanceUpdate(true);
+    getEthereumBalance();
+  
+    // Pause for 2 seconds before setting the trigger back to false
+    setTimeout(() => {
+      setTriggerBalanceUpdate(false);
+    }, 2000);
+  }
 
   return (
     <Formik
@@ -111,7 +137,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           if (type === "erc20") {
             if (asset.name === "wMinima") {
               action = "SENDWMINIMA";
-            } else if (asset.name === "Ethereum") {
+            } else if (asset.name === "Ethereum" || asset.name === 'SepoliaETH') {
               action = "SENDETH";
             } else if (asset.name === "Tether") {
               action = "SENDUSDT";
@@ -136,8 +162,18 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           await submitForm(
             type === "native" ? amount : { amount, action, address }
           );
-          resetForm();
+
+
           setStatus("Successful");
+          if (type === 'native') {
+            await getBalances();  
+          } else {
+            await handlePullBalance();
+          }
+
+
+          resetForm();
+
         } catch (error: any) {
           console.error(error);
           // display error message
@@ -193,8 +229,8 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 type="text"
                 autoFocus
                 placeholder="Amount"
-                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-black focus:text-black dark:placeholder:text-black font-bold w-full py-3 rounded-lg px-4`}
-              />
+                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
+              />              
             </div>
 
             {errors.amount && (
@@ -205,9 +241,10 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           </div>
 
           {status && (
-            <div className="text-center my-2 bg-teal-500 p-2 rounded">
+            <div className={`text-center my-2 bg-teal-500 p-2 rounded ${type === 'erc20' && "!bg-orange-500"}`}>
               <h6 className="font-bold text-teal-800 dark:text-black">
-                Withdrawal Successful
+                {type === 'erc20' && "Withdrawal Requested"}
+                {type !== 'erc20' && "Withdrawal Successful"}                
               </h6>
             </div>
           )}

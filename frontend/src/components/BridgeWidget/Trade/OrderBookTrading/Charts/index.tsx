@@ -43,6 +43,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
   useEffect(() => {
     if (!fav) {
       getSimpleOrderBookTotals((totals) => {
+        if (totals.length === 0) return;
+
         const bk = totals[book][`${type}book`];
 
         if (bk.length === 0) {
@@ -67,6 +69,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
       });
     } else {
       createFavsOrderBookSimpleTotals(_userDetails, (totals) => {
+        if (totals.length === 0) return;
+
         const bk = totals[book][`${type}book`];
 
         if (bk.length === 0) {
@@ -125,8 +129,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
                 position: "top" as const,
               },
               title: {
-                display: false,
-                // text: `${type === "buy" ? "Sell" : "Buy"} ${name}`,
+                display: true,
+                // text: "",
               },
             },
             scales: {
@@ -140,6 +144,18 @@ const Charts = ({ book, type, fav = false }: IProps) => {
                 grid: {
                   color: "#9ca3af", // Change the color of y-axis grid lines (if needed)
                 },
+                title: {
+                  display: true,
+                  text: 'Price',
+                  color: 'rgb(94 234 212)',
+                  font: {
+                    family: 'monospace',
+                    size: 12,
+                    weight: 'bold',
+                    lineHeight: 1.2,
+                  },
+                  // padding: {top: 20, left: 0, right: 0, bottom: 0}
+                }
               },
               x: {
                 ticks: {
@@ -151,6 +167,18 @@ const Charts = ({ book, type, fav = false }: IProps) => {
                 grid: {
                   color: "#5eead4", // Change the color of x-axis grid lines (if needed)
                 },
+                title: {
+                  display: true,
+                  text: 'Native Minima',
+                  color: 'rgb(94 234 212)',
+                  font: {
+                    family: 'monospace',
+                    size: 12,
+                    weight: 'bold',
+                    lineHeight: 1.2,
+                  },
+                  // padding: {top: 20, left: 0, right: 0, bottom: 0}
+                }
               },
             },
           }}

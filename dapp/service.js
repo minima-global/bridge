@@ -1,5 +1,5 @@
-
 //Load required files..
+MDS.load("./js/decimal.js");
 MDS.load("./js/puresha1.js");
 MDS.load("./js/jslib.js");
 MDS.load("./js/scripts.js");
@@ -132,22 +132,17 @@ MDS.init(function(msg){
 			return;
 		}
 		
-		//Check the Nonce.. 0 is valid
-		if(NONCE_TRACK != 0){
-			if(!checkIsPositiveNumber(NONCE_TRACK)){
-			
-				//REDO the NONCE
-				setNonceAuto(function(nonce){});
-				
-				//And check again..	
-				if(NONCE_TRACK != 0){
-					if(!checkIsPositiveNumber(NONCE_TRACK)){
-						MDS.log("ERROR Nonce not valid..");
-						return;
-					}	
-				}
-			}
-		}
+		//Has nonce been set
+        if(NONCE_TRACK == -1){
+            //REDO the NONCE
+            setNonceAuto(function(nonce){});
+            
+            //And check again..    
+            if(NONCE_TRACK == -1){
+                MDS.log("ERROR Nonce not valid..");
+                return;    
+            }
+        }
 		
 		//Get the current ETH block
 		var ethblock = 0;
@@ -210,6 +205,24 @@ MDS.init(function(msg){
 		//Check ETH for SWAPS
 		checkETHSwapHTLC(USER_DETAILS,ethblock, minimablock, function(ethswaps){});
 		
+		//Check ETH balance
+		getETHEREUMBalance(function (ethresp) {
+			// time to disable
+			if (ethresp < 0.01) {
+				getMyOrderBook(function (orderbook) {					
+					if (orderbook.wminima.enable || orderbook.usdt.enable) {
+						disableOrderbook(orderbook, function(set) {
+							var msg = {};
+							msg.status = true;
+							msg.message = "ETH balance below 0.01, disabled orderbook!";
+							sendFrontendMSG("DISABLEORDERBOOK", msg);
+						});
+					}					
+				});
+			}
+		});
+        
+        
 		//Do we have to send the orderbook..
 		ORDERSEND_COUNTER++;
 		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){
@@ -321,11 +334,7 @@ MDS.init(function(msg){
 				acceptOTCSwapCoin(USER_DETAILS, comms.coinid, function(res,message){
 					var fullmess 	 = {};
 					fullmess.res 	 = res;
-					if(res){
-						fullmess.message = JSON.parse(message);	
-					}else{
-						fullmess.message = message;
-					}
+					fullmess.message = message;
 					
 					sendFrontendMSG(comms.action,fullmess);
 				});

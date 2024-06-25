@@ -12,7 +12,6 @@ const Help = () => {
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    console.log(scrollRef.current);
     const handleScroll = () => {
       if (scrollRef.current && scrollRef.current.scrollTop > 0) {
         setIsExpanded(true);
@@ -26,7 +25,6 @@ const Help = () => {
 
     return () => {
       if (scrollContainer) {
-        console.log("Unsub event listeners");
         scrollContainer.removeEventListener("scroll", handleScroll);
       }
     };
@@ -118,7 +116,13 @@ const Help = () => {
                         Orderbook messages are broadcast over the Minima network
                         as Minima tranactions which all{" "}
                         <span className="font-bold">MiniSwap V2</span> Users
-                        see.
+                        see. <span className="text-xs text-teal-300">(fee: 0.0000000001 MINIMA)</span>
+                      </p>
+                      <p className="px-4 font-semibold">
+                        Swaps on the MINIMA side will cost you <span className="text-xs text-teal-300">(fee: 0.0001 MINIMA)</span> as you require to notify the user for the Ethereum secret when collecting your locked MINIMA.
+                      </p>
+                      <p className="px-4 font-semibold">
+                        MiniSwap V2 Wallet and ETH Wallet need to remain separate otherwise they will cause nonce issues if signing with the same key.
                       </p>
                       <p className="px-4 font-semibold">
                         <span className="font-bold">MiniSwap V2</span> will

@@ -1,9 +1,9 @@
-const DoneIcon = ({ fill }) => (
+const DoneIcon = ({ fill, size = 22 }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="icon icon-tabler icon-tabler-heart-filled"
-    width="24"
-    height="22"
+    width={size}
+    height={size}
     viewBox="0 0 24 24"
     strokeWidth="2.5"
     stroke={fill}

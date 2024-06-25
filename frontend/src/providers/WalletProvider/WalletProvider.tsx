@@ -29,6 +29,7 @@ type Context = {
     gas: GasFeeCalculated
   ) => Promise<TransactionResponse>;
   getTokenType: (tokeName: string, currentNetwork: string) => string;
+  getEthereumBalance: () => void;
 };
 
 const WalletContext = createContext<Context | null>(null);
@@ -100,9 +101,18 @@ export const WalletContextProvider = ({ children }: Props) => {
             return 'Tether';
           }
       }
+
+      if (token === 'minima') {
+        return 'Minima';
+      }
   
-      return "Minima";
+      return "Other";
   };
+
+  const getEthereumBalance = async () => {
+    const balance = await _provider.getBalance(_address);
+    setBalance(formatEther(balance));
+  }
 
   return (
     <WalletContext.Provider
@@ -117,6 +127,7 @@ export const WalletContextProvider = ({ children }: Props) => {
         setStep,
 
         getTokenType,
+        getEthereumBalance
       }}
     >
       {children}

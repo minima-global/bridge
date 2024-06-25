@@ -84,11 +84,14 @@ const WrappedPool = () => {
                 throw new Error();
               }
 
-              if (
-                new Decimal(val).equals(_currentOrderBook?.wminima.sell) && parent.buy &&
-                new Decimal(parent.buy).equals(_currentOrderBook?.wminima.buy)
-              ) {
-                throw new Error("Enter new values");
+              if (_currentOrderBook?.wminima.enable) {
+                console.log('order book is enabled');
+                if (
+                  new Decimal(val).equals(_currentOrderBook?.wminima.sell) && parent.buy &&
+                  new Decimal(parent.buy).equals(_currentOrderBook?.wminima.buy)
+                ) {
+                  throw new Error("Enter new values");
+                }
               }
 
               if (new Decimal(val).isZero()) {
@@ -99,9 +102,13 @@ const WrappedPool = () => {
                 throw new Error("Minimum is " + MINIMUM_MINIMA_TRADE);
               }
 
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
+              }
+
               return true;
             } catch (error) {
-              console.error(error);
+              // console.error(error);
               if (error instanceof Error) {
                 return createError({
                   path,
@@ -122,13 +129,14 @@ const WrappedPool = () => {
                 throw new Error("Order book not available");
               }
               
-                            
-              if (
-                new Decimal(val).equals(_currentOrderBook?.wminima.buy) && parent.sell &&
-                new Decimal(parent.sell).equals(_currentOrderBook?.wminima.sell)
-              ) {
-                throw new Error("Enter new values");
-              }
+              if (_currentOrderBook?.wminima.enable) {
+                if (
+                  new Decimal(val).equals(_currentOrderBook?.wminima.buy) && parent.sell &&
+                  new Decimal(parent.sell).equals(_currentOrderBook?.wminima.sell)
+                ) {
+                  throw new Error("Enter new values");
+                }
+              } 
 
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your buy offer");
@@ -138,9 +146,13 @@ const WrappedPool = () => {
                 throw new Error("Minimum is " + MINIMUM_MINIMA_TRADE);
               }
 
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
+              }
+
               return true;
             } catch (error) {
-              console.error(error);
+              // console.error(error);
               if (error instanceof Error) {
                 return createError({
                   path,

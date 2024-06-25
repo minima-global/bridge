@@ -15,6 +15,12 @@ import { OTCDeal } from "./types/OTCDeal.js";
 import { Favorite } from "./types/Favorite.js";
 import { getFavourites } from "../../dapp/js/sql.js";
 
+import {
+  getAllEvents,
+} from "../../dapp/js/sql.js";
+import * as _ from "lodash";
+import { OrderActivityEventGrouped } from "./types/Order.js";
+
 export var USER_DETAILS;
 export const appContext = createContext({} as any);
 
@@ -35,6 +41,8 @@ const AppProvider = ({ children }: IProps) => {
   // Current order book trade pool
   const [_currentOrderPoolTrade, setCurrentOrderPoolTrade] =
     useState("wminima");
+  // get all orders
+  const [orders, setOrders] = useState<OrderActivityEventGrouped | null>(null);
   // current Minima block height
   const [_currentBlock, setCurrentBlock] = useState<null | string>(null);
   // Accept OTC dialog
@@ -63,6 +71,10 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptHelp, setPromptHelp] = useState(false);
   // Settings
   const [_promptLogs, setPromptLogs] = useState(false);
+
+  const [_switchLogView, setSwitchLogView] = useState<'all' | 'orders'>('all');
+
+  
 
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
@@ -106,6 +118,7 @@ const AppProvider = ({ children }: IProps) => {
           // If in write mode, generate & set key
           if (response.response.mode === "WRITE") {
             initBridgeSystemsStartup(function (userdets) {
+
               // @ts-ignore
               window.USER_DETAILS = userdets;
               Object.freeze(USER_DETAILS);
@@ -348,10 +361,47 @@ const AppProvider = ({ children }: IProps) => {
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
-              //Show the message
-              globalNotify(JSON.stringify(comms));
 
-              // alert(JSON.stringify(comms, null, 2));
+              // get Latest orders               
+              getAllOrders();
+
+              if (comms.title === 'DISABLEORDERBOOK') {
+                return notify("Your order book has been disabled, you need more than 0.01 ETH to fulfill orders.");
+              }
+
+              if (comms.title === 'SENDETH' || comms.title === 'SENDWMINIMA' || comms.title === 'SENDUSDT') {
+                return notify("Withdrawal requested");
+              }
+
+              if (comms.title === 'STARTETHSWAP') {
+                if (comms.message && comms.message.status && comms.message.networkstatus) {
+                  return notify("Started an Ethereum swap!");
+                }
+              }
+
+              if (typeof comms.message === "string") {
+                if (comms.message.includes("insufficient funds for gas")) {
+                  notify(
+                    "Failed to execute Ethereum transaction, top up more ETH to complete the transaction."
+                  );
+                } else {
+                  notify(comms.message);
+                }
+              } else if (
+                typeof comms.message === "object" &&
+                comms.message !== null
+              ) {
+                if (
+                  comms.message.message &&
+                  typeof comms.message.message === "string"
+                ) {
+                  notify(comms.message.message);
+                } else {
+                  notify("Received an unknown message format.");
+                }
+              } else {
+                notify("Received an unknown message format.");
+              }
             }
           }
         }
@@ -364,34 +414,7 @@ const AppProvider = ({ children }: IProps) => {
             setCurrentBlock(resp.response.block);
           });
 
-          (window as any).MDS.cmd(
-            `balance tokenid:0x00 address:${
-              (window as any).USER_DETAILS.minimaaddress
-            }`,
-            (resp: any) => {
-              if (resp.status) {
-                const { confirmed, unconfirmed, coins } = resp.response[0];
-
-                // Use Minima Maths to calculate total of confirmed + unconfirmed
-                const add =
-                  'runscript script:"LET total=' +
-                  confirmed +
-                  "+" +
-                  unconfirmed +
-                  ' LET roundedtotal=FLOOR(total)"';
-
-                (window as any).MDS.cmd(add, function (respo) {
-                  const total = respo.response.variables.roundedtotal;
-                  setMinimaBalance({
-                    confirmed,
-                    unconfirmed,
-                    total,
-                    coins,
-                  });
-                });
-              }
-            }
-          );
+          getWalletBalance();
         }
       });
     }
@@ -540,6 +563,49 @@ const AppProvider = ({ children }: IProps) => {
       }
     });
   };
+  
+  const getWalletBalance = () => {
+    if (_userDetails === null) return;
+    (window as any).MDS.cmd(
+      `balance tokenid:0x00 address:${
+        _userDetails.minimaaddress.mxaddress
+      }`,
+      (resp: any) => {
+        if (resp.status) {
+          const { confirmed, unconfirmed, coins } = resp.response[0];
+
+          // Use Minima Maths to calculate total of confirmed + unconfirmed
+          const add =
+            'runscript script:"LET total=' +
+            confirmed +
+            "+" +
+            unconfirmed +
+            ' LET roundedtotal=FLOOR(total)"';
+
+          (window as any).MDS.cmd(add, function (respo) {
+            const total = respo.response.variables.roundedtotal;
+            setMinimaBalance({
+              confirmed,
+              unconfirmed,
+              total,
+              coins,
+            });
+          });
+        }
+      }
+    );
+  };
+  const getAllOrders = (max = 20, offset = 0) => {
+    getAllEvents(max, offset, (events) => {   
+      if (events.length) {
+        const filterEvents = events.filter(event => event.EVENT === 'CPTXN_COLLECT'||event.EVENT==='CPTXN_SENT'||event.EVENT==='HTLC_STARTED'||event.EVENT==='CPTXN_EXPIRED');
+        const group = _.groupBy(filterEvents.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
+        const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
+        
+        setOrders(sortGroupedData);
+      }
+    });
+  }
 
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
@@ -584,14 +650,17 @@ const AppProvider = ({ children }: IProps) => {
   const notify = (message: string) =>
     toast(message, { position: "bottom-right", theme: "dark" });
 
-  const globalNotify = (message: string) =>
-    toast(message, { position: "top-center", theme: "dark" });
+  // const globalNotify = (message: string) =>
+  //   toast(message, { position: "top-center", theme: "dark" });
 
   return (
     <appContext.Provider
       value={{
         loaded,
         isWorking,
+        
+        orders,
+        getAllOrders,
 
         _triggerBalanceUpdate,
         setTriggerBalanceUpdate,
@@ -615,12 +684,16 @@ const AppProvider = ({ children }: IProps) => {
 
         _mainBalance,
         getMainMinimaBalance,
-
+        getWalletBalance,
+        
         _promptWithdraw,
         promptWithdraw,
 
         _promptLogs,
         promptLogs,
+
+        _switchLogView, 
+        setSwitchLogView,
 
         _promptFavorites,
         promptFavorites,

@@ -1,6 +1,6 @@
 import { Formik } from "formik";
 import Navigation from "../Navigation";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import OrderPrice from "../OrderPrice";
 import * as yup from "yup";
 import Decimal from "decimal.js";
@@ -12,7 +12,6 @@ import { searchAllorFavsOrderBooks } from "../../../../../../../../dapp/js/order
 import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
-import { calculateAmount } from "../../../../../../../../dapp/js/orderbookutil.js";
 import {
   MINIMUM_MINIMA_TRADE,
   MAXIMUM_MINIMA_TRADE,
@@ -20,16 +19,43 @@ import {
 import { Data } from "../../../../../../types/Order.js";
 import Toolbar from "../Toolbar/index.js";
 import Charts from "../../Charts/index.js";
+import PricePerToken from "../PricePerToken/index.js";
+import WidgetInputWrapper from "../../../../../UI/FormComponents/WidgetInputWrapper/index.js";
+import WrappedToken from "./WrappedToken/index.js";
 
 const WrappedPool = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
   const [_f, setF] = useState(false);
 
-  const { _minimaBalance, _userDetails, notify, handleActionViaBackend } =
+  const { _minimaBalance, _userDetails, notify, handleActionViaBackend, setTriggerBalanceUpdate } =
     useContext(appContext);
   const { tokens } = useTokenStoreContext();
-  const { _network } = useWalletContext();
+  const { _network, getEthereumBalance } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "wMinima");
+
+  const handlePullBalance = async () => {
+    // Pause for 3 seconds
+    await new Promise((resolve) => {
+      setTimeout(resolve, 3000);
+    });
+  
+    // Trigger balance update
+    setTriggerBalanceUpdate(true);
+    getEthereumBalance();
+  
+    // Pause for 2 seconds before setting the trigger back to false
+    setTimeout(() => {
+      setTriggerBalanceUpdate(false);
+    }, 2000);
+  }
+
+  useEffect(() => {
+
+    (async () => {
+      await handlePullBalance();
+    })()
+
+  }, []);
 
   return (
     <Formik
@@ -42,41 +68,49 @@ const WrappedPool = () => {
         favorites: false,
       }}
       onSubmit={async (formData, { setFieldError, resetForm }) => {
-        const { offerPrice, order } = formData;
+        const { offerPrice, order, orderPrice } = formData;
 
         try {
           if (!order) {
             return setFieldError("matchingOrder", "No matching order");
           }
-
+          let message = {};
           const ERC20Contract =
             "0x" + _defaults["wMinima"][_network].slice(2).toUpperCase();
-          const message = {
-            action: "STARTETHSWAP",
-            reqpublickey: (order as Data).ethpublickey,
-            erc20contract: ERC20Contract,
-            reqamount: calculateAmount(
-              _currentNavigation.toLowerCase(),
-              offerPrice,
-              "wminima",
-              (order as Data).orderbook
-            ),
-            amount: offerPrice,
-          };
+
+          if (_currentNavigation === "Buy") {
+            message = {
+              action: "STARTETHSWAP",
+              reqpublickey: (order as Data).ethpublickey,
+              erc20contract: ERC20Contract,
+              reqamount: orderPrice,
+              amount: offerPrice,
+            };
+          } else {
+            message = {
+              action: "STARTMINIMASWAP",
+              reqpublickey: (order as Data).publickey,
+              contractaddress: "ETH:" + ERC20Contract,
+              requestamount: orderPrice,
+              sendamount: offerPrice,
+            };
+          }
 
           await handleActionViaBackend(message);
 
-          notify("Executed a swap!");
+          notify("Order requested...");
           resetForm();
 
-          // console.log("transaction response", res);
+          await handlePullBalance();
         } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
-            return notify("Error : "+ error.message);
+            return notify("Error : " + error.message);
           }
 
-          notify(error.message ? error.message : "Error, something went wrong!");
+          notify(
+            error.message ? error.message : "Error, something went wrong!"
+          );
         }
       }}
       validationSchema={yup.object().shape({
@@ -85,33 +119,42 @@ const WrappedPool = () => {
           .matches(/^\d*\.?\d+$/, "Enter a valid amount")
           .required("Enter your offer")
           .test("valid amount", function (val) {
-            const { path, createError } = this;
+            const { path, createError, parent } = this;
 
             try {
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your offer");
               }
 
-              if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
-                throw new Error("Exceeds max trade of " + MAXIMUM_MINIMA_TRADE);
-              }
-
               if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
-                throw new Error("Minimum order is " + MINIMUM_MINIMA_TRADE);
+                throw new Error("Minimum order is "+MINIMUM_MINIMA_TRADE+" MINIMA");
               }
 
-              if (_currentNavigation === "Sell") {
-                if (new Decimal(val).gt(_minimaBalance.confirmed)) {
-                  throw new Error("Insufficient funds");
-                }
-              } else {
+              if (new Decimal(val).gt(MAXIMUM_MINIMA_TRADE)) {
+                throw new Error("Exceeds maximum order of "+MAXIMUM_MINIMA_TRADE+" MINIMA");
+              }
+              
+              if (new Decimal(val).gt(_minimaBalance.confirmed)) {
+                throw new Error("Insufficient funds");
+              }
+
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
+              }
+
+
+              if (_currentNavigation === 'Buy') {
                 const balance = formatUnits(
                   relevantToken!.balance,
                   relevantToken!.decimals
                 ).toString();
-                if (new Decimal(val).gt(balance)) {
+                if (new Decimal(parent.orderPrice).gt(balance)) {
                   throw new Error("Insufficient funds");
-                }
+                }                            
+              }                        
+
+              if (new Decimal(parent.orderPrice).isZero()) {
+                throw new Error("Order unavailable");
               }
 
               return true;
@@ -196,115 +239,31 @@ const WrappedPool = () => {
             </div>
 
             <div className="grid grid-rows-[16px_1fr]">
-              <div className="flex flex-end justify-end px-8 text-gray-100">
-                <span className="text-xs text-black dark:text-gray-100 dark:text-opacity-50">
-                  {values.order &&
-                  (values.order as Data).orderbook &&
-                  (values.order as Data).orderbook.wminima
-                    ? "x" +
-                      (values.order as Data).orderbook.wminima[
-                        _currentNavigation === "Buy" ? "sell" : "buy"
-                      ] +
-                      " each"
-                    : null}
-                </span>
+              <div className="flex flex-end justify-end px-6 text-gray-100">
+                <PricePerToken
+                  order={values.order}
+                  tradingSide={_currentNavigation}
+                  token="wminima"
+                />
               </div>
-              <div className="grid grid-cols-2 divide-x-2 divide-teal-300 px-4">
-                <div className="px-4 border-l-2 border-red-300">
-                  <div className="grid grid-cols-[1fr_36px]">
-                    <div
-                      className={`${
-                        errors.offerPrice &&
-                        !errors.offerPrice.includes("Insufficient") &&
-                        "animate-pulse"
-                      }`}
-                    >
-                      <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
-                        I will give
-                      </label>
-                      <input
-                        onFocus={() => {
-                          setF(true);
-                        }}
-                        onBlur={(e) => {
-                          setF(false);
-                          handleBlur(e);
-                        }}
-                        id="offerPrice"
-                        name="offerPrice"
-                        onChange={handleChange}
-                        value={values.offerPrice}
-                        className="w-full bg-transparent focus:outline-none font-mono"
-                        placeholder="0.0"
-                      />
-                    </div>
-                    <div>
-                      <img
-                        alt="token"
-                        src={
-                          _currentNavigation === "Buy"
-                            ? "./assets/wtoken.svg"
-                            : "./assets/token.svg"
-                        }
-                        className="rounded-full w-[36px] h-[36px] my-auto"
-                      />
-                      <p className="text-xs text-center font-bold font-mono truncate">
-                        {_currentNavigation === "Sell" &&
-                          _minimaBalance &&
-                          new Decimal(_minimaBalance.confirmed).toFixed(0)}
-                        {_currentNavigation === "Buy" &&
-                          relevantToken &&
-                          new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
 
-                <div className="px-4">
-                  <div className="grid grid-cols-[1fr_36px]">
-                    <div>
-                      <label className="text-xs font-bold dark:text-gray-100 dark:text-opacity-30">
-                        I will receive
-                      </label>
-
-                      <OrderPrice
-                        orderType={_currentNavigation}
-                        token="wminima"
-                        userPublicKey={_userDetails.publickey}
-                      />
-                    </div>
-                    <div>
-                      <img
-                        alt="token"
-                        src={
-                          _currentNavigation === "Sell"
-                            ? "./assets/wtoken.svg"
-                            : "./assets/token.svg"
-                        }
-                        className="rounded-full w-[36px] h-[36px] my-auto"
-                      />
-                      <p className="text-xs text-center font-bold font-mono truncate">
-                        {_currentNavigation === "Buy" &&
-                          _minimaBalance &&
-                          new Decimal(_minimaBalance.confirmed).toFixed(0)}
-                        {_currentNavigation === "Sell" &&
-                          relevantToken &&
-                          new Decimal(
-                            formatUnits(
-                              relevantToken!.balance,
-                              relevantToken!.decimals
-                            )
-                          ).toFixed(0)}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <WidgetInputWrapper
+                tradeSide={_currentNavigation.toLowerCase() as 'buy'|'sell'}
+                value={values.offerPrice}
+                errors={
+                  !!(
+                    errors.offerPrice &&
+                    !errors.offerPrice.includes("Insufficient")
+                  )
+                }
+                tokenComponent={<WrappedToken />}
+                calculatedOrderComponent={
+                  <OrderPrice orderType={_currentNavigation} token="wminima" />
+                }
+                setFocus={setF}
+                handleBlur={handleBlur}
+                handleChange={handleChange}
+              />
             </div>
 
             <div className="px-4 pb-3">

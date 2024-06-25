@@ -79,12 +79,14 @@ const TetherPool = () => {
                 throw new Error("Order book not available");
               }
 
-              if (
-                new Decimal(val).equals(_currentOrderBook?.usdt.sell) && parent.buy &&
-                new Decimal(parent.buy).equals(_currentOrderBook?.usdt.buy)
-              ) {
-                throw new Error("Enter new values");
-              }
+              if (_currentOrderBook?.usdt.enable) {
+                if (
+                  new Decimal(val).equals(_currentOrderBook?.usdt.sell) && parent.buy &&
+                  new Decimal(parent.buy).equals(_currentOrderBook?.usdt.buy)
+                ) {
+                  throw new Error("Enter new values");
+                }
+              }            
 
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your sell offer");
@@ -92,6 +94,10 @@ const TetherPool = () => {
 
               if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
                 throw new Error("Minimum is " + MINIMUM_MINIMA_TRADE);
+              }
+
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
               }
 
               return true;
@@ -116,12 +122,15 @@ const TetherPool = () => {
                 throw new Error("Order book not available");
               }
 
-              if (
-                new Decimal(val).equals(_currentOrderBook?.usdt.buy) && parent.sell &&
-                new Decimal(parent.sell).equals(_currentOrderBook?.usdt.sell)
-              ) {
-                throw new Error("Enter new values");
-              }
+              if (_currentOrderBook?.usdt.enable) {
+                if (
+                  new Decimal(val).equals(_currentOrderBook?.usdt.buy) && parent.sell &&
+                  new Decimal(parent.sell).equals(_currentOrderBook?.usdt.sell)
+                ) {
+                  throw new Error("Enter new values");
+                }              
+              } 
+
 
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your buy offer");
@@ -129,6 +138,10 @@ const TetherPool = () => {
 
               if (new Decimal(val).lt(MINIMUM_MINIMA_TRADE)) {
                 throw new Error("Minimum is " + MINIMUM_MINIMA_TRADE);
+              }
+
+              if (new Decimal(val).decimalPlaces() > 4) {
+                throw new Error("Can't exceed more than 4 decimal places");
               }
 
               return true;

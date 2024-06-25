@@ -7,13 +7,11 @@ import { viteStaticCopy } from 'vite-plugin-static-copy'
 
 
 export default ({ mode }) => {
-  let devEnv = "";
-  const env = Object.assign(
-    globalThis.process.env,
-    loadEnv(mode, globalThis.process.cwd())
-  );
+  let devEnv = '';
+  // Load environment variables based on the mode
+  const env = loadEnv(mode, process.cwd());
 
-  if (mode === "development") {
+  if (mode === "development" || mode === 'second') {
     devEnv = `
       <script>
         var DEBUG = "${env.VITE_DEBUG}" === 'true';

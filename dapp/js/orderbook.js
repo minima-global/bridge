@@ -613,6 +613,18 @@ function getUniqueRecords(validrecords){
 	return orderbook;
 }
 
+function disableOrderbook (orderbook, callback) {
+	orderbook.wminima.enable = false;
+	orderbook.usdt.enable = false;
+
+
+	MDS.keypair.set("myorderbook",JSON.stringify(orderbook),function(setorder){
+		if(callback){
+			callback(setorder);
+		}
+	});
+}
+
 function setUserOrderBook(wrappedenable, wrappedbuy, wrappedsell, wrappedminimum, wrappedmaximum, 
 						  usdtenable, usdtbuy, usdtsell, usdtminimum, usdtmaximum, callback){
 	

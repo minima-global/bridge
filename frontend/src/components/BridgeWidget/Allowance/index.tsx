@@ -8,6 +8,9 @@ import { Token } from "@uniswap/sdk-core";
 import { useWalletContext } from "../../../providers/WalletProvider/WalletProvider";
 import { _defaults } from "../../../constants";
 
+import {sendSimpleBackendMSG} from "../../../../../dapp/js/jslib.js";
+
+
 const Allowance = () => {
   const {
     _network: currentNetwork,
@@ -17,13 +20,19 @@ const Allowance = () => {
   const { _promptAllowance, setPromptAllowance, _approving, setApproving } = useContext(appContext);
 
   const [error, setError] = useState<string | false>(false);
-  const [step, setStep] = useState(1);  
+  const [step, setStep] = useState(1);
 
   // this should check on load our allowances for both USDT & wMinima on the HTLC contract
   useAllowanceChecker();
 
   if (!_promptAllowance) {
     return null;
+  }
+
+  const handleRefreshNonce = () => {
+    sendSimpleBackendMSG("REFRESHNONCE", () => { 
+      // run refresh nonce after approving contract spends, so that backend nonce is up to date...
+    });
   }
 
   const isDefault = !_approving && !error && step === 1;
@@ -121,6 +130,8 @@ const Allowance = () => {
                   signer!,
                   _address!
                 );
+
+                handleRefreshNonce();
 
                 setStep(2);
               } catch (error) {

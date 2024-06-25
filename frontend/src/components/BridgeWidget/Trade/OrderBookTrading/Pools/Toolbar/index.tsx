@@ -1,7 +1,7 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import SelectFavorites from "../SelectFavorites";
 import { appContext } from "../../../../../../AppContext";
-import CaretIcon from "../../../../../UI/Icons/CaretIcon";
+// import CaretIcon from "../../../../../UI/Icons/CaretIcon";
 import { config, useSpring, animated } from "react-spring";
 
 const Toolbar = () => {
@@ -40,22 +40,22 @@ const Toolbar = () => {
   return (
     <div
       onClick={() => promptDropdown()}
-      className="grid grid-cols-[1fr_auto_1fr] items-center bg-gray-100 bg-opacity-30 dark:bg-black dark:bg-opacity-20 py-2 hover:bg-gray-300 hover:dark:bg-black"
+      className="grid grid-cols-[1fr_auto_1fr] items-center bg-gray-100 bg-opacity-30 dark:bg-black dark:bg-opacity-20 py-2 hover:bg-gray-300 hover:dark:bg-black hover:cursor-pointer"
     >
       <div />
       <div ref={dropdownRef} className="relative grid grid-cols-[1fr_auto]">
         {active && (
           <animated.div
             style={springProps}
-            className="origin-top-right z-[50] w-[105px] absolute right-0 top-[10px] mt-2 rounded-r-sm shadow-lg bg-white dark:bg-opacity-100 dark:bg-[#1B1B1B]"
+            className="origin-top-right z-[50] w-full absolute right-0 top-[20px] mt-2 rounded-r-sm shadow-sm bg-white dark:bg-opacity-100 dark:bg-[#1B1B1B] shadow-black dark:shadow-white"
             role="menu"
             aria-orientation="vertical"
             aria-labelledby="options-menu"
           >
-            <ul className="grid grid-rows-2 divide-y divide-teal-100">
+            <ul className="grid grid-rows-2 divide-y divide-black">
               <li
                 onClick={() => setCurrentOrderPoolTrade("usdt")}
-                className={`hover:bg-gray-200 hover:dark:bg-black px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${
+                className={`px-2 cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${
                   _currentOrderPoolTrade === "usdt" &&
                   "bg-gray-100 dark:bg-black"
                 } `}
@@ -71,7 +71,7 @@ const Toolbar = () => {
               </li>
               <li
                 onClick={() => setCurrentOrderPoolTrade("wminima")}
-                className={`px-2 hover:bg-gray-200 hover:dark:bg-black cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${
+                className={`px-2  cursor-pointer grid grid-cols-[auto_1fr] items-center gap-1 ${
                   _currentOrderPoolTrade === "wminima" &&
                   "bg-gray-100 dark:bg-black"
                 } `}
@@ -109,7 +109,7 @@ const Toolbar = () => {
             {_currentOrderPoolTrade === "wminima" ? "WMINIMA" : "USDT"}
           </h3>
         </div>
-        <CaretIcon />
+        {/* <CaretIcon /> */}
       </div>
       <div className="flex justify-end px-1">
         <SelectFavorites />

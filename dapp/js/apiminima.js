@@ -171,15 +171,22 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 			
 			//And send from the native wallet..
 			sendMinima(userdets,amount,HTLC_ADDRESS,state,function(resp){
-				MDS.log(JSON.stringify(resp));
+
+				var htlc_info = JSON.stringify({
+                    timelock: timelock,
+					amount: amount,
+					token: 'minima',
+                    requestamount: requestamount,
+                    requesttoken: reqtoken,
+                    otc: otc
+				});
+
 				//If success put in DB
-				if(resp.status){
-					
+				if(resp.status){					
 					//Log it..
-					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid,function(){
-						//Insert these details so you know in future if right amount sent
-						insertNewHTLCContract(hash,requestamount,reqtoken,function(resp){
-							MDS.log(JSON.stringify(resp));
+					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid+"-"+reqtoken+"-"+requestamount,function(){
+						insertNewHTLCContract(hash,requestamount,reqtoken, htlc_info,function(miniresp){
+							MDS.log(JSON.stringify(miniresp));
 							callback(resp);	
 						});
 					});
@@ -329,7 +336,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 						MDS.log('WMINIMA_DECIMALS: ' + WMINIMA_DECIMALS);
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", 0, "Incorrect amount", function(sqlresp){});	
+						collectHTLC(hash, "minima", reqamount.REQAMOUNT, "Counterparty sent incorrect amount", function(sqlresp){});	
 						
 						return;
 					}
@@ -343,7 +350,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					//Is it correct
 					if(token != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(coin));
-						collectHTLC(hash, "minima", 0, "Incorrect token", function(sqlresp){});	
+						collectHTLC(hash, "minima", reqamount.REQAMOUNT, "Counterparty sent incorrect token", function(sqlresp){});	
 						return;
 					}
 				}
@@ -543,13 +550,13 @@ function acceptOTCSwapCoin(userdets, coinid, callback){
 							
 							//Send the ETH counter TXN - to make him reveal the secret
 							sendCounterPartyMinimaTxn(userdets,coin,function(resp){
-								callback(resp.status,JSON.stringify(resp));	
+								callback(resp.status,"Posted counterparty transaction.");	
 							});	
 						});
 							
 					}
 				}else{
-					callback(false,"Allready sent counterparty txn..");	
+					callback(false,"Already sent counterparty transaction...");	
 				}
 			});		
 		});
@@ -562,7 +569,10 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 	var txnid = "htlc_collect_txn_"+randomInteger(1,1000000000);
 	
 	//Create a txn to collect this coin..
-	var finalamount = +coin.amount - 0.0001;
+	// var finalamount = +coin.amount - 0.0001;
+	var AMOUNT_DEFINED_IN_SCRIPT = 0.0001;
+	var finalamount = new Decimal(coin.amount).minus(AMOUNT_DEFINED_IN_SCRIPT).toString();
+
 			
 	var cmd = "txncreate id:"+txnid+";"
 	
@@ -587,6 +597,8 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			//AND POST!
 			+"txnpost id:"+txnid+" mine:true auto:true txndelete:true;";
 	
+	MDS.log('collection string, ' +  cmd);
+
 	//Run it.. 
 	MDS.cmd(cmd,function(resp){
 		
@@ -650,7 +662,8 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 		
 		//If success put in DB
 		if(ethresp.status){
-			sentCounterPartyTxn(hashlock,"ETH:"+token,amount,ethresp.result,function(){
+			
+			sentCounterPartyTxn(hashlock,"ETH:"+token,amount,ethresp.result+"-minima-"+reqamount,function(){
 				callback(ethresp);	
 			});
 		}else{

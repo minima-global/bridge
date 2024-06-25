@@ -113,9 +113,10 @@ function validInfuraKeys(callback){
  * Auto-set the NONCE
  */
 function setNonceAuto(callback){
-	
+	MDS.log('setNonceAuto');
 	//Get the nonce..
 	getRequiredNonce(function(nonce){
+		MDS.log('What is my nonce? ' + nonce);
 				
 		//This is the nonce..
 		NONCE_TRACK = nonce;
@@ -560,4 +561,4 @@ function boostTransaction(transactionid,callback){
 
 
 
-export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI, initialiseETHAddress, ethCallCommand };
+export { getETHERUMAddress, setInfuraApiKeys, getInfuraGASAPI, initialiseETHAddress, ethCallCommand, setNonceAuto };

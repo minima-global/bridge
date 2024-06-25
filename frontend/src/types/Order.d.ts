@@ -29,3 +29,17 @@ export interface Order {
     maximapublickey: string;
     data: Data;
 }
+
+export interface OrderActivityEvent {
+    ID: string;
+    HASH: string;
+    EVENT: string;
+    TOKEN: string;
+    AMOUNT: string;
+    TXNHASH: string;
+    EVENTDATE: string;
+}
+
+export interface OrderActivityEventGrouped {
+    [key: string]: OrderActivityEvent[]; 
+}

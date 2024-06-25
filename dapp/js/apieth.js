@@ -9,18 +9,27 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 	
 	//Create a secret
 	createSecretHash(function(hashlock){
-		
+
 		//Start the swap..
 		setupETHHTLCSwap(userdets.minimapublickey, swappublickey, hashlock, timelock, 
 						erc20contract, amount, requestamount, function(ethresp){
 			if(ethresp.status){
+
+				var htlc_info = JSON.stringify({
+                    timelock: timelock,
+					amount: amount,
+					token: 'ETH:'+erc20contract,
+                    requestamount: requestamount,
+                    requesttoken: 'minima',
+					otc: null
+				});
 				
 				//Log it..
 				startedCounterPartySwap(hashlock, "ETH:"+erc20contract, 
-							amount, ethresp.result, function(){
+							amount, ethresp.result+"-minima-"+requestamount, function(){
 					
 					//Insert these details so you know in future if right amount sent
-					insertNewHTLCContract(hashlock,requestamount,"minima",function(sqlresp){
+					insertNewHTLCContract(hashlock,requestamount,"minima",htlc_info,function(sqlresp){						
 						callback(ethresp);		
 					});		
 				});	
@@ -307,7 +316,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 						
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, reqamount.TOKEN, 0, "Incorrect amount", function(sqlresp){});	
+						collectHTLC(htlclog.hashlock, reqamount.TOKEN, 0, "Counterparty locked incorrect amount", function(sqlresp){});	
 						return;
 					}
 					
@@ -320,7 +329,7 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 					//Is it correct
 					if(htlclog.tokencontract != reqtoken){
 						MDS.log("ERROR : Incorrect token HTLC required:"+reqamount.TOKEN+" htlc:"+JSON.stringify(htlclog));
-						collectHTLC(htlclog.hashlock, reqamount.TOKEN, 0, "Incorrect token", function(sqlresp){});	
+						collectHTLC(htlclog.hashlock, reqamount.TOKEN, 0, "Counterparty locked incorrect token", function(sqlresp){});	
 						return;
 					}
 				}
@@ -493,7 +502,7 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 				
 				//If success put in DB
 				if(resp.status){
-					sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid,function(){
+					sentCounterPartyTxn(htlclog.hashlock,"minima",htlclog.requestamount,resp.response.txpowid+"-ETH:"+htlclog.tokencontract+"-"+htlclog.amount,function(){
 						callback(resp);	
 					});
 				}else{

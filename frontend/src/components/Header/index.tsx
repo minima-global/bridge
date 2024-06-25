@@ -30,9 +30,9 @@ const Header = () => {
             </div>
           </div>
           <div className="mb-auto">
-            <p className="text-center text-xs tracking-tighter text-sky-400 font-bold shadow-violet-300 dark:text-yellow-100  shadow-sm dark:shadow-yellow-300 max-w-max mx-auto px-4">
+            {/* <p className="text-center text-xs tracking-tighter text-sky-400 font-bold shadow-violet-300 dark:text-yellow-100  shadow-sm dark:shadow-yellow-300 max-w-max mx-auto px-4">
               TESTING PURPOSE ONLY
-            </p>
+            </p> */}
           </div>
           <div className="flex justify-end">
             <div
