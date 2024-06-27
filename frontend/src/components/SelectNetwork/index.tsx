@@ -5,7 +5,7 @@ import { appContext } from "../../AppContext";
 
 import Dialog from "../UI/Dialog";
 import EthereumNetwork from "../UI/EthereumNetwork";
-import SepoliaNetwork from "../UI/SepoliaNetwork";
+// import SepoliaNetwork from "../UI/SepoliaNetwork";
 import { useWalletContext } from "../../providers/WalletProvider/WalletProvider";
 
 const SelectNetwork = () => {
