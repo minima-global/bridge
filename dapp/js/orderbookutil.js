@@ -253,7 +253,6 @@ function searchAllOrderBooks(action, amount, token, ignoreme, callback){
 
 //I have AMOUNT of MINIMA - I want to swap for TOKEN.. find the best order
 function searchAllorFavsOrderBooks(favs,action, amount, token, ignoreme, callback){
-	
 	if(favs){
 		//Get the complete order book
 		getFavsOrderBook(function(completeorderbook){

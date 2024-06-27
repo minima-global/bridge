@@ -70,3 +70,12 @@
 - Tweak Liquidity pool UX
 - Add Minimum Minima Order on Liquidity pool UX
 - Bug fixes
+
+##### [2.6.0] - 27 June 24
+
+- Order book re-written
+- Fix orders pruning
+- Remove autofocus on withdrawal
+- Remove Secret Revealed events
+- Add View Orders button
+

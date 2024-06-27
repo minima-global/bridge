@@ -388,7 +388,7 @@ const MainActivity = () => {
   useEffect(() => {
     if (_promptLogs && _switchLogView === 'all') {
       getAllEvents(MAX, offset, (events) => {
-        const _evts = events.map((e) => {
+        const _evts = events.filter(e => !(e.TXNHASH === "SECRET REVEALED")).map((e) => {
 
           if (e.TXNHASH.includes("-")) {
             const txHash = e.TXNHASH.split("-")[0];

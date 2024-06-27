@@ -276,6 +276,12 @@ function getAllEvents(limit, offset, callback){
 	});
 }
 
+function getAllEventsForOrders(callback){
+	MDS.sql("SELECT * FROM counterparty ORDER BY id", function(sqlmsg){
+		callback(sqlmsg.rows);
+	});
+}
+
 function getAllOrders(callback){
 	const query = `SELECT * FROM myhtlc ORDER BY id DESC limit 20`;
 	MDS.sql(query, function(sqlmsg){
@@ -374,4 +380,4 @@ function getFavourites(callback){
 
 
 
-export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllOrders, getFavourites, addFavourites, removeFavourite, removeAllFavourites };
+export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllEventsForOrders, getAllOrders, getFavourites, addFavourites, removeFavourite, removeAllFavourites };

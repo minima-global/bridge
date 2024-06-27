@@ -226,8 +226,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 name="amount"
                 onFocus={() => setF(true)}
                 required
-                type="text"
-                autoFocus
+                type="text"              
                 placeholder="Amount"
                 className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
               />              
