@@ -135,7 +135,7 @@ const Allowance = () => {
               } catch (error) {
                 setStep(1);
                 if (error instanceof Error) {
-                  return setError(error.message);
+                  return setError(error.message.includes("insufficient funds") ? "Insufficient ETH, deposit some more ETH on the balance page and re-try" : error.message);
                 }
 
                 setError("Allowance approval failed");

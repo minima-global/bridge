@@ -186,7 +186,6 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 					//Log it..
 					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid+"-"+reqtoken+"-"+requestamount,function(){
 						insertNewHTLCContract(hash,requestamount,reqtoken, htlc_info,function(miniresp){
-							MDS.log(JSON.stringify(miniresp));
 							callback(resp);	
 						});
 					});
@@ -333,7 +332,6 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					
 					//Check is for the correct amount.. Will accept MORE
 					if(+reqamount.REQAMOUNT > +coin.amount){
-						MDS.log('WMINIMA_DECIMALS: ' + WMINIMA_DECIMALS);
 						//Incorrect amount - do NOT reveal the secret
 						MDS.log("ERROR : Incorrect amount HTLC required:"+reqamount.REQAMOUNT+" htlc:"+JSON.stringify(coin));
 						collectHTLC(hash, "minima", reqamount.REQAMOUNT, "Counterparty sent incorrect amount", function(sqlresp){});	
@@ -596,8 +594,7 @@ function _collectMinimaHTLCCoin(userdets, hash, secret, coin, callback){
 			
 			//AND POST!
 			+"txnpost id:"+txnid+" mine:true auto:true txndelete:true;";
-	
-	MDS.log('collection string, ' +  cmd);
+
 
 	//Run it.. 
 	MDS.cmd(cmd,function(resp){

@@ -80,4 +80,5 @@
 - Add View Orders button
 - Re-arrange allowance approval step
 - Tweak Allowance approval design
+- Add wallet address to Ethereum Withdrawal, set ETH wallet as default (when blank)
 

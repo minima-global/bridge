@@ -25,7 +25,7 @@ const getReceiversActions = async (coin) => {
   });
 };
 
-const renderCell = (cellData) => {
+const renderCell = (cellData, index, handleFocus, focusStates) => {
   const { uid, native, token, timelock, action, coinid, promptAcceptOTC } = cellData;
 
   return (
@@ -73,9 +73,9 @@ const renderCell = (cellData) => {
             LOCKED
           </p>
         )}
-        {action === "ACCEPT" && (
+        {(!focusStates[index] && action === "ACCEPT") && (
           <button
-            onClick={() => promptAcceptOTC({ uid, native, token, timelock, action, coinid })}
+            onClick={() => promptAcceptOTC({ uid, native, token, timelock, action, coinid, handleFocus, index })}
             type="button"
             className="bg-teal-300 py-1 text-black hover:bg-opacity-80 font-bold w-full"
           >
@@ -107,7 +107,7 @@ const renderCell = (cellData) => {
             </p>
           </div>
         )}
-        {action === "PENDING" && (
+        {(focusStates[index] || action === "PENDING") && (
           <div className="mx-auto bg-yellow-500 rounded-full px-4 w-max py-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -135,7 +135,7 @@ const renderCell = (cellData) => {
     </>
   );
 };
-const renderCellMobile = (cellData) => {
+const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   const { uid, native, token, timelock, action, coinid, promptAcceptOTC } = cellData;
 
   return (
@@ -183,9 +183,9 @@ const renderCellMobile = (cellData) => {
             LOCKED
           </p>
         )}
-        {action === "ACCEPT" && (
+        {(!focusStates[index] && action === "ACCEPT") && (
           <button
-            onClick={() => promptAcceptOTC({ uid, native, token, timelock, action, coinid })}
+            onClick={() => promptAcceptOTC({ uid, native, token, timelock, action, coinid, handleFocus, index })}
             type="button"
             className="bg-teal-300 text-black hover:bg-opacity-80 font-bold w-full"
           >
@@ -217,7 +217,7 @@ const renderCellMobile = (cellData) => {
             </p>
           </div>
         )}
-        {action === "PENDING" && (
+        {(focusStates[index] || action === "PENDING") && (
           <div className="bg-yellow-500 rounded-full px-4 w-max py-1">
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -288,7 +288,7 @@ const Activity = () => {
   }, [_currentBlock]);
 
   return (
-    <div className="bg-gray-100 bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg">
+    <div className="bg-gray-100 shadow-lg dark:shadow-none bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg">
       {!!deals.length && (
         <MostResponsiveTableEver
           headerClasses=""

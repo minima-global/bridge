@@ -100,7 +100,7 @@ const SelectAsset = () => {
             {formik.values.asset.name}
           </h6>
           <p className="m-0 p-0 text-sm font-mono text-black dark:text-white">
-          {formik.values.asset.type === 'erc20' && formatUnits(formik.values.asset.balance, formik.values.asset.decimals)}
+          {formik.values.asset.type === 'erc20' && formatUnits(formik.values.asset.balance, formik.values.asset.name === 'Tether' && _network === 'sepolia' ? 18 : formik.values.asset.decimals)}
           {formik.values.asset.type !== 'erc20' && formik.values.asset.balance}
           </p>
         </div>
@@ -161,7 +161,7 @@ const SelectAsset = () => {
                     {token.name}
                   </h6>
                   <p className="m-0 p-0 text-sm opacity-80 font-mono text-white dark:text-black">
-                    {formatUnits(token.balance, token.decimals)}
+                    {formatUnits(token.balance, token.name === 'Tether' && _network === 'sepolia' ? 18 : token.decimals)}
                   </p>
                 </div>
               </li>

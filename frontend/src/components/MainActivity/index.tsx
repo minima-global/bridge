@@ -427,7 +427,7 @@ const MainActivity = () => {
             style={springProps}
             className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-hidden"
           >
-            <div className="bg-slate-100 dark:bg-black" />
+            <div className="bg-slate-100 dark:bg-[#1B1B1B]" />
             <div className="overflow-scroll">
               <div className="flex justify-between items-center pr-4 my-3">
                 <Tabs />
@@ -511,7 +511,7 @@ const MainActivity = () => {
 
               {_switchLogView === "orders" && <OrderHistory full={true} />}
             </div>
-            <div className="bg-slate-100 dark:bg-black" />
+            <div className="bg-slate-100 dark:bg-[#1B1B1B]" />
           </animated.div>,
           document.body
         )}

@@ -4,7 +4,7 @@ import { min, max } from "./jslib.js";
 import { MAXIMUM_MINIMA_TRADE, PRICE_BOOK_STEPS} from "./htlcvars.js";
 
 //The Bridge order book address
-var BRIDGEORDERBBOK = "0xDEADDEADDEADFF";
+var BRIDGEORDERBBOK = "0xDEADDEADDEADFFFF";
 
 //How many new SIGS checked in complete orderbook
 var SIGS_CHECKED = 0;

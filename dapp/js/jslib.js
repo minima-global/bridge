@@ -126,7 +126,7 @@ function sendFrontendMSG(title, msg, callback){
 	comms.message	= msg;
 	
 	//Log it..
-	MDS.log("Send FRONTEND Message : "+JSON.stringify(comms));
+	// MDS.log("Send FRONTEND Message : "+JSON.stringify(comms));
 	
 	MDS.comms.solo(JSON.stringify(comms),function(resp){
 		if(callback){

@@ -1,6 +1,6 @@
 import { parseUnits } from "ethers";
 import { Formik } from "formik";
-import { useContext, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import * as yup from "yup";
 import ProgressIcon from "../UI/Progress";
 import SelectAsset from "../SelectAsset";
@@ -23,7 +23,9 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _network, getEthereumBalance } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
-  const [f, setF] = useState(false);
+  const [ethWalletAddress, setEthWalletAddress] = useState("");
+
+  const [f, setF] = useState({amount: false, address: false});
 
   const [_, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -59,6 +61,25 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
     }, 2000);
   }
 
+  useEffect(() => {
+    if (type === 'erc20') {
+      (async () => {
+        (window as any).MDS.cmd(
+          "seedrandom modifier:ghost",
+          async (resp) => {
+            try {
+              const genKey = resp.response.seedrandom;
+              const _address = await new Wallet(genKey).getAddress();      
+              setEthWalletAddress(_address);
+            } catch (error) {
+              console.error('Failed to gen eth wallet', error);
+            }
+          }
+        );        
+      })();
+    }
+  }, [type]);
+
   return (
     <Formik
       initialValues={{
@@ -75,7 +96,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                   type: "ether",
                 }
             : {},
-        address: "",
+        address: ethWalletAddress,
         receipt: null,
         gasPaid: "",
       }}
@@ -126,13 +147,12 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
             }
           }),
       })}
-      onSubmit={async ({ amount, asset }, { setStatus, resetForm }) => {
+      onSubmit={async ({ amount, asset, address }, { setStatus, resetForm }) => {
         setError(false);
         setLoading(true);
         setStatus(undefined);
         try {
           let action;
-          let address;
 
           if (type === "erc20") {
             if (asset.name === "wMinima") {
@@ -141,26 +161,15 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
               action = "SENDETH";
             } else if (asset.name === "Tether") {
               action = "SENDUSDT";
+            }    
+            
+            if (!address.length && !ethWalletAddress.length) {
+              throw new Error("Please enter an address");
             }
-
-            await new Promise((resolve, reject) => {
-              (window as any).MDS.cmd(
-                "seedrandom modifier:ghost",
-                async (resp) => {
-                  try {
-                    const genKey = resp.response.seedrandom;
-                    address = await new Wallet(genKey).getAddress();
-                    resolve(true);
-                  } catch (error) {
-                    reject(error);
-                  }
-                }
-              );
-            });
           }
 
           await submitForm(
-            type === "native" ? amount : { amount, action, address }
+            type === "native" ? amount : { amount, action, address: address.length ? address : ethWalletAddress }
           );
 
 
@@ -205,9 +214,41 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">{type === "erc20" && <SelectAsset />}</div>
           <div>
+            {type === 'erc20' &&
+
+            <>
+              <div
+                className={`my-2 flex space-x-2 bg-black ${f.address && "!bg-white"} rounded ${
+                  f.address && !errors.address && "outline outline-violet-300" 
+                } ${
+                  touched.address && errors.address
+                    ? "!border-4 !outline-none !border-red-500"
+                    : ""
+                }`}
+              >
+                <input
+                  disabled={isSubmitting}
+                  onBlur={(e) => {
+                    handleBlur(e);
+                    setF(prevState => ({...prevState, address: false}));
+                  }}
+                  onChange={handleChange}
+                  value={values.address}
+                  id="address"
+                  name="address"
+                  onFocus={() => setF(prevState => ({...prevState, address: true}))}
+                  type="text"              
+                  placeholder="Address"
+                  className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
+                />              
+                
+              </div>          
+              <p className="text-xs mb-2 font-bold">Leave address field empty if you want to withdraw to your ETH Wallet ({ethWalletAddress.substring(0,4)+"..."+ethWalletAddress.substring(ethWalletAddress.length-4,ethWalletAddress.length)})</p>
+            </>
+            }
             <div
-              className={`flex space-x-2 bg-black ${f && "!bg-white"} rounded ${
-                f && !errors.amount && "outline outline-violet-300" 
+              className={`flex space-x-2 bg-black ${f.amount && "!bg-white"} rounded ${
+                f.amount && !errors.amount && "outline outline-violet-300" 
               } ${
                 touched.amount && errors.amount
                   ? "!border-4 !outline-none !border-red-500"
@@ -218,13 +259,13 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 disabled={isSubmitting}
                 onBlur={(e) => {
                   handleBlur(e);
-                  setF(false);
+                  setF(prevState => ({...prevState, amount: false}));
                 }}
                 onChange={handleChange}
                 value={values.amount}
                 id="amount"
                 name="amount"
-                onFocus={() => setF(true)}
+                onFocus={() => setF(prevState => ({...prevState, amount: true}))}
                 required
                 type="text"              
                 placeholder="Amount"

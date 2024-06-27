@@ -20,7 +20,7 @@ const OTCForm = () => {
     <Formik
       initialValues={{
         uid: "",
-        native: 0,
+        native: "",
         token: { name: "WMINIMA", amount: "" },
         locked: false
       }}
@@ -132,7 +132,7 @@ const OTCForm = () => {
       })}
     >
       {({ handleSubmit, getFieldProps, setFieldValue, values, errors, touched, isValid }) => (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="shadow-lg dark:shadow-none">
           <InputWrapper
             errors={errors && errors.uid && touched && touched.uid ? errors.uid : false}
             inputProps={{ placeholder: "uid", ...getFieldProps("uid") }}
