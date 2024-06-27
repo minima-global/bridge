@@ -51,6 +51,8 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
   const [_promptWithdraw, setPromptWithdraw] = useState(false);
+  
+  const [_allowanceLock, setAllowanceLock] = useState(false);
   // Allownace Modal
   const [_promptAllowance, setPromptAllowance] = useState(false);
   // Approving status
@@ -73,8 +75,6 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptLogs, setPromptLogs] = useState(false);
 
   const [_switchLogView, setSwitchLogView] = useState<'all' | 'orders'>('all');
-
-  
 
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
@@ -364,6 +364,10 @@ const AppProvider = ({ children }: IProps) => {
               console.log(comms);
               // get Latest orders               
               getAllOrders();
+
+              if (comms.title === "REFRESHNONCE") {
+                return notify("Nonce refreshed!");
+              }
 
               if (comms.title === 'DISABLEORDERBOOK') {
                 return notify("Your order book has been disabled, you need more than 0.01 ETH to fulfill orders.");
@@ -708,6 +712,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptAllowance,
         setPromptAllowance,
+        _allowanceLock,
+        setAllowanceLock,
+
         _approving,
         setApproving,
 

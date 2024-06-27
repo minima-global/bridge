@@ -3,8 +3,8 @@ import { appContext } from "../../../AppContext";
 import ChooseMethod from "./ChooseMethod";
 import OverTheCounterTrading from "./OverTheCounterTrading";
 import AcceptOTC from "./OverTheCounterTrading/Activity/AcceptOTC";
-import Allowance from "../Allowance";
 import OrderBookTrading from "./OrderBookTrading";
+import Allowance from "../Allowance";
 
 const Trade = () => {
   const { _currentNavigation, _currentTradeWindow } = useContext(appContext);
@@ -17,16 +17,16 @@ const Trade = () => {
     return (
       <div className="mx-4 md:mx-0 text-left relative">
         <ChooseMethod />
-        <Allowance />
       </div>
     );
   }
 
   return (
-    <div className="mx-4 md:mx-0 text-left">
+    <div className="mx-4 md:mx-0 text-left relative">
       <OverTheCounterTrading />
       <AcceptOTC />
       <OrderBookTrading />
+      <Allowance />
     </div>
   );
 };

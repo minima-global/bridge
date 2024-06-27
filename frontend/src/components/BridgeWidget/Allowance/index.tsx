@@ -1,5 +1,4 @@
 import { Formik } from "formik";
-import useAllowanceChecker from "../../../hooks/useAllowanceChecker";
 import { useContext, useState } from "react";
 import { appContext } from "../../../AppContext";
 import { MaxUint256 } from "ethers";
@@ -23,7 +22,7 @@ const Allowance = () => {
   const [step, setStep] = useState(1);
 
   // this should check on load our allowances for both USDT & wMinima on the HTLC contract
-  useAllowanceChecker();
+  // useAllowanceChecker();
 
   if (!_promptAllowance) {
     return null;
@@ -44,8 +43,8 @@ const Allowance = () => {
 
   return (
     <div className="absolute left-0 right-0 bottom-0 top-0 flex justify-center">
-      <div className="backdrop-blur-sm z-9 fixed left-0 right-0 top-[90px] bottom-0"></div>
-      <div className="z-9 fixed h-[400px] max-w-sm mx-4 md:mx-auto bg-white dark:bg-black rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden">
+      <div onClick={() => !isApproving ? setPromptAllowance(false) : null} className="backdrop-blur-sm z-9 fixed left-0 right-0 top-0 bottom-0"></div>
+      <div className="z-9 fixed h-[400px] max-w-sm mx-4 md:mx-auto bg-white dark:bg-black rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden w-full">
         <div className="flex justify-between py-3 items-center px-4">
           {isDefault &&
           <h3 className="my-auto font-bold">Allowance Approval</h3>
@@ -65,8 +64,7 @@ const Allowance = () => {
           <div>
             {isDefault &&
             <p className="px-4 text-sm">
-              Approve wMinima & USDT allowance on the HTLC contract to start
-              trading.
+              You need to approve your wMinima & USDT to start trading.  You will need some ETH for this approval.  You can deposit some ETH on the Balance page by clicking the deposit button.
             </p>        
             }
             {isApproved &&
@@ -81,7 +79,7 @@ const Allowance = () => {
             }
             
             {_approving &&
-            <p className="px-4 text-sm animate-pulse text-black dark:text-teal-300">
+            <p className="px-4 text-sm animate-pulse text-black dark:text-white">
               Approving... Please be patient and do not refresh this page.
             </p>        
             }

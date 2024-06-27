@@ -12,7 +12,7 @@ import { _defaults } from "../../../../../constants";
 import Favorites from "../../../../Favorites";
 
 const OTCForm = () => {
-  const { _minimaBalance, handleActionViaBackend, notify, promptFavorites } = useContext(appContext);
+  const { _minimaBalance, handleActionViaBackend, notify, promptFavorites, _allowanceLock, setPromptAllowance } = useContext(appContext);
   const { _network } = useWalletContext();
 
   
@@ -181,13 +181,25 @@ const OTCForm = () => {
             }
           />
 
-          <button
-            disabled={!isValid}
-            type="submit"
-            className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
+          {!_allowanceLock &&
+            <button
+              disabled={!isValid}
+              type="submit"
+              className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
+            >
+              Trade
+            </button>
+          }
+          {
+            _allowanceLock && 
+            <button
+              onClick={() => setPromptAllowance(true)}              
+              type="button"
+              className="mt-4 w-full bg-violet-300 p-3 font-bold dark:text-black trailing-wider"
           >
-            Trade
+            Approve allowances
           </button>
+          }
         </form>
       )}
     </Formik>

@@ -9,24 +9,25 @@ import { _defaults } from "../../../../../../constants";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 
 interface EthSwapMessage {
-    action: "STARTETHSWAP";
-    reqpublickey: string;
-    erc20contract: string;
-    reqamount: number;
-    amount: string;
+  action: "STARTETHSWAP";
+  reqpublickey: string;
+  erc20contract: string;
+  reqamount: number;
+  amount: string;
 }
 
 interface MinimaSwapMessage {
-    action: "STARTMINIMASWAP";
-    reqpublickey: string;
-    contractaddress: string;
-    requestamount: number;
-    sendamount: string;
+  action: "STARTMINIMASWAP";
+  reqpublickey: string;
+  contractaddress: string;
+  requestamount: number;
+  sendamount: string;
 }
 
 const withConfirmation = (WrappedComponent) => {
   return (props) => {
-    const { _userDetails } = useContext(appContext);
+    const { _userDetails, _allowanceLock, setPromptAllowance } =
+      useContext(appContext);
     const { _network } = useWalletContext();
     const [show, setShow] = useState(false);
     const [orderType, setOrderType] = useState<"buy" | "sell" | null>(null);
@@ -53,38 +54,41 @@ const withConfirmation = (WrappedComponent) => {
       );
 
       if (_ord) {
-          setOpposingTokenAmount(_ord.orderPrice);
-          let message: MinimaSwapMessage | EthSwapMessage;
-          if (orderType === "buy") {
-              message = {
-                action: "STARTETHSWAP",
-                reqpublickey: _ord.order.ethpublickey,
-                erc20contract:
-                  tokenType === "wminima"
-                   ? "0x" + _defaults.wMinima[_network].slice(2).toUpperCase()
-                    : "0x" + _defaults.Tether[_network].slice(2).toUpperCase(),
-                    reqamount: _ord.orderPrice,
-                    amount: native,
-              };
-          } else {
-                message = {
-                action: "STARTMINIMASWAP",
-                reqpublickey: _ord.order.publickey,
-                contractaddress:
-                  tokenType === "wminima"
-                   ? "ETH:" + "0x" + _defaults.wMinima[_network].slice(2).toUpperCase()
-                    : "ETH:" + "0x" + _defaults.Tether[_network].slice(2).toUpperCase(),
-                requestamount: _ord.orderPrice,
-                sendamount: native,
-              };
-          }
-          // Cook the transaction message for the form
-          setFieldValue("transaction", message);
+        setOpposingTokenAmount(_ord.orderPrice);
+        let message: MinimaSwapMessage | EthSwapMessage;
+        if (orderType === "buy") {
+          message = {
+            action: "STARTETHSWAP",
+            reqpublickey: _ord.order.ethpublickey,
+            erc20contract:
+              tokenType === "wminima"
+                ? "0x" + _defaults.wMinima[_network].slice(2).toUpperCase()
+                : "0x" + _defaults.Tether[_network].slice(2).toUpperCase(),
+            reqamount: _ord.orderPrice,
+            amount: native,
+          };
+        } else {
+          message = {
+            action: "STARTMINIMASWAP",
+            reqpublickey: _ord.order.publickey,
+            contractaddress:
+              tokenType === "wminima"
+                ? "ETH:" +
+                  "0x" +
+                  _defaults.wMinima[_network].slice(2).toUpperCase()
+                : "ETH:" +
+                  "0x" +
+                  _defaults.Tether[_network].slice(2).toUpperCase(),
+            requestamount: _ord.orderPrice,
+            sendamount: native,
+          };
+        }
+        // Cook the transaction message for the form
+        setFieldValue("transaction", message);
       } else {
         setOpposingTokenAmount(null);
         setFieldValue("transaction", "");
       }
-
     };
 
     const handleShow = (
@@ -173,7 +177,11 @@ const withConfirmation = (WrappedComponent) => {
                         />
                       )}
                       {orderType === "sell" && (
-                        <img alt="minima" src="./assets/token.svg" className="rounded-full" />
+                        <img
+                          alt="minima"
+                          src="./assets/token.svg"
+                          className="rounded-full"
+                        />
                       )}
                       <p className="truncate text-sm my-auto font-mono font-bold ml-2">
                         {values.native}
@@ -200,7 +208,11 @@ const withConfirmation = (WrappedComponent) => {
                         />
                       )}
                       {orderType === "buy" && (
-                        <img alt="minima" src="./assets/token.svg" className="rounded-full" />
+                        <img
+                          alt="minima"
+                          src="./assets/token.svg"
+                          className="rounded-full"
+                        />
                       )}
                       <p className="truncate text-sm my-auto font-mono font-bold ml-2">
                         {opposingTokenAmount}
@@ -213,25 +225,39 @@ const withConfirmation = (WrappedComponent) => {
               {!opposingTokenAmount && <p>No order found</p>}
               <div className="grid grid-cols-[1fr_auto] pb-3">
                 <div />
-                {opposingTokenAmount &&
-                    <button
+                {_allowanceLock && (
+                  <button
+                    onClick={() => {
+                      handleClose();
+                      setPromptAllowance(true);
+                    }}
+                    type="button"
+                    className="mt-4 bg-violet-300 p-3 font-bold dark:text-black trailing-wider"
+                  >
+                    Approve
+                  </button>
+                )}
+                {!_allowanceLock && opposingTokenAmount && (
+                  <button
                     type="submit"
                     onClick={handleConfirm}
-                    className={`bg-black tracking-wider text-white font-bold dark:text-black ${orderType === "buy" ? "bg-teal-500":"bg-red-500"}`}
-                    >
-                    {orderType === 'buy' && "Buy"}
-                    {orderType === 'sell' && "Sell"}
-                    </button>            
-                }
-                {!opposingTokenAmount &&
-                    <button
+                    className={`bg-black tracking-wider text-white font-bold dark:text-black ${
+                      orderType === "buy" ? "bg-teal-500" : "bg-red-500"
+                    }`}
+                  >
+                    {orderType === "buy" && "Buy"}
+                    {orderType === "sell" && "Sell"}
+                  </button>
+                )}
+                {!opposingTokenAmount && (
+                  <button
                     type="button"
                     onClick={handleClose}
                     className={`bg-black dark:bg-white tracking-wider text-white font-bold dark:text-black`}
-                    >
+                  >
                     Close
-                </button>            
-                }
+                  </button>
+                )}
               </div>
             </div>
           </>

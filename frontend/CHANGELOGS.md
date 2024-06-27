@@ -78,4 +78,6 @@
 - Remove autofocus on withdrawal
 - Remove Secret Revealed events
 - Add View Orders button
+- Re-arrange allowance approval step
+- Tweak Allowance approval design
 

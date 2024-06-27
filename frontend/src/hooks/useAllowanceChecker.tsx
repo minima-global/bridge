@@ -9,7 +9,7 @@ import { useWalletContext } from "../providers/WalletProvider/WalletProvider.js"
 import Decimal from "decimal.js";
 
 const useAllowanceChecker = () => {
-  const { _provider, setPromptAllowance } = useContext(appContext);
+  const { _provider, setAllowanceLock } = useContext(appContext);
   const { _network: currentNetwork, _address } = useWalletContext();
 
   const checkAllowance = (
@@ -87,10 +87,11 @@ const useAllowanceChecker = () => {
       const wrappedAllowance = userAllowances[0];
       const tetherAllowance = userAllowances[1];
       if (new Decimal(wrappedAllowance.toString()).isZero() || new Decimal(tetherAllowance.toString()).isZero()) {
-        setPromptAllowance(true);
-      } else {
-        setPromptAllowance(false);
+        setAllowanceLock(true);
+      } else {        
+        setAllowanceLock(false);
       }
+
     })();
   }, []);
 

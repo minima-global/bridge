@@ -9,7 +9,7 @@ import OrderHistory from "../OrderBookTrading/OrderHistory";
 import BackIcon from "../../../UI/Icons/BackIcon";
 
 const OverTheCounterTrading = () => {
-  const { _currentTradeWindow, _userDetails, setCurrentTradeWindow } = useContext(appContext);
+  const { _currentTradeWindow, _userDetails, setCurrentTradeWindow, } = useContext(appContext);
 
   useAllowanceChecker();
 
