@@ -281,7 +281,7 @@ const AppProvider = ({ children }: IProps) => {
               } else {
                 // initialize it..
                 const initializeFirstNetwork = {
-                  default: "sepolia",
+                  default: "mainnet",
                 };
                 await sql(
                   `INSERT INTO cache (name, data) VALUES ('CURRENT_NETWORK', '${JSON.stringify(
