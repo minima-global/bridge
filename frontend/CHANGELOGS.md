@@ -84,3 +84,19 @@
 - Remove Sepolia, make mainnet default
 - Tweak Read Mode message
 
+
+##### [2.6.3] - 27-28 June 24
+
+- Tweak close button on deposit
+- Fix value sides on order book
+- Remove close button on approve
+- Must approve allowance before adding liquidity
+- UID hash lock on OTC
+- Tweak design on OTC
+- Allowance approval if trying to copy UID for OTC
+- Check balance on orderbook when buying/selling
+- Fix Order layout on smaller screen
+- Disabled orderbook event added
+- Boost TXNs per 10 mins
+- Bug fixes
+

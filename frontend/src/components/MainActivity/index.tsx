@@ -13,7 +13,13 @@ import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
 
-const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates) => {
+const renderCell = (
+  cellData,
+  index,
+  handleFocus,
+  focusStates,
+  txHashFocusStates
+) => {
   const {
     EVENT,
     EVENTDATE,
@@ -22,7 +28,7 @@ const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates
     AMOUNT,
     TXNHASH,
     getTokenType,
-    _network: network
+    _network: network,
   } = cellData;
 
   const isEthereumEvent =
@@ -33,8 +39,8 @@ const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates
     <>
       <td className="p-3">
         <input
-          onFocus={() => handleFocus(index, 'hash')}
-          onBlur={() => handleFocus(index, 'hash')}
+          onFocus={() => handleFocus(index, "hash")}
+          onBlur={() => handleFocus(index, "hash")}
           readOnly
           className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={
@@ -65,11 +71,18 @@ const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates
           </div>
         )}
 
-        {EVENT.includes("COLLECT") && (
-          <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            Attempted a collect
-          </div>
-        )}
+        {EVENT.includes("COLLECT") &&
+          !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
+            <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+              Attempted a collect
+            </div>
+          )}
+        {EVENT.includes("COLLECT") &&
+          TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
+            <div className="bg-red-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+              Disabled orderbook
+            </div>
+          )}
         {EVENT.includes("EXPIRED") && (
           <div className="bg-violet-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
             Contract expired
@@ -110,13 +123,15 @@ const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates
       </td>
       <td className="p-3">
         {EVENT.includes("EXPIRED") ? (
-          <p className="text-xs text-center">{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</p>
+          <p className="text-xs text-center">
+            {TXNHASH.includes("SECRET") ? TXNHASH : "-"}
+          </p>
         ) : (
           <>
             {isEthereumEvent && (
               <input
-                onFocus={() => handleFocus(index, 'txnhash')}
-                onBlur={() => handleFocus(index, 'txnhash')}
+                onFocus={() => handleFocus(index, "txnhash")}
+                onBlur={() => handleFocus(index, "txnhash")}
                 readOnly
                 className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
                 value={
@@ -150,8 +165,8 @@ const renderCell = (cellData, index, handleFocus, focusStates, txHashFocusStates
 
             {isMinimaEvent && TXNHASH.includes("0x") && (
               <input
-                onFocus={() => handleFocus(index, 'txnhash')}
-                onBlur={() => handleFocus(index, 'txnhash')}
+                onFocus={() => handleFocus(index, "txnhash")}
+                onBlur={() => handleFocus(index, "txnhash")}
                 onClick={async () => {
                   if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
                     return;
@@ -215,8 +230,8 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
     <>
       <div className="p-4 pt-3">
         <input
-          onFocus={() => handleFocus(index, 'hash')}
-          onBlur={() => handleFocus(index, 'hash')}
+          onFocus={() => handleFocus(index, "hash")}
+          onBlur={() => handleFocus(index, "hash")}
           readOnly
           className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
           value={
@@ -247,11 +262,18 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
           </div>
         )}
 
-        {EVENT.includes("COLLECT") && (
-          <div className="bg-teal-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
-            Attempted a collect
-          </div>
-        )}
+        {EVENT.includes("COLLECT") &&
+          !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
+            <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+              Attempted a collect
+            </div>
+          )}
+        {EVENT.includes("COLLECT") &&
+          TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
+            <div className="bg-red-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+              Disabled orderbook
+            </div>
+          )}
         {EVENT.includes("EXPIRED") && (
           <div className="bg-violet-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
             Contract expired
@@ -290,8 +312,10 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
         </div>
       </div>
       <div className="p-4 pt-2">
-      {EVENT.includes("EXPIRED") ? (
-          <p className="text-xs text-center">{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</p>
+        {EVENT.includes("EXPIRED") ? (
+          <p className="text-xs text-center">
+            {TXNHASH.includes("SECRET") ? TXNHASH : "-"}
+          </p>
         ) : (
           <>
             {isEthereumEvent && (
@@ -310,7 +334,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
                       "_blank"
                     );
                   }
-    
+
                   window.open(
                     network === "mainnet"
                       ? "https://etherscan.io/tx/" + TXNHASH
@@ -320,20 +344,20 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
                 }}
               />
             )}
-    
+
             {isMinimaEvent && TXNHASH.includes("0x") && (
               <input
                 onClick={async () => {
                   if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
                     return;
                   }
-    
+
                   const link = await utils.dAppLink("Block");
                   await new Promise((resolve) => setTimeout(resolve, 150));
                   window.open(
-                    `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
-                      link.sessionid
-                    }`,
+                    `${(window as any).MDS.filehost}${
+                      link.uid
+                    }/index.html?uid=${link.sessionid}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
                 }}
@@ -345,12 +369,12 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
             {isMinimaEvent && !TXNHASH.includes("0x") && (
               <p className="text-xs">{TXNHASH}</p>
             )}
-    
+
             {!isEthereumEvent && !isMinimaEvent && (
               <p className="text-xs">{TXNHASH}</p>
             )}
-            
-          </>)}
+          </>
+        )}
       </div>
 
       <div className="p-4">
@@ -369,12 +393,10 @@ const MainActivity = () => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState<any[]>([]);
 
-
   const springProps = useSpring({
     opacity: _promptLogs ? 1 : 0,
     config: config.gentle,
   });
-
 
   const handleNext = () => {
     setOffset((prevState) => prevState + 20);
@@ -384,31 +406,29 @@ const MainActivity = () => {
     setOffset((prevState) => prevState - 20);
   };
 
-
   useEffect(() => {
-    if (_promptLogs && _switchLogView === 'all') {
+    if (_promptLogs && _switchLogView === "all") {
       getAllEvents(MAX, offset, (events) => {
-        const _evts = events.filter(e => !(e.TXNHASH === "SECRET REVEALED")).map((e) => {
-
-          if (e.TXNHASH.includes("-")) {
-            const txHash = e.TXNHASH.split("-")[0];
+        const _evts = events
+          .filter((e) => !(e.TXNHASH === "SECRET REVEALED"))
+          .map((e) => {
+            if (e.TXNHASH.includes("-")) {
+              const txHash = e.TXNHASH.split("-")[0];
+              return {
+                ...e,
+                TXNHASH: txHash,
+                getTokenType,
+                _network,
+              };
+            }
             return {
               ...e,
-              TXNHASH: txHash,
               getTokenType,
-              _network              
+              _network,
             };
-          }
-          return {
-            ...e,
-            getTokenType,
-            _network
-          };
-        });
+          });
 
-        setData(
-          _evts          
-        );
+        setData(_evts);
       });
     }
   }, [_promptLogs, offset, _switchLogView]);

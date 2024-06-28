@@ -19,7 +19,6 @@ const OrderPrice = ({orderType, token}: IProps) => {
   useEffect(() => {
     if (!offerPrice) return;
 
-
     (async () => {
       const order: any = await new Promise((resolve) => {
         searchAllorFavsOrderBooks(

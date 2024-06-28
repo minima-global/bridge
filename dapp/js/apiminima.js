@@ -185,6 +185,7 @@ function startMinimaSwap(userdets, amount, requestamount, reqtoken, swappublicke
 				if(resp.status){					
 					//Log it..
 					startedCounterPartySwap(hash,"minima",amount,resp.response.txpowid+"-"+reqtoken+"-"+requestamount,function(){
+						MDS.log("Started Minima Swap INFO ---- "+JSON.stringify(htlc_info));
 						insertNewHTLCContract(hash,requestamount,reqtoken, htlc_info,function(miniresp){
 							callback(resp);	
 						});
@@ -665,7 +666,7 @@ function sendCounterPartyMinimaTxn(userdets, coin, callback){
 			});
 		}else{
 			MDS.log("FAIL Send counterparty ETH txn "+JSON.stringify(ethresp));
-			callback(ethresp);	
+			callback(ethresp.error.message);	
 		}			
 	});
 }

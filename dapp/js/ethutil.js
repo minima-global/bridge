@@ -220,12 +220,23 @@ function runEthCommand(payload, callback){
 		
 			var ethresp 			= {};
 			ethresp.networkstatus 	= resp.status;
+			/**
+			 * {
+				"jsonrpc": "2.0",
+				"id": 1,
+				"error": {
+					"code": 3,
+					"message": "execution reverted: Dai/insufficient-balance",
+					"data": "0x08c379a0000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000184461692f696e73756666696369656e742d62616c616e63650000000000000000"
+				}
+			}
+			 */
 			
 			//Did it work..?
 			if(!resp.status){
 				MDS.log("NETWORK ERROR running ETH network command : "+JSON.stringify(resp));
 				ethresp.status 			= false;
-				ethresp.error 		  	= {};
+				ethresp.error 		  	= resp.error.message;
 				ethresp.error.message 	= resp.error;
 				
 			}else{
@@ -237,8 +248,13 @@ function runEthCommand(payload, callback){
 					ethresp.status 	= false;
 					ethresp.error 	= ethreturned.error;
 					
-					//Send a message to frontend..
-					sendFrontendMSG("ETHCOMMAND",resp.response);
+					try {
+						const msg = JSON.parse(resp.response);
+						//Send a message to frontend..
+						sendFrontendMSG("ETHCOMMAND",msg.error.message);
+					} catch (error) {
+						sendFrontendMSG("ETHCOMMAND",resp.response);
+					}
 				}else{
 					ethresp.status 	= true;
 					ethresp.result 	= ethreturned.result;
@@ -389,6 +405,9 @@ function createRAWSendTxn(toaddress, ethamount){
 	if(maxfee._hex){
 		maxfee = maxfee._hex;
 	}
+
+	/** tiny fee to check if boost works */
+	// maxfee = "0xffffff";
 	
 	//We are NOT eip1559 compatible
 	var transaction = {
@@ -408,7 +427,7 @@ function createRAWSendTxn(toaddress, ethamount){
 function createRAWContractCallTxn(contractAddress, functionData, gaslimit){
 	
 	//WE USE the MEDIUM GAS
-	var usegas 			= GAS_API.medium;
+	var usegas 			= GAS_API.low;
 	var maxfee 			= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
 	if(maxfee._hex){
 		maxfee = maxfee._hex;
@@ -520,40 +539,94 @@ function checkETHTransaction(txnhash, callback){
 }
 
 function boostTransaction(transactionid,callback){
-		
-	//Get it from the DB
-	getETHTransaction(transactionid,function(sqlgetresp){
-		
-		//Does it exist..
-		if(sqlgetresp.rows.length==0){
-			//No transaction found..
-			var resp = {};
-			resp.networkstatus 	= false;
-			resp.status 		= false;
-			resp.error  		= "Transaction with ID:"+transactionid+" not found..";
-			callback(resp);
-			return;
-		}
-		
-		//Get details
-		var res 		= sqlgetresp.rows[0];
-		var transaction = JSON.parse(decodeStringFromDB(res.TRANSACTION));
-		
-		//WE USE the HIGH GAS for boost
-		var usegas 				= GAS_API.high;
-		var maxfee 				= ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
-		if(maxfee._hex){
-			maxfee = maxfee._hex;
-		}	
-		
-		//Update the GAS
-		transaction.gasPrice	= maxfee;
-		
-		//Boost it..
-		postTransaction(transaction,function(ethresp){
-			callback(ethresp);
-		});
-	});
+        
+    //Get it from the DB
+    getETHTransaction(transactionid,function(sqlgetresp){
+        
+        //Does it exist..
+        if(sqlgetresp.rows.length==0){
+            //No transaction found..
+            var resp = {};
+            resp.networkstatus     = false;
+            resp.status         = false;
+            resp.error          = "Transaction with ID:"+transactionid+" not found..";
+            callback(resp);
+            return;
+        }
+        
+        //Get details
+        var res         = sqlgetresp.rows[0];
+        var transaction = JSON.parse(decodeStringFromDB(res.TRANSACTION));
+        
+        //WE USE the HIGH GAS for boost
+        var usegas                 = GAS_API.medium;
+        var maxfee                 = ethers.utils.parseUnits(usegas.suggestedMaxFeePerGas,"gwei");
+        if(maxfee._hex){
+            maxfee = maxfee._hex;
+        }    
+        
+        //Update the GAS
+        transaction.gasPrice    = maxfee;
+        
+        //Check NONCE..
+        if(+transaction.nonce >= NONCE_TRACK){
+            NONCE_TRACK = +transaction.nonce+1;
+        }
+        
+        //Create the signature
+        var signedTransaction  = ethSigner.sign(transaction,PRIVATE_KEY);
+        
+        //Now send!
+        var payload = {"jsonrpc":"2.0", "method":"eth_sendRawTransaction",
+                "params": [signedTransaction], 
+                "id": 1};
+        
+        //Run it..
+        runEthCommand(payload,function(ethresp){
+            //Message
+            MDS.log("BOOST txn:"+JSON.stringify(transaction)+" result:"+JSON.stringify(ethresp));
+            
+            //Update the Status
+            changeStatusETHTransaction(transactionid,"BOOSTED:"+ethresp.result,function(sqlresp){
+                callback(ethresp);    
+            });    
+        });    
+    });
+}
+
+function checkBoostTransactions(callback){
+    
+    //get the current time..
+    var millitime = new Date().getTime()
+    
+    //Get all WAITING txns..
+    getAllETHTransaction(function(sqlresp){
+        
+        //Cycle..
+        for(var i=0;i<sqlresp.count;i++){
+            
+            //TXN ID
+            var txnhash = sqlresp.rows[i].TXNHASH;
+            
+            //Check this transaction status
+            checkETHTransactionStatus(txnhash,function(checkresp, transaction, evdate){
+                
+                //How long have they been waiting..
+                var diffmilli = millitime - evdate;
+                                    
+                //WAITING ONLY
+                if(checkresp == "WAITING"){
+                                    
+                    //10 Minutes..
+                    var maxtime = 1000 * 60 * 10;
+                    if(diffmilli > maxtime){
+                        //Boost IT
+                        boostTransaction(txnhash,function(ethresp){});
+                    }
+                }
+            });    
+        }
+    });
 }
 
 

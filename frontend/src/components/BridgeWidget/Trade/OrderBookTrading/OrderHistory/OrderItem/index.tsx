@@ -86,7 +86,7 @@ const OrderItem = ({ order }: IProps) => {
         </p>
       </div>
 
-      <div className="grid grid-cols-[1fr_1fr_1fr] gap-1">
+      <div className="grid sm:grid-cols-[1fr_1fr_1fr] gap-1">
         <div className="truncate my-auto text-xs grid ml-3">
           <p className="opacity-80 mt-2">Status</p>
 

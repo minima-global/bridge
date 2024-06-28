@@ -6,7 +6,7 @@ import InputWrapper from "../../../../../UI/FormComponents/InputWrapper";
 import Charts from "../../Charts";
 import WrappedToken from "../WrappedPoolOld/WrappedToken";
 
-const WrappedPool = ({onShowConfirm}) => {
+const WrappedPool = ({onShowConfirm }) => {
   const [f, setF] = useState(false);
 
   const formik: FormikContextType<FormikValues> = useFormikContext();
@@ -54,7 +54,7 @@ const WrappedPool = ({onShowConfirm}) => {
         <div className="grid grid-cols-2 gap-3 px-3">
           <button
             disabled={!!errors.native || !dirty}
-            onClick={() => onShowConfirm('buy', 'wminima')}
+            onClick={() => onShowConfirm('buy')}
             type="button"
             className="p-3 tracking-wider font-bold bg-teal-500 disabled:bg-opacity-10 disabled:text-white disabled:dark:text-[#1B1B1B]"
           >
@@ -62,7 +62,7 @@ const WrappedPool = ({onShowConfirm}) => {
           </button>
           <button
             disabled={!!errors.native || !dirty}
-            onClick={() => onShowConfirm('sell', 'wminima')}
+            onClick={() => onShowConfirm('sell')}
             type="button"
             className="p-3 tracking-wider font-bold bg-red-500 disabled:bg-opacity-10 disabled:text-white disabled:dark:text-[#1B1B1B]"
           >

@@ -7,13 +7,29 @@ import { WalletContextProvider } from "./providers/WalletProvider/WalletProvider
 import { TokenStoreContextProvider } from "./providers/TokenStoreProvider/index.tsx";
 import SetUpJsonRPC from "./components/SetUpJsonRPC/index.tsx";
 
+import { RouterProvider, createHashRouter } from "react-router-dom";
+import Secret from "./components/Secret/index.tsx";
+import { ToastContainer } from "react-toastify";
+
+const router = createHashRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "/secret",
+    element: <Secret />,
+  },
+]);
+
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <AppProvider>
       <WalletContextProvider>
         <TokenStoreContextProvider>
+          <ToastContainer />
           <SetUpJsonRPC />
-          <App />
+          <RouterProvider router={router} />
         </TokenStoreContextProvider>
       </WalletContextProvider>
     </AppProvider>

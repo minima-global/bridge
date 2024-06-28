@@ -15,14 +15,13 @@ import { useWalletContext } from "../../../../../providers/WalletProvider/Wallet
 import SelectFavorites from "../Pools/SelectFavorites";
 
 const WrappedPoolWithConfirmation = withConfirmation(
-  WrappedPool
+  WrappedPool, "wminima"
 );
-const TetherPoolWithConfirmation = withConfirmation(TetherPool);
+const TetherPoolWithConfirmation = withConfirmation(TetherPool, 'usdt');
 
 const OrderBookForm = () => {
   const { loaded, getWalletBalance, handleActionViaBackend, notify, setTriggerBalanceUpdate } = useContext(appContext);
   const { getEthereumBalance } = useWalletContext();
-
   const [_currentNavigation, setCurrentNavigation] = useState(0);
 
   const handlePullBalance = async () => {
@@ -61,15 +60,17 @@ const OrderBookForm = () => {
       />
       
       <Formik
-        initialValues={{ native: "", favorites: false, orderSide: "", transaction: ""}}
+        initialValues={{ native: "", favorites: false, transaction: ""}}
         validationSchema={yup.object().shape({
           native: yup
             .string()
             .matches(/^\d*\.?\d+$/, "Enter a valid amount")
             .required("Enter your offer")
             .test("valid amount", function (val) {
-              const { path, createError} = this;
+              const {path, createError} = this;
+              
               try {
+
                 if (new Decimal(val).isZero()) {
                   throw new Error("Enter your offer");
                 }                

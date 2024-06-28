@@ -53,7 +53,7 @@ const TetherPool = ({ onShowConfirm }) => {
         <div className="grid grid-cols-2 gap-3 px-3">
           <button
             disabled={!!errors.native || !dirty}
-            onClick={() => onShowConfirm('buy', 'usdt')}
+            onClick={() => onShowConfirm('buy')}
             type="button"
             className="p-3 tracking-wider font-bold bg-teal-500 disabled:bg-opacity-10 disabled:text-white disabled:dark:text-[#1B1B1B]"
           >
@@ -61,7 +61,7 @@ const TetherPool = ({ onShowConfirm }) => {
           </button>
           <button
             disabled={!!errors.native || !dirty}
-            onClick={() => onShowConfirm('sell', 'usdt')}
+            onClick={() => onShowConfirm('sell')}
             type="button"
             className="p-3 tracking-wider font-bold bg-red-500 disabled:bg-opacity-10 disabled:text-white disabled:dark:text-[#1B1B1B]"
           >

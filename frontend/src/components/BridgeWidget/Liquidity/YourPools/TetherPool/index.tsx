@@ -6,12 +6,14 @@ import { useOrderBookContext } from "../../../../../hooks/useOrderBook.js";
 import { Formik } from "formik";
 import * as yup from "yup";
 
-import {
-  MAXIMUM_MINIMA_TRADE,
-} from "../../../../../../../dapp/js/htlcvars.js";
+import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js";
+import useAllowanceChecker from "../../../../../hooks/useAllowanceChecker.js";
 
 const TetherPool = () => {
-  const { notify } = useContext(appContext);
+
+  useAllowanceChecker();
+
+  const { notify, _allowanceLock, setPromptAllowance } = useContext(appContext);
   const { _currentOrderBook, updateBook } = useOrderBookContext();
   const [f, setF] = useState(false);
 
@@ -47,7 +49,7 @@ const TetherPool = () => {
         buy: _currentOrderBook?.usdt.buy || 0,
         sell: _currentOrderBook?.usdt.sell || 0,
         maximum: MAXIMUM_MINIMA_TRADE || 1000,
-        minimum: _currentOrderBook?.usdt.minimum || 1,
+        minimum: _currentOrderBook?.usdt.minimum || 250,
       }}
       onSubmit={(values) => {
         try {
@@ -80,13 +82,16 @@ const TetherPool = () => {
 
               if (_currentOrderBook?.usdt.enable) {
                 if (
-                  new Decimal(val).equals(_currentOrderBook?.usdt.sell) && parent.buy &&
+                  new Decimal(val).equals(_currentOrderBook?.usdt.sell) &&
+                  parent.buy &&
                   new Decimal(parent.buy).equals(_currentOrderBook?.usdt.buy) &&
-                  new Decimal(parent.minimum).equals(_currentOrderBook?.usdt.minimum)
+                  new Decimal(parent.minimum).equals(
+                    _currentOrderBook?.usdt.minimum
+                  )
                 ) {
                   throw new Error("Enter new values");
                 }
-              }            
+              }
 
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your sell offer");
@@ -124,14 +129,18 @@ const TetherPool = () => {
 
               if (_currentOrderBook?.usdt.enable) {
                 if (
-                  new Decimal(val).equals(_currentOrderBook?.usdt.buy) && parent.sell &&
-                  new Decimal(parent.sell).equals(_currentOrderBook?.usdt.sell)
-                  && new Decimal(parent.minimum).equals(_currentOrderBook?.usdt.minimum)
+                  new Decimal(val).equals(_currentOrderBook?.usdt.buy) &&
+                  parent.sell &&
+                  new Decimal(parent.sell).equals(
+                    _currentOrderBook?.usdt.sell
+                  ) &&
+                  new Decimal(parent.minimum).equals(
+                    _currentOrderBook?.usdt.minimum
+                  )
                 ) {
                   throw new Error("Enter new values");
-                }              
-              } 
-
+                }
+              }
 
               if (new Decimal(val).isZero()) {
                 throw new Error("Enter your buy offer");
@@ -156,7 +165,7 @@ const TetherPool = () => {
               }
             }
           }),
-          minimum: yup
+        minimum: yup
           .number()
           .required("Enter the minimum Minima trade")
           .test("valid amount", function (val) {
@@ -165,8 +174,10 @@ const TetherPool = () => {
             try {
               const isWholeNumber = new Decimal(val).mod(1).equals(0);
               if (!isWholeNumber) {
-                throw new Error("Can have only whole numbers for Minimum trades");
-              }           
+                throw new Error(
+                  "Can have only whole numbers for Minimum trades"
+                );
+              }
 
               return true;
             } catch (error) {
@@ -194,7 +205,10 @@ const TetherPool = () => {
           onSubmit={handleSubmit}
           className={`shadow-sm dark:shadow-none bg-transparent dark:bg-[#1B1B1B] rounded ${
             f && "outline dark:outline-yellow-300"
-          } ${(errors.sell || errors.buy || errors.minimum) && "outline !outline-red-300"}`}
+          } ${
+            (errors.sell || errors.buy || errors.minimum) &&
+            "outline !outline-red-300"
+          }`}
         >
           <Toolbar token="USDT" />
 
@@ -288,13 +302,16 @@ const TetherPool = () => {
                         className="bg-transparent w-full rounded font-mono focus:outline-none truncate text-center"
                         placeholder="0"
                       />
-                    </div>                    
+                    </div>
                   </div>
                 </div>
                 <div className="relative grid grid-cols-[1fr_auto]">
                   <div className="pl-4 text-center">
                     <label className="text-xs font-bold mb-1 text-opacity-50">
-                      Maximum Minima Trade <span className="text-yellow-600 dark:text-yellow-300 tracking-tighter">(LOCKED)</span>
+                      Maximum Minima Trade{" "}
+                      <span className="text-yellow-600 dark:text-yellow-300 tracking-tighter">
+                        (LOCKED)
+                      </span>
                     </label>
                     <input
                       readOnly
@@ -311,41 +328,42 @@ const TetherPool = () => {
                       className="bg-transparent w-full font-mono rounded focus:outline-none truncate text-center text-yellow-600 dark:text-yellow-300"
                       placeholder="0"
                     />
-                  </div>                  
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
           <div className="px-4">
-            {!!values.sell && !!values.buy && (values.sell > 0 && values.buy > 0) &&
-              <p className="text-xs mt-4">
-                <b>Example:</b> You would receive {new Decimal(100).dividedBy(values.buy).toFixed(0)} <b>Minima</b> for 100 <b>USDT</b> and you
-                would receive {new Decimal(100).times(values.sell).toFixed(0)} <b>USDT</b> for 100 <b>Minima</b>
-              </p>          
-            }
+            {!!values.sell &&
+              !!values.buy &&
+              values.sell > 0 &&
+              values.buy > 0 && (
+                <p className="text-xs mt-4">
+                  <b>Example:</b> You would receive{" "}
+                  {new Decimal(100).dividedBy(values.buy).toFixed(0)}{" "}
+                  <b>Minima</b> for 100 <b>USDT</b> and you would receive{" "}
+                  {new Decimal(100).times(values.sell).toFixed(0)} <b>USDT</b>{" "}
+                  for 100 <b>Minima</b>
+                </p>
+              )}
           </div>
 
-          <div className="mt-4 px-4 mb-3">
-            {!values.enable && (
+          {_allowanceLock && (
+            <div className="mt-4 px-4 mb-3">
               <button
-                type="submit"
-                disabled={!isValid}
-                className={`hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20 ${
-                  (errors.sell || errors.buy || errors.minimum) &&
-                  "hover:bg-red-100 bg-red-100 !text-red-300"
-                }`}
+                onClick={() => setPromptAllowance(true)}
+                type="button"
+                className="mt-4 w-full bg-violet-300 p-3 font-bold dark:text-black trailing-wider"
               >
-                {errors.sell && errors.buy && errors.buy}
-                {errors.sell && !errors.buy && errors.sell}
-                {!errors.sell && errors.buy && errors.buy}
-                {!errors.sell && !errors.buy && errors.minimum && errors.minimum}
-                {!errors.sell && !errors.buy && !errors.minimum && "Enable"}
+                Approve allowances
               </button>
-            )}
+            </div>
+          )}
 
-            {values.enable && (
-              <div className="w-full grid grid-cols-[1fr_minmax(0,_100px)] gap-1">
+          {!_allowanceLock && (
+            <div className="mt-4 px-4 mb-3">
+              {!values.enable && (
                 <button
                   type="submit"
                   disabled={!isValid}
@@ -357,19 +375,44 @@ const TetherPool = () => {
                   {errors.sell && errors.buy && errors.buy}
                   {errors.sell && !errors.buy && errors.sell}
                   {!errors.sell && errors.buy && errors.buy}
-                  {!errors.sell && !errors.buy && errors.minimum && errors.minimum}
-                  {!errors.sell && !errors.buy && !errors.minimum && "Update"}
+                  {!errors.sell &&
+                    !errors.buy &&
+                    errors.minimum &&
+                    errors.minimum}
+                  {!errors.sell && !errors.buy && !errors.minimum && "Enable"}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleDisable}
-                  className="hover:bg-opacity-90 bg-red-500 text-[#1B1B1B] font-bold"
-                >
-                  Disable
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+
+              {values.enable && (
+                <div className="w-full grid grid-cols-[1fr_minmax(0,_100px)] gap-1">
+                  <button
+                    type="submit"
+                    disabled={!isValid}
+                    className={`hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20 ${
+                      (errors.sell || errors.buy || errors.minimum) &&
+                      "hover:bg-red-100 bg-red-100 !text-red-300"
+                    }`}
+                  >
+                    {errors.sell && errors.buy && errors.buy}
+                    {errors.sell && !errors.buy && errors.sell}
+                    {!errors.sell && errors.buy && errors.buy}
+                    {!errors.sell &&
+                      !errors.buy &&
+                      errors.minimum &&
+                      errors.minimum}
+                    {!errors.sell && !errors.buy && !errors.minimum && "Update"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDisable}
+                    className="hover:bg-opacity-90 bg-red-500 text-[#1B1B1B] font-bold"
+                  >
+                    Disable
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       )}
     </Formik>

@@ -42,7 +42,7 @@ const Allowance = () => {
 
 
   return (
-    <div className="absolute left-0 right-0 bottom-0 top-0 flex justify-center">
+    <div className="absolute left-0 right-0 bottom-0 top-0 flex justify-center z-[2000]">
       <div onClick={() => !isApproving ? setPromptAllowance(false) : null} className="backdrop-blur-sm z-9 fixed left-0 right-0 top-0 bottom-0"></div>
       <div className="z-9 fixed h-[400px] max-w-sm mx-4 md:mx-auto bg-white dark:bg-black rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden w-full">
         <div className="flex justify-between py-3 items-center px-4">

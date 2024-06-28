@@ -1,11 +1,18 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 
 import * as utils from "../../../../../utils";
+import { appContext } from "../../../../../AppContext";
 
 const Identity = ({ fullAddress = false, _address }) => {
+  const { _allowanceLock, setPromptAllowance } = useContext(appContext);
   const [copied, setCopied] = useState(false);
 
   const handleCopy = () => {
+
+    if (_allowanceLock) {
+      return setPromptAllowance(true);
+    }
+
     setCopied(true);
     utils.copyToClipboard(_address!);
     setTimeout(() => {

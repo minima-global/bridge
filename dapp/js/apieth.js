@@ -27,6 +27,8 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 				//Log it..
 				startedCounterPartySwap(hashlock, "ETH:"+erc20contract, 
 							amount, ethresp.result+"-minima-"+requestamount, function(){
+								
+					MDS.log("Started ETH Swap INFO ---- "+JSON.stringify(htlc_info));
 					
 					//Insert these details so you know in future if right amount sent
 					insertNewHTLCContract(hashlock,requestamount,"minima",htlc_info,function(sqlresp){						
@@ -34,7 +36,7 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 					});		
 				});	
 			}else{
-				callback(ethresp);
+				callback(ethresp.error.message);
 			}
 		});	
 	});

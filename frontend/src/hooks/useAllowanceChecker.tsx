@@ -9,7 +9,7 @@ import { useWalletContext } from "../providers/WalletProvider/WalletProvider.js"
 import Decimal from "decimal.js";
 
 const useAllowanceChecker = () => {
-  const { _provider, setAllowanceLock } = useContext(appContext);
+  const { _provider, setAllowanceLock, _promptAllowance } = useContext(appContext);
   const { _network: currentNetwork, _address } = useWalletContext();
 
   const checkAllowance = (
@@ -93,7 +93,7 @@ const useAllowanceChecker = () => {
       }
 
     })();
-  }, []);
+  }, [_promptAllowance]);
 
   return {
     checkAllowance,

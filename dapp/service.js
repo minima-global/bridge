@@ -204,6 +204,9 @@ MDS.init(function(msg){
 		
 		//Check ETH for SWAPS
 		checkETHSwapHTLC(USER_DETAILS,ethblock, minimablock, function(ethswaps){});
+
+		//Do we need to BOOST a txn..
+        checkBoostTransactions(function(){});
 		
 		//Check ETH balance
 		getETHEREUMBalance(function (ethresp) {
@@ -211,17 +214,17 @@ MDS.init(function(msg){
 			if (ethresp < 0.01) {
 				getMyOrderBook(function (orderbook) {					
 					if (orderbook.wminima.enable || orderbook.usdt.enable) {
-						disableOrderbook(orderbook, function(set) {
+						disableOrderbook(orderbook, function() {
 							var msg = {};
 							msg.status = true;
 							msg.message = "ETH balance below 0.01, disabled orderbook!";
 							sendFrontendMSG("DISABLEORDERBOOK", msg);
+							collectHTLC("0x00", "minima", 0, "Ran out of ETH, disabled orderbook", function(sqlresp){});							
 						});
 					}					
 				});
 			}
-		});
-        
+		});		    
         
 		//Do we have to send the orderbook..
 		ORDERSEND_COUNTER++;

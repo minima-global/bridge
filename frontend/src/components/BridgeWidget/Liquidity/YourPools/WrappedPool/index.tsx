@@ -7,9 +7,13 @@ import { Formik } from "formik";
 import * as yup from "yup";
 
 import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js";
+import useAllowanceChecker from "../../../../../hooks/useAllowanceChecker.js";
 
 const WrappedPool = () => {
-  const { notify } = useContext(appContext);
+
+  useAllowanceChecker();
+
+  const { notify, _allowanceLock, setPromptAllowance } = useContext(appContext);
   const { _currentOrderBook, updateBook } = useOrderBookContext();
   const [f, setF] = useState(false);
 
@@ -45,7 +49,7 @@ const WrappedPool = () => {
         buy: _currentOrderBook?.wminima.buy || 0,
         sell: _currentOrderBook?.wminima.sell || 0,
         maximum: MAXIMUM_MINIMA_TRADE || 10000,
-        minimum: _currentOrderBook?.wminima.minimum || 1,
+        minimum: _currentOrderBook?.wminima.minimum || 250,
       }}
       onSubmit={(values) => {
         try {
@@ -335,27 +339,21 @@ const WrappedPool = () => {
               )}
           </div>
 
-          <div className="mt-4 px-4 mb-3">
-            {!values.enable && (
+          {_allowanceLock && (
+            <div className="mt-4 px-4 mb-3">
               <button
-                type="submit"
-                disabled={!isValid}
-                className={`hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20 ${
-                  errors &&
-                  (errors.sell || errors.buy || errors.minimum) &&
-                  "hover:bg-red-100 bg-red-100 !text-red-300"
-                }`}
+                onClick={() => setPromptAllowance(true)}
+                type="button"
+                className="mt-4 w-full bg-violet-300 p-3 font-bold dark:text-black trailing-wider"
               >
-                {errors.sell && errors.buy && errors.buy}
-                {errors.sell && !errors.buy && errors.sell}
-                {!errors.sell && errors.buy && errors.buy}
-                {!errors.sell && !errors.buy && errors.minimum && errors.minimum}
-                {!errors.sell && !errors.buy && !errors.minimum && "Enable"}
+                Approve allowances
               </button>
-            )}
+            </div>
+          )}
 
-            {values.enable && (
-              <div className="w-full grid grid-cols-[1fr_minmax(0,_100px)] gap-1">
+          {!_allowanceLock && (
+            <div className="mt-4 px-4 mb-3">
+              {!values.enable && (
                 <button
                   type="submit"
                   disabled={!isValid}
@@ -367,19 +365,44 @@ const WrappedPool = () => {
                   {errors.sell && errors.buy && errors.buy}
                   {errors.sell && !errors.buy && errors.sell}
                   {!errors.sell && errors.buy && errors.buy}
-                  {!errors.sell && !errors.buy && errors.minimum && errors.minimum}
-                  {!errors.sell && !errors.buy && !errors.minimum && "Update"}
+                  {!errors.sell &&
+                    !errors.buy &&
+                    errors.minimum &&
+                    errors.minimum}
+                  {!errors.sell && !errors.buy && !errors.minimum && "Enable"}
                 </button>
-                <button
-                  type="button"
-                  onClick={handleDisable}
-                  className="hover:bg-opacity-90 bg-red-500 text-[#1B1B1B] font-bold"
-                >
-                  Disable
-                </button>
-              </div>
-            )}
-          </div>
+              )}
+
+              {values.enable && (
+                <div className="w-full grid grid-cols-[1fr_minmax(0,_100px)] gap-1">
+                  <button
+                    type="submit"
+                    disabled={!isValid}
+                    className={`hover:bg-teal-600 w-full text-white bg-teal-500 dark:text-[#1B1B1B] font-bold disabled:bg-opacity-20 ${
+                      (errors.sell || errors.buy || errors.minimum) &&
+                      "hover:bg-red-100 bg-red-100 !text-red-300"
+                    }`}
+                  >
+                    {errors.sell && errors.buy && errors.buy}
+                    {errors.sell && !errors.buy && errors.sell}
+                    {!errors.sell && errors.buy && errors.buy}
+                    {!errors.sell &&
+                      !errors.buy &&
+                      errors.minimum &&
+                      errors.minimum}
+                    {!errors.sell && !errors.buy && !errors.minimum && "Update"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDisable}
+                    className="hover:bg-opacity-90 bg-red-500 text-[#1B1B1B] font-bold"
+                  >
+                    Disable
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </form>
       )}
     </Formik>

@@ -4,7 +4,7 @@ import ChooseMethod from "./ChooseMethod";
 import OverTheCounterTrading from "./OverTheCounterTrading";
 import AcceptOTC from "./OverTheCounterTrading/Activity/AcceptOTC";
 import OrderBookTrading from "./OrderBookTrading";
-import Allowance from "../Allowance";
+import { OrderBookProvider } from "./OrderBookTrading/Context/OrderBookContext";
 
 const Trade = () => {
   const { _currentNavigation, _currentTradeWindow } = useContext(appContext);
@@ -25,8 +25,9 @@ const Trade = () => {
     <div className="mx-4 md:mx-0 text-left relative">
       <OverTheCounterTrading />
       <AcceptOTC />
-      <OrderBookTrading />
-      <Allowance />
+      <OrderBookProvider>
+        <OrderBookTrading />
+      </OrderBookProvider>
     </div>
   );
 };

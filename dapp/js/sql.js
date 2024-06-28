@@ -49,7 +49,7 @@ function createDB(callback){
 						+"  `id` bigint auto_increment, "
 						+"  `txnhash` varchar(128) NOT NULL, "
 						+"  `transaction` varchar(1024) NOT NULL, "
-						+"  `status` varchar(64) NOT NULL, "
+						+"  `status` varchar(256) NOT NULL, "
 						+"  `eventdate` bigint NOT NULL "
 						+" )";
 
@@ -114,6 +114,7 @@ function insertSecret(secret,hash,callback){
 	//do we already have it..
 	getSecretFromHash(hash,function(getsecret){
 		if(getsecret == null){
+
 			//Check is Valid..
 			checkSecret(secret,hash,function(valid){
 				if(!valid){
@@ -130,7 +131,7 @@ function insertSecret(secret,hash,callback){
 					//Insert into the DB
 					var sql = "INSERT INTO secrets(secret,hash,addeddate) "
 									+"VALUES ('"+secret+"','"+hash+"',"+recdate.getTime()+")";
-					MDS.sql(sql,function(msg){
+					MDS.sql(sql,function(msg){												
 						if(callback){
 							callback(true);	
 						}
@@ -342,6 +343,12 @@ function getETHTransaction(txnhash, callback){
 	MDS.sql("SELECT * FROM ethtxns WHERE txnhash='"+txnhash+"'", function(sqlmsg){
 		callback(sqlmsg);
 	});
+}
+
+function getAllETHTransaction(callback){
+    MDS.sql("SELECT * FROM ethtxns WHERE status='WAITING'", function(sqlmsg){
+        callback(sqlmsg);
+    });
 }
 
 function changeStatusETHTransaction(txnhash, status, callback){
