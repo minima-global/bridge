@@ -17,7 +17,7 @@ const OrderBookTrading = () => {
   }
 
   return (
-    <div className="mx-4 md:mx-0 text-left">
+    <div className="md:mx-0 text-left">
       <div className="my-4">
         <div className="flex justify-between items-center">
           <div className="flex gap-1 items-center">

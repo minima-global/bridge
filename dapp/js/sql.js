@@ -278,7 +278,7 @@ function getAllEvents(limit, offset, callback){
 }
 
 function getAllEventsForOrders(callback){
-	MDS.sql("SELECT * FROM counterparty ORDER BY id", function(sqlmsg){
+	MDS.sql("SELECT * FROM counterparty WHERE hash IN (SELECT hash FROM counterparty GROUP BY hash ORDER BY MAX(id) DESC LIMIT 10) ORDER BY eventdate DESC, id DESC;", function(sqlmsg){
 		callback(sqlmsg.rows);
 	});
 }

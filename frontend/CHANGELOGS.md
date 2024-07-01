@@ -100,3 +100,10 @@
 - Boost TXNs per 10 mins
 - Bug fixes
 
+##### [2.6.7] - 1 July 24
+
+- Select only last 10 orders
+- Dark/Light mode theme toggle
+- Design tweaks
+- Bug fixes
+

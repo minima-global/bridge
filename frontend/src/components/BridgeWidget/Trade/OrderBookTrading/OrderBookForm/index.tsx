@@ -121,7 +121,7 @@ const OrderBookForm = () => {
       >
         {({ submitForm }) => (
           <>
-            <div className="flex justify-end px-1">
+            <div className="flex justify-end px-1 my-2">
               <SelectFavorites />
             </div>
             {_currentNavigation === 0 && (

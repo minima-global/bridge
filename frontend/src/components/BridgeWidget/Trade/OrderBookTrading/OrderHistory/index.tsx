@@ -57,7 +57,7 @@ const OrderHistory = ({ full = false }) => {
             full && "h-full"
           }`}
         >
-          {Object.keys(orders).reverse().map((hash) => (
+          {Object.keys(orders).map((hash) => (
             <OrderItem key={hash} order={{ ...orders[hash] }} />
           ))}
         </ul>

@@ -97,7 +97,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
       if (!_userDetails) {
         return setFieldError(
           "native",
-          "Missing minima pub key, refresh page and try again"
+          "Page requires a refresh"
         );
       }
 

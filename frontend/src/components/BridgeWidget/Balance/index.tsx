@@ -41,6 +41,10 @@ const Balance = () => {
         }             
       } else {
         callBalance();
+        
+        const now = new Date().getTime();
+        
+        (window as any).MDS.keypair.set("_lastethbalancecheck", JSON.stringify({timestamp: now}), () => {})
       }
     })
   }
