@@ -46,7 +46,7 @@ function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock,
 	
 
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 500000);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 350000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
@@ -87,7 +87,7 @@ function withdrawHTLCSwap(contractId, secret, callback){
 	var functiondata = HTLCInterfaceABI.functions.withdraw.encode([contr, sec]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 120000);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 250000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){
@@ -107,7 +107,7 @@ function refundHTLCSwap(contractId, callback){
 	var functiondata = HTLCInterfaceABI.functions.refund.encode([contr]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 120000);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 250000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){

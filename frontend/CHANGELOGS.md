@@ -70,3 +70,40 @@
 - Tweak Liquidity pool UX
 - Add Minimum Minima Order on Liquidity pool UX
 - Bug fixes
+
+##### [2.6.0] - 27 June 24
+
+- Order book re-written
+- Fix orders pruning
+- Remove autofocus on withdrawal
+- Remove Secret Revealed events
+- Add View Orders button
+- Re-arrange allowance approval step
+- Tweak Allowance approval design
+- Add wallet address to Ethereum Withdrawal, set ETH wallet as default (when blank)
+- Remove Sepolia, make mainnet default
+- Tweak Read Mode message
+
+
+##### [2.6.3] - 27-28 June 24
+
+- Tweak close button on deposit
+- Fix value sides on order book
+- Remove close button on approve
+- Must approve allowance before adding liquidity
+- UID hash lock on OTC
+- Tweak design on OTC
+- Allowance approval if trying to copy UID for OTC
+- Check balance on orderbook when buying/selling
+- Fix Order layout on smaller screen
+- Disabled orderbook event added
+- Boost TXNs per 10 mins
+- Bug fixes
+
+##### [2.6.7] - 1 July 24
+
+- Select only last 10 orders
+- Dark/Light mode theme toggle
+- Design tweaks
+- Bug fixes
+

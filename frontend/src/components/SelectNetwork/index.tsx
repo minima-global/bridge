@@ -5,7 +5,7 @@ import { appContext } from "../../AppContext";
 
 import Dialog from "../UI/Dialog";
 import EthereumNetwork from "../UI/EthereumNetwork";
-import SepoliaNetwork from "../UI/SepoliaNetwork";
+// import SepoliaNetwork from "../UI/SepoliaNetwork";
 import { useWalletContext } from "../../providers/WalletProvider/WalletProvider";
 
 const SelectNetwork = () => {
@@ -29,10 +29,10 @@ const SelectNetwork = () => {
     <>
       <div
         className="my-4 p-2 px-3 hover:cursor-pointer bg-gray-50 bg-opacity-80 dark:bg-[#1B1B1B] hover:bg-opacity-30 dark:bg-opacity-50 grid grid-cols-[1fr_auto]"
-        onClick={promptSelectNetwork}
+        // onClick={promptSelectNetwork}
       >
         {_network === "mainnet" && <EthereumNetwork />}
-        {_network === "sepolia" && <SepoliaNetwork />}
+        {/* {_network === "sepolia" && <SepoliaNetwork />} */}
         {_network.length === 0 && <p className="font-bold">Select Network</p>}
       </div>
 
@@ -107,7 +107,7 @@ const SelectNetwork = () => {
                           Ethereum Mainnet
                         </li>
                       </ul>
-                      <h6 className="px-4 text-sm py-2">Test networks</h6>
+                      {/* <h6 className="px-4 text-sm py-2">Test networks</h6>
                       <ul className="mb-4">
                         <li
                           key="11155111"
@@ -125,7 +125,7 @@ const SelectNetwork = () => {
                           </div>
                           Sepolia
                         </li>
-                      </ul>
+                      </ul> */}
                     </div>
                   </div>
                 </div>

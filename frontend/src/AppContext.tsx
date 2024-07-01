@@ -16,7 +16,7 @@ import { Favorite } from "./types/Favorite.js";
 import { getFavourites } from "../../dapp/js/sql.js";
 
 import {
-  getAllEvents,
+  getAllEventsForOrders
 } from "../../dapp/js/sql.js";
 import * as _ from "lodash";
 import { OrderActivityEventGrouped } from "./types/Order.js";
@@ -51,6 +51,8 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
   const [_promptWithdraw, setPromptWithdraw] = useState(false);
+  
+  const [_allowanceLock, setAllowanceLock] = useState(false);
   // Allownace Modal
   const [_promptAllowance, setPromptAllowance] = useState(false);
   // Approving status
@@ -73,8 +75,6 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptLogs, setPromptLogs] = useState(false);
 
   const [_switchLogView, setSwitchLogView] = useState<'all' | 'orders'>('all');
-
-  
 
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
@@ -281,7 +281,7 @@ const AppProvider = ({ children }: IProps) => {
               } else {
                 // initialize it..
                 const initializeFirstNetwork = {
-                  default: "sepolia",
+                  default: "mainnet",
                 };
                 await sql(
                   `INSERT INTO cache (name, data) VALUES ('CURRENT_NETWORK', '${JSON.stringify(
@@ -361,9 +361,12 @@ const AppProvider = ({ children }: IProps) => {
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
-
               // get Latest orders               
               getAllOrders();
+
+              if (comms.title === "REFRESHNONCE") {
+                return notify("Nonce refreshed!");
+              }
 
               if (comms.title === 'DISABLEORDERBOOK') {
                 return notify("Your order book has been disabled, you need more than 0.01 ETH to fulfill orders.");
@@ -379,10 +382,20 @@ const AppProvider = ({ children }: IProps) => {
                 }
               }
 
+              if (comms.error) {
+                if (comms.error.message && comms.error.message.includes("insufficient funds for gas")) {
+                  notify("You need more ETH to complete your order, please top up first.");
+                } else {
+                  notify(comms.error.message);
+                } 
+                
+                return;
+              }
+
               if (comms.message && typeof comms.message === "string") {
                 if (comms.message.includes("insufficient funds for gas")) {
                   notify(
-                    "Failed to execute Ethereum transaction, top up more ETH to complete the transaction."
+                    "You need more ETH to complete your order, please top up first."
                   );
                 } else {
                   notify(comms.message);
@@ -601,14 +614,27 @@ const AppProvider = ({ children }: IProps) => {
       }
     );
   };
-  const getAllOrders = (max = 20, offset = 0) => {
-    getAllEvents(max, offset, (events) => {   
-      if (events.length) {
-        const filterEvents = events.filter(event => event.EVENT === 'CPTXN_COLLECT'||event.EVENT==='CPTXN_SENT'||event.EVENT==='HTLC_STARTED'||event.EVENT==='CPTXN_EXPIRED');
-        const group = _.groupBy(filterEvents.filter(e => !(e.EVENT === 'CPTXN_EXPIRED' && e.TXNHASH === 'SECRET REVEALED')), 'HASH');
-        const sortGroupedData = _.mapValues(group, group=> _.orderBy(group, ['EVENTDATE'], ['desc']));
+  const getAllOrders = () => {  
+
+    getAllEventsForOrders((events) => {
+      // Step 1: Filter events based on specific criteria
+      const filterEvents = events.filter(event => 
+        ['CPTXN_COLLECT', 'CPTXN_SENT', 'HTLC_STARTED', 'CPTXN_EXPIRED'].includes(event.EVENT)
+      );
+
+      if (filterEvents.length) {
+        // Step 2: Group the filtered events by 'HASH'
+        const group = _.groupBy(filterEvents.filter(e => !(e.TXNHASH === 'SECRET REVEALED')), 'HASH');
+        // Step 3: Sort each group by 'EVENTDATE' in descending order
+        const sortGroupedData = _.mapValues(group, group => _.orderBy(group, event => {
+          // Ensure EVENTDATE is parsed correctly as a number
         
+          return Number(event.EVENTDATE);
+        }, ['desc']));
+        
+        // Step 4: Update the state with the sorted and grouped data
         setOrders(sortGroupedData);
+
       }
     });
   }
@@ -685,6 +711,9 @@ const AppProvider = ({ children }: IProps) => {
 
         _promptAllowance,
         setPromptAllowance,
+        _allowanceLock,
+        setAllowanceLock,
+
         _approving,
         setApproving,
 

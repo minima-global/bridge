@@ -180,11 +180,7 @@ const Help = () => {
                       <p className="px-4 font-semibold flex gap-2 items-center">
                         <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob send 100 wMinima (on the ETH network) to a
                         contract that has that same hash and Alice's public key.
-                      </p>
-                      <p className="px-4 font-semibold flex gap-2 items-center">
-                        <span className="inline-block text-violet-500"><RightArrow fill="currentColor" /></span> Bob send 100 wMinima (on the ETH network) to a
-                        contract that has that same hash and Alice's public key.
-                      </p>
+                      </p>                      
                       <p className="px-4 font-semibold">
                         The contract says, Alice can take the 100 wMinima if she
                         signs and includes the secret (which when hashed is the

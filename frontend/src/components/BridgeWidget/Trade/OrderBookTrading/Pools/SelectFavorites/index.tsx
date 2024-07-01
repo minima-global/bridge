@@ -1,12 +1,13 @@
-import { useFormikContext } from "formik";
+import { FormikContextType, FormikValues, useFormikContext } from "formik";
 import AnimatedDialog from "../../../../../UI/AnimatedDialog";
 import { useEffect, useState } from "react";
 import FavoriteIcon from "../../../../../UI/Icons/FavoriteIcon";
 
 const SelectFavorites = () => {
-  const formik: any = useFormikContext();
+  const formik: FormikContextType<FormikValues> = useFormikContext();
+  const { values, setFieldValue } = formik;
+  const { favorites } = values;
   const [info, setInfo] = useState(false);
-  const { favorites } = formik.values;
   const toggleFavorite = () => {
     (window as any).MDS.keypair.set("_orderfavs", !favorites, () => null);
 
@@ -20,7 +21,7 @@ const SelectFavorites = () => {
   useEffect(() => {
     (window as any).MDS.keypair.get("_orderfavs", (resp) => {
       const status = resp.value;
-      formik.setFieldValue("favorites", status === "true" ? true : false);
+      setFieldValue("favorites", status === "true" ? true : false);
     });
   }, []);
 

@@ -48,8 +48,7 @@ const ReadMode = () => {
               <h1 className="text-3xl font-bold mb-4">Read Mode</h1>
               <p className="text-lg mb-6">This app is currently in read mode</p>
               <p className="text-sm mb-6">
-                If you trust the developer, set it to write mode on your
-                MiniHub, then reload this page.
+                You need to set it on write mode to use it.
               </p>
               <RetroButton
                 onClick={(e) => {

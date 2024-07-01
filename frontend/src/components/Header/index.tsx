@@ -4,6 +4,7 @@ import MainActivity from "../MainActivity";
 import SettingsIcon from "../UI/Icons/SettingsIcon";
 import FavoriteIcon from "../UI/Icons/FavoriteIcon";
 import HelpIcon from "../UI/Icons/HelpIcon";
+import AppThemeSwitch from "../AppThemeSwitch";
 
 const Header = () => {
   const { promptSettings, promptFavorites, promptHelp } = useContext(appContext);
@@ -48,7 +49,11 @@ const Header = () => {
               <span className="pr-2 text-teal-600" onClick={promptHelp}>
                 <HelpIcon fill="currentColor" />
               </span>
-
+              
+              <span className="pr-2" onClick={promptHelp}>
+                <AppThemeSwitch />
+              </span>
+              
               <span
                 onClick={promptSettings}
                 className="text-violet-300 hover:animate-spin"

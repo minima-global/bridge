@@ -41,6 +41,10 @@ const Balance = () => {
         }             
       } else {
         callBalance();
+        
+        const now = new Date().getTime();
+        
+        (window as any).MDS.keypair.set("_lastethbalancecheck", JSON.stringify({timestamp: now}), () => {})
       }
     })
   }
@@ -51,7 +55,7 @@ const Balance = () => {
         setRunningLow(prevState => ({...prevState, minima: true}));
       } 
       
-      if (etherBalance && new Decimal(etherBalance).lt(1)) {
+      if (etherBalance && new Decimal(etherBalance).lt(0.05)) {
         setRunningLow(prevState => ({...prevState, ethereum: true}));
 
         if (new Decimal(etherBalance).lt(0.01)) {
@@ -93,7 +97,7 @@ const Balance = () => {
       </div>
       <hr className="border border-violet-400 my-6"></hr>
       {runningLow.ethereum && <div className="bg-yellow-600 dark:bg-yellow-300 text-white dark:text-black rounded-lg px-3 py-2 my-3">
-        {!runningLow.disableEthereum&&<p className="text-xs font-bold">You are running low on Ethereum, you should top up to fulfill orders</p>}        
+        {!runningLow.disableEthereum&&<p className="text-xs font-bold">You are running low on Ethereum {"(< 0.05)"}, you should top up to fulfill orders</p>}        
         {!!runningLow.disableEthereum&&<p className="text-xs font-bold">You are low on funds and your order book has been disabled automatically</p>}        
         
       </div>}

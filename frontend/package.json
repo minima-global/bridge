@@ -1,9 +1,10 @@
 {
   "name": "miniswap",
   "private": true,
-  "version": "2.5.4",
+  "version": "2.6.7",
   "description": "Swap tokens OTC or Order book DEX and provide liquidity",
   "type": "module",
+  "homepage":".",
   "scripts": {
     "dev": "vite",
     "dev:second": "vite --mode second",
@@ -30,8 +31,10 @@
     "lodash": "^4.17.21",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
+    "react-confetti": "^6.1.0",
     "react-dom": "^18.2.0",
     "react-qr-code": "^2.0.12",
+    "react-router-dom": "^6.24.0",
     "react-spring": "^9.7.3",
     "react-toastify": "^10.0.5",
     "tailwindcss": "^3.3.5",

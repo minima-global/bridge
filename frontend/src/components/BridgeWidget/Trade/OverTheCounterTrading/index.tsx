@@ -7,9 +7,10 @@ import Activity from "./Activity";
 import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
 import OrderHistory from "../OrderBookTrading/OrderHistory";
 import BackIcon from "../../../UI/Icons/BackIcon";
+import ActivityIcon from "../../../UI/Icons/ActivityIcon";
 
 const OverTheCounterTrading = () => {
-  const { _currentTradeWindow, _userDetails, setCurrentTradeWindow } = useContext(appContext);
+  const { _currentTradeWindow, _userDetails, setCurrentTradeWindow, promptLogs, setSwitchLogView } = useContext(appContext);
 
   useAllowanceChecker();
 
@@ -56,6 +57,18 @@ const OverTheCounterTrading = () => {
             Orders
           </span>
           <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
+        </div>
+
+        <div className="flex justify-end items-center">
+          <button onClick={() => {
+            promptLogs();
+            setSwitchLogView("orders");
+          }} type="button" className="bg-transparent dark:text-white flex justify-end gap-1 items-end">
+            View Orders
+            <span className="text-black dark:text-white">
+              <ActivityIcon fill="currentColor"/>
+            </span>
+          </button>
         </div>
 
         <OrderHistory />

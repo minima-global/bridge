@@ -80,7 +80,7 @@ function erc20Approve(erc20contract, decimals,  contractaddress, amount, callbac
 	var functiondata = ERC20InterfaceABI.functions.approve.encode([addr, sendamount]);
 	
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(erc20contract, functiondata, 60000);
+	var transaction = createRAWContractCallTxn(erc20contract, functiondata, 100000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){

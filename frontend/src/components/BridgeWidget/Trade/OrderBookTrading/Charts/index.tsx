@@ -36,7 +36,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
   const { _userDetails } = useContext(appContext);
 
   const [chart, setChart] = useState<{
-    quantity: number[];
+    quantity: number[]; 
     price: number[];
   } | null>();
 
@@ -101,7 +101,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
     <>
       {!hasOrderBook && (
         <div className="min-h-[200px] flex justify-center items-center">
-          <p className="text-xs text-center opacity-50">Order book empty</p>
+          <p className="text-xs text-center opacity-50">{type === 'buy'?'Buy' : 'Sell'} order book empty</p>
         </div>
       )}
       {!!hasOrderBook && (
@@ -111,12 +111,12 @@ const Charts = ({ book, type, fav = false }: IProps) => {
             labels: chart.quantity,
             datasets: [
               {
-                label: "Price",
-                backgroundColor: "#99f6e4",
-                borderColor: "#5eead4",
+                label: "Price ("+book.toUpperCase()+")",
+                backgroundColor: type === 'buy' ? "rgb(20 184 166)" : "rgb(239 68 68)",
+                borderColor: type === 'buy' ? "rgb(20 184 166)" : "rgb(239 68 68)",
                 borderWidth: 3,
-                hoverBackgroundColor: "rgba(75,192,192,0.4)",
-                hoverBorderColor: "rgba(75,192,192,1)",
+                hoverBackgroundColor: type === 'buy' ? "rgb(20 184 166)" : "rgb(239 68 68)",
+                hoverBorderColor: type === 'buy' ? "rgb(20 184 166)" : "rgb(239 68 68)",
                 data: chart.price,
               },
             ],
@@ -127,9 +127,10 @@ const Charts = ({ book, type, fav = false }: IProps) => {
             plugins: {
               legend: {
                 position: "top" as const,
+                display: false
               },
               title: {
-                display: true,
+                display: false,
                 // text: "",
               },
             },
@@ -146,8 +147,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
                 },
                 title: {
                   display: true,
-                  text: 'Price',
-                  color: 'rgb(94 234 212)',
+                  text: 'Price ('+book.toUpperCase()+")",
+                  color: type === 'buy' ? "rgb(20 184 166)" : "rgb(239 68 68)",
                   font: {
                     family: 'monospace',
                     size: 12,
@@ -169,8 +170,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
                 },
                 title: {
                   display: true,
-                  text: 'Native Minima',
-                  color: 'rgb(94 234 212)',
+                  text: 'Quantity (MINIMA)',
+                  color: type === 'buy' ? "rgb(20 184 166)" : "rgb(239 68 68)",
                   font: {
                     family: 'monospace',
                     size: 12,

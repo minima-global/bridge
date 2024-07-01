@@ -47,6 +47,8 @@ const AcceptOTC = () => {
   const handleAccept = async () => {
     setLoading(true);
 
+    _promptAcceptOTC.handleFocus(_promptAcceptOTC.index, 'hash');
+
     try {
       const message = {
         action: "ACCEPTOTCSWAP",
@@ -79,18 +81,44 @@ const AcceptOTC = () => {
           <h3 className="font-bold ml-4">Accept OTC?</h3>
           <div />
         </div>
+
+        <div className="px-4 py-2">
+          {_promptAcceptOTC && (
+            <p>
+              You are giving{" "}
+              <span className="font-mono tracking-wide">
+                {_promptAcceptOTC.token.amount}
+              </span>
+              <span className="font-bold uppercase">
+                {" " + _promptAcceptOTC.token.tokenName}
+              </span>{" "}
+              for
+              <span className="font-mono tracking-wide">
+                {" " + _promptAcceptOTC.native}
+              </span>
+              <span className="font-bold uppercase"> MINIMA</span>
+            </p>
+          )}
+        </div>
         <div className="bg-transparent text-black dark:bg-black dark:text-white rounded-lg px-2">
-          <div className="flex justify-start mx-3 my-3 items-center">
+          <div className="flex justify-center mx-3 my-3 items-center">
             <div />
             <div className="grid grid-rows-1 grid-cols-3 items-center">
               <div className="flex">
                 <img
-                  alt="token-icon"
-                  src="./assets/token.svg"
-                  className={`!w-[28px] !h-[28px] rounded-full`}
+                  className="w-[34px] h-[34px] rounded-full inline-block pl-0.5 pb-0.5"
+                  src={
+                    _promptAcceptOTC &&
+                    _promptAcceptOTC.token.tokenName === "wMinima"
+                      ? "./assets/wtoken.svg"
+                      : "./assets/tether.svg"
+                  }
                 />
+
                 <p className="truncate text-sm my-auto font-mono font-bold ml-2">
-                  {_promptAcceptOTC ? _promptAcceptOTC.native : "-"}
+                  {_promptAcceptOTC && _promptAcceptOTC.token
+                    ? _promptAcceptOTC.token.amount
+                    : "-"}
                 </p>
               </div>
 
@@ -103,25 +131,18 @@ const AcceptOTC = () => {
 
               <div className="flex items-center">
                 <img
-                  className="w-[28px] h-[28px] rounded-full inline-block pl-0.5 pb-0.5"
-                  src={
-                    _promptAcceptOTC &&
-                    _promptAcceptOTC.token.tokenName === "wMinima"
-                      ? "./assets/wtoken.svg"
-                      : "./assets/tether.svg"
-                  }
+                  alt="token-icon"
+                  src="./assets/token.svg"
+                  className={`w-[34px] h-[34px] rounded-full`}
                 />
                 <p className="truncate text-sm my-auto font-mono font-bold ml-2">
-                  {_promptAcceptOTC && _promptAcceptOTC.token
-                    ? _promptAcceptOTC.token.amount
-                    : "-"}
+                  {_promptAcceptOTC ? _promptAcceptOTC.native : "-"}
                 </p>
               </div>
             </div>
             <div />
           </div>
         </div>
-        
 
         <div className="grid-cols-2 mt-16 hidden md:grid">
           <div />
@@ -139,7 +160,7 @@ const AcceptOTC = () => {
             </button>
           </div>
         </div>
-        
+
         <div className="grid-cols-1 mt-16 grid md:hidden">
           <div className="grid grid-cols-1 gap-2 px-4">
             <button

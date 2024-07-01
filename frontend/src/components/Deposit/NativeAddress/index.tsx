@@ -215,7 +215,7 @@ const NativeAddress = () => {
                       }}
                       className="bg-gray-500 text-white dark:text-black font-bold"
                     >
-                      Cancel
+                      Close
                     </button>
                   )}
                   <button
