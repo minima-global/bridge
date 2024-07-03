@@ -218,7 +218,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
 
             <>
               <div
-                className={`my-2 flex space-x-2 bg-black ${f.address && "!bg-white"} rounded ${
+                className={`my-2 flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${f.address && "!bg-white"} rounded ${
                   f.address && !errors.address && "outline outline-violet-300" 
                 } ${
                   touched.address && errors.address
@@ -239,7 +239,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                   onFocus={() => setF(prevState => ({...prevState, address: true}))}
                   type="text"              
                   placeholder="Address"
-                  className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
+                  className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:focus:text-black dark:placeholder:text-white`}
                 />              
                 
               </div>          
@@ -247,7 +247,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
             </>
             }
             <div
-              className={`flex space-x-2 bg-black ${f.amount && "!bg-white"} rounded ${
+              className={`flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${f.amount && "!bg-white"} rounded ${
                 f.amount && !errors.amount && "outline outline-violet-300" 
               } ${
                 touched.amount && errors.amount
@@ -269,7 +269,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 required
                 type="text"              
                 placeholder="Amount"
-                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
+                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white dark:focus:text-black`}
               />              
             </div>
 

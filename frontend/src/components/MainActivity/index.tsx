@@ -264,13 +264,13 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
 
         {EVENT.includes("COLLECT") &&
           !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+            <div className="bg-teal-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
               Attempted a collect
             </div>
           )}
         {EVENT.includes("COLLECT") &&
           TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <div className="bg-red-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
+            <div className="bg-red-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
               Disabled orderbook
             </div>
           )}
@@ -393,22 +393,25 @@ const MainActivity = () => {
   const [offset, setOffset] = useState(0);
   const [data, setData] = useState<any[]>([]);
 
+  const [hasMore, setHasMore] = useState(false);
+
   const springProps = useSpring({
     opacity: _promptLogs ? 1 : 0,
     config: config.gentle,
   });
 
   const handleNext = () => {
-    setOffset((prevState) => prevState + 20);
+    setOffset((prevState) => prevState + MAX);
   };
 
   const handlePrev = () => {
-    setOffset((prevState) => prevState - 20);
+    setOffset((prevState) => prevState - MAX);
   };
 
   useEffect(() => {
     if (_promptLogs && _switchLogView === "all") {
-      getAllEvents(MAX, offset, (events) => {
+      getAllEvents(MAX + 1, offset, (events) => {
+      
         const _evts = events
           .filter((e) => !(e.TXNHASH === "SECRET REVEALED"))
           .map((e) => {
@@ -428,7 +431,13 @@ const MainActivity = () => {
             };
           });
 
-        setData(_evts);
+          if (events.length > MAX) {
+            setHasMore(true);
+            setData(_evts.slice(0, MAX));
+          } else {
+            setHasMore(false);
+            setData(_evts);
+          }
       });
     }
   }, [_promptLogs, offset, _switchLogView]);
@@ -445,10 +454,10 @@ const MainActivity = () => {
         createPortal(
           <animated.div
             style={springProps}
-            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-hidden"
+            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-hidden overflow-y-auto"
           >
             <div className="bg-slate-100 dark:bg-[#1B1B1B]" />
-            <div className="overflow-scroll">
+            <div className="overflow-none">
               <div className="flex justify-between items-center pr-4 my-3">
                 <Tabs />
 
@@ -506,19 +515,22 @@ const MainActivity = () => {
                       renderCellMobile={renderCellMobile}
                     />
                   )}
-                  {!!data.length && (
+
+                  
+
+                  {!!data.length && (hasMore || offset !== 0) && (
                     <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
                       <button
                         onClick={handlePrev}
                         disabled={offset === 0}
                         type="button"
-                        className="bg-gray-100 dark:bg-gray-200 dark:text-black bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
+                        className="bg-black bg-opacity-100 text-white dark:bg-gray-200 dark:text-black dark:bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
                       >
                         Prev
                       </button>
                       <button
                         onClick={handleNext}
-                        disabled={data.length < 20}
+                        disabled={!hasMore}
                         type="button"
                         className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
                       >

@@ -132,7 +132,7 @@ const NativeAddress = () => {
                 />
               )}
               <div
-                className={`flex space-x-2 bg-black ${
+                className={`flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${
                   f && "!bg-white"
                 } rounded ${f && "outline outline-violet-300"} ${
                   touched.amount && errors.amount
@@ -155,7 +155,7 @@ const NativeAddress = () => {
                   type="text"
                   autoFocus={false}
                   placeholder="Amount"
-                  className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white`}
+                  className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white dark:focus:text-black`}
                 />
                 <div className="h-full my-auto">
                   <button

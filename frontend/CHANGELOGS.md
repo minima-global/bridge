@@ -107,3 +107,9 @@
 - Design tweaks
 - Bug fixes
 
+##### [2.6.10] - 3 July 24
+
+- Design tweak on darkMode
+- Remove annoying scrollbar on Main Activity
+- Tweak prev, next on Main Activity
+
