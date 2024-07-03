@@ -38,3 +38,8 @@ text {
 .text.expanded::after {
   display: none !important;
 }
+
+
+.overflow-y-auto {
+  overflow-y: auto;
+}
