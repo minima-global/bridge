@@ -113,3 +113,9 @@
 - Remove annoying scrollbar on Main Activity
 - Tweak prev, next on Main Activity
 
+##### [2.6.10] - 9 July 24
+
+- Up the gas limits on withdraw, refund of eth htlc
+- Added Export Private Key for ETH
+- Tweak designs
+

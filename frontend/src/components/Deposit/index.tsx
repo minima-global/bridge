@@ -26,6 +26,8 @@ const Deposit = () => {
       onClose={() => promptDeposit()}
       extraClass=""
     >
+      <div className="max-h-[75vh] overflow-y-auto">
+      
       <h2 className="text-center text-lg font-bold pb-1">Deposit</h2>
       <div className="px-3">
         <nav className="bg-violet-800 rounded-lg grid grid-cols-2 max-w-sm mx-auto text-center">
@@ -45,6 +47,7 @@ const Deposit = () => {
       </div>
       {view === "native" && <NativeAddress />}
       {view === "erc20" && <EthereumAddress />}
+      </div>
     </AnimatedDialog>
   );
 };
