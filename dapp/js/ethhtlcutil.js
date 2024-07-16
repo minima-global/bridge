@@ -46,7 +46,7 @@ function setupETHHTLCSwap(ownerminimakey, swappubkey, hashlock, timelock,
 	
 
 	//Now create the RAW txn..
-	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 350000);
+	var transaction = createRAWContractCallTxn(HTLCContractAddress, functiondata, 500000);
 	
 	//NOW SIGN..
 	postTransaction(transaction, function(ethresp){

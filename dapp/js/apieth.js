@@ -48,7 +48,7 @@ function startETHSwap(userdets, swappublickey, erc20contract, amount, requestamo
 function checkExpiredETHHTLC(ethblock, callback){
 	
 	//CHeck all blocks in a range to the past
-	var startblock = ethblock - 500;
+	var startblock = ethblock - 1000;
 	if(startblock < MIN_HTLC_BLOCK){
 		startblock = MIN_HTLC_BLOCK;
 	}
