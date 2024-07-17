@@ -1,4 +1,4 @@
-import { parseUnits } from "ethers";
+import { getAddress, parseUnits } from "ethers";
 import { Formik } from "formik";
 import { useContext, useEffect, useState } from "react";
 import * as yup from "yup";
@@ -18,9 +18,9 @@ type FormState = {
 };
 const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _balance } = useWalletContext();
-  const { _currentNetwork, _defaultNetworks, _minimaBalance, getWalletBalance, getMainMinimaBalance, setTriggerBalanceUpdate } =
+  const { _currentNetwork, _defaultNetworks, _minimaBalance, getWalletBalance, getMainMinimaBalance } =
     useContext(appContext);
-  const { _network, getEthereumBalance } = useWalletContext();
+  const { _network, callBalanceForApp } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   const [ethWalletAddress, setEthWalletAddress] = useState("");
@@ -44,22 +44,6 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
     getWalletBalance();
     getMainMinimaBalance();
   };
-
-  const handlePullBalance = async () => {
-    // Pause for 3 seconds
-    await new Promise((resolve) => {
-      setTimeout(resolve, 7000);
-    });
-  
-    // Trigger balance update
-    setTriggerBalanceUpdate(true);
-    getEthereumBalance();
-  
-    // Pause for 2 seconds before setting the trigger back to false
-    setTimeout(() => {
-      setTriggerBalanceUpdate(false);
-    }, 2000);
-  }
 
   useEffect(() => {
     if (type === 'erc20') {
@@ -109,13 +93,18 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
             const { path, createError, parent } = this;
 
             try {
+
+              if (new Decimal(val).isZero()) {
+                throw new Error("Please enter a valid amount");
+              }
+
               if (type === "erc20") {
                 if (
                   parent.asset.type === "ether" &&
                   (new Decimal(val).gt(_balance) || new Decimal(val).isZero())
                   // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
                 ) {
-                  throw new Error();
+                  throw new Error("Insufficient funds");
                 }
 
                 const assetBalance = parent.asset.balance;
@@ -129,23 +118,61 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                     new Decimal(assetBalance).isZero())
                   // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
                 ) {
-                  throw new Error();
+                  throw new Error("Insufficient funds");
                 }
               }
               if (type === "native") {
                 if (new Decimal(val).gt(_minimaBalance.confirmed)) {
-                  throw new Error();
+                  throw new Error("Insufficient funds");
                 }
               }
 
               return true;
             } catch (error) {
+              if (error instanceof Error) {
+                return createError({
+                  path,
+                  message: error.message,
+                });
+              }
+
               return createError({
                 path,
-                message: "Insufficient funds",
+                message: "Something went wrong, try again in a few",
               });
             }
           }),
+          address: yup.string().test("valid address", function(val) {
+            const { path, createError} = this;
+
+            try {
+
+              if (type === 'erc20') {
+                if (!val) {
+                  return true;
+                }
+
+                getAddress(val);
+              }
+              
+
+              return true;
+            } catch (error) {
+              if (error instanceof Error) {
+                return createError({
+                  path,
+                  message: error.message,
+                });
+              }
+
+              return createError({
+                path,
+                message: "Something went wrong, try again in a few",
+              });
+            }
+
+
+          })
       })}
       onSubmit={async ({ amount, asset, address }, { setStatus, resetForm }) => {
         setError(false);
@@ -177,7 +204,12 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           if (type === 'native') {
             await getBalances();  
           } else {
-            await handlePullBalance();
+            // wait 5s
+            await new Promise((resolve) => {
+              setTimeout(resolve, 5000);
+            });
+          
+            callBalanceForApp();
           }
 
 

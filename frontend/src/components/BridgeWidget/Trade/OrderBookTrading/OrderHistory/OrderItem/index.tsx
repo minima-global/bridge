@@ -118,7 +118,7 @@ const OrderItem = ({ order }: IProps) => {
                   window.open(
                     `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
                       link.sessionid
-                    }`,
+                    }#/t/${order[0].TXNHASH.split("-")[0]}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
 

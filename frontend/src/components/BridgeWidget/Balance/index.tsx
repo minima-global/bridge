@@ -10,18 +10,11 @@ import { useWalletContext } from "../../../providers/WalletProvider/WalletProvid
 import { differenceInSeconds } from "date-fns";
 
 const Balance = () => {
-  const { loaded, _currentNavigation, promptDeposit, promptWithdraw, _minimaBalance, getWalletBalance, setTriggerBalanceUpdate } = useContext(appContext);
-  const {_balance: etherBalance, getEthereumBalance} = useWalletContext();
+  const { loaded, _currentNavigation, promptDeposit, promptWithdraw, _minimaBalance, getWalletBalance } = useContext(appContext);
+  const {_balance: etherBalance, callBalanceForApp } = useWalletContext();
   
   const [runningLow, setRunningLow] = useState({minima: false, ethereum: false, disableEthereum: false});
 
-  const callBalance = () => {
-    setTriggerBalanceUpdate(true);
-        setTimeout(() => {
-          getEthereumBalance();
-          setTriggerBalanceUpdate(false);
-        }, 2000);
-  }
   const handlePullBalance = () => {
     (window as any).MDS.keypair.get("_lastethbalancecheck", (resp) => {
       if (resp.status) {
@@ -37,10 +30,10 @@ const Balance = () => {
           
           (window as any).MDS.keypair.set("_lastethbalancecheck", JSON.stringify({timestamp: now}), () => {})
 
-          callBalance();
+          callBalanceForApp();
         }             
       } else {
-        callBalance();
+        callBalanceForApp();
         
         const now = new Date().getTime();
         
@@ -63,7 +56,7 @@ const Balance = () => {
         }
       }
     
-      // let's fetch Minima balance again..
+      // let's fetch Minima balance again.. (since RPC is free.. just keep calling on every change)
       getWalletBalance();
       // Get Ethereum balance every 60s
       if (loaded && loaded.current) {

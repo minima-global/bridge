@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext } from "react";
 import { appContext } from "../../AppContext";
 import Dialog from "../UI/Dialog";
 import { createPortal } from "react-dom";
@@ -8,27 +8,6 @@ import RightArrow from "../UI/Icons/RightArrow";
 const Help = () => {
   const { _promptHelp, promptHelp } = useContext(appContext);
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const handleScroll = () => {
-      if (scrollRef.current && scrollRef.current.scrollTop > 0) {
-        setIsExpanded(true);
-      }
-    };
-
-    const scrollContainer = scrollRef.current;
-    if (scrollContainer) {
-      scrollContainer.addEventListener("scroll", handleScroll);
-    }
-
-    return () => {
-      if (scrollContainer) {
-        scrollContainer.removeEventListener("scroll", handleScroll);
-      }
-    };
-  }, [scrollRef.current, _promptHelp]);
 
   const springProps = useSpring({
     opacity: _promptHelp ? 1 : 0,
@@ -142,12 +121,8 @@ const Help = () => {
                       </div>
                     </div>
 
-                    <div
-                      style={{ maxHeight: "200px" }}
-                      ref={scrollRef}
-                      className={`relative text-sm flex flex-col gap-2 tracking-wide overflow-y-scroll text ${
-                        isExpanded ? "expanded" : ""
-                      }`}
+                    <div                                          
+                      className={`relative text-sm flex flex-col gap-2 tracking-wide`}
                     >
                       <p className="px-4 font-semibold">
                         Alice wants to swap 100 <span className="font-bold">Minima</span> for 100 <span className="font-bold">wMinima</span> with Bob.
@@ -236,13 +211,13 @@ const Help = () => {
                         completely decentralised..
                       </p>
 
-                      {!isExpanded && (
+                      {/* {!isExpanded && (
                         <div className="absolute left-0 right-0 top-0 bottom-0 flex justify-center items-end">
                           <p className=" bg-black z-[25] text-white dark:text-black dark:bg-white px-3 shadow-lg text-xs py-1">
                             Scroll to read More
                           </p>
                         </div>
-                      )}
+                      )} */}
                     </div>
 
 
