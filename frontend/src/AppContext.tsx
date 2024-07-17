@@ -30,6 +30,7 @@ interface IProps {
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
 
+
   // Loading App
   const [isWorking, setWorking] = useState(false);
   // App's navigation
@@ -774,6 +775,7 @@ const AppProvider = ({ children }: IProps) => {
         updateApiKeys,
 
         notify,
+
       }}
     >
       {children}

@@ -26,33 +26,15 @@ const TetherPoolOld = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
   const [_f, setF] = useState(false);
 
-  const { _minimaBalance, _userDetails, notify, handleActionViaBackend, setTriggerBalanceUpdate } =
+  const { _minimaBalance, _userDetails, notify, handleActionViaBackend } =
     useContext(appContext);
   const { tokens } = useTokenStoreContext();
-  const { _network } = useWalletContext();
+  const { _network, callBalanceForApp } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "Tether");
 
-  const handlePullBalance = async () => {
-    // Pause for 3 seconds
-    await new Promise((resolve) => {
-      setTimeout(resolve, 3000);
-    });
-  
-    // Trigger balance update
-    setTriggerBalanceUpdate(true);
-  
-    // Pause for 2 seconds before setting the trigger back to false
-    setTimeout(() => {
-      setTriggerBalanceUpdate(false);
-    }, 2000);
-  }
 
   useEffect(() => {
-
-    (async () => {
-      await handlePullBalance();
-    })()
-
+    callBalanceForApp();
   }, []);
 
   return (
@@ -99,7 +81,7 @@ const TetherPoolOld = () => {
           notify("Order requested...");
           resetForm();
           
-          await handlePullBalance();
+          callBalanceForApp();
           // console.log("transaction response", res);
         } catch (error: any) {
           console.error(error);

@@ -7,7 +7,7 @@ import { _defaults } from "../../constants";
 import RefreshIcon from "../UI/Icons/RefreshIcon";
 
 const TokenList = () => {
-  const { _currentNavigation, setTriggerBalanceUpdate, _triggerBalanceUpdate } = useContext(appContext);
+  const { _currentNavigation, setTriggerBalanceUpdate, _triggerBalanceUpdate, getWalletBalance } = useContext(appContext);
   const { _balance, _network, getEthereumBalance } = useWalletContext();
   const { tokens } = useTokenStoreContext();
   if (_currentNavigation !== "balance") {
@@ -17,6 +17,7 @@ const TokenList = () => {
   const handlePullBalance = () => {
     setTriggerBalanceUpdate(true);
     setTimeout(() => {
+      getWalletBalance();
       getEthereumBalance();
       setTriggerBalanceUpdate(false);
     }, 2000);

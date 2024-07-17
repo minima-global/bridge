@@ -177,7 +177,7 @@ const renderCell = (
                   window.open(
                     `${(window as any).MDS.filehost}${
                       link.uid
-                    }/index.html?uid=${link.sessionid}`,
+                    }/index.html?uid=${link.sessionid}#/t/${TXNHASH}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
                 }}
@@ -357,7 +357,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
                   window.open(
                     `${(window as any).MDS.filehost}${
                       link.uid
-                    }/index.html?uid=${link.sessionid}`,
+                    }/index.html?uid=${link.sessionid}#/t/${TXNHASH}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
                 }}

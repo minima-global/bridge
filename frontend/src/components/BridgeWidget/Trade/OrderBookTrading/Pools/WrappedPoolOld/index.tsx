@@ -26,33 +26,15 @@ const WrappedPoolOld = () => {
   const [_currentNavigation, setCurrentNavigation] = useState("Buy");
   const [_f, setF] = useState(false);
 
-  const { _minimaBalance, _userDetails, notify, handleActionViaBackend, setTriggerBalanceUpdate } =
+  const { _minimaBalance, _userDetails, notify, handleActionViaBackend } =
     useContext(appContext);
   const { tokens } = useTokenStoreContext();
-  const { _network, getEthereumBalance } = useWalletContext();
+  const { _network, callBalanceForApp } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "wMinima");
-
-  const handlePullBalance = async () => {
-    // Pause for 3 seconds
-    await new Promise((resolve) => {
-      setTimeout(resolve, 3000);
-    });
-  
-    // Trigger balance update
-    setTriggerBalanceUpdate(true);
-    getEthereumBalance();
-  
-    // Pause for 2 seconds before setting the trigger back to false
-    setTimeout(() => {
-      setTriggerBalanceUpdate(false);
-    }, 2000);
-  }
 
   useEffect(() => {
 
-    (async () => {
-      await handlePullBalance();
-    })()
+    callBalanceForApp();
 
   }, []);
 
@@ -100,7 +82,7 @@ const WrappedPoolOld = () => {
           notify("Order requested...");
           resetForm();
 
-          await handlePullBalance();
+          callBalanceForApp();
         } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {

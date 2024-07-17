@@ -20,30 +20,13 @@ const WrappedPoolWithConfirmation = withConfirmation(
 const TetherPoolWithConfirmation = withConfirmation(TetherPool, 'usdt');
 
 const OrderBookForm = () => {
-  const { loaded, getWalletBalance, handleActionViaBackend, notify, setTriggerBalanceUpdate } = useContext(appContext);
-  const { getEthereumBalance } = useWalletContext();
+  const { loaded, handleActionViaBackend, notify } = useContext(appContext);
+  const { callBalanceForApp } = useWalletContext();
   const [_currentNavigation, setCurrentNavigation] = useState(0);
 
-  const handlePullBalance = async () => {
-    // Pause for 3 seconds
-    await new Promise((resolve) => {
-      setTimeout(resolve, 15000);
-    });
-  
-    // Trigger balance update
-    setTriggerBalanceUpdate(true);
-    getEthereumBalance();
-  
-    // Pause for 2 seconds before setting the trigger back to false
-    setTimeout(() => {
-      setTriggerBalanceUpdate(false);
-    }, 2000);
-  }
-
   useEffect(() => {
-    if (loaded && loaded.current) {
-      getWalletBalance();
-      handlePullBalance();
+    if (loaded && loaded.current) {      
+      callBalanceForApp();
     }
   }, [loaded, _currentNavigation]);
 
@@ -108,7 +91,7 @@ const OrderBookForm = () => {
             notify("Order requested...");
             resetForm();
             
-            await handlePullBalance();            
+            callBalanceForApp();            
           } catch (error: any) {
             console.error(error);
             if (error instanceof Error) {

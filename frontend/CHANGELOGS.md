@@ -120,3 +120,9 @@
 - Increase eth check on expiry
 - Tweak designs
 
+##### [2.7.1] - 17 July 24
+
+- Manage the amount of call for balance to fix subsequent calls
+- Open block w/ transaction id
+- Add more validations on Withdraw forms
+

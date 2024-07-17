@@ -30,12 +30,13 @@ type Context = {
   ) => Promise<TransactionResponse>;
   getTokenType: (tokeName: string, currentNetwork: string) => string;
   getEthereumBalance: () => void;
+  callBalanceForApp: () => void;
 };
 
 const WalletContext = createContext<Context | null>(null);
 
 export const WalletContextProvider = ({ children }: Props) => {
-  const { _provider, _generatedKey } = useContext(appContext);
+  const { _provider, _generatedKey, getWalletBalance, _triggerBalanceUpdate, setTriggerBalanceUpdate } = useContext(appContext);
   const [_network, setNetwork] = useState("");
   const [_chainId, setChainId] = useState<string | null>(null);
   const [_wallet, setWallet] = useState<Signer | null>(null);
@@ -57,6 +58,27 @@ export const WalletContextProvider = ({ children }: Props) => {
     setAddress(address);
     setChainId(network.chainId);
   }, [_provider, _generatedKey]);
+
+  const callBalanceForApp = async () => {
+
+    // If there is already an on-going balance call.. stop
+
+    if (_triggerBalanceUpdate) return;
+
+    // Trigger balance update for ERC-20s...
+    setTriggerBalanceUpdate(true);
+
+    // Getting Ethereum Balance
+    getEthereumBalance();
+
+    // Get Swap Wallet Balance...
+    await getWalletBalance();
+
+    // Trigger Ethereum Balance update...
+    setTimeout(() => {      
+      setTriggerBalanceUpdate(false);
+    }, 2000);
+  }
 
   /**
    *
@@ -128,7 +150,8 @@ export const WalletContextProvider = ({ children }: Props) => {
         setStep,
 
         getTokenType,
-        getEthereumBalance
+        getEthereumBalance,
+        callBalanceForApp
       }}
     >
       {children}
