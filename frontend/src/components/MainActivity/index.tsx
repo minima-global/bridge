@@ -12,6 +12,7 @@ import * as utils from "../../utils";
 import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
+import CloseIcon from "../UI/Icons/CloseIcon/index.js";
 
 const renderCell = (
   cellData,
@@ -38,19 +39,25 @@ const renderCell = (
   return (
     <>
       <td className="p-3">
-        <input
-          onFocus={() => handleFocus(index, "hash")}
-          onBlur={() => handleFocus(index, "hash")}
-          readOnly
-          className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
-          value={
-            !focusStates[index]
-              ? HASH.substring(0, 8) +
-                "..." +
-                HASH.substring(HASH.length - 8, HASH.length)
-              : HASH
-          }
-        />
+        {EVENT.includes("SENDETH") ? (
+          <p className="text-center text-sm font-bold tracking-wide opacity-70">
+            Withdrawal
+          </p>
+        ) : (
+          <input
+            onFocus={() => handleFocus(index, "hash")}
+            onBlur={() => handleFocus(index, "hash")}
+            readOnly
+            className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
+            value={
+              !focusStates[index]
+                ? HASH.substring(0, 8) +
+                  "..." +
+                  HASH.substring(HASH.length - 8, HASH.length)
+                : HASH
+            }
+          />
+        )}
       </td>
       <td className="p-3">
         {EVENT.includes("WITHDRAW") && (
@@ -101,11 +108,7 @@ const renderCell = (
       </td>
 
       <td className="p-3">
-        <div
-          className={`${
-            TOKEN === "minima" && "!to-blue-500"
-          } bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max mx-auto`}
-        >
+        <div>
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
@@ -113,10 +116,12 @@ const renderCell = (
                 ? "./assets/wtoken.svg"
                 : getTokenType(TOKEN) === "Minima"
                 ? "./assets/token.svg"
-                : "./assets/tether.svg"
+                : getTokenType(TOKEN) === "Tether"
+                ? "./assets/tether.svg"
+                : "./assets/eth.svg"
             }
           />
-          <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
+          <p className="inline-block my-auto text-sm font-bold font-mono tracking-wide ml-1">
             {new Decimal(AMOUNT).toString()}
           </p>
         </div>
@@ -229,19 +234,25 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   return (
     <>
       <div className="p-4 pt-3">
-        <input
-          onFocus={() => handleFocus(index, "hash")}
-          onBlur={() => handleFocus(index, "hash")}
-          readOnly
-          className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
-          value={
-            !focusStates[index]
-              ? HASH.substring(0, 8) +
-                "..." +
-                HASH.substring(HASH.length - 8, HASH.length)
-              : HASH
-          }
-        />
+        {EVENT.includes("SENDETH") ? (
+          <p className="text-left text-sm font-bold tracking-wide opacity-70">
+            Withdrawal
+          </p>
+        ) : (
+          <input
+            onFocus={() => handleFocus(index, "hash")}
+            onBlur={() => handleFocus(index, "hash")}
+            readOnly
+            className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
+            value={
+              !focusStates[index]
+                ? HASH.substring(0, 8) +
+                  "..." +
+                  HASH.substring(HASH.length - 8, HASH.length)
+                : HASH
+            }
+          />
+        )}
       </div>
       <div className="p-4 pt-3">
         {EVENT.includes("WITHDRAW") && (
@@ -291,11 +302,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
         )}
       </div>
       <div className="p-4">
-        <div
-          className={`${
-            TOKEN === "minima" && "!to-blue-500"
-          } bg-gradient-to-r from-white dark:from-black to-teal-600 dark:to-teal-500 rounded-full w-max`}
-        >
+        <div>
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
@@ -303,10 +310,12 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
                 ? "./assets/wtoken.svg"
                 : getTokenType(TOKEN) === "Minima"
                 ? "./assets/token.svg"
-                : "./assets/tether.svg"
+                : getTokenType(TOKEN) === "Tether"
+                ? "./assets/tether.svg"
+                : "./assets/eth.svg"
             }
           />
-          <p className="max-w-xs text-white inline-block my-auto font-mono text-xs px-2">
+          <p className="inline-block my-auto text-sm font-bold font-mono tracking-wide ml-1">
             {new Decimal(AMOUNT).toString()}
           </p>
         </div>
@@ -386,14 +395,20 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   );
 };
 
-const MAX = 20;
 const MainActivity = () => {
-  const { _promptLogs, promptLogs, _switchLogView } = useContext(appContext);
+  const {
+    _promptLogs,
+    promptLogs,
+    _switchLogView,
+    offsetAllEvents,
+    offsetOrders,
+    setOffsetAllEvents,
+    setOffsetOrders,
+    allHasMore, setAllHasMore,
+    ordersHasMore
+  } = useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
-  const [offset, setOffset] = useState(0);
   const [data, setData] = useState<any[]>([]);
-
-  const [hasMore, setHasMore] = useState(false);
 
   const springProps = useSpring({
     opacity: _promptLogs ? 1 : 0,
@@ -401,46 +416,49 @@ const MainActivity = () => {
   });
 
   const handleNext = () => {
-    setOffset((prevState) => prevState + MAX);
+    if (_switchLogView === "all") {
+      setOffsetAllEvents((prevState) => prevState + 20);
+    }
+
+    if (_switchLogView === "orders") {
+      setOffsetOrders((prevState) => prevState + 10);
+
+    }
   };
 
   const handlePrev = () => {
-    setOffset((prevState) => prevState - MAX);
+    if (_switchLogView === "all") {
+      setOffsetAllEvents((prevState) => prevState - 20);
+    }
+    
+    if (_switchLogView === "orders") {
+      setOffsetOrders((prevState) => prevState - 10);
+    }
   };
 
   useEffect(() => {
     if (_promptLogs && _switchLogView === "all") {
-      getAllEvents(MAX + 1, offset, (events) => {
-      
+      getAllEvents(20 + 1, offsetAllEvents, (events) => {
         const _evts = events
-          .filter((e) => !(e.TXNHASH === "SECRET REVEALED"))
-          .map((e) => {
-            if (e.TXNHASH.includes("-")) {
-              const txHash = e.TXNHASH.split("-")[0];
-              return {
-                ...e,
-                TXNHASH: txHash,
-                getTokenType,
-                _network,
-              };
-            }
+          .map((e) => {            
             return {
               ...e,
               getTokenType,
               _network,
             };
           });
+          
+        if (_evts.length > 20) {
+          setAllHasMore(true);
+          setData(_evts.slice(0, 20));
+        } else {
+          setAllHasMore(false);
+          setData(_evts);
+        }
 
-          if (events.length > MAX) {
-            setHasMore(true);
-            setData(_evts.slice(0, MAX));
-          } else {
-            setHasMore(false);
-            setData(_evts);
-          }
       });
     }
-  }, [_promptLogs, offset, _switchLogView]);
+  }, [_promptLogs, offsetAllEvents]);
 
   return (
     <>
@@ -454,29 +472,58 @@ const MainActivity = () => {
         createPortal(
           <animated.div
             style={springProps}
-            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-hidden overflow-y-auto"
+            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-y-auto"
           >
             <div className="bg-slate-100 dark:bg-[#1B1B1B]" />
-            <div className="overflow-none">
-              <div className="flex justify-between items-center pr-4 my-3">
+            <div>
+              <div className="grid grid-cols-[auto_1fr] items-center pr-4 my-3">
                 <Tabs />
 
-                <svg
-                  onClick={promptLogs}
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  strokeWidth="4.5"
-                  stroke="currentColor"
-                  fill="none"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                <div className="grid grid-cols-[1fr_minmax(80px,_240px)_auto] items-center">
+                  <div />
+                  <div className="block sm:hidden" />
+                  <div className="hidden sm:grid gap-2 grid-cols-2 mx-8">
+                    <button
+                      disabled={(_switchLogView === 'all' && offsetAllEvents === 0)||(_switchLogView === 'orders' && offsetOrders === 0)}
+                      onClick={handlePrev}
+                      type="button"
+                      className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-full p-0 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
+                    >
+                      Prev
+                    </button>
+                    <button
+                      disabled={ (_switchLogView === 'all' && !allHasMore)||(_switchLogView === 'orders' && !ordersHasMore) }
+                      onClick={handleNext}
+                      type="button"
+                      className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-full p-0 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
+                    >
+                      Next
+                    </button>
+                  </div>
+
+                  <span onClick={promptLogs}>
+                    <CloseIcon fill="currentColor" />
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid sm:hidden grid-cols-2 gap-1">
+                <button
+                  disabled={ (_switchLogView === 'all' && offsetAllEvents === 0)||(_switchLogView === 'orders' && offsetOrders === 0) }
+                  onClick={handlePrev}
+                  type="button"
+                  className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-none p-0 py-2 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
                 >
-                  <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                  <path d="M18 6l-12 12" />
-                  <path d="M6 6l12 12" />
-                </svg>
+                  Prev
+                </button>
+                <button
+                  disabled={ (_switchLogView === 'all' && !allHasMore)||(_switchLogView === 'orders' && !ordersHasMore) }
+                  onClick={handleNext}
+                  type="button"
+                  className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-none p-0 py-2 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
+                >
+                  Next
+                </button>
               </div>
 
               {_switchLogView === "all" && (
@@ -514,29 +561,6 @@ const MainActivity = () => {
                       renderCell={renderCell}
                       renderCellMobile={renderCellMobile}
                     />
-                  )}
-
-                  
-
-                  {!!data.length && (hasMore || offset !== 0) && (
-                    <div className="grid grid-cols-2 px-4 my-4 gap-3 max-w-sm mx-auto">
-                      <button
-                        onClick={handlePrev}
-                        disabled={offset === 0}
-                        type="button"
-                        className="bg-black bg-opacity-100 text-white dark:bg-gray-200 dark:text-black dark:bg-opacity-50 disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
-                      >
-                        Prev
-                      </button>
-                      <button
-                        onClick={handleNext}
-                        disabled={!hasMore}
-                        type="button"
-                        className="bg-blue-500 dark:text-black font-bold text-white disabled:bg-gray-300 disabled:text-gray-600 disabled:font-thin disabled:dark:bg-gray-500 disabled:dark:text-gray-300"
-                      >
-                        Next
-                      </button>
-                    </div>
                   )}
                 </>
               )}

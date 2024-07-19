@@ -42,6 +42,15 @@ const AppProvider = ({ children }: IProps) => {
   // Current order book trade pool
   const [_currentOrderPoolTrade, setCurrentOrderPoolTrade] =
     useState("wminima");
+
+
+  // check to see whether next is disabled or not..
+  const [allHasMore, setAllHasMore] = useState(false);
+  const [ordersHasMore, setOrdersHasMore] = useState(false);
+  // offset for all the events/activities
+  const [offsetAllEvents, setOffsetAllEvents] = useState(0);
+  // offset for all orders
+  const [offsetOrders, setOffsetOrders] = useState(0);
   // get all orders
   const [orders, setOrders] = useState<OrderActivityEventGrouped | null>(null);
   // current Minima block height
@@ -363,7 +372,7 @@ const AppProvider = ({ children }: IProps) => {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
               // get Latest orders               
-              getAllOrders();
+              getAllOrders(10, offsetOrders);
 
               if (comms.title === "REFRESHNONCE") {
                 return notify("Nonce refreshed!");
@@ -615,30 +624,22 @@ const AppProvider = ({ children }: IProps) => {
       }
     );
   };
-  const getAllOrders = () => {  
-
-    getAllEventsForOrders((events) => {
+  
+  const getAllOrders = (max = 10, offset = 0) => {  
+    getAllEventsForOrders(max, offset, (events) => {
       // Step 1: Filter events based on specific criteria
       const filterEvents = events.filter(event => 
         ['CPTXN_COLLECT', 'CPTXN_SENT', 'HTLC_STARTED', 'CPTXN_EXPIRED'].includes(event.EVENT)
       );
-
-      if (filterEvents.length) {
-        // Step 2: Group the filtered events by 'HASH'
-        const group = _.groupBy(filterEvents.filter(e => !(e.TXNHASH === 'SECRET REVEALED')), 'HASH');
-        // Step 3: Sort each group by 'EVENTDATE' in descending order
-        const sortGroupedData = _.mapValues(group, group => _.orderBy(group, event => {
-          // Ensure EVENTDATE is parsed correctly as a number
+  
+      if (filterEvents.length) {      
+        const group = _.groupBy(filterEvents, 'HASH');
         
-          return Number(event.EVENTDATE);
-        }, ['desc']));
-        
-        // Step 4: Update the state with the sorted and grouped data
-        setOrders(sortGroupedData);
-
+        setOrders(group);
       }
     });
   }
+  
 
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
@@ -775,6 +776,13 @@ const AppProvider = ({ children }: IProps) => {
         updateApiKeys,
 
         notify,
+
+        offsetAllEvents, setOffsetAllEvents,
+        offsetOrders, setOffsetOrders,
+        allHasMore, setAllHasMore,
+        ordersHasMore, setOrdersHasMore
+
+
 
       }}
     >
