@@ -1,4 +1,4 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import { createPortal } from "react-dom";
 
 import Dialog from "../UI/Dialog";
@@ -8,8 +8,8 @@ import { useSpring, animated, config } from "react-spring";
 import { appContext } from "../../AppContext";
 
 const AppLoading = () => {
-  const { isWorking, promptSettings } = useContext(appContext);
-  const [takingTooLong, setTakingTooLong] = useState(false);
+  const { isWorking } = useContext(appContext);
+  // const [takingTooLong, setTakingTooLong] = useState(false);
 
   const springProps = useSpring({
     opacity: isWorking ? 1 : 0,
@@ -19,11 +19,11 @@ const AppLoading = () => {
     config: config.wobbly,
   });
 
-  useEffect(() => {
-    setTakingTooLong(false);
+  // useEffect(() => {
+  //   setTakingTooLong(false);
 
-    setTimeout(() => setTakingTooLong(true), 10000);
-  }, []);
+  //   setTimeout(() => setTakingTooLong(true), 10000);
+  // }, []);
 
   if (!isWorking) {
     return null;
@@ -66,7 +66,7 @@ const AppLoading = () => {
                   Connecting...
                 </p>
 
-                {takingTooLong && (
+                {/* {takingTooLong && (
                   <div>
                     <button
                       className="bg-purple-300 my-2 text-black font-bold shadow-none"
@@ -75,7 +75,7 @@ const AppLoading = () => {
                       Switch Networks
                     </button>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
           </animated.div>

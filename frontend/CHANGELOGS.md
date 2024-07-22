@@ -126,3 +126,19 @@
 - Open block w/ transaction id
 - Add more validations on Withdraw forms
 
+##### [2.8.0] - 19 July 24
+
+- Show correct token on withdrawal
+- Fix orders dissappearing
+- Fix pagination with all activities
+- Minor design tweaks
+
+##### [2.8.1] - 19 July 24
+
+- Adjusted Activity table design
+
+##### [2.9.0] - 22 July 24
+
+- Adjust design + UX on withdraw/deposit forms
+- Bug fixes
+

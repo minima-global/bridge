@@ -272,13 +272,13 @@ function insertSendETH(token,txnhash,amount,callback){
 }
 
 function getAllEvents(limit, offset, callback){
-	MDS.sql("SELECT * FROM counterparty ORDER BY id DESC LIMIT "+limit+" OFFSET "+offset, function(sqlmsg){
+	MDS.sql(`SELECT *, CASE WHEN POSITION('-' IN TXNHASH) > 0 THEN SUBSTRING(TXNHASH, 1, POSITION('-' IN TXNHASH) - 1) ELSE TXNHASH END AS TXNHASH FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' ORDER BY id DESC LIMIT ${limit} OFFSET ${offset};`, function(sqlmsg){
 		callback(sqlmsg.rows);
 	});
 }
 
-function getAllEventsForOrders(callback){
-	MDS.sql("SELECT * FROM counterparty WHERE hash IN (SELECT hash FROM counterparty GROUP BY hash ORDER BY MAX(id) DESC LIMIT 10) ORDER BY eventdate DESC, id DESC;", function(sqlmsg){
+function getAllEventsForOrders(max, offset, callback){
+	MDS.sql(`SELECT * FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' AND hash IN (SELECT hash FROM (SELECT DISTINCT HASH FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' ORDER BY hash DESC LIMIT ${max} OFFSET ${offset}) AS temp_hashes) ORDER BY hash DESC, eventdate DESC;`, function(sqlmsg){
 		callback(sqlmsg.rows);
 	});
 }

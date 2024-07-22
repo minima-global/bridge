@@ -36,7 +36,13 @@ type Context = {
 const WalletContext = createContext<Context | null>(null);
 
 export const WalletContextProvider = ({ children }: Props) => {
-  const { _provider, _generatedKey, getWalletBalance, _triggerBalanceUpdate, setTriggerBalanceUpdate } = useContext(appContext);
+  const {
+    _provider,
+    _generatedKey,
+    getWalletBalance,
+    _triggerBalanceUpdate,
+    setTriggerBalanceUpdate,
+  } = useContext(appContext);
   const [_network, setNetwork] = useState("");
   const [_chainId, setChainId] = useState<string | null>(null);
   const [_wallet, setWallet] = useState<Signer | null>(null);
@@ -60,7 +66,6 @@ export const WalletContextProvider = ({ children }: Props) => {
   }, [_provider, _generatedKey]);
 
   const callBalanceForApp = async () => {
-
     // If there is already an on-going balance call.. stop
 
     if (_triggerBalanceUpdate) return;
@@ -75,10 +80,10 @@ export const WalletContextProvider = ({ children }: Props) => {
     await getWalletBalance();
 
     // Trigger Ethereum Balance update...
-    setTimeout(() => {      
+    setTimeout(() => {
       setTriggerBalanceUpdate(false);
     }, 2000);
-  }
+  };
 
   /**
    *
@@ -106,36 +111,50 @@ export const WalletContextProvider = ({ children }: Props) => {
     return tx;
   };
 
-  const getTokenType = (token: string): string => {
-      if (token.startsWith("ETH:")) {
-          const contractAddress = token.replace("ETH:", "").toUpperCase();
-          
-          const wMinimaMainnet = _defaults['wMinima'].mainnet.toUpperCase();
-          const wMinimaSepolia = _defaults['wMinima'].sepolia.toUpperCase();
-          const tetherMainnet = _defaults['Tether'].mainnet.toUpperCase();
-          const tetherSepolia = _defaults['Tether'].sepolia.toUpperCase();
+  const getTokenType = (token: string): string => {       
+    
+    if (token === 'ETH') {
+      return 'Ethereum';
+    }
 
-          if ([wMinimaMainnet, wMinimaSepolia].includes(contractAddress)) {
-            return 'wMinima';
-          }
-          
-          if ([tetherMainnet, tetherSepolia].includes(contractAddress)) {
-            return 'Tether';
-          }
+    if (token === 'minima') {
+      return 'Minima';
+    }
+
+    const wMinimaMainnet = _defaults["wMinima"].mainnet.toUpperCase();
+    const wMinimaSepolia = _defaults["wMinima"].sepolia.toUpperCase();
+    const tetherMainnet = _defaults["Tether"].mainnet.toUpperCase();
+    const tetherSepolia = _defaults["Tether"].sepolia.toUpperCase();
+    
+    if (token.startsWith("ETH:")) {
+      const contractAddress = token.replace("ETH:", "").toUpperCase();
+
+
+      if ([wMinimaMainnet, wMinimaSepolia].includes(contractAddress)) {
+        return "wMinima";
       }
 
-      if (token === 'minima') {
-        return 'Minima';
+      if ([tetherMainnet, tetherSepolia].includes(contractAddress)) {
+        return "Tether";
+      }
+    } else {
+      if ([wMinimaMainnet, wMinimaSepolia].includes(token.toUpperCase())) {
+        return "wMinima";
       }
   
-      return "Other";
+      if ([tetherMainnet, tetherSepolia].includes(token.toUpperCase())) {
+        return "Tether";
+      }
+    }    
+
+    return "Other";
   };
 
   const getEthereumBalance = async () => {
     if (!_address) return;
     const balance = await _provider.getBalance(_address);
     setBalance(formatEther(balance));
-  }
+  };
 
   return (
     <WalletContext.Provider
@@ -151,7 +170,7 @@ export const WalletContextProvider = ({ children }: Props) => {
 
         getTokenType,
         getEthereumBalance,
-        callBalanceForApp
+        callBalanceForApp,
       }}
     >
       {children}

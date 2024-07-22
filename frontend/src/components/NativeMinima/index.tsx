@@ -54,13 +54,7 @@ const NativeMinima = ({ display = false, external }: Props) => {
             </p>
           )}
           {external && (
-            <p
-              className={`font-mono text-sm truncate bg-transparent focus:outline-none ${
-                display ? "text-[11px]" : ""
-              }`}
-            >
-              {external}
-            </p>
+            <input value={external} readOnly className="truncate focus:outline-none w-full bg-transparent text-sm tracking-wider" />            
           )}
         </div>
       </div>
