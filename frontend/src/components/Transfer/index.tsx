@@ -18,14 +18,20 @@ type FormState = {
 };
 const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const { _balance } = useWalletContext();
-  const { _currentNetwork, _defaultNetworks, _minimaBalance, getWalletBalance, getMainMinimaBalance } =
-    useContext(appContext);
+  const {
+    _currentNetwork,
+    _defaultNetworks,
+    _minimaBalance,
+    getWalletBalance,
+    getMainMinimaBalance,
+    promptWithdraw,
+  } = useContext(appContext);
   const { _network, callBalanceForApp } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   const [ethWalletAddress, setEthWalletAddress] = useState("");
 
-  const [f, setF] = useState({amount: false, address: false});
+  const [f, setF] = useState({ amount: false, address: false });
 
   const [_, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -46,20 +52,17 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   };
 
   useEffect(() => {
-    if (type === 'erc20') {
+    if (type === "erc20") {
       (async () => {
-        (window as any).MDS.cmd(
-          "seedrandom modifier:ghost",
-          async (resp) => {
-            try {
-              const genKey = resp.response.seedrandom;
-              const _address = await new Wallet(genKey).getAddress();      
-              setEthWalletAddress(_address);
-            } catch (error) {
-              console.error('Failed to gen eth wallet', error);
-            }
+        (window as any).MDS.cmd("seedrandom modifier:ghost", async (resp) => {
+          try {
+            const genKey = resp.response.seedrandom;
+            const _address = await new Wallet(genKey).getAddress();
+            setEthWalletAddress(_address);
+          } catch (error) {
+            console.error("Failed to gen eth wallet", error);
           }
-        );        
+        });
       })();
     }
   }, [type]);
@@ -93,7 +96,6 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
             const { path, createError, parent } = this;
 
             try {
-
               if (new Decimal(val).isZero()) {
                 throw new Error("Please enter a valid amount");
               }
@@ -142,39 +144,38 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
               });
             }
           }),
-          address: yup.string().test("valid address", function(val) {
-            const { path, createError} = this;
+        address: yup.string().test("valid address", function (val) {
+          const { path, createError } = this;
 
-            try {
-
-              if (type === 'erc20') {
-                if (!val) {
-                  return true;
-                }
-
-                getAddress(val);
-              }
-              
-
-              return true;
-            } catch (error) {
-              if (error instanceof Error) {
-                return createError({
-                  path,
-                  message: error.message,
-                });
+          try {
+            if (type === "erc20") {
+              if (!val) {
+                return true;
               }
 
+              getAddress(val);
+            }
+
+            return true;
+          } catch (error) {
+            if (error instanceof Error) {
               return createError({
                 path,
-                message: "Something went wrong, try again in a few",
+                message: "Invalid Ethereum address",
               });
             }
 
-
-          })
+            return createError({
+              path,
+              message: "Something went wrong, try again in a few",
+            });
+          }
+        }),
       })}
-      onSubmit={async ({ amount, asset, address }, { setStatus, resetForm }) => {
+      onSubmit={async (
+        { amount, asset, address },
+        { setStatus, resetForm }
+      ) => {
         setError(false);
         setLoading(true);
         setStatus(undefined);
@@ -184,37 +185,39 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
           if (type === "erc20") {
             if (asset.name === "wMinima") {
               action = "SENDWMINIMA";
-            } else if (asset.name === "Ethereum" || asset.name === 'SepoliaETH') {
+            } else if (
+              asset.name === "Ethereum" ||
+              asset.name === "SepoliaETH"
+            ) {
               action = "SENDETH";
             } else if (asset.name === "Tether") {
               action = "SENDUSDT";
-            }    
-            
+            }
+
             if (!address.length && !ethWalletAddress.length) {
               throw new Error("Please enter an address");
             }
           }
 
           await submitForm(
-            type === "native" ? amount : { amount, action, address: address.length ? address : ethWalletAddress }
+            type === "native"
+              ? amount
+              : {
+                  amount,
+                  action,
+                  address: address.length ? address : ethWalletAddress,
+                }
           );
 
-
           setStatus("Successful");
-          if (type === 'native') {
-            await getBalances();  
-          } else {
-            // wait 5s
-            await new Promise((resolve) => {
-              setTimeout(resolve, 5000);
-            });
-          
+          if (type === "native") {
+            await getBalances();
+          } else {            
             callBalanceForApp();
           }
 
-
           resetForm();
-
+          promptWithdraw();
         } catch (error: any) {
           console.error(error);
           // display error message
@@ -246,44 +249,64 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
         <form onSubmit={handleSubmit}>
           <div className="mb-3">{type === "erc20" && <SelectAsset />}</div>
           <div>
-            {type === 'erc20' &&
+            {type === "erc20" && (
+              <>
+                <div
+                  className={`my-2 flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${
+                    f.address && "!bg-white"
+                  } rounded ${
+                    f.address && !errors.address && "outline outline-violet-300"
+                  } ${
+                    touched.address && errors.address
+                      ? "!border-4 !outline-none !border-violet-500"
+                      : ""
+                  }`}
+                >
+                  <input
+                    disabled={isSubmitting}
+                    onBlur={(e) => {
+                      handleBlur(e);
+                      setF((prevState) => ({ ...prevState, address: false }));
+                    }}
+                    onChange={handleChange}
+                    value={values.address}
+                    id="address"
+                    name="address"
+                    onFocus={() =>
+                      setF((prevState) => ({ ...prevState, address: true }))
+                    }
+                    type="text"
+                    placeholder="Address"
+                    className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:focus:text-black dark:placeholder:text-white`}
+                  />
+                </div>
+                <p className="text-xs mb-2 font-bold">
+                  Leave address field empty if you want to withdraw to your ETH
+                  Wallet (
+                  {ethWalletAddress.substring(0, 4) +
+                    "..." +
+                    ethWalletAddress.substring(
+                      ethWalletAddress.length - 4,
+                      ethWalletAddress.length
+                    )}
+                  )
+                </p>
 
-            <>
-              <div
-                className={`my-2 flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${f.address && "!bg-white"} rounded ${
-                  f.address && !errors.address && "outline outline-violet-300" 
-                } ${
-                  touched.address && errors.address
-                    ? "!border-4 !outline-none !border-red-500"
-                    : ""
-                }`}
-              >
-                <input
-                  disabled={isSubmitting}
-                  onBlur={(e) => {
-                    handleBlur(e);
-                    setF(prevState => ({...prevState, address: false}));
-                  }}
-                  onChange={handleChange}
-                  value={values.address}
-                  id="address"
-                  name="address"
-                  onFocus={() => setF(prevState => ({...prevState, address: true}))}
-                  type="text"              
-                  placeholder="Address"
-                  className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:focus:text-black dark:placeholder:text-white`}
-                />              
-                
-              </div>          
-              <p className="text-xs mb-2 font-bold">Leave address field empty if you want to withdraw to your ETH Wallet ({ethWalletAddress.substring(0,4)+"..."+ethWalletAddress.substring(ethWalletAddress.length-4,ethWalletAddress.length)})</p>
-            </>
-            }
+                {errors.address && (
+                  <div className="p-2 text-sm px-4 bg-violet-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2">
+                    {errors.address}
+                  </div>
+            )}
+              </>
+            )}
             <div
-              className={`flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${f.amount && "!bg-white"} rounded ${
-                f.amount && !errors.amount && "outline outline-violet-300" 
+              className={`flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${
+                f.amount && "!bg-white"
+              } rounded ${
+                f.amount && !errors.amount && "outline outline-violet-300"
               } ${
                 touched.amount && errors.amount
-                  ? "!border-4 !outline-none !border-red-500"
+                  ? "!border-4 !outline-none !border-violet-500"
                   : ""
               }`}
             >
@@ -291,32 +314,38 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 disabled={isSubmitting}
                 onBlur={(e) => {
                   handleBlur(e);
-                  setF(prevState => ({...prevState, amount: false}));
+                  setF((prevState) => ({ ...prevState, amount: false }));
                 }}
                 onChange={handleChange}
                 value={values.amount}
                 id="amount"
                 name="amount"
-                onFocus={() => setF(prevState => ({...prevState, amount: true}))}
+                onFocus={() =>
+                  setF((prevState) => ({ ...prevState, amount: true }))
+                }
                 required
-                type="text"              
+                type="text"
                 placeholder="Amount"
                 className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white dark:focus:text-black`}
-              />              
+              />
             </div>
 
             {errors.amount && (
-              <div className="p-2 bg-red-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2 outline outline-red-500">
+              <div className="p-2 text-sm px-4 bg-violet-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2">
                 {errors.amount}
               </div>
             )}
           </div>
 
           {status && (
-            <div className={`text-center my-2 bg-teal-500 p-2 rounded ${type === 'erc20' && "!bg-orange-500"}`}>
+            <div
+              className={`text-center my-2 bg-teal-500 p-2 rounded ${
+                type === "erc20" && "!bg-orange-500"
+              }`}
+            >
               <h6 className="font-bold text-teal-800 dark:text-black">
-                {type === 'erc20' && "Withdrawal Requested"}
-                {type !== 'erc20' && "Withdrawal Successful"}                
+                {type === "erc20" && "Withdrawal Requested"}
+                {type !== "erc20" && "Withdrawal Successful"}
               </h6>
             </div>
           )}

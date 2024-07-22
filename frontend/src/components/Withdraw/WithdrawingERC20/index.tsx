@@ -10,7 +10,6 @@ const WithdrawingERC20 = () => {
 
 
     async function withdrawToken({amount, action, address}) {    
-        
         return new Promise((resolve) => {
             const message = {
                 amount,
@@ -18,21 +17,17 @@ const WithdrawingERC20 = () => {
                 action
             }
 
-
             sendBackendMSG(message, (resp) => {
                 resolve(resp);
             });
         });
     }
 
-    
-
-
 
   return (
     <div className="max-w-sm mx-auto my-4 px-2">
         <div className="flex items-end justify-end"><InfoTooltip message="Your withdrawal will be sent to your node's ETH Wallet." /></div>    
-      <Transfer type="erc20" submitForm={withdrawToken} onCancel={promptWithdraw} />
+        <Transfer type="erc20" submitForm={withdrawToken} onCancel={promptWithdraw} />
     </div>
   );
 };

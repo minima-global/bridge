@@ -277,8 +277,7 @@ function getAllEvents(limit, offset, callback){
 	});
 }
 
-// SELECT * FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' AND hash IN (SELECT DISTINCT hash FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' ORDER BY hash DESC LIMIT ${max} OFFSET ${offset}) ORDER BY hash, eventdate DESC;
-function getAllEventsForOrders(max = 10, offset = 0, callback){
+function getAllEventsForOrders(max, offset, callback){
 	MDS.sql(`SELECT * FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' AND hash IN (SELECT hash FROM (SELECT DISTINCT HASH FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' ORDER BY hash DESC LIMIT ${max} OFFSET ${offset}) AS temp_hashes) ORDER BY hash DESC, eventdate DESC;`, function(sqlmsg){
 		callback(sqlmsg.rows);
 	});

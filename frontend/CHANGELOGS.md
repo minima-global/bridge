@@ -133,3 +133,12 @@
 - Fix pagination with all activities
 - Minor design tweaks
 
+##### [2.8.1] - 19 July 24
+
+- Adjusted Activity table design
+
+##### [2.9.0] - 22 July 24
+
+- Adjust design + UX on withdraw/deposit forms
+- Bug fixes
+

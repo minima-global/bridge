@@ -13,6 +13,7 @@ import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
 import CloseIcon from "../UI/Icons/CloseIcon/index.js";
+import Activity from "./Activity/index.js";
 
 const renderCell = (
   cellData,
@@ -39,10 +40,8 @@ const renderCell = (
   return (
     <>
       <td className="p-3">
-        {EVENT.includes("SENDETH") ? (
-          <p className="text-center text-sm font-bold tracking-wide opacity-70">
-            Withdrawal
-          </p>
+        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH"))  ? (
+          <Activity extraClass="text-center">-</Activity>
         ) : (
           <input
             onFocus={() => handleFocus(index, "hash")}
@@ -60,55 +59,35 @@ const renderCell = (
         )}
       </td>
       <td className="p-3">
-        {EVENT.includes("WITHDRAW") && (
-          <div className="bg-sky-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            Withdrew tokens
-          </div>
+        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH")) && (
+          <Activity extraClass="text-center">Withdrew tokens</Activity>
         )}
 
         {EVENT.includes("STARTED") && (
-          <div className="bg-blue-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            Created a contract
-          </div>
-        )}
-
-        {EVENT.includes("SENDETH") && (
-          <div className="bg-orange-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            Sent ETH / ERC20
-          </div>
+          <Activity extraClass="text-center">Created a contract</Activity>
         )}
 
         {EVENT.includes("COLLECT") &&
           !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-              Attempted a collect
-            </div>
+            <Activity extraClass="text-center">Attempted collection</Activity>
           )}
         {EVENT.includes("COLLECT") &&
           TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <div className="bg-red-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-              Disabled orderbook
-            </div>
+            <Activity extraClass="text-center">Disabled orderbook</Activity>
           )}
         {EVENT.includes("EXPIRED") && (
-          <div className="bg-violet-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            Contract expired
-          </div>
+          <Activity extraClass="text-center">Contract expired</Activity>
         )}
         {EVENT.includes("SENT") && (
-          <div className="bg-teal-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            Sent counterparty tokens
-          </div>
+          <Activity extraClass="text-center">Sent counterparty tokens</Activity>
         )}
         {EVENT.includes("APPROVE") && (
-          <div className="bg-yellow-700 rounded-full px-4 w-max py-1 mx-auto text-white dark:text-black text-xs">
-            {EVENT}
-          </div>
+          <Activity extraClass="text-center">{EVENT}</Activity>
         )}
       </td>
 
       <td className="p-3">
-        <div>
+        <div className="text-center">
           <img
             className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
             src={
@@ -128,9 +107,7 @@ const renderCell = (
       </td>
       <td className="p-3">
         {EVENT.includes("EXPIRED") ? (
-          <p className="text-xs text-center">
-            {TXNHASH.includes("SECRET") ? TXNHASH : "-"}
-          </p>
+          <Activity>{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</Activity>
         ) : (
           <>
             {isEthereumEvent && (
@@ -234,10 +211,8 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   return (
     <>
       <div className="p-4 pt-3">
-        {EVENT.includes("SENDETH") ? (
-          <p className="text-left text-sm font-bold tracking-wide opacity-70">
-            Withdrawal
-          </p>
+        {(EVENT.includes("SENDETH") || EVENT.includes("WITHDRAW")) ? (
+          <Activity extraClass="mt-2">Withdrawal</Activity>
         ) : (
           <input
             onFocus={() => handleFocus(index, "hash")}
@@ -254,51 +229,31 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
           />
         )}
       </div>
-      <div className="p-4 pt-3">
-        {EVENT.includes("WITHDRAW") && (
-          <div className="bg-sky-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-            Withdrew tokens
-          </div>
+      <div className="p-4 pt-5">
+        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH"))  && (
+          <Activity extraClass="">Withdrew tokens</Activity>
         )}
 
         {EVENT.includes("STARTED") && (
-          <div className="bg-blue-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
-            Created a contract
-          </div>
-        )}
-
-        {EVENT.includes("SENDETH") && (
-          <div className="bg-orange-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
-            Sent ETH / ERC20
-          </div>
+          <Activity extraClass="">Created a contract</Activity>
         )}
 
         {EVENT.includes("COLLECT") &&
           !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <div className="bg-teal-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-              Attempted a collect
-            </div>
+            <Activity extraClass="">Attemped collection</Activity>
           )}
         {EVENT.includes("COLLECT") &&
           TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <div className="bg-red-700 rounded-full px-4 w-max py-1 text-white dark:text-black text-xs">
-              Disabled orderbook
-            </div>
+            <Activity extraClass="">Disabled orderbook</Activity>
           )}
         {EVENT.includes("EXPIRED") && (
-          <div className="bg-violet-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
-            Contract expired
-          </div>
+          <Activity extraClass="">Contract expired</Activity>
         )}
         {EVENT.includes("SENT") && (
-          <div className="bg-teal-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
-            Sent counterparty tokens
-          </div>
+          <Activity>Sent counterparty tokens</Activity>
         )}
         {EVENT.includes("APPROVE") && (
-          <div className="bg-yellow-700 rounded-full px-4 w-max py-1  text-white dark:text-black text-xs">
-            {EVENT}
-          </div>
+          <Activity>{EVENT}</Activity>
         )}
       </div>
       <div className="p-4">
@@ -322,9 +277,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
       </div>
       <div className="p-4 pt-2">
         {EVENT.includes("EXPIRED") ? (
-          <p className="text-xs text-center">
-            {TXNHASH.includes("SECRET") ? TXNHASH : "-"}
-          </p>
+          <Activity>{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</Activity>
         ) : (
           <>
             {isEthereumEvent && (
@@ -386,7 +339,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
         )}
       </div>
 
-      <div className="p-4">
+      <div className="p-4 font-bold">
         <div className="text-xs">
           {format(parseInt(EVENTDATE), "MMMM dd, yyyy hh:mm a")}
         </div>

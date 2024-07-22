@@ -26,7 +26,7 @@ const ChooseMethod = () => {
           <button
             type="button"
             onClick={() => setCurrentTradeWindow("orderbook")}
-            className="hover:outline dark:hover:outline-yellow-300 text-center flex items-center justify-center flex-col gap-2 font-bold dark:bg-[#1B1B1B]"
+            className="hover:outline md:hover:mr-1 transition-all dark:hover:outline-yellow-300 text-center flex items-center justify-center flex-col gap-2 font-bold dark:bg-[#1B1B1B]"
           >
             <OrderBookIcon /> 
             <p>Order Book</p>
@@ -54,7 +54,7 @@ const ChooseMethod = () => {
           <button
             type="button"
             onClick={() => setCurrentTradeWindow("otc")}
-            className="hover:outline dark:hover:outline-yellow-300 text-center flex items-center justify-center flex-col gap-2 font-bold dark:bg-[#1B1B1B]"
+            className="hover:outline md:hover:ml-1 transition-all dark:hover:outline-yellow-300 text-center flex items-center justify-center flex-col gap-2 font-bold dark:bg-[#1B1B1B]"
           >
             <OTCIcon /> 
             <p>OTC</p>

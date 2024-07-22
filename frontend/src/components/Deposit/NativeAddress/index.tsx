@@ -13,6 +13,7 @@ const NativeAddress = () => {
     getWalletBalance,
     _mainBalance,
     promptDeposit,
+    notify
   } = useContext(appContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | false>(false);
@@ -61,10 +62,12 @@ const NativeAddress = () => {
                   }
                 );
               });
-
-              setStatus("Done!");
-              await getBalances();
+              
+              setStatus("Withdrawal successful");
               resetForm();
+              promptDeposit();
+              notify("Deposit of "+amount+" MINIMA to the Swap Wallet on the way")
+              await getBalances();
             } catch (error) {
               if (error instanceof Error) {
                 return setError(error.message);
@@ -79,7 +82,7 @@ const NativeAddress = () => {
             amount: yup
               .string()
               .matches(/^\d*\.?\d+$/, "Enter a valid number.")
-              .required("Amount is required")
+              .required("Enter an amount")
               .test("has funds", function (val) {
                 const { path, createError } = this;
 
@@ -89,7 +92,7 @@ const NativeAddress = () => {
                   }
 
                   if (new Decimal(val).isZero()) {
-                    throw new Error("Amount is required");
+                    throw new Error("Enter an amount");
                   }
 
                   if (new Decimal(val).gt(_mainBalance.sendable)) {
@@ -125,6 +128,8 @@ const NativeAddress = () => {
             dirty,
           }) => (
             <form onSubmit={handleSubmit} className="px-4">
+              <p className="text-sm">Note: This is your Main Minima Wallet balance.</p>
+              <p className="text-sm mb-2">Enter an amount to deposit into your Swap Wallet.</p>
               {_mainBalance !== null && (
                 <NativeMinima
                   display={false}
@@ -136,7 +141,7 @@ const NativeAddress = () => {
                   f && "!bg-white"
                 } rounded ${f && "outline outline-violet-300"} ${
                   touched.amount && errors.amount
-                    ? "!border-4 !outline-none !border-red-500"
+                    ? "!border-4 !outline-none !border-violet-500"
                     : ""
                 }`}
               >
@@ -176,7 +181,7 @@ const NativeAddress = () => {
               </div>
 
               {errors.amount && (
-                <div className="p-2 bg-red-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2 outline outline-red-500">
+                <div className="p-2 text-sm px-4 bg-violet-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2">
                   {errors.amount}
                 </div>
               )}
