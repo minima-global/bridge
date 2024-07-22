@@ -48,12 +48,13 @@ const Balance = () => {
         setRunningLow(prevState => ({...prevState, minima: true}));
       } 
       
+      if (etherBalance && new Decimal(etherBalance).lt(0.01)) {
+        setRunningLow(prevState => ({...prevState, disableEthereum: true}));
+      }
+      
       if (etherBalance && new Decimal(etherBalance).lt(0.05)) {
         setRunningLow(prevState => ({...prevState, ethereum: true}));
 
-        if (new Decimal(etherBalance).lt(0.01)) {
-          setRunningLow(prevState => ({...prevState, disableEthereum: true}));
-        }
       }
     
       // let's fetch Minima balance again.. (since RPC is free.. just keep calling on every change)

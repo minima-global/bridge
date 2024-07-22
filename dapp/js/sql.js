@@ -278,7 +278,15 @@ function getAllEvents(limit, offset, callback){
 }
 
 function getAllEventsForOrders(max, offset, callback){
-	MDS.sql(`SELECT * FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' AND hash IN (SELECT hash FROM (SELECT DISTINCT HASH FROM counterparty WHERE TXNHASH != 'SECRET REVEALED' ORDER BY hash DESC LIMIT ${max} OFFSET ${offset}) AS temp_hashes) ORDER BY hash DESC, eventdate DESC;`, function(sqlmsg){
+    // Ensure `max` and `offset` have reasonable default values if not provided
+    max = max || 10; // Number of records per page
+    offset = offset || 1; // Page number, starting from 1
+
+    // Calculate the pagination limits
+    var limit = max;
+    var offsetRows = max * (offset - 1);
+
+	MDS.sql(`WITH LatestEvents AS (SELECT HASH, EVENT, EVENTDATE, ROW_NUMBER() OVER (PARTITION BY HASH ORDER BY EVENTDATE DESC) AS rn FROM counterparty WHERE EVENT IN ('CPTXN_COLLECT', 'CPTXN_SENT', 'HTLC_STARTED', 'CPTXN_EXPIRED') AND TXNHASH != 'SECRET REVEALED'), TopLatestEvents AS (SELECT HASH, EVENT, EVENTDATE, ROW_NUMBER() OVER (ORDER BY EVENTDATE DESC) AS rank FROM LatestEvents WHERE rn = 1), OffsetLimitedEvents AS (SELECT HASH FROM TopLatestEvents WHERE rank > ${offsetRows} AND rank <= ${offsetRows + limit}) SELECT * FROM counterparty WHERE HASH IN (SELECT HASH FROM OffsetLimitedEvents) AND EVENT IN ('CPTXN_COLLECT', 'CPTXN_SENT', 'HTLC_STARTED', 'CPTXN_EXPIRED');`, function(sqlmsg){
 		callback(sqlmsg.rows);
 	});
 }

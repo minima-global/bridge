@@ -1,6 +1,6 @@
 const EthereumNetwork = () => {
   return (
-    <div className="flex items-center gap-1 font-bold">
+    <div className="flex items-center gap-2 font-bold">
       <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
         <g fill="none" fillRule="evenodd">
           <circle cx="16" cy="16" r="16" fill="#627EEA" />

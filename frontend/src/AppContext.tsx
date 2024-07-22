@@ -15,9 +15,7 @@ import { OTCDeal } from "./types/OTCDeal.js";
 import { Favorite } from "./types/Favorite.js";
 import { getFavourites } from "../../dapp/js/sql.js";
 
-import {
-  getAllEventsForOrders
-} from "../../dapp/js/sql.js";
+import { getAllEventsForOrders } from "../../dapp/js/sql.js";
 import * as _ from "lodash";
 import { OrderActivityEventGrouped } from "./types/Order.js";
 
@@ -29,7 +27,6 @@ interface IProps {
 }
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
-
 
   // Loading App
   const [isWorking, setWorking] = useState(false);
@@ -43,14 +40,13 @@ const AppProvider = ({ children }: IProps) => {
   const [_currentOrderPoolTrade, setCurrentOrderPoolTrade] =
     useState("wminima");
 
-
   // check to see whether next is disabled or not..
   const [allHasMore, setAllHasMore] = useState(false);
-  const [ordersHasMore, setOrdersHasMore] = useState(false);
+  const [ordersHasMore, setOrdersHasMore] = useState(true);
   // offset for all the events/activities
   const [offsetAllEvents, setOffsetAllEvents] = useState(0);
   // offset for all orders
-  const [offsetOrders, setOffsetOrders] = useState(0);
+  const [offsetOrders, setOffsetOrders] = useState(1);
   // get all orders
   const [orders, setOrders] = useState<OrderActivityEventGrouped | null>(null);
   // current Minima block height
@@ -61,7 +57,7 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptDeposit, setPromptDeposit] = useState(false);
   // Withdraw Modal
   const [_promptWithdraw, setPromptWithdraw] = useState(false);
-  
+
   const [_allowanceLock, setAllowanceLock] = useState(false);
   // Allownace Modal
   const [_promptAllowance, setPromptAllowance] = useState(false);
@@ -84,7 +80,7 @@ const AppProvider = ({ children }: IProps) => {
   // Settings
   const [_promptLogs, setPromptLogs] = useState(false);
 
-  const [_switchLogView, setSwitchLogView] = useState<'all' | 'orders'>('all');
+  const [_switchLogView, setSwitchLogView] = useState<"all" | "orders">("all");
 
   // Current Network
   const [_currentNetwork, setCurrentNetwork] = useState("mainnet");
@@ -128,7 +124,6 @@ const AppProvider = ({ children }: IProps) => {
           // If in write mode, generate & set key
           if (response.response.mode === "WRITE") {
             initBridgeSystemsStartup(function (userdets) {
-
               // @ts-ignore
               window.USER_DETAILS = userdets;
               Object.freeze(USER_DETAILS);
@@ -371,34 +366,49 @@ const AppProvider = ({ children }: IProps) => {
           if (!msg.data.public) {
             var comms = JSON.parse(msg.data.message);
             if (comms.action == "FRONTENDMSG") {
-              // get Latest orders               
-              getAllOrders(10, offsetOrders);
+              // get Latest orders
+              getAllOrders(10 + 1, offsetOrders);
 
               if (comms.title === "REFRESHNONCE") {
                 return notify("Nonce refreshed!");
               }
 
-              if (comms.title === 'DISABLEORDERBOOK') {
-                return notify("Your order book has been disabled, you need more than 0.01 ETH to fulfill orders.");
+              if (comms.title === "DISABLEORDERBOOK") {
+                return notify(
+                  "Your order book has been disabled, you need more than 0.01 ETH to fulfill orders."
+                );
               }
 
-              if (comms.title === 'SENDETH' || comms.title === 'SENDWMINIMA' || comms.title === 'SENDUSDT') {
+              if (
+                comms.title === "SENDETH" ||
+                comms.title === "SENDWMINIMA" ||
+                comms.title === "SENDUSDT"
+              ) {
                 return notify("Withdrawal requested");
               }
 
-              if (comms.title === 'STARTETHSWAP') {
-                if (comms.message && comms.message.status && comms.message.networkstatus) {
+              if (comms.title === "STARTETHSWAP") {
+                if (
+                  comms.message &&
+                  comms.message.status &&
+                  comms.message.networkstatus
+                ) {
                   return notify("Started an Ethereum swap!");
                 }
               }
 
               if (comms.error) {
-                if (comms.error.message && comms.error.message.includes("insufficient funds for gas")) {
-                  notify("You need more ETH to complete your order, please top up first.");
+                if (
+                  comms.error.message &&
+                  comms.error.message.includes("insufficient funds for gas")
+                ) {
+                  notify(
+                    "You need more ETH to complete your order, please top up first."
+                  );
                 } else {
                   notify(comms.error.message);
-                } 
-                
+                }
+
                 return;
               }
 
@@ -592,13 +602,11 @@ const AppProvider = ({ children }: IProps) => {
       }
     });
   };
-  
+
   const getWalletBalance = () => {
     if (_userDetails === null) return;
     (window as any).MDS.cmd(
-      `balance tokenid:0x00 address:${
-        _userDetails.minimaaddress.mxaddress
-      }`,
+      `balance tokenid:0x00 address:${_userDetails.minimaaddress.mxaddress}`,
       (resp: any) => {
         if (resp.status) {
           const { confirmed, unconfirmed, coins } = resp.response[0];
@@ -624,22 +632,27 @@ const AppProvider = ({ children }: IProps) => {
       }
     );
   };
-  
-  const getAllOrders = (max = 10, offset = 0) => {  
+
+  const getAllOrders = (max = 10, offset = 1) => {
     getAllEventsForOrders(max, offset, (events) => {
-      // Step 1: Filter events based on specific criteria
-      const filterEvents = events.filter(event => 
-        ['CPTXN_COLLECT', 'CPTXN_SENT', 'HTLC_STARTED', 'CPTXN_EXPIRED'].includes(event.EVENT)
-      );
-  
-      if (filterEvents.length) {      
-        const group = _.groupBy(filterEvents, 'HASH');
-        
+      const group = _.groupBy(events, "HASH");
+      const numberOfEvents = Object.keys(group).length;
+
+      if (numberOfEvents > 10) {
+        // I'll shorten it to 10
+        const firstTenGroups = _.take(_.keys(group), max);
+        // Create a new object with only the limited number of groups
+        const limitedGroup = _.pick(group, firstTenGroups);
+
+        setOrders(limitedGroup);
+
+        setOrdersHasMore(true);
+      } else {
         setOrders(group);
+        setOrdersHasMore(false);
       }
     });
-  }
-  
+  };
 
   const promptJsonRpcSetup = () => {
     setPromptJsonRpcSetup((prevState) => !prevState);
@@ -692,7 +705,7 @@ const AppProvider = ({ children }: IProps) => {
       value={{
         loaded,
         isWorking,
-        
+
         orders,
         getAllOrders,
 
@@ -722,14 +735,14 @@ const AppProvider = ({ children }: IProps) => {
         _mainBalance,
         getMainMinimaBalance,
         getWalletBalance,
-        
+
         _promptWithdraw,
         promptWithdraw,
 
         _promptLogs,
         promptLogs,
 
-        _switchLogView, 
+        _switchLogView,
         setSwitchLogView,
 
         _promptFavorites,
@@ -777,13 +790,14 @@ const AppProvider = ({ children }: IProps) => {
 
         notify,
 
-        offsetAllEvents, setOffsetAllEvents,
-        offsetOrders, setOffsetOrders,
-        allHasMore, setAllHasMore,
-        ordersHasMore, setOrdersHasMore
-
-
-
+        offsetAllEvents,
+        setOffsetAllEvents,
+        offsetOrders,
+        setOffsetOrders,
+        allHasMore,
+        setAllHasMore,
+        ordersHasMore,
+        setOrdersHasMore,
       }}
     >
       {children}

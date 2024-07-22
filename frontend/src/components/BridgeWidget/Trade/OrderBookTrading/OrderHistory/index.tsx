@@ -33,8 +33,8 @@ const OrderHistory = ({ full = false }) => {
   const intervalId = useRef<number | null>(null);
 
   const startPolling = () => {
-    getAllOrders(10, offsetOrders);
-    intervalId.current = window.setInterval(() => getAllOrders(10, offsetOrders), 30000);
+    getAllOrders(10+1, offsetOrders);
+    intervalId.current = window.setInterval(() => getAllOrders(10+1, offsetOrders), 30000);
   };
 
   const stopPolling = () => {

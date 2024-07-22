@@ -40,7 +40,9 @@ const renderCell = (
   return (
     <>
       <td className="p-3">
-        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH"))  ? (
+        {EVENT.includes("WITHDRAW") ||
+        EVENT.includes("SENDETH") ||
+        TXNHASH.includes("Ran out of ETH, disabled orderbook") ? (
           <Activity extraClass="text-center">-</Activity>
         ) : (
           <input
@@ -211,8 +213,10 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
   return (
     <>
       <div className="p-4 pt-3">
-        {(EVENT.includes("SENDETH") || EVENT.includes("WITHDRAW")) ? (
-          <Activity extraClass="mt-2">Withdrawal</Activity>
+        {EVENT.includes("WITHDRAW") ||
+        EVENT.includes("SENDETH") ||
+        TXNHASH.includes("Ran out of ETH, disabled orderbook") ? (
+          <Activity extraClass="text-center">-</Activity>
         ) : (
           <input
             onFocus={() => handleFocus(index, "hash")}
@@ -230,7 +234,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
         )}
       </div>
       <div className="p-4 pt-5">
-        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH"))  && (
+        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH")) && (
           <Activity extraClass="">Withdrew tokens</Activity>
         )}
 
@@ -252,9 +256,7 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
         {EVENT.includes("SENT") && (
           <Activity>Sent counterparty tokens</Activity>
         )}
-        {EVENT.includes("APPROVE") && (
-          <Activity>{EVENT}</Activity>
-        )}
+        {EVENT.includes("APPROVE") && <Activity>{EVENT}</Activity>}
       </div>
       <div className="p-4">
         <div>
@@ -357,8 +359,9 @@ const MainActivity = () => {
     offsetOrders,
     setOffsetAllEvents,
     setOffsetOrders,
-    allHasMore, setAllHasMore,
-    ordersHasMore
+    allHasMore,
+    setAllHasMore,
+    ordersHasMore,
   } = useContext(appContext);
   const { getTokenType, _network } = useWalletContext();
   const [data, setData] = useState<any[]>([]);
@@ -374,8 +377,7 @@ const MainActivity = () => {
     }
 
     if (_switchLogView === "orders") {
-      setOffsetOrders((prevState) => prevState + 10);
-
+      setOffsetOrders((prevState) => prevState + 1);
     }
   };
 
@@ -383,24 +385,23 @@ const MainActivity = () => {
     if (_switchLogView === "all") {
       setOffsetAllEvents((prevState) => prevState - 20);
     }
-    
+
     if (_switchLogView === "orders") {
-      setOffsetOrders((prevState) => prevState - 10);
+      setOffsetOrders((prevState) => prevState - 1);
     }
   };
 
   useEffect(() => {
     if (_promptLogs && _switchLogView === "all") {
       getAllEvents(20 + 1, offsetAllEvents, (events) => {
-        const _evts = events
-          .map((e) => {            
-            return {
-              ...e,
-              getTokenType,
-              _network,
-            };
-          });
-          
+        const _evts = events.map((e) => {
+          return {
+            ...e,
+            getTokenType,
+            _network,
+          };
+        });
+
         if (_evts.length > 20) {
           setAllHasMore(true);
           setData(_evts.slice(0, 20));
@@ -408,7 +409,6 @@ const MainActivity = () => {
           setAllHasMore(false);
           setData(_evts);
         }
-
       });
     }
   }, [_promptLogs, offsetAllEvents]);
@@ -437,7 +437,10 @@ const MainActivity = () => {
                   <div className="block sm:hidden" />
                   <div className="hidden sm:grid gap-2 grid-cols-2 mx-8">
                     <button
-                      disabled={(_switchLogView === 'all' && offsetAllEvents === 0)||(_switchLogView === 'orders' && offsetOrders === 0)}
+                      disabled={
+                        (_switchLogView === "all" && offsetAllEvents === 0) ||
+                        (_switchLogView === "orders" && offsetOrders === 1)
+                      }
                       onClick={handlePrev}
                       type="button"
                       className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-full p-0 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
@@ -445,7 +448,10 @@ const MainActivity = () => {
                       Prev
                     </button>
                     <button
-                      disabled={ (_switchLogView === 'all' && !allHasMore)||(_switchLogView === 'orders' && !ordersHasMore) }
+                      disabled={
+                        (_switchLogView === "all" && !allHasMore) ||
+                        (_switchLogView === "orders" && !ordersHasMore)
+                      }
                       onClick={handleNext}
                       type="button"
                       className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-full p-0 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
@@ -462,7 +468,10 @@ const MainActivity = () => {
 
               <div className="grid sm:hidden grid-cols-2 gap-1">
                 <button
-                  disabled={ (_switchLogView === 'all' && offsetAllEvents === 0)||(_switchLogView === 'orders' && offsetOrders === 0) }
+                  disabled={
+                    (_switchLogView === "all" && offsetAllEvents === 0) ||
+                    (_switchLogView === "orders" && offsetOrders === 1)
+                  }
                   onClick={handlePrev}
                   type="button"
                   className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-none p-0 py-2 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
@@ -470,7 +479,10 @@ const MainActivity = () => {
                   Prev
                 </button>
                 <button
-                  disabled={ (_switchLogView === 'all' && !allHasMore)||(_switchLogView === 'orders' && !ordersHasMore) }
+                  disabled={
+                    (_switchLogView === "all" && !allHasMore) ||
+                    (_switchLogView === "orders" && !ordersHasMore)
+                  }
                   onClick={handleNext}
                   type="button"
                   className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-none p-0 py-2 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
