@@ -137,8 +137,12 @@
 
 - Adjusted Activity table design
 
-##### [2.9.0] - 22 July 24
+##### [2.9.4] - 22 July 24
 
-- Adjust design + UX on withdraw/deposit forms
-- Bug fixes
+- Orders fixed, paginated all orders
+- Adjust design + UX on withdraw/deposit forms & comms update
+- Activity table design tweaks & comms
+- Ethereum balance low & disabled message fix
+- Other bug fixes
+
 
