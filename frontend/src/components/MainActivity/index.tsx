@@ -411,7 +411,7 @@ const MainActivity = () => {
         }
       });
     }
-  }, [_promptLogs, offsetAllEvents]);
+  }, [_promptLogs, offsetAllEvents, _switchLogView]);
 
   return (
     <>

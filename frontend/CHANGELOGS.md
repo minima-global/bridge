@@ -145,4 +145,8 @@
 - Ethereum balance low & disabled message fix
 - Other bug fixes
 
+##### [2.10.0] - 23 July 24
+
+- Full View Order Book
+
 

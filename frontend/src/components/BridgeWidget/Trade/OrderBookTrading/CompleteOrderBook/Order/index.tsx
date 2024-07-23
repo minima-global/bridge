@@ -3,9 +3,10 @@ import { Order as OrderInterface } from "../../../../../../types/Order";
 import AnimatedDialog from "../../../../../UI/AnimatedDialog";
 import Bear from "../../../../../UI/Avatars/Bear";
 import { Favorite } from "../../../../../../types/Favorite";
-import NativeMinima from "../../../../../NativeMinima";
-import EthereumTokens from "../../../../../EthereumTokens";
-import DetailsNavigation from "./Navigation";
+import CloseIcon from "../../../../../UI/Icons/CloseIcon";
+// import NativeMinima from "../../../../../NativeMinima";
+// import EthereumTokens from "../../../../../EthereumTokens";
+// import DetailsNavigation from "./Navigation";
 
 interface IProps {
   data: OrderInterface;
@@ -14,7 +15,7 @@ interface IProps {
 const Order = ({ data, favorites }: IProps) => {
   const [details, setDetails] = useState(false);
   const [contact, setContact] = useState<Favorite | null>(null);
-  const [_currentNavigation, setCurrentNavigation] = useState<
+  const [_currentNavigation, _] = useState<
     "orders" | "balance" | "keys"
   >("orders");
 
@@ -51,31 +52,18 @@ const Order = ({ data, favorites }: IProps) => {
       >
         <>
           <div className="px-4 flex justify-between">
-            <h3 className="font-bold">Details</h3>
-            <svg
-              onClick={promptDetails}
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              strokeWidth="4.5"
-              stroke="currentColor"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
+            <h3 className="font-bold flex items-center"><span className="inline-block truncate !max-w-[120px]">{contact ? contact?.NAME : "Provider"}</span>'s Order book</h3>
+            <span onClick={promptDetails}>
+              <CloseIcon fill="currentColor" />
+            </span>
           </div>
           <div className="px-4 my-2">
-            <DetailsNavigation
+            {/* <DetailsNavigation
               _currentNavigation={_currentNavigation}
               setCurrentNavigation={setCurrentNavigation}
-            />
+            /> */}
 
-            {_currentNavigation === "balance" && (
+            {/* {_currentNavigation === "balance" && (
               <div className="h-[calc(100%_-_60px)]">
                 <NativeMinima
                   display={false}
@@ -87,7 +75,7 @@ const Order = ({ data, favorites }: IProps) => {
                   externalWMINIMA={data.data.balance.wminima}
                 />
               </div>
-            )}
+            )} */}
 
             {_currentNavigation === "orders" && (
               <div className="grid grid-rows-2 h-[250px]">
@@ -171,7 +159,7 @@ const Order = ({ data, favorites }: IProps) => {
               </div>
             )}
 
-            {_currentNavigation === "keys" && (
+            {/* {_currentNavigation === "keys" && (
               <>
                 <div className="p-3 bg-gray-100 rounded mb-2 dark:bg-[#1B1B1B] dark:bg-opacity-10">
                   <h6 className="text-xs font-bold">Minima</h6>
@@ -200,7 +188,7 @@ const Order = ({ data, favorites }: IProps) => {
                   />
                 </div>
               </>
-            )}
+            )} */}
           </div>
         </>
       </AnimatedDialog>
