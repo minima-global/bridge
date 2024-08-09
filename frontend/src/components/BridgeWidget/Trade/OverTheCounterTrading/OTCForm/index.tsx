@@ -132,7 +132,7 @@ const OTCForm = () => {
       })}
     >
       {({ handleSubmit, getFieldProps, setFieldValue, values, errors, touched, isValid }) => (
-        <form onSubmit={handleSubmit} className="shadow-lg dark:shadow-none">
+        <form onSubmit={handleSubmit} className="shadow-sm dark:shadow-none">
           <InputWrapper
             errors={errors && errors.uid && touched && touched.uid ? errors.uid : false}
             inputProps={{ placeholder: "uid", ...getFieldProps("uid") }}
@@ -182,13 +182,16 @@ const OTCForm = () => {
           />
 
           {!_allowanceLock &&
+          <div className="my-8 px-4 dark:px-0">
             <button
+              // disabled={true} 
               disabled={!isValid}
               type="submit"
-              className="mt-4 w-full bg-black py-4 text-white dark:bg-orange-600 font-bold dark:text-black disabled:bg-gray-100 dark:disabled:bg-gray-100 dark:disabled:bg-opacity-5"
+              className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black disabled:bg-opacity-10"
             >
               Trade
             </button>
+          </div>
           }
           {
             _allowanceLock && 

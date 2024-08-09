@@ -40,6 +40,9 @@ var LOGS_ENABLED = false;
 //We send the orderbook every 20 mins..
 var ORDERSEND_COUNTER = 0;
 
+// set a 2 min timer
+var TIMER_COUNT = 0;
+
 //Check and init the bridge - when you can
 function serviceCheckBridgeInited(){
 	
@@ -113,7 +116,14 @@ MDS.init(function(msg){
 	
 	//NOW we can continue..
 	if(msg.event == "MDS_TIMER_60SECONDS"){
-		
+		// run every 2 mins instead of 60s to lessen load of API calls
+		if (TIMER_COUNT < 2) {			
+			TIMER_COUNT++;
+			return;
+		} else {
+			TIMER_COUNT = 0;
+		}
+
 		//SERVICE.js runs function synchromously... as no HTTP call.. 
 		//so no need to to stack functions inside each other
 		

@@ -3,10 +3,7 @@ import AnimatedDialog from "../UI/AnimatedDialog";
 import { appContext } from "../../AppContext";
 import FavoriteIcon from "../UI/Icons/FavoriteIcon/index.js";
 
-import {
-  addFavourites,
-  removeFavourite  
-} from "../../../../dapp/js/sql.js";
+import { addFavourites, removeFavourite } from "../../../../dapp/js/sql.js";
 import Bear from "../UI/Avatars/Bear/index.js";
 import AddIcon from "../UI/Icons/AddIcon/index.js";
 import RemoveIcon from "../UI/Icons/RemoveIcon/index.js";
@@ -20,9 +17,20 @@ import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
 
 interface IProps {
   form: boolean;
+  passProp?: {
+    mode: "none" | "delete" | "add";
+    data: string;
+  };
 }
-const Favorites = ({form = false}: IProps) => {
-  const { _promptFavorites, promptFavorites, notify, getAndSetFavorites, _favorites: favorites, loaded } = useContext(appContext);  
+const Favorites = ({ form = false, passProp }: IProps) => {
+  const {
+    _promptFavorites,
+    promptFavorites,
+    notify,
+    getAndSetFavorites,
+    _favorites: favorites,
+    loaded,
+  } = useContext(appContext);
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
 
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
@@ -34,7 +42,14 @@ const Favorites = ({form = false}: IProps) => {
   }
 
   useEffect(() => {
-    if ((loaded && loaded.current) && (_promptFavorites || !form)) {
+    if (passProp) {
+      setMode(passProp.mode);
+      setFavToAdd({ name: "", uid: passProp.data });
+    }
+  }, [passProp]);
+
+  useEffect(() => {
+    if (loaded && loaded.current && (_promptFavorites || !form)) {
       getAndSetFavorites();
     }
   }, [_promptFavorites]);
@@ -56,15 +71,19 @@ const Favorites = ({form = false}: IProps) => {
   };
 
   const handleAdd = () => {
-    addFavourites(sanitizeSQLInput(favToAdd.name), sanitizeSQLInput(favToAdd.uid), () => {
-      //
-    });
+    addFavourites(
+      sanitizeSQLInput(favToAdd.name),
+      sanitizeSQLInput(favToAdd.uid),
+      () => {
+        //
+      }
+    );
     setFavToAdd({ name: "", uid: "" });
     notify("Added new favorite!");
     getAndSetFavorites();
   };
 
-  const handleDelete = async () => {    
+  const handleDelete = async () => {
     await Promise.all(
       favToDelete.map(
         (id) =>
@@ -97,7 +116,12 @@ const Favorites = ({form = false}: IProps) => {
 
   const hexRegExp = /^0x[0-9a-fA-F]+$/;
   const sqlInjectionPattern = /['";]/; // Example pattern, you might need to adjust it
-  const disableForm = (favToAdd.name.length === 0 || favToAdd.uid.length === 0) || sqlInjectionPattern.test(favToAdd.name) || sqlInjectionPattern.test(favToAdd.uid) || !hexRegExp.test(favToAdd.uid);
+  const disableForm =
+    favToAdd.name.length === 0 ||
+    favToAdd.uid.length === 0 ||
+    sqlInjectionPattern.test(favToAdd.name) ||
+    sqlInjectionPattern.test(favToAdd.uid) ||
+    !hexRegExp.test(favToAdd.uid);
 
   return (
     <AnimatedDialog
@@ -150,8 +174,15 @@ const Favorites = ({form = false}: IProps) => {
                   />
                 </div>
                 <div
-                  className={`${favorites.length === 0||favToDelete.length===0 && "opacity-50"}`}
-                  onClick={favorites.length > 0 && favToDelete.length>0 ? handleDelete : () => null}
+                  className={`${
+                    favorites.length === 0 ||
+                    (favToDelete.length === 0 && "opacity-50")
+                  }`}
+                  onClick={
+                    favorites.length > 0 && favToDelete.length > 0
+                      ? handleDelete
+                      : () => null
+                  }
                 >
                   <RubbishIcon fill="currentColor" />
                 </div>
@@ -182,12 +213,16 @@ const Favorites = ({form = false}: IProps) => {
                   name="uid"
                   type="text"
                   placeholder="Enter UID"
-                  className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
+                  className="focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
                 />
               </div>
             )}
           </div>
-          <div className="grid grid-cols-[1fr_32px]">
+          <div
+            className={`grid transition-all duration-300 ease-in-out ${
+              disableForm ? "grid-cols-1" : "grid-cols-[1fr_32px]"
+            }`}
+          >
             {mode === "add" && (
               <>
                 <input
@@ -196,11 +231,16 @@ const Favorites = ({form = false}: IProps) => {
                   type="text"
                   name="name"
                   placeholder="Enter Name"
-                  className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
+                  className="focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
                 />
-                <div onClick={disableForm ? () => null : handleAdd} className={`m-auto rounded-full ${disableForm ? 'opacity-50' : ''}`}>
-                  <PlusIcon fill="currentColor" />
-                </div>
+                {!disableForm && (
+                  <div
+                    onClick={disableForm ? () => null : handleAdd}
+                    className={`text-[#1B1B1B] dark:text-neutral-500 m-auto rounded-full`}
+                  >
+                    <PlusIcon fill="currentColor" />
+                  </div>
+                )}
               </>
             )}
           </div>
@@ -208,12 +248,16 @@ const Favorites = ({form = false}: IProps) => {
         {favorites.length === 0 && (
           <p className="text-sm text-center py-3">No favorites yet!</p>
         )}
-        <div className={`${mode !== 'add' ? 'h-[calc(100%_-_60px)]' : 'h-[calc(100%_-_80px)]'} overflow-y-auto`}>
+        <div
+          className={`${
+            mode !== "add" ? "h-[calc(100%_-_60px)]" : "h-[calc(100%_-_80px)]"
+          } overflow-y-auto`}
+        >
           <ul>
             {favorites
               ? favorites.map((f, index) => (
                   <li
-                    key={index+f.BRIDGEUID}
+                    key={index + f.BRIDGEUID}
                     onClick={() => {
                       if (form) {
                         formik.setFieldValue("uid", f.BRIDGEUID);
@@ -245,7 +289,7 @@ const Favorites = ({form = false}: IProps) => {
                         readOnly
                         value={f.NAME}
                         className="bg-transparent cursor-default focus:outline-none w-full truncate font-bold"
-                      />                      
+                      />
                       <input
                         onClick={(e) => e.stopPropagation()}
                         readOnly

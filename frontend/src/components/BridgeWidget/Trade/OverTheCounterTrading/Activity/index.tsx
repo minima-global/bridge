@@ -378,7 +378,7 @@ const Activity = () => {
   }, [_currentBlock]);
 
   return (
-    <div className="bg-gray-100 shadow-lg dark:shadow-none bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg">
+    <div className={`bg-neutral-200 shadow-sm dark:shadow-none bg-opacity-50 dark:bg-opacity-100 dark:bg-[#1B1B1B] overflow-auto rounded-lg ${!deals.length && "shadow-sm min-h-[200px]"}`}>
       {!!deals.length && (
         <MostResponsiveTableEver
           headerClasses=""
@@ -407,7 +407,7 @@ const Activity = () => {
 
       {!deals.length && (
         <div className="flex justify-center items-center h-full">
-          <p className="text-sm !text-opacity-30 dark:text-white py-16 md:py-0">
+          <p className="text-sm text-[#1b1b1b] dark:text-neutral-600 py-16 md:py-0">
             No active deals
           </p>
         </div>
