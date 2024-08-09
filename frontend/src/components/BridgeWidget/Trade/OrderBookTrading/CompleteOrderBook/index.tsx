@@ -21,7 +21,7 @@ const CompleteOrderBook = () => {
 
 
   return (
-    <div>
+    <div className="bg-neutral-100 dark:bg-[#1B1B1B] rounded-lg">
       <ul>
         {!orderBook || !orderBook.filter(o => o.maximapublickey !== _userDetails.maximapublickey).length && <p className="text-center text-xs font-bold">No orderbook found</p>}        
         {orderBook?.map((order) => (

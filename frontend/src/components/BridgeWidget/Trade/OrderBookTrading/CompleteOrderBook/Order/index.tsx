@@ -58,25 +58,6 @@ const Order = ({ data, favorites }: IProps) => {
             </span>
           </div>
           <div className="px-4 my-2">
-            {/* <DetailsNavigation
-              _currentNavigation={_currentNavigation}
-              setCurrentNavigation={setCurrentNavigation}
-            /> */}
-
-            {/* {_currentNavigation === "balance" && (
-              <div className="h-[calc(100%_-_60px)]">
-                <NativeMinima
-                  display={false}
-                  external={data.data.balance.minima.total}
-                />
-                <EthereumTokens
-                  externalEthereum={data.data.balance.eth}
-                  externalUSDT={data.data.balance.usdt}
-                  externalWMINIMA={data.data.balance.wminima}
-                />
-              </div>
-            )} */}
-
             {_currentNavigation === "orders" && (
               <div className="grid grid-rows-2 h-[250px]">
                 <div className={`my-auto ${!data.data.orderbook.usdt.enable && "opacity-50"}`}>
