@@ -149,7 +149,7 @@
 
 - Full View Order Book
 
-##### [2.11.0] - 09 August 24
+##### [2.11.0] - 14 August 24
 
 - Lessen load on API calls, every 2 min check from 60s
 - Full View Order Book tweaks
