@@ -2,16 +2,15 @@ import { useContext, useEffect, useState } from "react";
 import { Order as OrderInterface } from "../../../../../../types/Order";
 import Bear from "../../../../../UI/Avatars/Bear";
 import { Favorite } from "../../../../../../types/Favorite";
-import Favorites from "../../../../../Favorites";
 import { appContext } from "../../../../../../AppContext";
 import AddIcon from "../../../../../UI/Icons/AddIcon";
+import { Link, Outlet } from "react-router-dom";
 
 interface IProps {
   data: OrderInterface;
-  favorites: Favorite[];
 }
-const Order = ({ data, favorites }: IProps) => {
-  const { promptFavorites } = useContext(appContext);
+const Order = ({ data }: IProps) => {
+  const { _favorites: favorites, promptFavorites } = useContext(appContext);
   const [contact, setContact] = useState<Favorite | null>(null);
   const [_currentNavigation, _] = useState<"orders" | "balance" | "keys">(
     "orders"
@@ -30,26 +29,22 @@ const Order = ({ data, favorites }: IProps) => {
     const match = findMatchingPublickey(data.data.publickey, favorites);
     setContact(match);
   }, [favorites]);
-
   return (
     <>
-      <Favorites
-        form={false}
-        passProp={{ mode: "add", data: data.maximapublickey }}
-      />
+      <Outlet />
 
       <li
         className={`group transition-all ease-in-out hover:p-4 grid grid-rows-[auto_1fr] bg-gray-100 bg-opacity-20 dark:!bg-opacity-50 dark:bg-[#1b1b1b] px-3 hover:bg-white dark:hover:bg-black`}
       >
         {!contact && (
           <div className="flex justify-start">
-            <button
-              type="button"
+            <Link
+              to={`/favorite/${data.data.publickey}/add`}
               onClick={promptFavorites}
-              className={`transition-opacity pl-2 p-0 text-[#1B1B1B]  dark:text-neutral-400 opacity-0 group-hover:opacity-100 flex justify-center`}
+              className={`transition-opacity pl-2 p-0 text-[#1B1B1B]  dark:text-neutral-400 opacity-0 group-hover:opacity-100 flex justify-center hover:text-neutral-800`}
             >
               <AddIcon fill="currentColor" />
-            </button>
+            </Link>
           </div>
         )}
 

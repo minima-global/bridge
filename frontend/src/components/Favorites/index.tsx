@@ -14,6 +14,7 @@ import PlusIcon from "../UI/Icons/PlusIcon/index.js";
 import { useFormikContext } from "formik";
 
 import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
+import { useParams } from "react-router-dom";
 
 interface IProps {
   form: boolean;
@@ -22,19 +23,20 @@ interface IProps {
     data: string;
   };
 }
-const Favorites = ({ form = false, passProp }: IProps) => {
+const Favorites = ({ form = false  }: IProps) => {
+  const { uid, mode: _mode } = useParams();
+  
   const {
     _promptFavorites,
     promptFavorites,
     notify,
     getAndSetFavorites,
-    _favorites: favorites,
+    _favorites,
     loaded,
   } = useContext(appContext);
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
-
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
-  const [favToAdd, setFavToAdd] = useState({ name: "", uid: "" });
+  const [favToAdd, setFavToAdd] = useState({ name: "", uid: uid || "" });
 
   let formik: any;
   if (form) {
@@ -42,11 +44,11 @@ const Favorites = ({ form = false, passProp }: IProps) => {
   }
 
   useEffect(() => {
-    if (passProp) {
-      setMode(passProp.mode);
-      setFavToAdd({ name: "", uid: passProp.data });
+    if (uid && mode) {
+      setFavToAdd((prev) => ({ ...prev, uid }));
+      setMode(mode as "none" | "delete" | "add");
     }
-  }, [passProp]);
+  }, [uid, mode]);
 
   useEffect(() => {
     if (loaded && loaded.current && (_promptFavorites || !form)) {
@@ -58,7 +60,7 @@ const Favorites = ({ form = false, passProp }: IProps) => {
     const checked = evt.target.checked;
 
     if (checked) {
-      setFavToDelete(favorites.map((fav) => fav.ID));
+      setFavToDelete(_favorites.map((fav) => fav.ID));
     } else {
       setFavToDelete([]);
     }
@@ -71,6 +73,11 @@ const Favorites = ({ form = false, passProp }: IProps) => {
   };
 
   const handleAdd = () => {
+    if (_favorites.map(t => t.BRIDGEUID === favToAdd.uid)) {
+      notify("You have already added this contact!");
+      return;
+    }
+
     addFavourites(
       sanitizeSQLInput(favToAdd.name),
       sanitizeSQLInput(favToAdd.uid),
@@ -168,18 +175,18 @@ const Favorites = ({ form = false, passProp }: IProps) => {
               <div className="flex gap-1">
                 <div className="mx-1">
                   <input
-                    disabled={favorites.length === 0}
+                    disabled={_favorites.length === 0}
                     type="checkbox"
                     onClick={handleSelectAll}
                   />
                 </div>
                 <div
                   className={`${
-                    favorites.length === 0 ||
+                    _favorites.length === 0 ||
                     (favToDelete.length === 0 && "opacity-50")
                   }`}
                   onClick={
-                    favorites.length > 0 && favToDelete.length > 0
+                    _favorites.length > 0 && favToDelete.length > 0
                       ? handleDelete
                       : () => null
                   }
@@ -245,7 +252,7 @@ const Favorites = ({ form = false, passProp }: IProps) => {
             )}
           </div>
         </div>
-        {favorites.length === 0 && (
+        {_favorites.length === 0 && (
           <p className="text-sm text-center py-3">No favorites yet!</p>
         )}
         <div
@@ -254,8 +261,8 @@ const Favorites = ({ form = false, passProp }: IProps) => {
           } overflow-y-auto`}
         >
           <ul>
-            {favorites
-              ? favorites.map((f, index) => (
+            {_favorites
+              ? _favorites.map((f, index) => (
                   <li
                     key={index + f.BRIDGEUID}
                     onClick={() => {

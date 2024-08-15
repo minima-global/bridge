@@ -28,7 +28,7 @@ const sortEventsByEvent = (data) => {
 };
 
 const OrderHistory = ({ full = false }) => {
-  const { orders, getAllOrders, offsetOrders, promptLogs, setSwitchLogView } =
+  const { orders, getAllOrders, offsetOrders, promptLogs, setSwitchLogView, _promptLogs } =
     useContext(appContext);
 
   const intervalId = useRef<number | null>(null);
@@ -71,7 +71,6 @@ const OrderHistory = ({ full = false }) => {
   return (
     <div
       onDoubleClick={() => {
-        console.log('herro');
         promptLogs();
         setSwitchLogView("orders");
       }}
@@ -79,21 +78,24 @@ const OrderHistory = ({ full = false }) => {
         orders === null && "min-h-[250px] grid grid-rows-1"
       } ${full && "!outline-none"}`}
     >
-      <div className="opacity-0 transition-opacity group-hover:opacity-100 mx-auto absolute right-0 bottom-2 left-0">
-        <button
-          onClick={() => {
-            promptLogs();
-            setSwitchLogView("orders");
-          }}
-          type="button"
-          className="bg-transparent outline w-max mx-auto dark:text-white flex justify-end gap-1 items-end dark:outline-neutral-800 text-neutral-800"
-        >
-          View Orders
-          <span className="text-black dark:text-white">
-            <ActivityIcon fill="currentColor" />
-          </span>
-        </button>
-      </div>
+      {(!_promptLogs && orders !== null && Object.keys(orders).length > 0
+      ) &&
+        <div className="opacity-0 transition-opacity group-hover:opacity-100 mx-auto absolute right-0 bottom-2 left-0">
+          <button
+            onClick={() => {
+              promptLogs();
+              setSwitchLogView("orders");
+            }}
+            type="button"
+            className="bg-transparent outline w-max mx-auto dark:text-white flex justify-end gap-1 items-end dark:outline-neutral-800 text-neutral-800"
+          >
+            View Orders
+            <span className="text-black dark:text-white">
+              <ActivityIcon fill="currentColor" />
+            </span>
+          </button>
+        </div>    
+      }
 
       {orders === null ||
         (JSON.stringify(orders) === "{}" && (

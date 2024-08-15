@@ -10,6 +10,7 @@ const TetherToken = ({extraClass}: Props) => {
   const { tokens } = useTokenStoreContext();
   const { _network } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "Tether");
+  
   return (
     <div className={`flex items-center gap-2 ${extraClass ? extraClass : ''}`}>
       <p className="font-mono text-sm truncate bg-transparent focus:outline-none">

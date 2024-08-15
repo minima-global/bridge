@@ -153,6 +153,9 @@
 
 - Lessen load on API calls, every 2 min check from 60s
 - Full View Order Book tweaks
+- Liquidity providers design tweak
+- Add LP to favorites suggestion
+- Add own book to Liquidity providers
 - Design tweaks
 
 

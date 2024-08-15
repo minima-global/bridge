@@ -9,14 +9,15 @@ interface Props {
 const WrappedToken = ({extraClass}: Props) => {
   const { tokens } = useTokenStoreContext();
   const relevantToken = tokens.find((t) => t.name === "wMinima");
+
   return (
-    <div className={`flex items-center gap-2 ${extraClass ? extraClass : ''}`}>
+    <div className={`flex items-center gap-1 ${extraClass ? extraClass : ''}`}>
       <p className="font-mono text-sm truncate bg-transparent focus:outline-none">
-        {!relevantToken && <span className="text-black dark:text-teal-300"><RefreshIcon extraClass="w-[12px] h-[16px] mx-auto animate-spin" fill="currentColor" /></span>}
-        {relevantToken &&
+        {(!relevantToken || !relevantToken.balance) && <span className="text-black dark:text-teal-300"><RefreshIcon extraClass="w-[12px] h-[12px] mx-auto animate-spin" fill="currentColor" /></span>}
+        {relevantToken && relevantToken.balance &&
           new Decimal(
             formatUnits(relevantToken!.balance, relevantToken!.decimals)
-          ).toFixed(0)}
+          ).toFixed(0)}        
       </p>
 
       <img

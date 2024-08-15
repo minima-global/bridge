@@ -237,7 +237,7 @@ MDS.init(function(msg){
 		});		    
         
 		//Do we have to send the orderbook..
-		ORDERSEND_COUNTER++;
+		ORDERSEND_COUNTER+=2;
 		if(ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0){
 			
 			//Clear the previous validated signatures.. so list does not grow endlessly
