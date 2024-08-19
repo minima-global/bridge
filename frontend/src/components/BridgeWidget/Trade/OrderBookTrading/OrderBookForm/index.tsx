@@ -3,32 +3,34 @@ import TetherPool from "../Pools/TetherPool";
 import WrappedPool from "../Pools/WrappedPool";
 import { appContext } from "../../../../../AppContext";
 import SelectPool from "../Pools/SelectPool";
-import PoolA from "../Pools/SelectPool/PoolA";
-import PoolB from "../Pools/SelectPool/PoolB";
 import withConfirmation from "../Pools/withConfirmation";
 
 import { Formik } from "formik";
 import * as yup from "yup";
 import Decimal from "decimal.js";
-import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js"
+import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js";
 import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
 import SelectFavorites from "../Pools/SelectFavorites";
 
-const WrappedPoolWithConfirmation = withConfirmation(
-  WrappedPool, "wminima"
-);
-const TetherPoolWithConfirmation = withConfirmation(TetherPool, 'usdt');
+const WrappedPoolWithConfirmation = withConfirmation(WrappedPool, "wminima");
+const TetherPoolWithConfirmation = withConfirmation(TetherPool, "usdt");
 
 const OrderBookForm = () => {
   const { loaded, handleActionViaBackend, notify } = useContext(appContext);
   const { callBalanceForApp } = useWalletContext();
-  const [_currentNavigation, setCurrentNavigation] = useState(0);
+  const [selectedOption, setSelectedOption] = useState<'wminima' | 'usdt'>("wminima");
 
   useEffect(() => {
-    if (loaded && loaded.current) {      
+    if (loaded && loaded.current) {
       callBalanceForApp();
     }
-  }, [loaded, _currentNavigation]);
+  }, [loaded, selectedOption]);
+
+  const handleOptionChange = (e) => {
+    const val = e.target.value;
+
+    setSelectedOption(val);
+  };
 
   return (
     <div>
@@ -37,33 +39,33 @@ const OrderBookForm = () => {
       </h3>
 
       <SelectPool
-        setCurrentNavigation={setCurrentNavigation}
-        _currentNavigation={_currentNavigation}
-        navigation={[<PoolA />, <PoolB />]}
+        selectedOption={selectedOption}
+        handleOptionChange={handleOptionChange}
       />
-      
+
       <Formik
-        initialValues={{ native: "", favorites: false, transaction: ""}}
+        initialValues={{ native: "", favorites: false, transaction: "" }}
         validationSchema={yup.object().shape({
           native: yup
             .string()
             .matches(/^\d*\.?\d+$/, "Enter a valid amount")
             .required("Enter your offer")
             .test("valid amount", function (val) {
-              const {path, createError} = this;
-              
-              try {
+              const { path, createError } = this;
 
+              try {
                 if (new Decimal(val).isZero()) {
                   throw new Error("Enter your offer");
-                }                
+                }
 
                 if (new Decimal(val).decimalPlaces() > 4) {
                   throw new Error("Can't exceed more than 4 decimal places");
                 }
 
                 if (new Decimal(val).greaterThan(MAXIMUM_MINIMA_TRADE)) {
-                  throw new Error("Order too big, must be less than "+MAXIMUM_MINIMA_TRADE);
+                  throw new Error(
+                    "Order too big, must be less than " + MAXIMUM_MINIMA_TRADE
+                  );
                 }
 
                 return true;
@@ -78,27 +80,28 @@ const OrderBookForm = () => {
               }
             }),
         })}
-        onSubmit={async ({transaction}, {resetForm}) => {
+        onSubmit={async ({ transaction }, { resetForm }) => {
           // do something..
           try {
-            
             if (!transaction) {
               throw new Error("Transaction payload not available");
             }
-  
+
             await handleActionViaBackend(transaction);
-  
+
             notify("Order requested...");
             resetForm();
-            
-            callBalanceForApp();            
+
+            callBalanceForApp();
           } catch (error: any) {
             console.error(error);
             if (error instanceof Error) {
-              return notify("Error : "+ error.message);
+              return notify("Error : " + error.message);
             }
-  
-            notify(error.message ? error.message : "Error, something went wrong!");
+
+            notify(
+              error.message ? error.message : "Error, something went wrong!"
+            );
           }
         }}
       >
@@ -107,12 +110,12 @@ const OrderBookForm = () => {
             <div className="flex justify-end px-1 my-2">
               <SelectFavorites />
             </div>
-            {_currentNavigation === 0 && (
+            {selectedOption === 'wminima' && (
               <WrappedPoolWithConfirmation onSubmit={() => submitForm()} />
             )}
-            {_currentNavigation === 1 && (
+            {selectedOption === 'usdt' && (
               <TetherPoolWithConfirmation onSubmit={() => submitForm()} />
-            )}            
+            )}
           </>
         )}
       </Formik>

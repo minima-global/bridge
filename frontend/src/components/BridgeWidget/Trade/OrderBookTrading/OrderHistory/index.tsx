@@ -1,6 +1,7 @@
 import { useContext, useEffect, useRef } from "react";
 import OrderItem from "./OrderItem/index.js";
 import { appContext } from "../../../../../AppContext.js";
+import ActivityIcon from "../../../../UI/Icons/ActivityIcon";
 
 const sortEventsByEvent = (data) => {
   // Step 1: Create an array of keys with their first EVENTDATE
@@ -27,14 +28,17 @@ const sortEventsByEvent = (data) => {
 };
 
 const OrderHistory = ({ full = false }) => {
-  const { orders, getAllOrders, offsetOrders } =
+  const { orders, getAllOrders, offsetOrders, promptLogs, setSwitchLogView, _promptLogs } =
     useContext(appContext);
 
   const intervalId = useRef<number | null>(null);
 
   const startPolling = () => {
-    getAllOrders(10+1, offsetOrders);
-    intervalId.current = window.setInterval(() => getAllOrders(10+1, offsetOrders), 30000);
+    getAllOrders(10 + 1, offsetOrders);
+    intervalId.current = window.setInterval(
+      () => getAllOrders(10 + 1, offsetOrders),
+      30000
+    );
   };
 
   const stopPolling = () => {
@@ -66,11 +70,33 @@ const OrderHistory = ({ full = false }) => {
 
   return (
     <div
-      className={`my-4 dark:outline shadow-lg dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
+      onDoubleClick={() => {
+        promptLogs();
+        setSwitchLogView("orders");
+      }}
+      className={`relative group my-4 dark:outline shadow-lg dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
         orders === null && "min-h-[250px] grid grid-rows-1"
       } ${full && "!outline-none"}`}
     >
-      {/* <h3 className="font-bold p-3 pb-2">Order History</h3> */}
+      {(!_promptLogs && orders !== null && Object.keys(orders).length > 0
+      ) &&
+        <div className="opacity-0 transition-opacity group-hover:opacity-100 mx-auto absolute right-0 bottom-2 left-0">
+          <button
+            onClick={() => {
+              promptLogs();
+              setSwitchLogView("orders");
+            }}
+            type="button"
+            className="bg-transparent outline w-max mx-auto dark:text-white flex justify-end gap-1 items-end dark:outline-neutral-800 text-neutral-800"
+          >
+            View Orders
+            <span className="text-black dark:text-white">
+              <ActivityIcon fill="currentColor" />
+            </span>
+          </button>
+        </div>    
+      }
+
       {orders === null ||
         (JSON.stringify(orders) === "{}" && (
           <div className="h-full flex items-center justify-center">

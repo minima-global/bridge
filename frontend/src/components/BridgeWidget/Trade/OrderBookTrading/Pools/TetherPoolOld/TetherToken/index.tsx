@@ -3,14 +3,17 @@ import { useTokenStoreContext } from "../../../../../../../providers/TokenStoreP
 import { formatUnits } from "ethers";
 import { useWalletContext } from "../../../../../../../providers/WalletProvider/WalletProvider";
 import RefreshIcon from "../../../../../../UI/Icons/RefreshIcon";
-
-const TetherToken = () => {
+interface Props {
+  extraClass?: string;
+}
+const TetherToken = ({extraClass}: Props) => {
   const { tokens } = useTokenStoreContext();
   const { _network } = useWalletContext();
   const relevantToken = tokens.find((t) => t.name === "Tether");
+  
   return (
-    <div className="flex items-center gap-2">
-      <p className="text-center font-bold font-mono truncate tracking-wider">
+    <div className={`flex items-center gap-2 ${extraClass ? extraClass : ''}`}>
+      <p className="font-mono text-sm truncate bg-transparent focus:outline-none">
         {!relevantToken && <span className="text-black dark:text-teal-300"><RefreshIcon extraClass="w-[12px] h-[16px] mx-auto animate-spin" fill="currentColor" /></span>}
         {relevantToken &&
           new Decimal(

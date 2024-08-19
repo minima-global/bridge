@@ -3,10 +3,7 @@ import AnimatedDialog from "../UI/AnimatedDialog";
 import { appContext } from "../../AppContext";
 import FavoriteIcon from "../UI/Icons/FavoriteIcon/index.js";
 
-import {
-  addFavourites,
-  removeFavourite  
-} from "../../../../dapp/js/sql.js";
+import { addFavourites, removeFavourite } from "../../../../dapp/js/sql.js";
 import Bear from "../UI/Avatars/Bear/index.js";
 import AddIcon from "../UI/Icons/AddIcon/index.js";
 import RemoveIcon from "../UI/Icons/RemoveIcon/index.js";
@@ -17,16 +14,29 @@ import PlusIcon from "../UI/Icons/PlusIcon/index.js";
 import { useFormikContext } from "formik";
 
 import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
+import { useParams } from "react-router-dom";
 
 interface IProps {
   form: boolean;
+  passProp?: {
+    mode: "none" | "delete" | "add";
+    data: string;
+  };
 }
-const Favorites = ({form = false}: IProps) => {
-  const { _promptFavorites, promptFavorites, notify, getAndSetFavorites, _favorites: favorites, loaded } = useContext(appContext);  
+const Favorites = ({ form = false  }: IProps) => {
+  const { uid, mode: _mode } = useParams();
+  
+  const {
+    _promptFavorites,
+    promptFavorites,
+    notify,
+    getAndSetFavorites,
+    _favorites,
+    loaded,
+  } = useContext(appContext);
   const [mode, setMode] = useState<"none" | "delete" | "add">("none");
-
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
-  const [favToAdd, setFavToAdd] = useState({ name: "", uid: "" });
+  const [favToAdd, setFavToAdd] = useState({ name: "", uid: uid || "" });
 
   let formik: any;
   if (form) {
@@ -34,7 +44,14 @@ const Favorites = ({form = false}: IProps) => {
   }
 
   useEffect(() => {
-    if ((loaded && loaded.current) && (_promptFavorites || !form)) {
+    if (uid && mode) {
+      setFavToAdd((prev) => ({ ...prev, uid }));
+      setMode(mode as "none" | "delete" | "add");
+    }
+  }, [uid, mode]);
+
+  useEffect(() => {
+    if (loaded && loaded.current && (_promptFavorites || !form)) {
       getAndSetFavorites();
     }
   }, [_promptFavorites]);
@@ -43,7 +60,7 @@ const Favorites = ({form = false}: IProps) => {
     const checked = evt.target.checked;
 
     if (checked) {
-      setFavToDelete(favorites.map((fav) => fav.ID));
+      setFavToDelete(_favorites.map((fav) => fav.ID));
     } else {
       setFavToDelete([]);
     }
@@ -55,16 +72,26 @@ const Favorites = ({form = false}: IProps) => {
     setFavToAdd((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleAdd = () => {
-    addFavourites(sanitizeSQLInput(favToAdd.name), sanitizeSQLInput(favToAdd.uid), () => {
-      //
-    });
+  const handleAdd = async () => {
+    if (_favorites.find(t => t.BRIDGEUID === favToAdd.uid)) {
+      notify("You have this contact already.");
+      return;
+    }
+
+    addFavourites(
+      sanitizeSQLInput(favToAdd.name),
+      sanitizeSQLInput(favToAdd.uid),
+      () => {
+        //
+      }
+    );
     setFavToAdd({ name: "", uid: "" });
-    notify("Added new favorite!");
+    notify("Added new favorite.");    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     getAndSetFavorites();
   };
 
-  const handleDelete = async () => {    
+  const handleDelete = async () => {
     await Promise.all(
       favToDelete.map(
         (id) =>
@@ -97,7 +124,12 @@ const Favorites = ({form = false}: IProps) => {
 
   const hexRegExp = /^0x[0-9a-fA-F]+$/;
   const sqlInjectionPattern = /['";]/; // Example pattern, you might need to adjust it
-  const disableForm = (favToAdd.name.length === 0 || favToAdd.uid.length === 0) || sqlInjectionPattern.test(favToAdd.name) || sqlInjectionPattern.test(favToAdd.uid) || !hexRegExp.test(favToAdd.uid);
+  const disableForm =
+    favToAdd.name.length === 0 ||
+    favToAdd.uid.length === 0 ||
+    sqlInjectionPattern.test(favToAdd.name) ||
+    sqlInjectionPattern.test(favToAdd.uid) ||
+    !hexRegExp.test(favToAdd.uid);
 
   return (
     <AnimatedDialog
@@ -144,14 +176,21 @@ const Favorites = ({form = false}: IProps) => {
               <div className="flex gap-1">
                 <div className="mx-1">
                   <input
-                    disabled={favorites.length === 0}
+                    disabled={_favorites.length === 0}
                     type="checkbox"
                     onClick={handleSelectAll}
                   />
                 </div>
                 <div
-                  className={`${favorites.length === 0||favToDelete.length===0 && "opacity-50"}`}
-                  onClick={favorites.length > 0 && favToDelete.length>0 ? handleDelete : () => null}
+                  className={`${
+                    _favorites.length === 0 ||
+                    (favToDelete.length === 0 && "opacity-50")
+                  }`}
+                  onClick={
+                    _favorites.length > 0 && favToDelete.length > 0
+                      ? handleDelete
+                      : () => null
+                  }
                 >
                   <RubbishIcon fill="currentColor" />
                 </div>
@@ -182,12 +221,16 @@ const Favorites = ({form = false}: IProps) => {
                   name="uid"
                   type="text"
                   placeholder="Enter UID"
-                  className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
+                  className="focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
                 />
               </div>
             )}
           </div>
-          <div className="grid grid-cols-[1fr_32px]">
+          <div
+            className={`grid transition-all duration-300 ease-in-out ${
+              disableForm ? "grid-cols-1" : "grid-cols-[1fr_32px]"
+            }`}
+          >
             {mode === "add" && (
               <>
                 <input
@@ -196,24 +239,33 @@ const Favorites = ({form = false}: IProps) => {
                   type="text"
                   name="name"
                   placeholder="Enter Name"
-                  className="px-2 w-full bg-gray-100 dark:bg-black text-sm py-2 focus:outline-teal-300 rounded-lg truncate"
+                  className="focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
                 />
-                <div onClick={disableForm ? () => null : handleAdd} className={`m-auto rounded-full ${disableForm ? 'opacity-50' : ''}`}>
-                  <PlusIcon fill="currentColor" />
-                </div>
+                {!disableForm && (
+                  <div
+                    onClick={disableForm ? () => null : handleAdd}
+                    className={`text-[#1B1B1B] dark:text-neutral-500 m-auto rounded-full`}
+                  >
+                    <PlusIcon fill="currentColor" />
+                  </div>
+                )}
               </>
             )}
           </div>
         </div>
-        {favorites.length === 0 && (
+        {_favorites.length === 0 && (
           <p className="text-sm text-center py-3">No favorites yet!</p>
         )}
-        <div className={`${mode !== 'add' ? 'h-[calc(100%_-_60px)]' : 'h-[calc(100%_-_80px)]'} overflow-y-auto`}>
+        <div
+          className={`${
+            mode !== "add" ? "h-[calc(100%_-_60px)]" : "h-[calc(100%_-_80px)]"
+          } overflow-y-auto`}
+        >
           <ul>
-            {favorites
-              ? favorites.map((f, index) => (
+            {_favorites
+              ? _favorites.map((f, index) => (
                   <li
-                    key={index+f.BRIDGEUID}
+                    key={index + f.BRIDGEUID}
                     onClick={() => {
                       if (form) {
                         formik.setFieldValue("uid", f.BRIDGEUID);
@@ -245,7 +297,7 @@ const Favorites = ({form = false}: IProps) => {
                         readOnly
                         value={f.NAME}
                         className="bg-transparent cursor-default focus:outline-none w-full truncate font-bold"
-                      />                      
+                      />
                       <input
                         onClick={(e) => e.stopPropagation()}
                         readOnly
@@ -264,3 +316,4 @@ const Favorites = ({form = false}: IProps) => {
 };
 
 export default Favorites;
+0

@@ -1,34 +1,81 @@
-import { ReactNode } from "react";
+import { ChangeEventHandler } from "react";
 
 interface IProps {
-  _currentNavigation: number;
-  setCurrentNavigation: (nav: number) => void;
-  navigation: ReactNode[];
+  selectedOption: "wminima" | "usdt";
+  handleOptionChange: ChangeEventHandler<HTMLInputElement>;
 }
-const SelectPool = ({
-  _currentNavigation,
-  setCurrentNavigation,
-  navigation,
-}: IProps) => {
-  const isActive = (_current: number) => {
-    return _currentNavigation === _current
-      ? "bg-gray-200 shadow-lg dark:shadow-none text-black dark:bg-black rounded-lg dark:text-gray-100 font-bold py-2 text-xs"
-      : "text-gray-800 dark:text-gray-100 cursor-pointer my-auto opacity-50 duration-100 text-xs";
-  };
-
+const SelectPool = ({ selectedOption, handleOptionChange }: IProps) => {
   return (
-    <div>
-      <nav className={`shadow-sm dark:shadow-none dark:bg-black dark:bg-opacity-20 rounded-lg grid grid-cols-${navigation.length} max-w-sm mx-auto text-center`}>
-        {navigation.map((n, index) => (
-          <div
-            key={index}
-            onClick={() => setCurrentNavigation(index)}
-            className={`${isActive(index)}`}
-          >
-            {n}
+    <div className="flex-1 flex flex-col">
+      {/* Custom Radio Buttons */}
+      <div className="mb-1">
+        <fieldset>
+          <div className="grid grid-cols-2 gap-2 md:mx-16">
+            <label
+              className={`tracking-widest text-center gap-1 justify-center text-sm p-4 rounded-full sm:flex-row flex items-center transition-all ${
+                selectedOption === "wminima"
+                  ? "bg-black dark:bg-black font-bold"
+                  : "bg-neutral-200 dark:bg-[#1B1B1B]"
+              }`}
+            >
+              <input
+                type="radio"
+                name="option"
+                value="wminima"
+                checked={selectedOption === "wminima"}
+                onChange={handleOptionChange}
+                className="hidden"
+              />
+              <span>
+                <img
+                  src="./assets/wtoken.svg"
+                  alt="wrapped"
+                  className="w-[24px] h-[24px] rounded-full"
+                />
+              </span>
+              <span
+                className={`ml-0 md:ml-2 ${
+                  selectedOption === "wminima" ? "text-white" : ""
+                }`}
+              >
+                wMinima
+              </span>
+            </label>
+            <label
+              className={`tracking-widest text-center gap-1 justify-center text-sm rounded-full sm:flex-row p-4 flex items-center transition-all ${
+                selectedOption === "usdt"
+                  ? "bg-black dark:bg-black font-bold"
+                  : "bg-neutral-200 dark:bg-[#1B1B1B]"
+              }`}
+            >
+              <input
+                type="radio"
+                name="option"
+                value="usdt"
+                checked={selectedOption === "usdt"}
+                onChange={(e) => {
+                  handleOptionChange(e);
+                }}
+                className="hidden"
+              />
+              <span>
+                <img
+                  src="./assets/tether.svg"
+                  alt="wrapped"
+                  className="w-[24px] h-[24px] rounded-full"
+                />
+              </span>
+              <span
+                className={`ml-0 md:ml-2 ${
+                  selectedOption === "usdt" ? "text-white" : ""
+                }`}
+              >
+                USDT
+              </span>
+            </label>
           </div>
-        ))}
-      </nav>
+        </fieldset>
+      </div>
     </div>
   );
 };

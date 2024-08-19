@@ -145,4 +145,17 @@
 - Ethereum balance low & disabled message fix
 - Other bug fixes
 
+##### [2.10.0] - 23 July 24
+
+- Full View Order Book
+
+##### [2.11.0] - 14 August 24
+
+- Lessen load on API calls, every 2 min check from 60s
+- Full View Order Book tweaks
+- Liquidity providers design tweak
+- Add LP to favorites suggestion
+- Add own book to Liquidity providers
+- Design tweaks
+
 
