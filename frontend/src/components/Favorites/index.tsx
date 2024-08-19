@@ -72,9 +72,9 @@ const Favorites = ({ form = false  }: IProps) => {
     setFavToAdd((prevState) => ({ ...prevState, [name]: value }));
   };
 
-  const handleAdd = () => {
-    if (_favorites.map(t => t.BRIDGEUID === favToAdd.uid)) {
-      notify("You have already added this contact!");
+  const handleAdd = async () => {
+    if (_favorites.find(t => t.BRIDGEUID === favToAdd.uid)) {
+      notify("You have this contact already.");
       return;
     }
 
@@ -86,7 +86,8 @@ const Favorites = ({ form = false  }: IProps) => {
       }
     );
     setFavToAdd({ name: "", uid: "" });
-    notify("Added new favorite!");
+    notify("Added new favorite.");    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
     getAndSetFavorites();
   };
 
@@ -315,3 +316,4 @@ const Favorites = ({ form = false  }: IProps) => {
 };
 
 export default Favorites;
+0
