@@ -28,8 +28,14 @@ const sortEventsByEvent = (data) => {
 };
 
 const OrderHistory = ({ full = false }) => {
-  const { orders, getAllOrders, offsetOrders, promptLogs, setSwitchLogView, _promptLogs } =
-    useContext(appContext);
+  const {
+    orders,
+    getAllOrders,
+    offsetOrders,
+    promptLogs,
+    setSwitchLogView,
+    _promptLogs,
+  } = useContext(appContext);
 
   const intervalId = useRef<number | null>(null);
 
@@ -37,7 +43,7 @@ const OrderHistory = ({ full = false }) => {
     getAllOrders(10 + 1, offsetOrders);
     intervalId.current = window.setInterval(
       () => getAllOrders(10 + 1, offsetOrders),
-      30000
+      30000,
     );
   };
 
@@ -74,12 +80,15 @@ const OrderHistory = ({ full = false }) => {
         promptLogs();
         setSwitchLogView("orders");
       }}
-      className={`relative group my-4 dark:outline shadow-lg dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
+      className={`relative group my-4 dark:outline shadow-lg ${
+        orders === null ||
+        (JSON.stringify(orders) === "{}" &&
+          "shadow-none !my-8 text-neutral-500")
+      } dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
         orders === null && "min-h-[250px] grid grid-rows-1"
       } ${full && "!outline-none"}`}
     >
-      {(!_promptLogs && orders !== null && Object.keys(orders).length > 0
-      ) &&
+      {!_promptLogs && orders !== null && Object.keys(orders).length > 0 && (
         <div className="opacity-0 transition-opacity group-hover:opacity-100 mx-auto absolute right-0 bottom-2 left-0">
           <button
             onClick={() => {
@@ -94,8 +103,8 @@ const OrderHistory = ({ full = false }) => {
               <ActivityIcon fill="currentColor" />
             </span>
           </button>
-        </div>    
-      }
+        </div>
+      )}
 
       {orders === null ||
         (JSON.stringify(orders) === "{}" && (

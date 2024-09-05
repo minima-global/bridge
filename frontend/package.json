@@ -1,10 +1,10 @@
 {
   "name": "miniswap",
   "private": true,
-  "version": "2.11.2",
+  "version": "2.12.0",
   "description": "Swap tokens OTC or Order book DEX and provide liquidity",
   "type": "module",
-  "homepage":".",
+  "homepage": ".",
   "scripts": {
     "dev": "vite",
     "dev:second": "vite --mode second",

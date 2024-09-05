@@ -158,4 +158,6 @@
 - Add own book to Liquidity providers
 - Design tweaks
 
+##### [2.12.0] - 05 Sept 24
 
+- Added UniSwap wMinima vs USDT price
