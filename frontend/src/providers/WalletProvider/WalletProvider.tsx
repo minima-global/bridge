@@ -11,6 +11,7 @@ import { appContext } from "../../AppContext";
 import { GasFeeCalculated } from "../../types/GasFeeInterface";
 import { TransactionResponse } from "ethers";
 import { _defaults } from "../../constants";
+import { getCurrentPoolPrice } from "../../libs/getPrice";
 
 type Props = {
   children: React.ReactNode;
@@ -19,6 +20,7 @@ type Context = {
   _address: string | null;
   _network: string;
   _chainId: string | null;
+  _poolPrice: number | null;
   _wallet: Signer | null;
   _balance: string;
   step: number;
@@ -26,7 +28,7 @@ type Context = {
   transfer: (
     address: string,
     amount: string,
-    gas: GasFeeCalculated
+    gas: GasFeeCalculated,
   ) => Promise<TransactionResponse>;
   getTokenType: (tokeName: string, currentNetwork: string) => string;
   getEthereumBalance: () => void;
@@ -43,6 +45,7 @@ export const WalletContextProvider = ({ children }: Props) => {
     _triggerBalanceUpdate,
     setTriggerBalanceUpdate,
   } = useContext(appContext);
+  const [_poolPrice, setCurrentPoolPrice] = useState<null | number>(null);
   const [_network, setNetwork] = useState("");
   const [_chainId, setChainId] = useState<string | null>(null);
   const [_wallet, setWallet] = useState<Signer | null>(null);
@@ -58,6 +61,9 @@ export const WalletContextProvider = ({ children }: Props) => {
     const network = await _provider.getNetwork();
 
     const balance = await _provider.getBalance(address);
+    // get current pool price for wM vs usdt
+    const poolPrice = await getCurrentPoolPrice(_provider);
+    setCurrentPoolPrice(poolPrice);
     setBalance(formatEther(balance));
     setWallet(wallet);
     setNetwork(network.name);
@@ -79,6 +85,10 @@ export const WalletContextProvider = ({ children }: Props) => {
     // Get Swap Wallet Balance...
     await getWalletBalance();
 
+    // get current pool price for wM vs usdt
+    const poolPrice = await getCurrentPoolPrice(_provider);
+    setCurrentPoolPrice(poolPrice);
+
     // Trigger Ethereum Balance update...
     setTimeout(() => {
       setTriggerBalanceUpdate(false);
@@ -95,7 +105,7 @@ export const WalletContextProvider = ({ children }: Props) => {
   const transfer = async (
     address: string,
     amount: string,
-    gas: GasFeeCalculated
+    gas: GasFeeCalculated,
   ): Promise<TransactionResponse> => {
     const tx = await _wallet!
       .sendTransaction({
@@ -111,24 +121,22 @@ export const WalletContextProvider = ({ children }: Props) => {
     return tx;
   };
 
-  const getTokenType = (token: string): string => {       
-    
-    if (token === 'ETH') {
-      return 'Ethereum';
+  const getTokenType = (token: string): string => {
+    if (token === "ETH") {
+      return "Ethereum";
     }
 
-    if (token === 'minima') {
-      return 'Minima';
+    if (token === "minima") {
+      return "Minima";
     }
 
     const wMinimaMainnet = _defaults["wMinima"].mainnet.toUpperCase();
     const wMinimaSepolia = _defaults["wMinima"].sepolia.toUpperCase();
     const tetherMainnet = _defaults["Tether"].mainnet.toUpperCase();
     const tetherSepolia = _defaults["Tether"].sepolia.toUpperCase();
-    
+
     if (token.startsWith("ETH:")) {
       const contractAddress = token.replace("ETH:", "").toUpperCase();
-
 
       if ([wMinimaMainnet, wMinimaSepolia].includes(contractAddress)) {
         return "wMinima";
@@ -141,11 +149,11 @@ export const WalletContextProvider = ({ children }: Props) => {
       if ([wMinimaMainnet, wMinimaSepolia].includes(token.toUpperCase())) {
         return "wMinima";
       }
-  
+
       if ([tetherMainnet, tetherSepolia].includes(token.toUpperCase())) {
         return "Tether";
       }
-    }    
+    }
 
     return "Other";
   };
@@ -159,6 +167,7 @@ export const WalletContextProvider = ({ children }: Props) => {
   return (
     <WalletContext.Provider
       value={{
+        _poolPrice,
         _address,
         _network,
         _chainId,
@@ -183,7 +192,7 @@ export const useWalletContext = () => {
 
   if (!context)
     throw new Error(
-      "WalletContext must be called from within the WalletContextProvider"
+      "WalletContext must be called from within the WalletContextProvider",
     );
 
   return context;
