@@ -6,6 +6,10 @@ import { useTokenStoreContext } from "../../../../../../providers/TokenStoreProv
 import { formatUnits } from "ethers";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 import Decimal from "decimal.js";
+import {
+  dismissButtonStyle,
+  primaryButtonStyle,
+} from "../../../../../../styles";
 
 const AcceptOTC = () => {
   const { _promptAcceptOTC, promptAcceptOTC, handleActionViaBackend, notify } =
@@ -28,7 +32,7 @@ const AcceptOTC = () => {
 
         const balance = formatUnits(
           relevantToken!.balance,
-          _network === "sepolia" ? 18 : relevantToken!.decimals
+          _network === "sepolia" ? 18 : relevantToken!.decimals,
         );
 
         // is our balance less than the requested amount
@@ -47,7 +51,7 @@ const AcceptOTC = () => {
   const handleAccept = async () => {
     setLoading(true);
 
-    _promptAcceptOTC.handleFocus(_promptAcceptOTC.index, 'hash');
+    _promptAcceptOTC.handleFocus(_promptAcceptOTC.index, "hash");
 
     try {
       const message = {
@@ -71,10 +75,8 @@ const AcceptOTC = () => {
 
   return (
     <AnimatedDialog
-      position="items-center h-screen w-full"
-      extraClass=""
-      isOpen={_promptAcceptOTC}
-      onClose={() => (!loading ? promptAcceptOTC() : null)}
+      display={_promptAcceptOTC}
+      dismiss={() => (!loading ? promptAcceptOTC() : null)}
     >
       <div>
         <div className="flex justify-between items-center pr-4">
@@ -147,13 +149,17 @@ const AcceptOTC = () => {
         <div className="grid-cols-2 mt-16 hidden md:grid">
           <div />
           <div className="grid grid-cols-2 gap-1 pr-4">
-            <button disabled={loading} onClick={promptAcceptOTC}>
+            <button
+              className={dismissButtonStyle}
+              disabled={loading}
+              onClick={promptAcceptOTC}
+            >
               Dismiss
             </button>
             <button
               disabled={insufficientFunds || loading}
               onClick={handleAccept}
-              className="bg-black hover:bg-opacity-80 truncate dark:bg-teal-300 text-white dark:text-black font-bold disabled:bg-opacity-50"
+              className={primaryButtonStyle}
             >
               {insufficientFunds && "Insufficient funds"}
               {!insufficientFunds && "Accept"}
@@ -161,18 +167,23 @@ const AcceptOTC = () => {
           </div>
         </div>
 
-        <div className="grid-cols-1 mt-16 grid md:hidden">
-          <div className="grid grid-cols-1 gap-2 px-4">
+        <div className="flex mt-16 md:hidden">
+          <div className="flex-grow" />
+          <div className="flex gap-2">
+            <button
+              className={dismissButtonStyle}
+              disabled={loading}
+              onClick={promptAcceptOTC}
+            >
+              Dismiss
+            </button>
             <button
               disabled={insufficientFunds || loading}
               onClick={handleAccept}
-              className="bg-black hover:bg-opacity-80 truncate dark:bg-teal-300 text-white dark:text-black font-bold disabled:bg-opacity-50"
+              className={primaryButtonStyle}
             >
               {insufficientFunds && "Insufficient funds"}
               {!insufficientFunds && "Accept"}
-            </button>
-            <button disabled={loading} onClick={promptAcceptOTC}>
-              Dismiss
             </button>
           </div>
         </div>

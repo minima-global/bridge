@@ -23,9 +23,9 @@ interface IProps {
     data: string;
   };
 }
-const Favorites = ({ form = false  }: IProps) => {
+const Favorites = ({ form = false }: IProps) => {
   const { uid, mode: _mode } = useParams();
-  
+
   const {
     _promptFavorites,
     promptFavorites,
@@ -73,7 +73,7 @@ const Favorites = ({ form = false  }: IProps) => {
   };
 
   const handleAdd = async () => {
-    if (_favorites.find(t => t.BRIDGEUID === favToAdd.uid)) {
+    if (_favorites.find((t) => t.BRIDGEUID === favToAdd.uid)) {
       notify("You have this contact already.");
       return;
     }
@@ -83,10 +83,10 @@ const Favorites = ({ form = false  }: IProps) => {
       sanitizeSQLInput(favToAdd.uid),
       () => {
         //
-      }
+      },
     );
     setFavToAdd({ name: "", uid: "" });
-    notify("Added new favorite.");    
+    notify("Added new favorite.");
     await new Promise((resolve) => setTimeout(resolve, 2000));
     getAndSetFavorites();
   };
@@ -100,8 +100,8 @@ const Favorites = ({ form = false  }: IProps) => {
               // Assuming removeFavourite callback returns something meaningful
               resolve(resp);
             });
-          })
-      )
+          }),
+      ),
     );
     notify("Deleted " + favToDelete.length + " contacts!");
     setFavToDelete([]);
@@ -132,13 +132,7 @@ const Favorites = ({ form = false  }: IProps) => {
     !hexRegExp.test(favToAdd.uid);
 
   return (
-    <AnimatedDialog
-      isOpen={_promptFavorites}
-      onClose={promptFavorites}
-      position="items-start mt-20"
-      extraClass="max-w-sm mx-auto"
-      dialogStyles="h-[400px] rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden"
-    >
+    <AnimatedDialog display={_promptFavorites} dismiss={promptFavorites}>
       <>
         <div className="flex justify-between items-center pr-4">
           <div className="grid grid-cols-[auto_1fr] ml-2">
@@ -147,26 +141,13 @@ const Favorites = ({ form = false  }: IProps) => {
               {mode === "add"
                 ? "Add New"
                 : mode === "none"
-                ? "Favorites"
-                : "Delete"}
+                  ? "Favorites"
+                  : "Delete"}
             </h3>
           </div>
-          <svg
-            onClick={promptFavorites}
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            strokeWidth="4.5"
-            stroke="currentColor"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-            <path d="M18 6l-12 12" />
-            <path d="M6 6l12 12" />
-          </svg>
+          <span onClick={promptFavorites}>
+            <CloseIcon fill="currentColor" />
+          </span>
         </div>
 
         <hr className="h-1 mt-3 border-teal-300 border-1" />
@@ -316,4 +297,4 @@ const Favorites = ({ form = false  }: IProps) => {
 };
 
 export default Favorites;
-0
+0;

@@ -5,6 +5,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import Decimal from "decimal.js";
 import NativeMinima from "../../NativeMinima";
+import { dismissButtonStyle } from "../../../styles";
 
 const NativeAddress = () => {
   const {
@@ -13,7 +14,7 @@ const NativeAddress = () => {
     getWalletBalance,
     _mainBalance,
     promptDeposit,
-    notify
+    notify,
   } = useContext(appContext);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | false>(false);
@@ -54,19 +55,23 @@ const NativeAddress = () => {
                         resp.error
                           ? resp.error
                           : resp.message
-                          ? resp.message
-                          : "Failed, please try again later"
+                            ? resp.message
+                            : "Failed, please try again later",
                       );
 
                     resolve(resp.status);
-                  }
+                  },
                 );
               });
-              
+
               setStatus("Withdrawal successful");
               resetForm();
               promptDeposit();
-              notify("Deposit of "+amount+" MINIMA to the Swap Wallet on the way")
+              notify(
+                "Deposit of " +
+                  amount +
+                  " MINIMA to the Swap Wallet on the way",
+              );
               await getBalances();
             } catch (error) {
               if (error instanceof Error) {
@@ -127,13 +132,21 @@ const NativeAddress = () => {
             isValid,
             dirty,
           }) => (
-            <form onSubmit={handleSubmit} className="px-4">
-              <p className="text-sm">Note: This is your Main Minima Wallet balance.</p>
-              <p className="text-sm mb-2">Enter an amount to deposit into your Swap Wallet.</p>
+            <form onSubmit={handleSubmit}>
+              <p className="text-xs text-center font-bold mb-4">
+                Main Minima Wallet Balance
+              </p>
+              <p className="text-sm mb-2">
+                Enter an amount to deposit into your Swap Wallet.
+              </p>
               {_mainBalance !== null && (
                 <NativeMinima
                   display={false}
-                  external={_mainBalance.unconfirmed != "0" ? _mainBalance.sendable+"/"+_mainBalance.unconfirmed : _mainBalance.sendable}
+                  external={
+                    _mainBalance.unconfirmed != "0"
+                      ? _mainBalance.sendable + "/" + _mainBalance.unconfirmed
+                      : _mainBalance.sendable
+                  }
                 />
               )}
               <div
@@ -167,7 +180,7 @@ const NativeAddress = () => {
                     onClick={() =>
                       setFieldValue(
                         "amount",
-                        _mainBalance !== null ? _mainBalance.sendable : 0
+                        _mainBalance !== null ? _mainBalance.sendable : 0,
                       )
                     }
                     type="button"
@@ -189,7 +202,8 @@ const NativeAddress = () => {
               {status && (
                 <div className="text-center my-2 bg-teal-500 p-2 rounded">
                   <h6 className="font-bold text-teal-800 dark:text-black">
-                    Deposit successful, please wait until your transaction is confirmed
+                    Deposit successful, please wait until your transaction is
+                    confirmed
                   </h6>
                 </div>
               )}
@@ -218,7 +232,7 @@ const NativeAddress = () => {
                         resetForm();
                         promptDeposit();
                       }}
-                      className="bg-gray-500 text-white dark:text-black font-bold"
+                      className={dismissButtonStyle}
                     >
                       Close
                     </button>

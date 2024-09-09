@@ -521,3 +521,65 @@ function _sendCounterPartyETHTxn(userdets, htlclog, minimablock, callback){
 		}
 	});
 }
+function manualCollectExpiredETHCoin(contractid, tokencontract, hashlock, amount, callback) {
+	//What is the contract ID
+	var contid = contractid;
+  
+	//Make sure we can collect it..
+	canCollect(contid, function (canc) {
+	  if (canc) {
+		MDS.log("Timelock Collect Expired ETH HTLC! " + contractid);
+  
+		//Try and refund
+		refundHTLCSwap(contid, function (resp) {
+		  //Did it work ?
+		  if (resp.status) {
+			//We have now collected this - don't try again
+			collectExpiredHTLC(
+			  hashlock,
+			  "ETH:" + tokencontract,
+			  amount,
+			  resp.result,
+			  function () {
+				callback(resp);
+			  },
+			);
+		  } else {
+			//Didn''t work..
+			MDS.log("HTLC refund failed : " + resp.error.message);
+  
+			//What is the error
+			if (
+			  resp.error.message.includes("refundable: already ") ||
+			  resp.error.message.includes("refundable: not sender")
+			) {
+			  //Already collected - don't try again..
+			  collectExpiredHTLC(
+				hashlock,
+				"ETH:" + tokencontract,
+				0,
+				"Already collected",
+				function () {
+				  callback(resp);
+				},
+			  );
+			} else {
+			  callback(resp);
+			}
+		  }
+		});
+	  } else {
+		//Already collected - don't try again..
+		//MDS.log("Trying to collect already collected HTLC : "+JSON.stringify(htlclog));
+		collectExpiredHTLC(
+		  hashlock,
+		  "ETH:" + tokencontract,
+		  0,
+		  "Already collected",
+		  function () {
+			callback();
+		  },
+		);
+	  }
+	});
+  }

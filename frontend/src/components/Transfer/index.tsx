@@ -10,6 +10,7 @@ import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { _defaults } from "../../constants";
 import { Wallet } from "ethers";
 import Decimal from "decimal.js";
+import { dismissButtonStyle } from "../../styles";
 
 type FormState = {
   type: "native" | "erc20";
@@ -38,7 +39,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const [error, setError] = useState<string | false>(false);
 
   const initialTokenShouldBeMinimaIfExists = tokens.find(
-    (token) => token.address === _defaults["wMinima"][_network]
+    (token) => token.address === _defaults["wMinima"][_network],
   );
 
   const getBalances = async () => {
@@ -115,7 +116,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 if (
                   parent.asset.type === "erc20" &&
                   (new Decimal(parseUnits(val, decimals).toString()).gt(
-                    assetBalance
+                    assetBalance,
                   ) ||
                     new Decimal(assetBalance).isZero())
                   // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
@@ -174,7 +175,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
       })}
       onSubmit={async (
         { amount, asset, address },
-        { setStatus, resetForm }
+        { setStatus, resetForm },
       ) => {
         setError(false);
         setLoading(true);
@@ -206,13 +207,13 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                   amount,
                   action,
                   address: address.length ? address : ethWalletAddress,
-                }
+                },
           );
 
           setStatus("Successful");
           if (type === "native") {
             await getBalances();
-          } else {            
+          } else {
             callBalanceForApp();
           }
 
@@ -226,8 +227,8 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
             error && error.shortMessage
               ? error.shortMessage
               : typeof error === "string"
-              ? error
-              : "Transaction failed, please try again."
+                ? error
+                : "Transaction failed, please try again.",
           );
         } finally {
           setLoading(false);
@@ -287,7 +288,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                     "..." +
                     ethWalletAddress.substring(
                       ethWalletAddress.length - 4,
-                      ethWalletAddress.length
+                      ethWalletAddress.length,
                     )}
                   )
                 </p>
@@ -296,7 +297,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                   <div className="p-2 text-sm px-4 bg-violet-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2">
                     {errors.address}
                   </div>
-            )}
+                )}
               </>
             )}
             <div
@@ -371,7 +372,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
                 <button
                   type="button"
                   onClick={onCancel}
-                  className="bg-gray-500 text-white dark:text-black font-bold"
+                  className={dismissButtonStyle}
                 >
                   Close
                 </button>

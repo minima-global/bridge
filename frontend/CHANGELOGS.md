@@ -161,3 +161,8 @@
 ##### [2.12.0] - 05 Sept 24
 
 - Added UniSwap wMinima vs USDT price
+
+##### [2.13.0] - 09 Sept 24
+
+- Added Ethereum Manual Refund feature
+- Design tweaks
