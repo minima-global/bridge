@@ -18,7 +18,7 @@ const router = createHashRouter([
     element: <App />,
     children: [{
       path: "favorite/:uid/:mode",
-      element: <Favorites form={false} />
+      element: <Favorites />
     }]
   },
   {

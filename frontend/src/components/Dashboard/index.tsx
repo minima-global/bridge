@@ -18,7 +18,7 @@ const Dashboard = () => {
       <Help />
       <Settings />
       <DatabaseLocked />
-      <Favorites form={false} />
+      <Favorites />
       <AppLoading />
       <ContentGrid>
         <Navigation />

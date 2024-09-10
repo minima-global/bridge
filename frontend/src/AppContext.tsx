@@ -76,7 +76,7 @@ const AppProvider = ({ children }: IProps) => {
     false,
   );
   // Set up API Keys
-  const [_promptFavorites, setPromptFavorites] = useState(false);
+  const [_promptFavorites, setPromptFavorites] = useState<false | 'write' | 'read'>(false);
   // Select Network
   const [_promptSelectNetwork, setSelectNetwork] = useState(false);
   // Settings
@@ -702,8 +702,8 @@ const AppProvider = ({ children }: IProps) => {
     setPromptLogs((prevState) => !prevState);
   };
 
-  const promptFavorites = () => {
-    setPromptFavorites((prevState) => !prevState);
+  const promptFavorites = (mode: "read"|"write"|false) => {
+    setPromptFavorites(mode);
   };
 
   const promptDatabaseLocked = () => {

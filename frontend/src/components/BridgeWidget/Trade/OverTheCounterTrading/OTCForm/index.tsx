@@ -4,15 +4,16 @@ import NativeMinima from "../../../../NativeMinima";
 import EthereumTokenSelect from "../EthereumTokenSelect";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { appContext } from "../../../../../AppContext";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
 import { _defaults } from "../../../../../constants";
-import Favorites from "../../../../Favorites";
+import FavoritesForm from "../FavoritesForm";
 
 const OTCForm = () => {
-  const { _minimaBalance, handleActionViaBackend, notify, promptFavorites, _allowanceLock, setPromptAllowance } = useContext(appContext);
+  const [openFavorites, setOpenFavorites] = useState(false);
+  const { _minimaBalance, handleActionViaBackend, notify, _allowanceLock, setPromptAllowance } = useContext(appContext);
   const { _network } = useWalletContext();
 
   
@@ -133,18 +134,19 @@ const OTCForm = () => {
     >
       {({ handleSubmit, getFieldProps, setFieldValue, values, errors, touched, isValid }) => (
         <form onSubmit={handleSubmit} className="shadow-sm dark:shadow-none">
+          <FavoritesForm open={openFavorites} dismiss={() => setOpenFavorites(false)} />
           <InputWrapper
             errors={errors && errors.uid && touched && touched.uid ? errors.uid : false}
             inputProps={{ placeholder: "uid", ...getFieldProps("uid") }}
             action={ 
               <div className="flex items-center justify-center">
               <button
-                onClick={promptFavorites}
+                onClick={() => setOpenFavorites(true)}
                 type="button"
                 className="hover:animate-pulse text-sm flex items-center text-center"
               >
                 <FavoriteIcon fill="currentColor" />
-                <Favorites form={true} />
+                
               </button>
               </div>
             }

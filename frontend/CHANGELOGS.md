@@ -166,3 +166,7 @@
 
 - Added Ethereum Manual Refund feature
 - Design tweaks
+
+##### [2.13.1] - 10 Sept 24
+
+- Design bug fix with favorites

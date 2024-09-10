@@ -1,25 +1,29 @@
 import { useContext, useEffect, useState } from "react";
-import AnimatedDialog from "../UI/AnimatedDialog";
-import { appContext } from "../../AppContext";
-import FavoriteIcon from "../UI/Icons/FavoriteIcon/index.js";
+import AnimatedDialog from "../../../../UI/AnimatedDialog";
+import { appContext } from "../../../../../AppContext";
+import FavoriteIcon from "../../../../UI/Icons/FavoriteIcon/index.js";
 
-import { addFavourites, removeFavourite } from "../../../../dapp/js/sql.js";
-import Bear from "../UI/Avatars/Bear/index.js";
-import AddIcon from "../UI/Icons/AddIcon/index.js";
-import RemoveIcon from "../UI/Icons/RemoveIcon/index.js";
-import RubbishIcon from "../UI/Icons/RubbishIcon/index.js";
-import DoneIcon from "../UI/Icons/DoneIcon/index.js";
-import CloseIcon from "../UI/Icons/CloseIcon/index.js";
-import PlusIcon from "../UI/Icons/PlusIcon/index.js";
+import { addFavourites, removeFavourite } from "../../../../../../../dapp/js/sql.js";
+import Bear from "../../../../UI/Avatars/Bear/index.js";
+import AddIcon from "../../../../UI/Icons/AddIcon/index.js";
+import RemoveIcon from "../../../../UI/Icons/RemoveIcon/index.js";
+import RubbishIcon from "../../../../UI/Icons/RubbishIcon/index.js";
+import DoneIcon from "../../../../UI/Icons/DoneIcon/index.js";
+import CloseIcon from "../../../../UI/Icons/CloseIcon/index.js";
+import PlusIcon from "../../../../UI/Icons/PlusIcon/index.js";
+import { useFormikContext } from "formik";
 
-import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
+import sanitizeSQLInput from "../../../../../libs/sanitizeSQL.js";
 import { useParams } from "react-router-dom";
 
-const Favorites = () => {
+interface IProps {
+    open: boolean;
+    dismiss: () => void;
+
+}
+const FavoritesForm = ({open, dismiss}: IProps) => {
   const { uid, mode: _mode } = useParams();
   const {
-    _promptFavorites,
-    promptFavorites,
     notify,
     getAndSetFavorites,
     _favorites,
@@ -29,6 +33,7 @@ const Favorites = () => {
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
   const [favToAdd, setFavToAdd] = useState({ name: "", uid: uid || "" });
 
+  const formik = useFormikContext();
 
   useEffect(() => {
     if (uid && mode) {
@@ -38,10 +43,10 @@ const Favorites = () => {
   }, [uid, mode]);
 
   useEffect(() => {
-    if (loaded && loaded.current && (_promptFavorites)) {
+    if (loaded && loaded.current && (open)) {
       getAndSetFavorites();
     }
-  }, [_promptFavorites]);
+  }, [open]);
 
   const handleSelectAll = (evt) => {
     const checked = evt.target.checked;
@@ -119,7 +124,7 @@ const Favorites = () => {
     !hexRegExp.test(favToAdd.uid);
 
   return (
-    <AnimatedDialog up={50} display={_promptFavorites} dismiss={() => null}>
+    <AnimatedDialog up={50} display={open} dismiss={() => null}>
       <>
         <div className="flex justify-between items-center pr-4">
           <div className="grid grid-cols-[auto_1fr] ml-2">
@@ -133,7 +138,7 @@ const Favorites = () => {
             </h3>
           </div>
           <span 
-          onClick={() => promptFavorites(false)}
+          onClick={() => dismiss()}
           >
             <CloseIcon fill="currentColor" />
           </span>
@@ -236,6 +241,11 @@ const Favorites = () => {
               ? _favorites.map((f, index) => (
                   <li
                     key={index + f.BRIDGEUID}
+                    onClick={() => {
+                      
+                    dismiss();
+                    formik.setFieldValue("uid", f.BRIDGEUID);
+                    }}
                     className={`grid ${
                       mode !== "delete"
                         ? "grid-cols-[46px_1fr]"
@@ -280,4 +290,4 @@ const Favorites = () => {
   );
 };
 
-export default Favorites;
+export default FavoritesForm;
