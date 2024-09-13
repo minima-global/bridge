@@ -4,53 +4,66 @@ import NativeMinima from "../../../../NativeMinima";
 import EthereumTokenSelect from "../EthereumTokenSelect";
 import { Formik } from "formik";
 import * as yup from "yup";
-import { useContext, useState } from "react";
+import { useContext } from "react";
 import { appContext } from "../../../../../AppContext";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
 import { _defaults } from "../../../../../constants";
-import FavoritesForm from "../FavoritesForm";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const OTCForm = () => {
-  const [openFavorites, setOpenFavorites] = useState(false);
-  const { _minimaBalance, handleActionViaBackend, notify, _allowanceLock, setPromptAllowance } = useContext(appContext);
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const {
+    _minimaBalance,
+    handleActionViaBackend,
+    notify,
+    _allowanceLock,
+    setPromptAllowance,
+  } = useContext(appContext);
   const { _network } = useWalletContext();
 
-  
   return (
     <Formik
+      enableReinitialize={!!searchParams && !!searchParams.get("contact")}
       initialValues={{
-        uid: "",
+        uid: searchParams.get("contact") || "",
         native: "",
         token: { name: "WMINIMA", amount: "" },
-        locked: false
+        locked: false,
       }}
-      onSubmit={async (data, {resetForm}) => {
-        
+      onSubmit={async (data, { resetForm }) => {
         const { uid, native, token } = data;
-        try {          
+        try {
           const message = {
             action: "STARTMINIMASWAP",
             sendamount: native,
             requestamount: token.amount,
-            contractaddress: "ETH:"+"0x"+_defaults[token.name.includes("WMINIMA") ? 'wMinima' : 'Tether'][_network].slice(2).toUpperCase(),
+            contractaddress:
+              "ETH:" +
+              "0x" +
+              _defaults[token.name.includes("WMINIMA") ? "wMinima" : "Tether"][
+                _network
+              ]
+                .slice(2)
+                .toUpperCase(),
             reqpublickey: uid,
             otc: true,
-          }
+          };
 
           await handleActionViaBackend(message);
 
-
           notify("OTC Swap requested!");
           resetForm();
-
         } catch (error: any) {
           console.error(error);
           if (error instanceof Error) {
-            return notify("Error : "+ error.message);
+            return notify("Error : " + error.message);
           }
 
-          notify(error.message ? error.message : "Error, something went wrong!");
+          notify(
+            error.message ? error.message : "Error, something went wrong!",
+          );
         }
       }}
       validationSchema={yup.object().shape({
@@ -122,39 +135,54 @@ const OTCForm = () => {
                   return createError({
                     path,
                     message:
-                      error && error.message
-                        ? error.message
-                        : "Invalid number",
+                      error && error.message ? error.message : "Invalid number",
                   });
-                }                
+                }
               }
             }),
         }),
       })}
     >
-      {({ handleSubmit, getFieldProps, setFieldValue, values, errors, touched, isValid }) => (
+      {({
+        handleSubmit,
+        getFieldProps,
+        setFieldValue,
+        values,
+        errors,
+        touched,
+        isValid,
+      }) => (
         <form onSubmit={handleSubmit} className="shadow-sm dark:shadow-none">
-          <FavoritesForm open={openFavorites} dismiss={() => setOpenFavorites(false)} />
           <InputWrapper
-            errors={errors && errors.uid && touched && touched.uid ? errors.uid : false}
+            errors={
+              errors && errors.uid && touched && touched.uid
+                ? errors.uid
+                : false
+            }
             inputProps={{ placeholder: "uid", ...getFieldProps("uid") }}
-            action={ 
+            action={
               <div className="flex items-center justify-center">
-              <button
-                onClick={() => setOpenFavorites(true)}
-                type="button"
-                className="hover:animate-pulse text-sm flex items-center text-center"
-              >
-                <FavoriteIcon fill="currentColor" />
-                
-              </button>
+                <button
+                  onClick={() => {
+                    searchParams.set("form", "true");
+                    navigate(`/fav?${searchParams.toString()}`);
+                  }}
+                  type="button"
+                  className="hover:animate-pulse text-sm flex items-center text-center"
+                >
+                  <FavoriteIcon fill="currentColor" />
+                </button>
               </div>
             }
             label="Your Counterparty"
           />
 
           <InputWrapper
-            errors={errors && errors.native && touched && touched.native ? errors.native : false}
+            errors={
+              errors && errors.native && touched && touched.native
+                ? errors.native
+                : false
+            }
             wrapperStyle="mt-2"
             inputProps={{ placeholder: "0.0", ...getFieldProps("native") }}
             label="Native Offering"
@@ -167,7 +195,9 @@ const OTCForm = () => {
 
           <InputWrapper
             errors={
-              errors && errors.token?.amount && touched && touched.token?.amount ? errors.token.amount : false
+              errors && errors.token?.amount && touched && touched.token?.amount
+                ? errors.token.amount
+                : false
             }
             wrapperStyle="mt-2"
             inputProps={{
@@ -183,28 +213,27 @@ const OTCForm = () => {
             }
           />
 
-          {!_allowanceLock &&
-          <div className="my-8 px-4 dark:px-0">
+          {!_allowanceLock && (
+            <div className="my-8 px-4 dark:px-0">
+              <button
+                // disabled={true}
+                disabled={!isValid}
+                type="submit"
+                className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black disabled:bg-opacity-10"
+              >
+                Trade
+              </button>
+            </div>
+          )}
+          {_allowanceLock && (
             <button
-              // disabled={true} 
-              disabled={!isValid}
-              type="submit"
-              className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black disabled:bg-opacity-10"
-            >
-              Trade
-            </button>
-          </div>
-          }
-          {
-            _allowanceLock && 
-            <button
-              onClick={() => setPromptAllowance(true)}              
+              onClick={() => setPromptAllowance(true)}
               type="button"
               className="mt-4 w-full bg-violet-300 p-3 font-bold dark:text-black trailing-wider"
-          >
-            Approve allowances
-          </button>
-          }
+            >
+              Approve allowances
+            </button>
+          )}
         </form>
       )}
     </Formik>

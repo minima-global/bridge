@@ -92,26 +92,8 @@ const ManualRefund = () => {
 
       // Now calculate the contractId using the extracted parameters
       const abiEncoded = ethers.AbiCoder.defaultAbiCoder().encode(
-        [
-          "bytes32",
-          "address",
-          "bytes32",
-          "uint256",
-          "address",
-          "uint256",
-          "uint256",
-          "bool",
-        ],
-        [
-          _senderminima,
-          _receiver,
-          _hashlock,
-          _timelock,
-          _tokenContract,
-          _amount,
-          _requestamount,
-          _otc,
-        ],
+        ["bytes32"],
+        [_hashlock],
       );
 
       // check contract expiry..

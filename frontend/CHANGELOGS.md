@@ -170,3 +170,7 @@
 ##### [2.13.1] - 10 Sept 24
 
 - Design bug fix with favorites
+
+##### [2.14.0] - 13 Sept 24
+
+- Bug fixes

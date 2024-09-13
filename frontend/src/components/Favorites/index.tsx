@@ -13,35 +13,34 @@ import CloseIcon from "../UI/Icons/CloseIcon/index.js";
 import PlusIcon from "../UI/Icons/PlusIcon/index.js";
 
 import sanitizeSQLInput from "../../libs/sanitizeSQL.js";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 
 const Favorites = () => {
-  const { uid, mode: _mode } = useParams();
-  const {
-    _promptFavorites,
-    promptFavorites,
-    notify,
-    getAndSetFavorites,
-    _favorites,
-    loaded,
-  } = useContext(appContext);
-  const [mode, setMode] = useState<"none" | "delete" | "add">("none");
+  const [searchParams] = useSearchParams();
+
+  const uid = searchParams.get("uid");
+  const form = searchParams.get("form");
+  const action = searchParams.get("action");
+
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const { notify, getAndSetFavorites, _favorites, loaded } =
+    useContext(appContext);
   const [favToDelete, setFavToDelete] = useState<string[]>([]);
   const [favToAdd, setFavToAdd] = useState({ name: "", uid: uid || "" });
 
-
   useEffect(() => {
-    if (uid && mode) {
-      setFavToAdd((prev) => ({ ...prev, uid }));
-      setMode(mode as "none" | "delete" | "add");
+    if (uid) {
+      setFavToAdd({ name: "", uid: uid });
     }
-  }, [uid, mode]);
+  }, [uid, form]);
 
   useEffect(() => {
-    if (loaded && loaded.current && (_promptFavorites)) {
+    if (loaded && loaded.current) {
       getAndSetFavorites();
     }
-  }, [_promptFavorites]);
+  }, []);
 
   const handleSelectAll = (evt) => {
     const checked = evt.target.checked;
@@ -118,132 +117,157 @@ const Favorites = () => {
     sqlInjectionPattern.test(favToAdd.uid) ||
     !hexRegExp.test(favToAdd.uid);
 
+  const actionDelete = action && action === "delete";
+  const actionAdd = action && action === "add";
+
   return (
-    <AnimatedDialog up={50} display={_promptFavorites} dismiss={() => null}>
+    <AnimatedDialog
+      up={50}
+      display={location.pathname.includes("/fav")}
+      dismiss={() => null}
+    >
       <>
         <div className="flex justify-between items-center pr-4">
           <div className="grid grid-cols-[auto_1fr] ml-2">
             <FavoriteIcon fill="currentColor" />
             <h3 className="my-auto font-bold ml-2">
-              {mode === "add"
-                ? "Add New"
-                : mode === "none"
-                  ? "Favorites"
-                  : "Delete"}
+              {!action && "Favorites"}
+              {action &&
+                action.substring(0, 1).toUpperCase() +
+                  action.substring(1, action.length).toLowerCase()}
             </h3>
           </div>
-          <span 
-          onClick={() => promptFavorites(false)}
-          >
+          <span onClick={() => navigate("/")}>
             <CloseIcon fill="currentColor" />
           </span>
         </div>
 
         <hr className="h-1 mt-3 border-teal-300 border-1" />
-        <div className="px-2 py-2 dark:bg-[#1B1B1B] grid grid-cols-2 gap-1">
-          <div className="flex gap-1">
-            {mode === "delete" && (
-              <div className="flex gap-1">
-                <div className="mx-1">
-                  <input
-                    disabled={_favorites.length === 0}
-                    type="checkbox"
-                    onClick={handleSelectAll}
-                  />
-                </div>
-                <div
-                  className={`${
-                    _favorites.length === 0 ||
-                    (favToDelete.length === 0 && "opacity-50")
-                  }`}
-                  onClick={
-                    _favorites.length > 0 && favToDelete.length > 0
-                      ? handleDelete
-                      : () => null
-                  }
-                >
-                  <RubbishIcon fill="currentColor" />
-                </div>
-                <div onClick={() => setMode("none")}>
-                  <DoneIcon fill="currentColor" />
-                </div>
-              </div>
-            )}
-            {mode === "none" && (
-              <div className="flex gap-1">
-                <div onClick={() => setMode("add")}>
-                  <AddIcon fill="currentColor" />
-                </div>
-                <div onClick={() => setMode("delete")}>
-                  <RemoveIcon fill="currentColor" />
-                </div>
-              </div>
-            )}
 
-            {mode === "add" && (
-              <div className="grid grid-cols-[32px_1fr]">
-                <div onClick={() => setMode("none")} className="m-auto">
-                  <CloseIcon fill="currentColor" />
-                </div>
+        <div className="flex gap-1 px-2 py-2 dark:bg-neutral-950">
+          {actionDelete && (
+            <div className="flex gap-1">
+              <div className="mx-1">
+                <input
+                  disabled={_favorites.length === 0}
+                  type="checkbox"
+                  onClick={handleSelectAll}
+                />
+              </div>
+              <div
+                className={`${
+                  _favorites.length === 0 ||
+                  (favToDelete.length === 0 && "opacity-50")
+                }`}
+                onClick={
+                  _favorites.length > 0 && favToDelete.length > 0
+                    ? handleDelete
+                    : () => null
+                }
+              >
+                <RubbishIcon fill="currentColor" />
+              </div>
+              <div
+                onClick={() => {
+                  searchParams.delete("action");
+                  navigate(`/fav?${searchParams.toString()}`);
+                }}
+              >
+                <DoneIcon fill="currentColor" />
+              </div>
+            </div>
+          )}
+          {!action && (
+            <div className="flex gap-1">
+              <div
+                onClick={() => {
+                  searchParams.set("action", "add");
+                  navigate(`/fav?${searchParams.toString()}`);
+                }}
+              >
+                <AddIcon fill="currentColor" />
+              </div>
+              <div
+                onClick={() => {
+                  searchParams.set("action", "delete");
+                  navigate(`/fav?${searchParams.toString()}`);
+                }}
+              >
+                <RemoveIcon fill="currentColor" />
+              </div>
+            </div>
+          )}
+
+          {actionAdd && (
+            <div className="flex gap-1 w-full">
+              <div
+                onClick={() => {
+                  searchParams.delete("action");
+                  navigate(`/fav?${searchParams.toString()}`);
+                }}
+                className="my-auto"
+              >
+                <CloseIcon fill="currentColor" />
+              </div>
+              <div className="flex-grow flex gap-1 mx-2">
                 <input
                   onChange={handleAddChange}
                   value={favToAdd.uid}
                   name="uid"
                   type="text"
                   placeholder="Enter UID"
-                  className="focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
+                  className="flex-grow focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
                 />
-              </div>
-            )}
-          </div>
-          <div
-            className={`grid transition-all duration-300 ease-in-out ${
-              disableForm ? "grid-cols-1" : "grid-cols-[1fr_32px]"
-            }`}
-          >
-            {mode === "add" && (
-              <>
+
                 <input
                   onChange={handleAddChange}
                   value={favToAdd.name}
                   type="text"
                   name="name"
                   placeholder="Enter Name"
-                  className="focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
+                  className="flex-grow focus:outline-none dark:text-neutral-100 dark:bg-black dark:border dark:border-neutral-800  px-2 w-full bg-gray-100 text-sm py-2 rounded-lg truncate dark:placeholder:text-neutral-600 text-center"
                 />
-                {!disableForm && (
-                  <div
-                    onClick={disableForm ? () => null : handleAdd}
-                    className={`text-[#1B1B1B] dark:text-neutral-500 m-auto rounded-full`}
-                  >
-                    <PlusIcon fill="currentColor" />
-                  </div>
-                )}
-              </>
-            )}
-          </div>
+              </div>
+
+              {!disableForm && (
+                <div
+                  onClick={disableForm ? () => null : handleAdd}
+                  className={`text-[#1B1B1B] dark:text-neutral-500 m-auto rounded-full`}
+                >
+                  <PlusIcon fill="currentColor" />
+                </div>
+              )}
+            </div>
+          )}
         </div>
         {_favorites.length === 0 && (
-          <p className="text-sm text-center py-3">No favorites yet!</p>
+          <p className="text-sm text-center py-3 dark:text-neutral-500">
+            No favorites added
+          </p>
         )}
         <div
           className={`${
-            mode !== "add" ? "h-[calc(100%_-_60px)]" : "h-[calc(100%_-_80px)]"
+            !actionAdd ? "h-[calc(100%_-_60px)]" : "h-[calc(100%_-_80px)]"
           } overflow-y-auto`}
         >
           <ul>
             {_favorites
               ? _favorites.map((f, index) => (
                   <li
+                    onClick={() => {
+                      if (form) {
+                        searchParams.set("contact", f.BRIDGEUID);
+                        navigate(`/?${searchParams.toString()}`);
+                      }
+                    }}
                     key={index + f.BRIDGEUID}
                     className={`grid ${
-                      mode !== "delete"
+                      !actionDelete
                         ? "grid-cols-[46px_1fr]"
                         : "grid-cols-[20px_46px_1fr]"
                     } gap-1 mb-3 bg-gray-100 bg-opacity-20 dark:!bg-opacity-50 dark:bg-[#1b1b1b] px-3 hover:bg-white dark:hover:bg-black`}
                   >
-                    
-                    {mode === "delete" && (
+                    {actionDelete && (
                       <div className="my-auto">
                         <input
                           value={f.ID}
@@ -257,7 +281,7 @@ const Favorites = () => {
                     <div className="my-auto">
                       <Bear extraClass="w-[46px]" input={f.BRIDGEUID} />
                     </div>
-                    <div className="pt-2">
+                    <div className="pt-2 pl-2">
                       <input
                         readOnly
                         value={f.NAME}
@@ -267,7 +291,7 @@ const Favorites = () => {
                         onClick={(e) => e.stopPropagation()}
                         readOnly
                         value={f.BRIDGEUID}
-                        className="bg-transparent cursor-default focus:outline-none text-xs w-full truncate font-mono"
+                        className="bg-transparent cursor-default focus:outline-none text-xs w-full truncate"
                       />
                     </div>
                   </li>

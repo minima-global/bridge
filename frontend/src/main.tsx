@@ -11,15 +11,20 @@ import { RouterProvider, createHashRouter } from "react-router-dom";
 import Secret from "./components/Secret/index.tsx";
 import { ToastContainer } from "react-toastify";
 import Favorites from "./components/Favorites/index.tsx";
+import NotFound from "./components/NotFound/index.tsx";
 
 const router = createHashRouter([
   {
     path: "/",
     element: <App />,
-    children: [{
-      path: "favorite/:uid/:mode",
-      element: <Favorites />
-    }]
+    errorElement: <NotFound />,
+    children: [
+      {
+        path: "fav",
+        element: <Favorites />,
+        errorElement: <NotFound />,
+      },
+    ],
   },
   {
     path: "/secret",
@@ -38,5 +43,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
         </TokenStoreContextProvider>
       </WalletContextProvider>
     </AppProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );
