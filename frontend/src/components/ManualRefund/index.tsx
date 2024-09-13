@@ -79,16 +79,8 @@ const ManualRefund = () => {
       const decodedInput = iface.decodeFunctionData("newContract", tx.data);
 
       // Destructure the parameters
-      const {
-        _senderminima,
-        _receiver,
-        _hashlock,
-        _timelock,
-        _tokenContract,
-        _amount,
-        _requestamount,
-        _otc,
-      } = decodedInput;
+      const { _hashlock, _timelock, _tokenContract, _amount, _otc } =
+        decodedInput;
 
       // Now calculate the contractId using the extracted parameters
       const abiEncoded = ethers.AbiCoder.defaultAbiCoder().encode(
