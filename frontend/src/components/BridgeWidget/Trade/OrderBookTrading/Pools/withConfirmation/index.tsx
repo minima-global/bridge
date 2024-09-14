@@ -11,6 +11,8 @@ import { useOrderBookContext } from "../../Context/OrderBookContext";
 import { useTokenStoreContext } from "../../../../../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import Decimal from "decimal.js";
+import CloseIcon from "../../../../../UI/Icons/CloseIcon";
+import { primaryButtonStyle } from "../../../../../../styles";
 
 interface EthSwapMessage {
   action: "STARTETHSWAP";
@@ -30,8 +32,7 @@ interface MinimaSwapMessage {
 
 const withConfirmation = (WrappedComponent, PoolName) => {
   return (props) => {
-
-    const { orderContext, setOrderContext} = useOrderBookContext();
+    const { orderContext, setOrderContext } = useOrderBookContext();
     const [insufficientFunds, setInsufficientFunds] = useState(false);
 
     const { _userDetails, _allowanceLock, setPromptAllowance, _minimaBalance } =
@@ -42,15 +43,17 @@ const withConfirmation = (WrappedComponent, PoolName) => {
 
     const { tokens } = useTokenStoreContext();
     const formik: FormikContextType<FormikValues> = useFormikContext();
-    const { values, setFieldValue, setFieldError } = formik;   
-    
-    const updateOrder = (order: number|null) => {
-      setFieldValue("order", order)
-    }
-    
-    const updateOrderMessage = (message: MinimaSwapMessage | EthSwapMessage | null) => {
-      setFieldValue("transaction", message)
-    }
+    const { values, setFieldValue, setFieldError } = formik;
+
+    const updateOrder = (order: number | null) => {
+      setFieldValue("order", order);
+    };
+
+    const updateOrderMessage = (
+      message: MinimaSwapMessage | EthSwapMessage | null,
+    ) => {
+      setFieldValue("transaction", message);
+    };
 
     useEffect(() => {
       // Check the OrderContext, are we buying or selling?
@@ -61,13 +64,22 @@ const withConfirmation = (WrappedComponent, PoolName) => {
       if (orderContext.action === "buy") {
         // What's the Pool we are on?
         const name = orderContext.pool === "wminima" ? "wMinima" : "Tether";
-        
+
         // Find the relevant token
         const relevantToken = tokens.find((t) => t.name === name);
-        // If we find it.. 
+        // If we find it..
         if (relevantToken) {
           // Format the Token appropriately and check if we can fulfill the order
-          if (new Decimal(formatUnits(relevantToken.balance, relevantToken.name === 'Tether' && _network === 'sepolia' ? 18 : relevantToken.decimals).toString()).lessThan(values.order)) {
+          if (
+            new Decimal(
+              formatUnits(
+                relevantToken.balance,
+                relevantToken.name === "Tether" && _network === "sepolia"
+                  ? 18
+                  : relevantToken.decimals,
+              ).toString(),
+            ).lessThan(values.order)
+          ) {
             setInsufficientFunds(true);
           } else {
             setInsufficientFunds(false);
@@ -76,18 +88,14 @@ const withConfirmation = (WrappedComponent, PoolName) => {
       }
       // We are selling Native
       if (orderContext.action === "sell") {
-        // Can we fulfill the order 
-        if (
-          new Decimal(values.order).greaterThan(_minimaBalance.confirmed)
-        ) {
+        // Can we fulfill the order
+        if (new Decimal(values.order).greaterThan(_minimaBalance.confirmed)) {
           setInsufficientFunds(true);
-
         } else {
           setInsufficientFunds(false);
         }
       }
-
-    }, [orderContext, values.order])
+    }, [orderContext, values.order]);
 
     useEffect(() => {
       calculateOrder();
@@ -95,10 +103,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
 
     const calculateOrder = async () => {
       if (!_userDetails) {
-        return setFieldError(
-          "native",
-          "Page requires a refresh"
-        );
+        return setFieldError("native", "Page requires a refresh");
       }
 
       if (orderContext.action === null) return;
@@ -109,7 +114,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
         orderContext.action,
         native,
         PoolName,
-        _userDetails.minimapublickey
+        _userDetails.minimapublickey,
       );
 
       if (_ord) {
@@ -121,7 +126,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
             action: "STARTETHSWAP",
             reqpublickey: _ord.order.ethpublickey,
             erc20contract:
-            PoolName === "wminima"
+              PoolName === "wminima"
                 ? "0x" + _defaults.wMinima[_network].slice(2).toUpperCase()
                 : "0x" + _defaults.Tether[_network].slice(2).toUpperCase(),
             reqamount: _ord.orderPrice,
@@ -132,7 +137,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
             action: "STARTMINIMASWAP",
             reqpublickey: _ord.order.publickey,
             contractaddress:
-            PoolName === "wminima"
+              PoolName === "wminima"
                 ? "ETH:" +
                   "0x" +
                   _defaults.wMinima[_network].slice(2).toUpperCase()
@@ -152,11 +157,9 @@ const withConfirmation = (WrappedComponent, PoolName) => {
       }
     };
 
-    const handleShow = (
-      _orderType: "buy" | "sell"      
-    ) => {
+    const handleShow = (_orderType: "buy" | "sell") => {
       setShow(true);
-      setOrderContext({action: _orderType, pool: PoolName});
+      setOrderContext({ action: _orderType, pool: PoolName });
     };
     const handleClose = () => setShow(false);
 
@@ -171,13 +174,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
       <>
         <WrappedComponent {...props} onShowConfirm={handleShow} />
 
-        <AnimatedDialog
-          onClose={handleClose}
-          isOpen={show}
-          position="items-start mt-20"
-          extraClass="max-w-sm mx-auto"
-          dialogStyles="h-[400px] rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden"
-        >
+        <AnimatedDialog dismiss={handleClose} display={show}>
           <>
             <div className="flex justify-between items-center pr-4">
               <div className="grid grid-cols-[auto_1fr] ml-2">
@@ -187,24 +184,11 @@ const withConfirmation = (WrappedComponent, PoolName) => {
                     : "No matching order"}
                 </h3>
               </div>
-              <svg
-                onClick={handleClose}
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                strokeWidth="4.5"
-                stroke="currentColor"
-                fill="none"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-                <path d="M18 6l-12 12" />
-                <path d="M6 6l12 12" />
-              </svg>
+              <span onClick={handleClose}>
+                <CloseIcon fill="currentColor" />
+              </span>
             </div>
-            <div className="px-4 py-3 text-sm flex flex-col justify-between h-full">
+            <div className="px-4 py-3 text-sm flex flex-col justify-between">
               {values.order && (
                 <p>
                   You are {orderContext.action === "buy" ? "buying" : "selling"}{" "}
@@ -215,9 +199,7 @@ const withConfirmation = (WrappedComponent, PoolName) => {
                   <span className="font-mono tracking-wide">
                     {values.order}
                   </span>{" "}
-                  <span className="font-bold">
-                    {PoolName.toUpperCase()}{" "}
-                  </span>
+                  <span className="font-bold">{PoolName.toUpperCase()} </span>
                 </p>
               )}
               {values.order && (
@@ -295,23 +277,29 @@ const withConfirmation = (WrappedComponent, PoolName) => {
                       setPromptAllowance(true);
                     }}
                     type="button"
-                    className="mt-4 bg-violet-300 p-3 font-bold dark:text-black trailing-wider"
+                    className={`${primaryButtonStyle} mt-4`}
                   >
                     Approve
                   </button>
-                )}                
+                )}
 
-                {(!_allowanceLock && values.order) && (
+                {!_allowanceLock && values.order && (
                   <button
                     type="submit"
                     disabled={insufficientFunds}
                     onClick={handleConfirm}
-                    className={`bg-black tracking-wider disabled:bg-opacity-30 text-white font-bold dark:text-black ${
-                      orderContext.action === "buy" ? "bg-teal-500" : "bg-red-500"
-                    } ${insufficientFunds && "bg-yellow-500"}` }
+                    className={`${primaryButtonStyle} ${
+                      orderContext.action === "buy"
+                        ? "bg-teal-500"
+                        : "bg-red-500"
+                    } ${insufficientFunds && "bg-yellow-500"}`}
                   >
-                    {!insufficientFunds && orderContext.action === "buy" && "Buy"}
-                    {!insufficientFunds && orderContext.action === "sell" && "Sell"}                                        
+                    {!insufficientFunds &&
+                      orderContext.action === "buy" &&
+                      "Buy"}
+                    {!insufficientFunds &&
+                      orderContext.action === "sell" &&
+                      "Sell"}
                     {insufficientFunds && "Insufficient Funds"}
                   </button>
                 )}

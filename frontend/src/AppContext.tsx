@@ -28,6 +28,10 @@ interface IProps {
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
 
+  const [isDarkMode, setIsDarkMode] = useState(() => {
+    // Initialize state based on localStorage
+    return localStorage.getItem("dark-mode") === "true";
+  });
   // Loading App
   const [isWorking, setWorking] = useState(false);
   // App's navigation
@@ -58,6 +62,8 @@ const AppProvider = ({ children }: IProps) => {
   // Withdraw Modal
   const [_promptWithdraw, setPromptWithdraw] = useState(false);
 
+  const [_promptManualRefund, setPromptManualRefund] = useState(false);
+
   const [_allowanceLock, setAllowanceLock] = useState(false);
   // Allownace Modal
   const [_promptAllowance, setPromptAllowance] = useState(false);
@@ -67,10 +73,12 @@ const AppProvider = ({ children }: IProps) => {
   const [_promptReadMode, setReadMode] = useState<null | boolean>(null);
   // Set up API Keys
   const [_promptJsonRpcSetup, setPromptJsonRpcSetup] = useState<null | boolean>(
-    false
+    false,
   );
   // Set up API Keys
-  const [_promptFavorites, setPromptFavorites] = useState(false);
+  const [_promptFavorites, setPromptFavorites] = useState<
+    false | "write" | "read"
+  >(false);
   // Select Network
   const [_promptSelectNetwork, setSelectNetwork] = useState(false);
   // Settings
@@ -90,7 +98,7 @@ const AppProvider = ({ children }: IProps) => {
   });
   // Default ERC 20 Assets
   const [_defaultNetworks, setDefaultNetworks] = useState<Networks | null>(
-    null
+    null,
   );
   // Generated Key by MDS seedrandom generator
   const [_generatedKey, setGeneratedKey] = useState("");
@@ -109,13 +117,23 @@ const AppProvider = ({ children }: IProps) => {
   const [_mainBalance, setMainBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
-
+  console.log(_userDetails);
   // display db locked, ask for unlock
   const [_promptDatabaseLocked, setPromptDatabaseLocked] = useState(false);
 
   // Trigger an Ethereum balance update
   const [_triggerBalanceUpdate, setTriggerBalanceUpdate] = useState(false);
 
+  useEffect(() => {
+    // Apply or remove the 'dark' class on the document element
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+      localStorage.setItem("dark-mode", "true");
+    } else {
+      document.documentElement.classList.remove("dark");
+      localStorage.setItem("dark-mode", "false");
+    }
+  }, [isDarkMode]); // Re-run effect when isDarkMode changes
   useEffect(() => {
     if (loaded && loaded.current && _userKeys !== null && _userKeys.apiKey) {
       // Check if read or write mode
@@ -154,7 +172,7 @@ const AppProvider = ({ children }: IProps) => {
                       });
                     });
                   }
-                }
+                },
               );
             });
 
@@ -189,7 +207,7 @@ const AppProvider = ({ children }: IProps) => {
         const currentNetwork = await _provider.getNetwork();
         // Fetch assets according to the default network (different network, different assets)
         const defaultAssets: any = await sql(
-          `SELECT * FROM cache WHERE name = 'DEFAULTASSETS_${currentNetwork.chainId}'`
+          `SELECT * FROM cache WHERE name = 'DEFAULTASSETS_${currentNetwork.chainId}'`,
         );
 
         // if exists, set them in memory
@@ -217,7 +235,7 @@ const AppProvider = ({ children }: IProps) => {
           await sql(
             `INSERT INTO cache (name, data) VALUES ('DEFAULTASSETS_${
               currentNetwork.chainId
-            }', '${JSON.stringify({ assets: _d })}')`
+            }', '${JSON.stringify({ assets: _d })}')`,
           );
           setDefaultAssets({ assets: _d });
         }
@@ -240,20 +258,20 @@ const AppProvider = ({ children }: IProps) => {
             setWorking(true);
             // Initialize cache-ing table
             await sql(
-              `CREATE TABLE IF NOT EXISTS cache (name varchar(255), data longtext);`
+              `CREATE TABLE IF NOT EXISTS cache (name varchar(255), data longtext);`,
             );
 
             // Now we check if user has previously chosen a network, if not connect Sepolia
             const cachedNetwork: any = await sql(
-              `SELECT * FROM cache WHERE name = 'CURRENT_NETWORK'`
+              `SELECT * FROM cache WHERE name = 'CURRENT_NETWORK'`,
             );
             // Fetch all saved networks
             const defaultNetworks: any = await sql(
-              `SELECT * FROM cache WHERE name = 'DEFAULTNETWORKS'`
+              `SELECT * FROM cache WHERE name = 'DEFAULTNETWORKS'`,
             );
 
             const cachedApiKeys: any = await sql(
-              `SELECT * FROM cache WHERE name = 'API_KEYS'`
+              `SELECT * FROM cache WHERE name = 'API_KEYS'`,
             );
 
             // USER PREFERENCES
@@ -281,7 +299,7 @@ const AppProvider = ({ children }: IProps) => {
                       symbol: "SepoliaETH",
                     },
                   },
-                  JSON.parse(cachedApiKeys.DATA)
+                  JSON.parse(cachedApiKeys.DATA),
                 );
               } else {
                 // initialize it..
@@ -290,8 +308,8 @@ const AppProvider = ({ children }: IProps) => {
                 };
                 await sql(
                   `INSERT INTO cache (name, data) VALUES ('CURRENT_NETWORK', '${JSON.stringify(
-                    initializeFirstNetwork
-                  )}')`
+                    initializeFirstNetwork,
+                  )}')`,
                 );
                 setRPCNetwork(
                   initializeFirstNetwork.default,
@@ -309,7 +327,7 @@ const AppProvider = ({ children }: IProps) => {
                       symbol: "SepoliaETH",
                     },
                   },
-                  JSON.parse(cachedApiKeys.DATA)
+                  JSON.parse(cachedApiKeys.DATA),
                 );
               }
             } else {
@@ -338,8 +356,8 @@ const AppProvider = ({ children }: IProps) => {
                       chainId: "11155111",
                       symbol: "SepoliaETH",
                     },
-                  }
-                )}')`
+                  },
+                )}')`,
               );
               setDefaultNetworks({
                 mainnet: {
@@ -375,7 +393,7 @@ const AppProvider = ({ children }: IProps) => {
 
               if (comms.title === "DISABLEORDERBOOK") {
                 return notify(
-                  "Your order book has been disabled, you need more than 0.01 ETH to fulfill orders."
+                  "Your order book has been disabled, you need more than 0.01 ETH to fulfill orders.",
                 );
               }
 
@@ -403,7 +421,7 @@ const AppProvider = ({ children }: IProps) => {
                   comms.error.message.includes("insufficient funds for gas")
                 ) {
                   notify(
-                    "You need more ETH to complete your order, please top up first."
+                    "You need more ETH to complete your order, please top up first.",
                   );
                 } else {
                   notify(comms.error.message);
@@ -415,7 +433,7 @@ const AppProvider = ({ children }: IProps) => {
               if (comms.message && typeof comms.message === "string") {
                 if (comms.message.includes("insufficient funds for gas")) {
                   notify(
-                    "You need more ETH to complete your order, please top up first."
+                    "You need more ETH to complete your order, please top up first.",
                   );
                 } else {
                   notify(comms.message);
@@ -462,7 +480,7 @@ const AppProvider = ({ children }: IProps) => {
   const setRPCNetwork = (
     network: string,
     networks: Networks,
-    cachedApiKeys: any
+    cachedApiKeys: any,
   ) => {
     let rpcUrl = networks && networks[network] ? networks[network].rpc : null;
 
@@ -485,7 +503,7 @@ const AppProvider = ({ children }: IProps) => {
 
       const networkToConnect = new JsonRpcProvider(rpcUrl);
       const preAuth = btoa(
-        cachedApiKeys.apiKey + ":" + cachedApiKeys.apiKeySecret
+        cachedApiKeys.apiKey + ":" + cachedApiKeys.apiKeySecret,
       );
       setInfuraApiKeys(
         cachedApiKeys.apiKey,
@@ -498,7 +516,7 @@ const AppProvider = ({ children }: IProps) => {
               // alert("API Keys Work!\n\n" + JSON.stringify(gas));
             }
           });
-        }
+        },
       );
 
       setProvider(networkToConnect);
@@ -515,26 +533,26 @@ const AppProvider = ({ children }: IProps) => {
 
     // Fetch all saved networks
     const defaultNetworks: any = await sql(
-      `SELECT * FROM cache WHERE name = 'DEFAULTNETWORKS'`
+      `SELECT * FROM cache WHERE name = 'DEFAULTNETWORKS'`,
     );
 
     setRPCNetwork(name, JSON.parse(defaultNetworks.DATA), _userKeys);
 
     const rows = await sql(
-      `SELECT * FROM cache WHERE name = 'CURRENT_NETWORK'`
+      `SELECT * FROM cache WHERE name = 'CURRENT_NETWORK'`,
     );
 
     if (!rows) {
       await sql(
         `INSERT INTO cache (name, data) VALUES ('CURRENT_NETWORK', '${JSON.stringify(
-          updatedData
-        )}')`
+          updatedData,
+        )}')`,
       );
     } else {
       await sql(
         `UPDATE cache SET data = '${JSON.stringify(
-          updatedData
-        )}' WHERE name = 'CURRENT_NETWORK'`
+          updatedData,
+        )}' WHERE name = 'CURRENT_NETWORK'`,
       );
     }
 
@@ -558,14 +576,14 @@ const AppProvider = ({ children }: IProps) => {
     if (!rows) {
       await sql(
         `INSERT INTO cache (name, data) VALUES ('API_KEYS', '${JSON.stringify(
-          updatedData
-        )}')`
+          updatedData,
+        )}')`,
       );
     } else {
       await sql(
         `UPDATE cache SET data = '${JSON.stringify(
-          updatedData
-        )}' WHERE name = 'API_KEYS'`
+          updatedData,
+        )}' WHERE name = 'API_KEYS'`,
       );
     }
   };
@@ -586,7 +604,7 @@ const AppProvider = ({ children }: IProps) => {
         reject(
           resp && resp.message
             ? resp.message
-            : "Something went wrong, pls try again..."
+            : "Something went wrong, pls try again...",
         );
       });
     });
@@ -629,7 +647,7 @@ const AppProvider = ({ children }: IProps) => {
             });
           });
         }
-      }
+      },
     );
   };
 
@@ -686,8 +704,8 @@ const AppProvider = ({ children }: IProps) => {
     setPromptLogs((prevState) => !prevState);
   };
 
-  const promptFavorites = () => {
-    setPromptFavorites((prevState) => !prevState);
+  const promptFavorites = (mode: "read" | "write" | false) => {
+    setPromptFavorites(mode);
   };
 
   const promptDatabaseLocked = () => {
@@ -708,6 +726,9 @@ const AppProvider = ({ children }: IProps) => {
 
         orders,
         getAllOrders,
+
+        _promptManualRefund,
+        setPromptManualRefund,
 
         _triggerBalanceUpdate,
         setTriggerBalanceUpdate,
@@ -798,6 +819,9 @@ const AppProvider = ({ children }: IProps) => {
         setAllHasMore,
         ordersHasMore,
         setOrdersHasMore,
+
+        isDarkMode,
+        setIsDarkMode,
       }}
     >
       {children}

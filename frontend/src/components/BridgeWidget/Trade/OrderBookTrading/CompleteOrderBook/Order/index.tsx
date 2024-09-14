@@ -13,7 +13,7 @@ const Order = ({ data }: IProps) => {
   const { _favorites: favorites, promptFavorites } = useContext(appContext);
   const [contact, setContact] = useState<Favorite | null>(null);
   const [_currentNavigation, _] = useState<"orders" | "balance" | "keys">(
-    "orders"
+    "orders",
   );
 
   function findMatchingPublickey(uid, array) {
@@ -39,8 +39,8 @@ const Order = ({ data }: IProps) => {
         {!contact && (
           <div className="flex justify-start">
             <Link
-              to={`/favorite/${data.data.publickey}/add`}
-              onClick={promptFavorites}
+              to={`/fav?uid=${data.data.publickey}&action=add`}
+              onClick={() => promptFavorites("read")}
               className={`transition-opacity pl-2 p-0 text-[#1B1B1B]  dark:text-neutral-400 opacity-0 group-hover:opacity-100 flex justify-center hover:text-neutral-800`}
             >
               <AddIcon fill="currentColor" />

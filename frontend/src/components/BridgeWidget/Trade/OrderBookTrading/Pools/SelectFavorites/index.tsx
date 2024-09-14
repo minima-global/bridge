@@ -2,6 +2,8 @@ import { FormikContextType, FormikValues, useFormikContext } from "formik";
 import AnimatedDialog from "../../../../../UI/AnimatedDialog";
 import { useEffect, useState } from "react";
 import FavoriteIcon from "../../../../../UI/Icons/FavoriteIcon";
+import CloseIcon from "../../../../../UI/Icons/CloseIcon";
+import { primaryButtonStyle } from "../../../../../../styles";
 
 const SelectFavorites = () => {
   const formik: FormikContextType<FormikValues> = useFormikContext();
@@ -28,13 +30,10 @@ const SelectFavorites = () => {
   return (
     <>
       <AnimatedDialog
-        onClose={() => {
+        dismiss={() => {
           toggleInfo();
         }}
-        isOpen={info}
-        position="items-start mt-20"
-        extraClass="max-w-sm mx-auto"
-        dialogStyles="h-[400px] rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden"
+        display={info}
       >
         <>
           <div className="flex justify-between items-center pr-4">
@@ -44,30 +43,17 @@ const SelectFavorites = () => {
                 Toggle Favorites Feature
               </h3>
             </div>
-            <svg
-              onClick={toggleInfo}
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              strokeWidth="4.5"
-              stroke="currentColor"
-              fill="none"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-              <path d="M18 6l-12 12" />
-              <path d="M6 6l12 12" />
-            </svg>
+            <span onClick={toggleInfo}>
+              <CloseIcon fill="currentColor" />{" "}
+            </span>
           </div>
-          <div className="px-4 py-3 text-sm flex flex-col justify-between h-full">
-            <p>
-              This feature will set up your trades with your favorite counter-parties{" "}
-              <b>only</b>. Do you want to switch this feature{" "}
+          <div className="px-4 py-3 text-sm flex flex-col justify-between">
+            <p className="mt-4">
+              This feature will set up your trades with your favorite
+              counter-parties <b>only</b>. Do you want to switch this feature{" "}
               {!favorites ? "on?" : "off?"}
             </p>
-            <div className="grid grid-cols-[1fr_auto] pb-3">
+            <div className="grid grid-cols-[1fr_auto] pb-3 mt-4">
               <div />
               <button
                 type="button"
@@ -75,9 +61,9 @@ const SelectFavorites = () => {
                   toggleFavorite();
                   toggleInfo();
                 }}
-                className="bg-black text-white font-bold dark:text-black dark:bg-teal-300"
+                className={primaryButtonStyle}
               >
-                Yes
+                {!favorites ? "Turn on" : "Turn off"}
               </button>
             </div>
           </div>

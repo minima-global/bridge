@@ -4,10 +4,11 @@ import MainActivity from "../MainActivity";
 import SettingsIcon from "../UI/Icons/SettingsIcon";
 import FavoriteIcon from "../UI/Icons/FavoriteIcon";
 import HelpIcon from "../UI/Icons/HelpIcon";
-import AppThemeSwitch from "../AppThemeSwitch";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const { promptSettings, promptFavorites, promptHelp } = useContext(appContext);
+  const navigate = useNavigate();
+  const { promptSettings, promptHelp } = useContext(appContext);
   return (
     <>
       <header
@@ -41,19 +42,16 @@ const Header = () => {
               className="flex items-center"
             >
               <MainActivity />
-
-              <span className="pr-2 text-red-400" onClick={promptFavorites}>
+              <span
+                className="pr-2 text-red-400"
+                onClick={() => navigate("/fav")}
+              >
                 <FavoriteIcon fill="currentColor" />
               </span>
-              
               <span className="pr-2 text-teal-600" onClick={promptHelp}>
                 <HelpIcon fill="currentColor" />
               </span>
-              
-              <span className="pr-2" onClick={promptHelp}>
-                <AppThemeSwitch />
-              </span>
-              
+
               <span
                 onClick={promptSettings}
                 className="text-violet-300 hover:animate-spin"

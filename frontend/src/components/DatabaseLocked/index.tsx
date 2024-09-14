@@ -1,26 +1,19 @@
 import { useContext } from "react";
 import { appContext } from "../../AppContext";
 import AnimatedDialog from "../UI/AnimatedDialog";
+import { primaryButtonStyle } from "../../styles";
 
 const DatabaseLocked = () => {
-  const { _promptDatabaseLocked } =
-    useContext(appContext);
-
-    if (!_promptDatabaseLocked) {
-        return null;
-    }
+  const { _promptDatabaseLocked } = useContext(appContext);
 
   return (
     <AnimatedDialog
-      position="items-start mt-20"
-      extraClass="max-w-sm mx-auto"
-      dialogStyles="h-[400px] rounded-lg !shadow-teal-800 !shadow-sm overflow-hidden"
-      isOpen={_promptDatabaseLocked}
-      onClose={() => {
+      display={_promptDatabaseLocked}
+      dismiss={() => {
         if (window.navigator.userAgent.includes("Minima Browser")) {
-            // @ts-ignore
-            Android.showTitleBar();
-          }
+          // @ts-ignore
+          Android.showTitleBar();
+        }
       }}
     >
       <>
@@ -28,9 +21,9 @@ const DatabaseLocked = () => {
           <h3 className="my-auto font-bold">Your node is locked</h3>
         </div>
 
-        <div className="h-full flex flex-col justify-between">
+        <div className="h-full flex flex-col">
           <div className="px-2">
-            <p className="font-bold text-sm my-3">
+            <p className="text-sm my-3">
               Your node is currently locked and this MiniDapp requires it to be
               unlocked. Please unlock and refresh this page.
             </p>
@@ -43,7 +36,7 @@ const DatabaseLocked = () => {
                 window.location.reload();
               }}
               type="button"
-              className="disabled:bg-gray-500 hover:bg-opacity-80 w-full bg-teal-300 text-white  dark:text-black font-bold"
+              className={`${primaryButtonStyle} w-full`}
             >
               Reload
             </button>
@@ -53,6 +46,5 @@ const DatabaseLocked = () => {
     </AnimatedDialog>
   );
 };
-
 
 export default DatabaseLocked;
