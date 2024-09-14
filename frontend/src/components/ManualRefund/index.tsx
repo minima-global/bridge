@@ -83,10 +83,8 @@ const ManualRefund = () => {
         decodedInput;
 
       // Now calculate the contractId using the extracted parameters
-      const abiEncoded = ethers.AbiCoder.defaultAbiCoder().encode(
-        ["bytes32"],
-        [_hashlock],
-      );
+      // Use `solidityPack` to mimic Solidity's `abi.encodePacked`
+      const contractId = ethers.solidityPackedSha256(["bytes32"], [_hashlock]);
 
       // check contract expiry..
       const latestBlock = await _provider.getBlock("latest");
@@ -96,7 +94,7 @@ const ManualRefund = () => {
         expired = true;
       }
 
-      const contractId = ethers.keccak256(abiEncoded);
+      // const contractId = ethers.keccak256(abiEncoded);
       setContract({
         contractId: contractId,
         timeLock: _timelock,

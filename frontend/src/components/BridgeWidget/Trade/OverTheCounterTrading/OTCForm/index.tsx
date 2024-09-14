@@ -213,7 +213,7 @@ const OTCForm = () => {
             }
           />
 
-          {!_allowanceLock && (
+          {_allowanceLock && (
             <div className="my-8 px-4 dark:px-0">
               <button
                 // disabled={true}

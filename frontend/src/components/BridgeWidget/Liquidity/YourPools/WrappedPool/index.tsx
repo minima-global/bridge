@@ -10,7 +10,6 @@ import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js";
 import useAllowanceChecker from "../../../../../hooks/useAllowanceChecker.js";
 
 const WrappedPool = () => {
-
   useAllowanceChecker();
 
   const { notify, _allowanceLock, setPromptAllowance } = useContext(appContext);
@@ -88,7 +87,12 @@ const WrappedPool = () => {
                 if (
                   new Decimal(val).equals(_currentOrderBook?.wminima.sell) &&
                   parent.buy &&
-                  new Decimal(parent.buy).equals(_currentOrderBook?.wminima.buy) && new Decimal(parent.minimum).equals(_currentOrderBook?.wminima.minimum)
+                  new Decimal(parent.buy).equals(
+                    _currentOrderBook?.wminima.buy,
+                  ) &&
+                  new Decimal(parent.minimum).equals(
+                    _currentOrderBook?.wminima.minimum,
+                  )
                 ) {
                   throw new Error("Enter new values");
                 }
@@ -133,7 +137,12 @@ const WrappedPool = () => {
                 if (
                   new Decimal(val).equals(_currentOrderBook?.wminima.sell) &&
                   parent.buy &&
-                  new Decimal(parent.buy).equals(_currentOrderBook?.wminima.buy) && new Decimal(parent.minimum).equals(_currentOrderBook?.wminima.minimum)
+                  new Decimal(parent.buy).equals(
+                    _currentOrderBook?.wminima.buy,
+                  ) &&
+                  new Decimal(parent.minimum).equals(
+                    _currentOrderBook?.wminima.minimum,
+                  )
                 ) {
                   throw new Error("Enter new values");
                 }
@@ -172,8 +181,10 @@ const WrappedPool = () => {
             try {
               const isWholeNumber = new Decimal(val).mod(1).equals(0);
               if (!isWholeNumber) {
-                throw new Error("Can have only whole numbers for Minimum trades");
-              }           
+                throw new Error(
+                  "Can have only whole numbers for Minimum trades",
+                );
+              }
 
               return true;
             } catch (error) {
@@ -295,13 +306,16 @@ const WrappedPool = () => {
                         className="bg-transparent w-full rounded font-mono focus:outline-none truncate text-center"
                         placeholder="0"
                       />
-                    </div>                    
+                    </div>
                   </div>
                 </div>
                 <div className="relative grid grid-cols-[1fr_auto]">
                   <div className="pl-4 text-center">
                     <label className="text-xs font-bold mb-1 text-opacity-50">
-                      Maximum Minima Trade <span className="text-yellow-600 dark:text-yellow-300 tracking-tighter">(LOCKED)</span>
+                      Maximum Minima Trade{" "}
+                      <span className="text-yellow-600 dark:text-yellow-300 tracking-tighter">
+                        (LOCKED)
+                      </span>
                     </label>
                     <input
                       readOnly
@@ -318,7 +332,7 @@ const WrappedPool = () => {
                       className="bg-transparent w-full font-mono rounded focus:outline-none truncate text-center text-yellow-600 dark:text-yellow-300"
                       placeholder="0"
                     />
-                  </div>                  
+                  </div>
                 </div>
               </div>
             </div>
@@ -351,7 +365,7 @@ const WrappedPool = () => {
             </div>
           )}
 
-          {!_allowanceLock && (
+          {_allowanceLock && (
             <div className="mt-4 px-4 mb-3">
               {!values.enable && (
                 <button

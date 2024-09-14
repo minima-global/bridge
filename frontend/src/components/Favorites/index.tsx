@@ -37,10 +37,10 @@ const Favorites = () => {
   }, [uid, form]);
 
   useEffect(() => {
-    if (loaded && loaded.current) {
+    if (loaded && loaded.current && location.pathname.includes("/fav")) {
       getAndSetFavorites();
     }
-  }, []);
+  }, [location]);
 
   const handleSelectAll = (evt) => {
     const checked = evt.target.checked;

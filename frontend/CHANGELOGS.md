@@ -174,3 +174,7 @@
 ##### [2.14.0] - 13 Sept 24
 
 - Bug fixes
+
+##### [2.14.2] - 13 Sept 24
+
+- Tweak the parser for contract id

@@ -76,7 +76,9 @@ const AppProvider = ({ children }: IProps) => {
     false,
   );
   // Set up API Keys
-  const [_promptFavorites, setPromptFavorites] = useState<false | 'write' | 'read'>(false);
+  const [_promptFavorites, setPromptFavorites] = useState<
+    false | "write" | "read"
+  >(false);
   // Select Network
   const [_promptSelectNetwork, setSelectNetwork] = useState(false);
   // Settings
@@ -115,7 +117,7 @@ const AppProvider = ({ children }: IProps) => {
   const [_mainBalance, setMainBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
-
+  console.log(_userDetails);
   // display db locked, ask for unlock
   const [_promptDatabaseLocked, setPromptDatabaseLocked] = useState(false);
 
@@ -702,7 +704,7 @@ const AppProvider = ({ children }: IProps) => {
     setPromptLogs((prevState) => !prevState);
   };
 
-  const promptFavorites = (mode: "read"|"write"|false) => {
+  const promptFavorites = (mode: "read" | "write" | false) => {
     setPromptFavorites(mode);
   };
 
