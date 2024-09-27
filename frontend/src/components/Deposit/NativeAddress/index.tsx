@@ -38,7 +38,7 @@ const NativeAddress = () => {
     return <ProgressIcon />;
   }
   return (
-    <div className="my-4">
+    <div className="max-w-sm mx-auto my-4 px-2">
       <div className="flex flex-col gap-3 max-w-sm mx-auto">
         <Formik
           initialValues={{ amount: 0 }}

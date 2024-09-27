@@ -40,7 +40,7 @@ const EthereumAddress = () => {
   };
 
   return (
-    <div className="my-4">
+    <div className="max-w-sm mx-auto my-4 px-2">
       <div className="grid grid-cols-[1fr_auto_1fr]">
         <div />
         <div className="flex flex-col gap-3 items-center">
