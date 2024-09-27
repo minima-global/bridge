@@ -365,7 +365,7 @@ const WrappedPool = () => {
             </div>
           )}
 
-          {_allowanceLock && (
+          {!_allowanceLock && (
             <div className="mt-4 px-4 mb-3">
               {!values.enable && (
                 <button

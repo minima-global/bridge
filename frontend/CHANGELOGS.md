@@ -175,6 +175,8 @@
 
 - Bug fixes
 
-##### [2.14.2] - 13 Sept 24
+##### [2.14.4] - 27 Sept 24
 
 - Tweak the parser for contract id
+- Version Number
+- Fix bug on liquidity page
