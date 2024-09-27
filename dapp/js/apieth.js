@@ -338,6 +338,9 @@ function _checkCanCollectETHCoin(userdets, htlclog, minimablock, callback){
 				
 				//We can collect
 				MDS.log("Can Collect ETH HTLC coin as we know secret for hash "+hash);
+				// MDS.notify("Collecting "+htlclog.amount+" ETH TOKEN");
+				var myToken = htlclog.tokencontract.toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
+				MDS.notify(`Collecting ${htlclog.amount} ${myToken} for ${htlclog.requestamount} MINIMA`);
 				_collectETHHTLCCoin(htlclog, hash, secret, function(resp){});	
 			});
 			

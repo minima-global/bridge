@@ -356,6 +356,10 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 				
 				//We can collect
 				MDS.log("Can Collect Minima HTLC coin as we know secret for hash "+hash);
+				var requestedtoken = reqtoken.TOKEN.split("ETH:")[1].toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
+				MDS.notify(`Collecting ${coin.amount} MINIMA for ${reqamount.REQAMOUNT} ${requestedtoken}`);
+
+				// MDS.notify("Collecting" + coin.amount + " MINIMA");
 				_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){});
 			});
 			

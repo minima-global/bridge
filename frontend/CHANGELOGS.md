@@ -173,10 +173,15 @@
 
 ##### [2.14.0] - 13 Sept 24
 
-- Bug fixes
-
-##### [2.14.4] - 27 Sept 24
-
 - Tweak the parser for contract id
 - Version Number
 - Fix bug on liquidity page
+
+##### [2.14.4] - 27 Sept 24
+
+- Fix bug on liquidity page
+- Add version number to bottom of page
+
+##### [2.15.3] - 27 Sept 24
+
+- Notify on trades

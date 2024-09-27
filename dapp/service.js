@@ -321,6 +321,10 @@ MDS.init(function (msg) {
           sendFrontendMSG(comms.action, ethresp);
         });
       } else if (comms.action == "STARTMINIMASWAP") {
+
+        var requestedtoken = comms.contractaddress.split("ETH:")[1].toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
+        MDS.notify(`Locking up ${comms.sendamount} MINIMA for ${comms.requestamount} ${requestedtoken}`);
+
         startMinimaSwap(
           USER_DETAILS,
           comms.sendamount,
@@ -343,6 +347,10 @@ MDS.init(function (msg) {
           },
         );
       } else if (comms.action == "STARTETHSWAP") {
+
+        var erc20contract = comms.erc20contract.toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
+        MDS.notify(`Locking up ${comms.amount} ${erc20contract} for ${comms.reqamount} MINIMA`);
+
         startETHSwap(
           USER_DETAILS,
           comms.reqpublickey,
