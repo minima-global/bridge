@@ -13,7 +13,7 @@ const Navigation = () => {
   return (
     <div className="mx-4 sm:mx-0">
       <nav className="bg-violet-800 rounded-lg p-1 max-w-sm mx-auto">
-        <ul className="grid grid-cols-3 gap-1">
+        <ul className="grid grid-cols-2 gap-1">
           <li>
             <button
               onClick={() => setCurrentNavigation("balance")}
@@ -34,15 +34,7 @@ const Navigation = () => {
             >
               Trade
             </button>
-          </li>
-          <li>
-            <button
-              onClick={() => setCurrentNavigation("liquidity")}
-              className={`w-full ${isActive("liquidity")}`}
-            >
-              Liquidity
-            </button>
-          </li>
+          </li>          
         </ul>
       </nav>
     </div>

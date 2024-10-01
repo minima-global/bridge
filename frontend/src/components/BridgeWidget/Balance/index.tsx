@@ -8,12 +8,13 @@ import { useWalletContext } from "../../../providers/WalletProvider/WalletProvid
 
 import { differenceInSeconds } from "date-fns";
 import EthereumIcon from "../../UI/Icons/EthereumIcon";
-import { ArrowDownIcon, ArrowLeft, ArrowUpIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowLeft, ArrowUpIcon, Wallet2 } from "lucide-react";
 import WithdrawingNative from "../../Withdraw/WithdrawingNative";
 import NativeAddress from "../../Deposit/NativeAddress";
 import NativeMinima from "../../NativeMinima";
 import EthereumAddress from "../../Deposit/EthereumAddress";
 import WithdrawingERC20 from "../../Withdraw/WithdrawingERC20";
+import { Wallet } from "ethers";
 
 const Balance = () => {
   const { loaded, _currentNavigation, _minimaBalance, getWalletBalance } =
@@ -113,19 +114,17 @@ const Balance = () => {
 
   return (
     <div className="mx-4 md:mx-0 text-left">
-      <div className="my-4">
-        <div className="flex">
-          <div className="flex gap-1 items-center flex-grow">
-            <span className="text-violet-500">
-              <WalletIcon />
-            </span>
-            <h1 className="text-lg dark:text-violet-100 font-bold">
-              Swap Wallet
-            </h1>
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-full">
+            <Wallet2 className="w-6 h-6 text-violet-600 dark:text-violet-400" />
           </div>
-          <InfoTooltip message="Your native and Ethereum wallet balances are exclusive to this application." />
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            Swap Wallet Balance
+          </h1>
         </div>
-        <hr className="border border-neutral-450 dark:border-teal-300 mt-2 w-full mx-auto" />
+
+        <div className="relative h-1 w-32 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
       </div>
 
       <div className="bg-violet-100 border-l-4 border-violet-500 text-violet-700 p-4 mb-4 rounded">

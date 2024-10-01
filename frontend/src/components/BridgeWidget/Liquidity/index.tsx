@@ -1,33 +1,55 @@
 import { useContext } from "react";
 import { appContext } from "../../../AppContext";
-import PoolIcon from "../../UI/Icons/PoolIcon/index.js";
+import { Droplets } from "lucide-react";
 import YourPools from "./YourPools/index.js";
 
 const Liquidity = () => {
-    const { _currentNavigation } = useContext(appContext);
+  const { _currentNavigation } = useContext(appContext);
 
   if (_currentNavigation !== "liquidity") {
     return null;
   }
 
   return (
-    <div className="mx-4 md:mx-0 text-left">
-      <div className="my-4">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-1 items-center">
-            <PoolIcon />
-            <h1 className="text-lg dark:text-white font-bold">Liquidity</h1>
+    <div className="max-w-4xl mx-auto px-4 md:px-0">
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-full">
+            <Droplets className="w-6 h-6 text-violet-600 dark:text-violet-400" />
           </div>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            Add Liquidity
+          </h1>
         </div>
-        <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />
+        <div className="relative h-1 w-32 bg-violet-600 dark:bg-violet-400 rounded-full"></div>
       </div>
-      <div>
-        <p className="text-sm mb-3">You can choose to provide liquidity to the orderbook for other users to trade with. All  <b>native Minima</b> and <b>WMINIMA</b> (or <b>USDT</b>) in your Swap wallet will be made available for other users. You will make a margin based on your buy/sell prices. Trades will only execute at your chosen buy/sell prices.</p>
+
+      <div className="p-0">
+        <div className="bg-violet-100 border-l-4 border-violet-500 text-violet-700 p-4 mb-4 rounded">
+          <p className="text-sm font-medium leading-relaxed text-left">
+            You can choose to provide liquidity to the orderbook for other users
+            to trade with. All{" "}
+            <span className="font-semibold text-blue-600 dark:text-blue-400">
+              native Minima
+            </span>{" "}
+            and{" "}
+            <span className="font-semibold text-blue-600 dark:text-blue-400">
+              WMINIMA
+            </span>{" "}
+            (or{" "}
+            <span className="font-semibold text-blue-600 dark:text-blue-400">
+              USDT
+            </span>
+            ) in your Swap wallet will be made available for other users. You
+            will make a margin based on your buy/sell prices. Trades will only
+            execute at your chosen buy/sell prices.
+          </p>
+        </div>
+
         <YourPools />
       </div>
     </div>
   );
-}
-
+};
 
 export default Liquidity;

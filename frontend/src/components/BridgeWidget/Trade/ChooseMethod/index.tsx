@@ -1,8 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../../../AppContext";
-import TradeIcon from "../../../UI/Icons/TradeIcon";
-import OTCIcon from "../../../UI/Icons/OTCIcon";
-import OrderBookIcon from "../../../UI/Icons/OrderBookIcon";
+import { Book, Users, ArrowRightLeft } from "lucide-react";
 import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
 
 const ChooseMethod = () => {
@@ -11,59 +9,57 @@ const ChooseMethod = () => {
   useAllowanceChecker();
 
   return (
-    <>
-      <div className="my-4">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-1 items-center">
-            <TradeIcon />
-            <h1 className="text-lg dark:text-white font-bold">Select Method</h1>
+    <div className="max-w-4xl mx-auto">
+      <div className="mb-8">
+        <div className="flex items-center gap-4 mb-4">
+          <div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-full">
+            <ArrowRightLeft className="w-6 h-6 text-violet-600 dark:text-violet-400" />
           </div>
+          <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+            Select Trading Method
+          </h1>
         </div>
-        <hr className="border border-gray-500 dark:border-teal-300 mb-6 mt-2 w-full mx-auto" />
+
+        <div className="relative h-1 w-32 bg-purple-600 dark:bg-purple-400 rounded-full"></div>
       </div>
-      <div className="grid md:grid-cols-[1fr_auto_1fr] md:divide-x divide-violet-300">
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setCurrentTradeWindow("orderbook")}
-            className="hover:outline md:hover:mr-1 transition-all dark:hover:outline-yellow-300 text-center flex items-center justify-center flex-col gap-2 font-bold dark:bg-[#1B1B1B]"
-          >
-            <OrderBookIcon /> 
-            <p>Order Book</p>
-            <span className="text-xs">Trade with other users who are providing liquidity</span>
-          </button>
-        </div>
 
-        <div className="hidden md:flex items-center justify-center">
-          <hr className="border border-violet-400 h-6 w-1 absolute left-0 top-0 animate-pulse block md:hidden" />
-          <span className="mx-4 text-sm text-black dark:text-yellow-300 font-semibold block md:hidden">
-            Or
-          </span>
-          <hr className="border border-violet-400 h-6 w-1 absolute left-0 bottom-0 animate-pulse block md:hidden" />
-        </div>
+      <div className="grid md:grid-cols-2 gap-8 p-6 bg-white dark:bg-gray-800 rounded-lg shadow-sm">
+        <TradeOption
+          icon={
+            <Book className="w-12 h-12 mb-4 text-purple-600 dark:text-purple-400" />
+          }
+          title="Order Book"
+          description="Trade with other users who are providing liquidity"
+          onClick={() => setCurrentTradeWindow("orderbook")}
+        />
 
-        <div className="flex md:hidden items-center justify-center">
-          <hr className="border border-violet-400 my-6 w-[120px] animate-pulse" />
-          <span className="mx-4 text-sm text-black dark:text-yellow-300 font-semibold">
-            Or
-          </span>
-          <hr className="border border-violet-400 my-6 w-[120px] animate-pulse" />
-        </div>
-
-        <div className="flex justify-center">
-          <button
-            type="button"
-            onClick={() => setCurrentTradeWindow("otc")}
-            className="hover:outline md:hover:ml-1 transition-all dark:hover:outline-yellow-300 text-center flex items-center justify-center flex-col gap-2 font-bold dark:bg-[#1B1B1B]"
-          >
-            <OTCIcon /> 
-            <p>OTC</p>
-            <span className="text-xs">Trade Over-the-Counter with your chosen counterparty</span>
-          </button>
-        </div>
+        <TradeOption
+          icon={
+            <Users className="w-12 h-12 mb-4 text-purple-600 dark:text-purple-400" />
+          }
+          title="OTC"
+          description="Trade Over-the-Counter with your chosen counterparty"
+          onClick={() => setCurrentTradeWindow("otc")}
+        />
       </div>
-    </>
+    </div>
   );
 };
+
+const TradeOption = ({ icon, title, description, onClick }) => (
+  <button
+    type="button"
+    onClick={onClick}
+    className="flex flex-col items-center justify-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg transition-all duration-300 hover:shadow-xl hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50"
+  >
+    {icon}
+    <h2 className="text-xl font-bold mb-2 text-gray-800 dark:text-white">
+      {title}
+    </h2>
+    <p className="text-sm text-center text-gray-600 dark:text-gray-300">
+      {description}
+    </p>
+  </button>
+);
 
 export default ChooseMethod;
