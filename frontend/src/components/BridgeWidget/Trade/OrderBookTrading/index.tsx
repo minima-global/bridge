@@ -1,64 +1,90 @@
-import { useContext } from "react";
-import { appContext } from "../../../../AppContext";
-import SwapIcon from "../../../UI/Icons/SwapIcon";
-import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
-import OrderBookForm from "./OrderBookForm";
-import OrderHistory from "./OrderHistory";
-import BackIcon from "../../../UI/Icons/BackIcon";
-import CompleteOrderBook from "./CompleteOrderBook";
+import { useContext } from "react"
+import { appContext } from "../../../../AppContext"
+import useAllowanceChecker from "../../../../hooks/useAllowanceChecker"
+import OrderBookForm from "./OrderBookForm"
+import OrderHistory from "./OrderHistory"
+import CompleteOrderBook from "./CompleteOrderBook"
+import { ArrowLeft, History, Users, PlusCircle, AlertTriangle } from "lucide-react"
 
 const OrderBookTrading = () => {
-  const { _currentTradeWindow, setCurrentTradeWindow} = useContext(appContext);
+  const { _currentTradeWindow, setCurrentTradeWindow, setCurrentNavigation, _allowanceLock, setPromptAllowance } = useContext(appContext)
 
-  useAllowanceChecker();
+  useAllowanceChecker()
 
   if (_currentTradeWindow !== "orderbook") {
-    return null;
+    return null
+  }
+
+  const handleAddLiquidity = () => {
+    setCurrentNavigation("liquidity")
   }
 
   return (
-    <div className="md:mx-0 text-left">
-      <div className="my-4">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-1 items-center">
-            <span onClick={() => setCurrentTradeWindow(null)}>
-              <BackIcon fill="currentColor" />
-            </span>
-            <SwapIcon />
-            <h1 className="text-lg dark:text-white font-bold">Order Book</h1>
+    <div className="max-w-4xl mx-auto px-4 md:px-0">
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setCurrentTradeWindow(null)}
+              className="p-2 rounded-full bg-violet-100 dark:bg-violet-900 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-800 transition-colors"
+              aria-label="Go back"
+            >
+              <ArrowLeft className="w-6 h-6" />
+            </button>
+            <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
+              Order Book
+            </h1>
           </div>
+          <button
+            onClick={handleAddLiquidity}
+            className="flex items-center gap-2 px-4 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-opacity-50"
+          >
+            <PlusCircle className="w-5 h-5" />
+            <span>Add Liquidity</span>
+          </button>
         </div>
-        <hr className="border border-gray-500 dark:border-teal-300 mb-1 mt-2 w-full mx-auto" />
-
-        <div className="mt-4"></div>
+        <div className="relative h-1 w-48 bg-violet-600 dark:bg-violet-400 rounded-full"></div>
       </div>
-      <div className="grid">
-        <OrderBookForm />
 
-        <div className="flex items-center justify-center">
-          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
-          <span className="mx-4 text-sm text-black dark:text-white font-bold">
-            Orders
-          </span>
-          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
+      {_allowanceLock && (
+        <div className="mb-8 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-md" role="alert">
+          <div className="flex items-center">
+            <AlertTriangle className="w-6 h-6 mr-2" />
+            <p className="font-bold">Token Allowance Required</p>
+          </div>
+          <p className="mt-2">To start trading, please allow allowance on your tokens. This is a one-time action.</p>
+          <button 
+            className="mt-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out"
+            onClick={() => setPromptAllowance(true)}
+          >
+            Approve Allowance
+          </button>
         </div>
-        
+      )}
 
-        <OrderHistory />
-        
-        <div className="flex items-center justify-center">
-          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
-          <span className="mx-4 text-[10px] md:text-sm text-center text-black dark:text-white font-bold">
+      <div className="space-y-8">
+        <section className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <OrderBookForm />
+        </section>
+
+        <section className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+            <History className="w-5 h-5 mr-2 text-violet-600 dark:text-violet-400" />
+            Order History
+          </h2>
+          <OrderHistory />
+        </section>
+
+        <section className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
+            <Users className="w-5 h-5 mr-2 text-violet-600 dark:text-violet-400" />
             Liquidity Providers
-          </span>
-          <hr className="border border-violet-400 my-6 w-[90px] md:w-[120px]" />
-        </div>
-
-        <CompleteOrderBook />
-
+          </h2>
+          <CompleteOrderBook />
+        </section>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default OrderBookTrading;
+export default OrderBookTrading

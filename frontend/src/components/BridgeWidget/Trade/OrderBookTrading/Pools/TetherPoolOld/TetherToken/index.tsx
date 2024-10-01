@@ -1,33 +1,45 @@
-import Decimal from "decimal.js";
-import { useTokenStoreContext } from "../../../../../../../providers/TokenStoreProvider";
-import { formatUnits } from "ethers";
-import { useWalletContext } from "../../../../../../../providers/WalletProvider/WalletProvider";
-import RefreshIcon from "../../../../../../UI/Icons/RefreshIcon";
-interface Props {
-  extraClass?: string;
-}
-const TetherToken = ({extraClass}: Props) => {
-  const { tokens } = useTokenStoreContext();
-  const { _network } = useWalletContext();
-  const relevantToken = tokens.find((t) => t.name === "Tether");
-  
-  return (
-    <div className={`flex items-center gap-2 ${extraClass ? extraClass : ''}`}>
-      <p className="font-mono text-sm truncate bg-transparent focus:outline-none">
-        {!relevantToken && <span className="text-black dark:text-teal-300"><RefreshIcon extraClass="w-[12px] h-[16px] mx-auto animate-spin" fill="currentColor" /></span>}
-        {relevantToken &&
-          new Decimal(
-            formatUnits(relevantToken!.balance, _network === 'sepolia' ? 18 : relevantToken!.decimals)
-          ).toFixed(0)}
-      </p>
-      <img
-        alt="token"
-        src="./assets/tether.svg"
-        className="rounded-full w-[36px] h-[36px] my-auto"
-      />
-      
-    </div>
-  );
-};
+import Decimal from "decimal.js"
+import { useTokenStoreContext } from "../../../../../../../providers/TokenStoreProvider"
+import { useWalletContext } from "../../../../../../../providers/WalletProvider/WalletProvider"
+import { formatUnits } from "ethers"
+import { Loader } from "lucide-react"
 
-export default TetherToken;
+interface Props {
+  extraClass?: string
+}
+
+const TetherToken = ({ extraClass }: Props) => {
+  const { tokens } = useTokenStoreContext()
+  const { _network } = useWalletContext()
+  const relevantToken = tokens.find((t) => t.name === "Tether")
+
+  const isLoading = !relevantToken || !relevantToken.balance
+  const balance = relevantToken && relevantToken.balance
+    ? new Decimal(formatUnits(relevantToken.balance, _network === 'sepolia' ? 18 : relevantToken.decimals)).toFixed(2)
+    : null
+
+  return (
+    <div className={`flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 md:max-w-max rounded-full py-2 px-4 ${extraClass || ''}`}>
+      <img
+        alt="Tether"
+        src="./assets/tether.svg"
+        className="w-10 h-10 rounded-full"
+      />
+      <div>
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">Tether</p>
+        {isLoading ? (
+          <div className="flex items-center space-x-2">
+            <Loader className="w-4 h-4 text-blue-500 animate-spin" />
+            <span className="text-sm text-gray-400">Loading...</span>
+          </div>
+        ) : (
+          <p className="text-lg font-bold text-gray-900 dark:text-white">
+            {balance} <span className="text-sm font-normal">USDT</span>
+          </p>
+        )}
+      </div>
+    </div>
+  )
+}
+
+export default TetherToken

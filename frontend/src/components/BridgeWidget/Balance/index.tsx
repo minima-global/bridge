@@ -15,6 +15,7 @@ import NativeMinima from "../../NativeMinima";
 import EthereumAddress from "../../Deposit/EthereumAddress";
 import WithdrawingERC20 from "../../Withdraw/WithdrawingERC20";
 import { Wallet } from "ethers";
+import EthereumBalance from "../../Ethereum";
 
 const Balance = () => {
   const { loaded, _currentNavigation, _minimaBalance, getWalletBalance } =
@@ -230,12 +231,8 @@ const Balance = () => {
               </p>
             </div>
           )}
-          <div className="flex items-center my-2">
-            <span className="text-violet-500">
-              <EthereumIcon fill="currentColor" />
-            </span>
-            <p className="text-3xl font-bold">{etherBalance} ETH</p>
-          </div>
+         
+         <EthereumBalance />
 
           {!showBackButtonEthereum && <TokenList />}
 

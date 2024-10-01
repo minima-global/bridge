@@ -273,7 +273,6 @@ const withConfirmation = (WrappedComponent, PoolName) => {
                 {_allowanceLock && (
                   <button
                     onClick={() => {
-                      handleClose();
                       setPromptAllowance(true);
                     }}
                     type="button"

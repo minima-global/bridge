@@ -4,66 +4,64 @@ import NativeMinima from "../../../../../NativeMinima";
 import InputWrapper from "../../../../../UI/FormComponents/InputWrapper";
 import Charts from "../../Charts";
 import WrappedToken from "../WrappedPoolOld/WrappedToken";
+import {
+  ArrowRightLeft,
+  ChevronDown,
+  ChevronUp,
+  BarChart2,
+  ArrowDownUp,
+} from "lucide-react";
 
 const WrappedPool = ({ onShowConfirm }) => {
-  const [f, setF] = useState(false);
+  const [focused, setFocused] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   const formik: FormikContextType<FormikValues> = useFormikContext();
   const { dirty, errors, touched, values, getFieldProps } = formik;
   const { favorites } = values;
 
   return (
-    <div
-      className={`bg-neutral-100 pt-4 mt-4 dark:bg-[#1B1B1B] ${
-        f &&
-        "shadow-lg dark:outline dark:shadow-none dark:outline-yellow-300 rounded-lg"
-      }`}
-    >
-      <Charts fav={favorites} book="wminima" type="buy" />
-      <Charts fav={favorites} book="wminima" type="sell" />
-
-      <form className={`pb-8`}>
-        <div className="flex items-center mt-5 justify-center pb-1 sm:pb-0 mx-auto gap-2">
-          <NativeMinima display={true} />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mx-2"
-          >
-            <path d="M7 10h14l-4 -4" />
-            <path d="M17 14h-14l4 4" />
-          </svg>
-          <WrappedToken extraClass="flex-col-reverse gap-0 text-sm" />
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+      <div className="p-6">
+        <div className="flex flex-col md:flex-row items-center justify-center space-y-4 md:space-y-0 md:space-x-4 mb-4">
+          <div className="w-full md:w-auto">
+            <NativeMinima />
+          </div>
+          <div className="flex justify-center">
+            <div className="bg-violet-100 dark:bg-violet-900 rounded-full p-2">
+              <ArrowDownUp className="w-6 h-6 text-violet-500 md:hidden" />
+              <ArrowRightLeft className="w-6 h-6 text-violet-500 hidden md:block" />
+            </div>
+          </div>
+          <div className="w-full md:w-auto">
+            <WrappedToken />
+          </div>
         </div>
 
-        <div className="mx-4">
-          <InputWrapper
-            orderbook={true}
-            orderbookFocus={f}
-            errors={
-              errors && errors.native && touched && touched.native
-                ? errors.native
-                : false
-            }
-            wrapperStyle="mt-2"
-            inputProps={{ placeholder: "0.0", ...getFieldProps("native") }}
-            label="Amount of Minima"
-            setOrderFocus={setF}
-          />
-        </div>
-        <div className="grid grid-cols-2 gap-3 px-3">
+        <InputWrapper
+          orderbook={true}
+          orderbookFocus={focused}
+          errors={
+            errors && errors.native && touched && touched.native
+              ? errors.native
+              : false
+          }
+          wrapperStyle="mb-6"
+          inputProps={{
+            placeholder: "0.0",
+            ...getFieldProps("native"),
+            className: "text-lg font-medium",
+          }}
+          label="Amount of Minima"
+          setOrderFocus={setFocused}
+        />
+
+        <div className="grid grid-cols-2 gap-4">
           <button
             disabled={!!errors.native || !dirty}
             onClick={() => onShowConfirm("buy")}
             type="button"
-            className="p-3 tracking-wider font-bold bg-teal-500 disabled:bg-opacity-10 disabled:text-white disabled:dark:text-[#1B1B1B]"
+            className="py-3 px-6 rounded-lg font-bold text-white bg-green-500 hover:bg-green-600 disabled:bg-gray-300 disabled:text-gray-500 transition-colors duration-200"
           >
             Buy
           </button>
@@ -71,12 +69,38 @@ const WrappedPool = ({ onShowConfirm }) => {
             disabled={!!errors.native || !dirty}
             onClick={() => onShowConfirm("sell")}
             type="button"
-            className="p-3 tracking-wider font-bold bg-red-500 disabled:bg-opacity-10 disabled:text-white disabled:dark:text-[#1B1B1B]"
+            className="py-3 px-6 rounded-lg font-bold text-white bg-red-500 hover:bg-red-600 disabled:bg-gray-300 disabled:text-gray-500 transition-colors duration-200"
           >
             Sell
           </button>
         </div>
-      </form>
+      </div>
+
+      <div className="border-t border-gray-200 dark:border-gray-700">
+        <button
+          onClick={() => setShowAdvanced(!showAdvanced)}
+          className="bg-transparent w-full py-3 px-6 text-left text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none transition-colors duration-200"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <BarChart2 className="w-5 h-5 mr-2 text-violet-500" />
+              Advanced View
+            </div>
+            {showAdvanced ? (
+              <ChevronUp className="w-5 h-5 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-5 h-5 text-gray-500" />
+            )}
+          </div>
+        </button>
+      </div>
+
+      {showAdvanced && (
+        <div className="p-6 bg-gray-50 dark:bg-gray-900">
+          <Charts fav={favorites} book="wminima" type="buy" />
+          <Charts fav={favorites} book="wminima" type="sell" />
+        </div>
+      )}
     </div>
   );
 };

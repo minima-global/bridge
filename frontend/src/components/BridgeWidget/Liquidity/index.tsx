@@ -1,10 +1,10 @@
 import { useContext } from "react";
 import { appContext } from "../../../AppContext";
-import { Droplets } from "lucide-react";
+import { ArrowLeft, Droplets } from "lucide-react";
 import YourPools from "./YourPools/index.js";
 
 const Liquidity = () => {
-  const { _currentNavigation } = useContext(appContext);
+  const { _currentNavigation, setCurrentNavigation } = useContext(appContext);
 
   if (_currentNavigation !== "liquidity") {
     return null;
@@ -14,9 +14,13 @@ const Liquidity = () => {
     <div className="max-w-4xl mx-auto px-4 md:px-0">
       <div className="mb-8">
         <div className="flex items-center gap-4 mb-4">
-          <div className="p-3 bg-violet-100 dark:bg-violet-900 rounded-full">
-            <Droplets className="w-6 h-6 text-violet-600 dark:text-violet-400" />
-          </div>
+          <button
+            onClick={() => setCurrentNavigation("trade")}
+            className="p-2 rounded-full bg-violet-100 dark:bg-violet-900 text-violet-600 dark:text-violet-400 hover:bg-violet-200 dark:hover:bg-violet-800 transition-colors"
+            aria-label="Go back"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
           <h1 className="text-2xl font-bold text-gray-800 dark:text-white">
             Add Liquidity
           </h1>
