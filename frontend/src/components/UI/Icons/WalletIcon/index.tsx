@@ -2,12 +2,12 @@
 const WalletIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    className="icon icon-tabler icon-tabler-wallet fill-teal-600"
+    className="icon icon-tabler icon-tabler-wallet"
     width="24"
     height="20"
     viewBox="0 0 24 24"
     strokeWidth="2.5"
-    stroke="#86efac"
+    stroke="currentColor"
     fill="none"
     strokeLinecap="round"
     strokeLinejoin="round"

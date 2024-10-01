@@ -4,6 +4,7 @@ import QRCode from "react-qr-code";
 import WalletAddress from "../WalletAddress";
 import ProgressIcon from "../../UI/Progress";
 import PrivateKey from "../PrivateKey";
+import { Eye, EyeOff, Copy, AlertTriangle } from "lucide-react";
 
 const EthereumAddress = () => {
   const { _userDetails } = useContext(appContext);
@@ -11,17 +12,24 @@ const EthereumAddress = () => {
   const [viewKey, setViewKey] = useState(false);
   const [remainingTime, setRemainingTime] = useState(5000);
   const [held, setHeld] = useState(false);
-  const timeoutRef: any = useRef(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   if (_userDetails === null) {
-    return <ProgressIcon />;
+    return (
+      <div className="flex justify-center items-center h-64">
+        <ProgressIcon />
+      </div>
+    );
   }
 
   const handleStart = () => {
     timeoutRef.current = setInterval(() => {
       setRemainingTime((prevTime) => {
         if (prevTime <= 0) {
-          clearInterval(timeoutRef.current);
+          if (timeoutRef.current) {
+            clearInterval(timeoutRef.current); // Stop the interval after 3 calls
+            timeoutRef.current = null; // Reset the intervalRef to null
+          }
           setHeld(true);
           setViewKey(true);
           return 0;
@@ -34,56 +42,70 @@ const EthereumAddress = () => {
 
   const handleEnd = () => {
     setViewKey(false);
-    clearInterval(timeoutRef.current);
+    if (timeoutRef.current) {
+      clearInterval(timeoutRef.current); // Stop the interval after 3 calls
+      timeoutRef.current = null; // Reset the intervalRef to null
+    }
     setRemainingTime(5000);
     setHeld(false);
   };
 
   return (
-    <div className="max-w-sm mx-auto my-4 px-2">
-      <div className="grid grid-cols-[1fr_auto_1fr]">
-        <div />
-        <div className="flex flex-col gap-3 items-center">
+    <div className="max-w-sm mx-auto my-8 px-4">
+      <div className="bg-violet-50 dark:bg-gray-800 rounded-lg p-6">
+        <div className="flex flex-col items-center gap-6">
           <QRCode
             className="rounded-lg"
             size={200}
             value={_userDetails.ethaddress}
           />
 
-          <div className="w-max mx-auto my-4">
+          <div className="w-full">
             {!viewKey && (
-              <WalletAddress _address={_userDetails.ethaddress} fullAddress />
+              <div className="flex justify-center">
+                <WalletAddress _address={_userDetails.ethaddress} fullAddress />
+              </div>
             )}
-            {!viewKey && (
+            {!viewKey ? (
               <button
                 onMouseDown={handleStart}
                 onMouseUp={handleEnd}
                 onMouseLeave={handleEnd}
                 onTouchStart={handleStart}
                 onTouchEnd={handleEnd}
-                className="mt-2 font-bold w-full rounded-lg text-white bg-purple-500"
+                className="mt-4 font-bold w-full py-3 rounded-lg text-white bg-purple-600 hover:bg-purple-700 transition-colors duration-200 flex items-center justify-center gap-2"
               >
-                {held
-                  ? `Hold to reveal... (${Math.ceil(remainingTime / 1000)}s)`
-                  : `View private key`}
+                {held ? (
+                  <>
+                    <Eye className="w-5 h-5" />
+                    Hold to reveal... ({Math.ceil(remainingTime / 1000)}s)
+                  </>
+                ) : (
+                  <>
+                    <EyeOff className="w-5 h-5" />
+                    View private key
+                  </>
+                )}
               </button>
-            )}
-            {viewKey && (
-              <div className="my-2">
+            ) : (
+              <div className="mt-4 space-y-4">
                 <PrivateKey fullAddress />
                 <div
-                  className="max-w-xs my-2 mx-auto bg-red-700 border border-red-800 text-red-100 px-4 py-3 rounded relative"
+                  className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 rounded"
                   role="alert"
                 >
-                  <strong className="font-bold mr-1">Warning</strong>
-                  <span className="block sm:inline">
+                  <div className="flex items-center">
+                    <AlertTriangle className="w-5 h-5 mr-2" />
+                    <strong className="font-bold">Warning:</strong>
+                  </div>
+                  <p className="text-sm mt-2">
                     Never share your private key with anyone! Doing so could
                     result in the loss of your funds.
-                  </span>
+                  </p>
                 </div>
                 <button
-                  onClick={() => handleEnd()}
-                  className="w-full bg-violet-500 text-white font-bold"
+                  onClick={handleEnd}
+                  className="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 rounded-lg transition-colors duration-200"
                 >
                   Done
                 </button>
@@ -91,12 +113,12 @@ const EthereumAddress = () => {
             )}
           </div>
 
-          <p className="text-sm max-w-[236px] text-center">
-            Send Ethereum and ERC-20 tokens to this address <br /> (e.g
-            wMINIMA/USDT)
+          <p className="text-sm text-center text-violet-600 dark:text-gray-300">
+            Send Ethereum and ERC-20 tokens to this address
+            <br />
+            (e.g wMINIMA/USDT)
           </p>
         </div>
-        <div />
       </div>
     </div>
   );

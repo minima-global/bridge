@@ -4,7 +4,7 @@ import { useWalletContext } from "../../providers/WalletProvider/WalletProvider"
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
-import RefreshIcon from "../UI/Icons/RefreshIcon";
+import {RefreshCwIcon} from "lucide-react";
 import Decimal from "decimal.js";
 
 const TokenList = () => {
@@ -14,8 +14,7 @@ const TokenList = () => {
     _triggerBalanceUpdate,
     getWalletBalance,
   } = useContext(appContext);
-  const { _balance, _network, _poolPrice, getEthereumBalance } =
-    useWalletContext();
+  const { _network, _poolPrice, getEthereumBalance } = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   if (_currentNavigation !== "balance") {
@@ -36,24 +35,34 @@ const TokenList = () => {
       <div className="grid grid-cols-[1fr_auto]">
         <h3 className="font-bold mb-2">Ethereum Tokens</h3>
         <span onClick={handlePullBalance} className={`dark:text-sky-500`}>
-          <RefreshIcon
-            extraClass={`${_triggerBalanceUpdate && "animate-spin"}`}
-            fill="currentColor"
+          <RefreshCwIcon
+            className={`${_triggerBalanceUpdate && "animate-spin" } w-6 h-4`}            
           />
         </span>
       </div>
 
       {_triggerBalanceUpdate && (
-        <p className="text-center text-xs font-bold text-opacity-50 animate-pulse">
-          Fetching balance...
-        </p>
+        <ul className="space-y-2">
+          {[...Array(2)].map((_, index) => (
+            <li
+              key={index}
+              className="shadow-sm dark:shadow-none grid grid-cols-[auto_1fr] bg-neutral-100 dark:bg-[#1B1B1B] items-center rounded-md p-2"
+            >
+              <div className="w-[36px] h-[36px] bg-gray-200 dark:bg-gray-700 rounded-full animate-pulse" />
+              <div className="ml-2 space-y-2">
+                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2 animate-pulse" />
+                <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4 animate-pulse" />
+              </div>
+            </li>
+          ))}
+        </ul>
       )}
       {!_triggerBalanceUpdate && (
         <ul>
           {tokens.map((token) => (
             <li
               key={token.address}
-              className="shadow-sm dark:shadow-none grid grid-cols-[auto_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
+              className="shadow-sm dark:shadow-none grid grid-cols-[auto_1fr] bg-neutral-200 items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
             >
               {_defaults["wMinima"][_network] === token.address ? (
                 <img
@@ -97,34 +106,6 @@ const TokenList = () => {
               </div>
             </li>
           ))}
-          <li className="grid grid-cols-[auto_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32">
-              <g fill="none" fillRule="evenodd">
-                <circle cx="16" cy="16" r="16" fill="#627EEA" />
-                <g fill="#FFF" fillRule="nonzero">
-                  <path fillOpacity=".602" d="M16.498 4v8.87l7.497 3.35z" />
-                  <path d="M16.498 4L9 16.22l7.498-3.35z" />
-                  <path
-                    fillOpacity=".602"
-                    d="M16.498 21.968v6.027L24 17.616z"
-                  />
-                  <path d="M16.498 27.995v-6.028L9 17.616z" />
-                  <path
-                    fillOpacity=".2"
-                    d="M16.498 20.573l7.497-4.353-7.497-3.348z"
-                  />
-                  <path fillOpacity=".602" d="M9 16.22l7.498 4.353v-7.701z" />
-                </g>
-              </g>
-            </svg>
-
-            <div className="flex justify-between ml-2">
-              <div>
-                <h3 className="font-bold ">Ethereum</h3>
-                <p className="font-mono text-sm">{_balance}</p>
-              </div>
-            </div>
-          </li>
         </ul>
       )}
     </div>

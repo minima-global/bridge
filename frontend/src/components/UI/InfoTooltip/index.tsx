@@ -1,54 +1,58 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react'
+import { InfoIcon } from 'lucide-react'
 
-const InfoTooltip = ({ message }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
+interface InfoTooltipProps {
+  message: string
+}
 
-  const handleMouseEnter = () => {
-    setShowTooltip(true);
-  };
+export default function InfoTooltip({ message }: InfoTooltipProps) {
+  const [showTooltip, setShowTooltip] = useState(false)
+  const tooltipRef = useRef<HTMLDivElement>(null)
+  const iconRef = useRef<SVGSVGElement>(null)
 
-  const handleMouseLeave = () => {
-    setShowTooltip(false);
-  };
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (tooltipRef.current && !tooltipRef.current.contains(event.target as Node) &&
+          iconRef.current && !iconRef.current.contains(event.target as Node)) {
+        setShowTooltip(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   return (
-    <div className="inline-block" onMouseEnter={handleMouseEnter} onMouseLeave={handleMouseLeave}>
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        className="icon icon-tabler icon-tabler-info-square"
-        width="20"
-        height="16"
-        viewBox="0 0 24 24"
-        strokeWidth="2.5"
-        stroke="currentColor"
-        fill="none"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path stroke="none" d="M0 0h24v24H0z" fill="none" />
-        <path d="M12 9h.01" />
-        <path d="M3 5a2 2 0 0 1 2 -2h14a2 2 0 0 1 2 2v14a2 2 0 0 1 -2 2h-14a2 2 0 0 1 -2 -2v-14z" />
-        <path d="M11 12h1v4h1" />
-      </svg>
+    <div className="relative inline-block">
+      <InfoIcon
+        ref={iconRef}
+        className="w-5 h-5 text-violet-500 cursor-help focus:outline-none"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+        onClick={() => setShowTooltip(!showTooltip)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            setShowTooltip(!showTooltip)
+          }
+        }}
+        aria-label="More information"
+      />
       {showTooltip && (
         <div
-          style={{
-            position: 'absolute',
-            top: '5%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.8)',
-            color: '#ffffff',
-            padding: '8px',
-            borderRadius: '4px',
-            zIndex: '999',
-          }}
+          ref={tooltipRef}
+          role="tooltip"
+          className="absolute z-[9999] bg-neutral-100 dark:bg-[#1b1b1b] text-black dark:text-white shadow-neutral-300 dark:shadow-black w-64 p-2 px-4 text-sm bg-popover text-popover-foreground rounded-md shadow-md translate-y-[100%] right-[100%] bottom-full mb-2"
         >
-          {message}
+          <div className="relative">
+            <div className="absolute -bottom-1 left-1/2 -ml-1 w-2 h-2 bg-popover transform rotate-45" />
+            {message}
+          </div>
         </div>
       )}
     </div>
-  );
-};
-
-export default InfoTooltip;
+  )
+}

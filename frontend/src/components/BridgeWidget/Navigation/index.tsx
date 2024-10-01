@@ -1,44 +1,52 @@
-import { useContext } from "react";
-import { appContext } from "../../../AppContext";
+import { useContext } from "react"
+import { appContext } from "../../../AppContext"
 
 const Navigation = () => {
-  const { _currentNavigation, setCurrentNavigation, _currentTradeWindow, setCurrentTradeWindow } = useContext(appContext);
+  const { _currentNavigation, setCurrentNavigation, _currentTradeWindow, setCurrentTradeWindow } = useContext(appContext)
 
   const isActive = (_current: string) => {
     return _currentNavigation === _current
-      ? "bg-violet-500 rounded-lg text-white dark:text-black font-bold hover:text-white dark:hover:text-black py-2"
-      : "text-violet-300 hover:text-violet-400 cursor-pointer my-auto opacity-50 duration-100";
-  };
+      ? "bg-violet-500 rounded-lg text-white dark:text-black font-bold py-2 px-4"
+      : "text-violet-300 hover:text-violet-400 cursor-pointer opacity-50 py-2 px-4 transition-colors duration-200"
+  }
 
   return (
     <div className="mx-4 sm:mx-0">
-      <nav className="bg-violet-800 rounded-lg grid grid-cols-3 max-w-sm mx-auto text-center">
-        <a
-          onClick={() => setCurrentNavigation("balance")}
-          className={`${isActive("balance")}`}
-        >
-          Balance
-        </a>
-        <a
-          onClick={() => {
-            if (_currentTradeWindow !== null && _currentNavigation === 'trade') {
-              setCurrentTradeWindow(null);
-            }
-            setCurrentNavigation("trade");
-          }}
-          className={`${isActive("trade")}`}
-        >
-          Trade
-        </a>
-        <a
-          onClick={() => setCurrentNavigation("liquidity")}
-          className={`${isActive("liquidity")}`}
-        >
-          Liquidity
-        </a>
+      <nav className="bg-violet-800 rounded-lg p-1 max-w-sm mx-auto">
+        <ul className="grid grid-cols-3 gap-1">
+          <li>
+            <button
+              onClick={() => setCurrentNavigation("balance")}
+              className={`w-full ${isActive("balance")}`}
+            >
+              Balance
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => {
+                if (_currentTradeWindow !== null && _currentNavigation === 'trade') {
+                  setCurrentTradeWindow(null)
+                }
+                setCurrentNavigation("trade")
+              }}
+              className={`w-full ${isActive("trade")}`}
+            >
+              Trade
+            </button>
+          </li>
+          <li>
+            <button
+              onClick={() => setCurrentNavigation("liquidity")}
+              className={`w-full ${isActive("liquidity")}`}
+            >
+              Liquidity
+            </button>
+          </li>
+        </ul>
       </nav>
     </div>
-  );
-};
+  )
+}
 
-export default Navigation;
+export default Navigation

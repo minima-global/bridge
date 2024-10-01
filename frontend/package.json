@@ -1,7 +1,7 @@
 {
   "name": "miniswap",
   "private": true,
-  "version": "2.15.5",
+  "version": "2.16.0",
   "description": "Swap tokens OTC or Order book DEX and provide liquidity",
   "type": "module",
   "homepage": ".",
@@ -30,6 +30,7 @@
     "ethers": "^6.12.0",
     "formik": "^2.4.6",
     "lodash": "^4.17.21",
+    "lucide-react": "^0.446.0",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-confetti": "^6.1.0",

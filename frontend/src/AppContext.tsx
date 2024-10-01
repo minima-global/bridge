@@ -117,7 +117,7 @@ const AppProvider = ({ children }: IProps) => {
   const [_mainBalance, setMainBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
-  console.log(_userDetails);
+  
   // display db locked, ask for unlock
   const [_promptDatabaseLocked, setPromptDatabaseLocked] = useState(false);
 
@@ -713,7 +713,7 @@ const AppProvider = ({ children }: IProps) => {
   };
 
   const notify = (message: string) =>
-    toast(message, { position: "bottom-right", theme: "dark" });
+    toast(message, { position: "top-center", theme: isDarkMode ? "dark" : "light" });
 
   // const globalNotify = (message: string) =>
   //   toast(message, { position: "top-center", theme: "dark" });

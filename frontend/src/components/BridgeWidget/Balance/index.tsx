@@ -1,19 +1,36 @@
 import { useContext, useEffect, useState } from "react";
 import { appContext } from "../../../AppContext";
 import TokenList from "../../TokenList";
-import NativeMinima from "../../NativeMinima";
 import InfoTooltip from "../../UI/InfoTooltip";
 import WalletIcon from "../../UI/Icons/WalletIcon";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../providers/WalletProvider/WalletProvider";
 
 import { differenceInSeconds } from "date-fns";
+import EthereumIcon from "../../UI/Icons/EthereumIcon";
+import { ArrowDownIcon, ArrowLeft, ArrowUpIcon } from "lucide-react";
+import WithdrawingNative from "../../Withdraw/WithdrawingNative";
+import NativeAddress from "../../Deposit/NativeAddress";
+import NativeMinima from "../../NativeMinima";
+import EthereumAddress from "../../Deposit/EthereumAddress";
+import WithdrawingERC20 from "../../Withdraw/WithdrawingERC20";
 
 const Balance = () => {
-  const { loaded, _currentNavigation, promptDeposit, promptWithdraw, _minimaBalance, getWalletBalance } = useContext(appContext);
-  const {_balance: etherBalance, callBalanceForApp } = useWalletContext();
-  
-  const [runningLow, setRunningLow] = useState({minima: false, ethereum: false, disableEthereum: false});
+  const { loaded, _currentNavigation, _minimaBalance, getWalletBalance } =
+    useContext(appContext);
+  const { _balance: etherBalance, callBalanceForApp } = useWalletContext();
+
+  const [promptDepositNative, setPromptDepositNative] = useState(false);
+  const [promptDepositEthereum, setPromptDepositEthereum] = useState(false);
+
+  const [promptWithdrawNative, setPromptWithdrawNative] = useState(false);
+  const [promptWithdrawEthereum, setPromptWithdrawEthereum] = useState(false);
+
+  const [runningLow, setRunningLow] = useState({
+    minima: false,
+    ethereum: false,
+    disableEthereum: false,
+  });
 
   const handlePullBalance = () => {
     (window as any).MDS.keypair.get("_lastethbalancecheck", (resp) => {
@@ -27,36 +44,30 @@ const Balance = () => {
 
         // Check if the difference is more than 60 seconds
         if (differenceInSeconds(currentTime, lastCheck) > 60) {
-          
-          (window as any).MDS.keypair.set("_lastethbalancecheck", JSON.stringify({timestamp: now}), () => {})
+          (window as any).MDS.keypair.set(
+            "_lastethbalancecheck",
+            JSON.stringify({ timestamp: now }),
+            () => {}
+          );
 
           callBalanceForApp();
-        }             
+        }
       } else {
         callBalanceForApp();
-        
+
         const now = new Date().getTime();
-        
-        (window as any).MDS.keypair.set("_lastethbalancecheck", JSON.stringify({timestamp: now}), () => {})
+
+        (window as any).MDS.keypair.set(
+          "_lastethbalancecheck",
+          JSON.stringify({ timestamp: now }),
+          () => {}
+        );
       }
-    })
-  }
+    });
+  };
 
   useEffect(() => {
     if (_currentNavigation === "balance") {
-      if (_minimaBalance && new Decimal(_minimaBalance.confirmed).lt(1)) {
-        setRunningLow(prevState => ({...prevState, minima: true}));
-      } 
-      
-      if (etherBalance && new Decimal(etherBalance).lt(0.01)) {
-        setRunningLow(prevState => ({...prevState, disableEthereum: true}));
-      }
-      
-      if (etherBalance && new Decimal(etherBalance).lt(0.05)) {
-        setRunningLow(prevState => ({...prevState, ethereum: true}));
-
-      }
-    
       // let's fetch Minima balance again.. (since RPC is free.. just keep calling on every change)
       getWalletBalance();
       // Get Ethereum balance every 60s
@@ -66,42 +77,198 @@ const Balance = () => {
     }
   }, [_currentNavigation, loaded]);
 
+  useEffect(() => {
+    if (_currentNavigation === "balance") {
+      if (_minimaBalance && new Decimal(_minimaBalance.confirmed).lt(1)) {
+        setRunningLow((prevState) => ({ ...prevState, minima: true }));
+      }
+
+      if (etherBalance && new Decimal(etherBalance).lt(0.01)) {
+        setRunningLow((prevState) => ({ ...prevState, disableEthereum: true }));
+      }
+
+      if (etherBalance && new Decimal(etherBalance).lt(0.05)) {
+        setRunningLow((prevState) => ({ ...prevState, ethereum: true }));
+      }
+    }
+  }, [_currentNavigation, _minimaBalance, etherBalance]);
+
+  const handleNativeDismiss = () => {
+    setPromptDepositNative(false);
+    setPromptWithdrawNative(false);
+  };
+
+  const handleEthereumDismiss = () => {
+    setPromptDepositEthereum(false);
+    setPromptWithdrawEthereum(false);
+  };
+
   if (_currentNavigation !== "balance") {
     return null;
   }
 
+  const showBackButtonNative = promptDepositNative || promptWithdrawNative;
+  const showBackButtonEthereum =
+    promptDepositEthereum || promptWithdrawEthereum;
+
   return (
     <div className="mx-4 md:mx-0 text-left">
       <div className="my-4">
-        <div className="flex justify-between items-center">
-          <div className="flex gap-1 items-center">
-            <WalletIcon />
-            <h1 className="text-lg dark:text-white font-bold">Swap Wallet</h1>
+        <div className="flex">
+          <div className="flex gap-1 items-center flex-grow">
+            <span className="text-violet-500">
+              <WalletIcon />
+            </span>
+            <h1 className="text-lg dark:text-violet-100 font-bold">
+              Swap Wallet
+            </h1>
           </div>
-          <InfoTooltip message="The Swap wallet is separated from your main Native Minima and Ethereum Wallets." />
+          <InfoTooltip message="Your native and Ethereum wallet balances are exclusive to this application." />
         </div>
-        <hr className="border border-gray-500 dark:border-teal-300 mt-2 w-full mx-auto" />
+        <hr className="border border-neutral-450 dark:border-teal-300 mt-2 w-full mx-auto" />
       </div>
-      <div>
-        {runningLow.minima && <div className="bg-yellow-600 dark:bg-yellow-300 text-white dark:text-black rounded-lg px-3 py-2 my-3"><p className="text-xs font-bold">You are running low on Minima, you should top up to fulfill orders</p></div>}
-      </div>
-      <div>
-        <h3 className="font-bold mb-2">Native</h3>
-        <NativeMinima display={false} />
-      </div>
-      <hr className="border border-violet-400 my-6"></hr>
-      {runningLow.ethereum && <div className="bg-yellow-600 dark:bg-yellow-300 text-white dark:text-black rounded-lg px-3 py-2 my-3">
-        {!runningLow.disableEthereum&&<p className="text-xs font-bold">You are running low on Ethereum {"(< 0.05)"}, you should top up to fulfill orders</p>}        
-        {!!runningLow.disableEthereum&&<p className="text-xs font-bold">You are low on funds and your order book has been disabled automatically</p>}        
-        
-      </div>}
 
-      <TokenList />
+      <div className="bg-violet-100 border-l-4 border-violet-500 text-violet-700 p-4 mb-4 rounded">
+        <p className="text-sm font-medium">
+          All tokens deposited will be used to provide liquidity and fund swap
+          contracts for seamless trading.
+        </p>
+      </div>
 
-      <div className="mx-auto max-w-sm my-8">        
-        <div className="grid grid-cols-2 gap-2">
-          <button onClick={promptDeposit} className="font-bold bg-teal-600 text-white dark:text-black">Deposit</button>
-          <button onClick={promptWithdraw} className="font-bold bg-orange-600 text-white dark:text-black">Withdraw</button>
+      <div className="grid gap-2">
+        <div className="bg-white dark:bg-[#1b1b1b] text-card-foreground rounded-lg shadow-sm p-6">
+          <div className="space-y-4">
+            {showBackButtonNative && (
+              <button
+                type="button"
+                onClick={handleNativeDismiss}
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </button>
+            )}
+            <h2 className="text-xl font-semibold mb-4">
+              {!showBackButtonNative && "Minima Balance"}
+              {!promptDepositNative &&
+                promptWithdrawNative &&
+                "Withdraw From Swap Wallet"}
+              {promptDepositNative &&
+                !promptWithdrawNative &&
+                "Deposit To Swap Wallet"}
+            </h2>
+          </div>
+          {runningLow.minima && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-4 rounded">
+              <p className="text-sm font-medium">
+                You are running low on Minima. Top up to fulfill orders.
+              </p>
+            </div>
+          )}
+          <div className="my-4">
+            <NativeMinima />
+          </div>
+
+          {promptDepositNative && (
+            <div className="my-8">
+              <NativeAddress />
+            </div>
+          )}
+          {promptWithdrawNative && (
+            <div className="my-8">
+              <WithdrawingNative />
+            </div>
+          )}
+
+          {!promptDepositNative && !promptWithdrawNative && (
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={() => setPromptDepositNative(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-teal-500 text-white py-2 rounded-md hover:bg-primary/90 transition-colors"
+              >
+                <ArrowDownIcon className="w-4 h-4" />
+                Deposit
+              </button>
+              <button
+                onClick={() => setPromptWithdrawNative(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 rounded-md hover:bg-secondary/90 transition-colors"
+              >
+                <ArrowUpIcon className="w-4 h-4" />
+                Withdraw
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="bg-white dark:bg-[#1b1b1b] text-card-foreground rounded-lg shadow-sm p-6">
+          <div className="space-y-4">
+            {showBackButtonEthereum && (
+              <button
+                type="button"
+                onClick={handleEthereumDismiss}
+                className="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-purple-700 bg-purple-100 hover:bg-purple-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 transition-colors duration-200"
+              >
+                <ArrowLeft className="h-4 w-4 mr-2" />
+                Back
+              </button>
+            )}
+            <h2 className="text-xl font-semibold mb-4">
+              {!showBackButtonEthereum && "Ethereum Balance"}
+              {!promptDepositEthereum &&
+                promptWithdrawEthereum &&
+                "Withdraw From Swap Wallet"}
+              {promptDepositEthereum &&
+                !promptWithdrawEthereum &&
+                "Deposit To Swap Wallet"}
+            </h2>
+          </div>
+          {runningLow.ethereum && (
+            <div className="bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 my-4 rounded">
+              <p className="text-sm font-medium">
+                {runningLow.disableEthereum
+                  ? "You are running on low on Ethereum (<0.01) and your order book has been disabled automatically.  Deposit some Ethereum to your wallet and re-activate your liquidity."
+                  : "You are running low on Ethereum (< 0.05). Top up to fulfill orders."}
+              </p>
+            </div>
+          )}
+          <div className="flex items-center my-2">
+            <span className="text-violet-500">
+              <EthereumIcon fill="currentColor" />
+            </span>
+            <p className="text-3xl font-bold">{etherBalance} ETH</p>
+          </div>
+
+          {!showBackButtonEthereum && <TokenList />}
+
+          {promptDepositEthereum && (
+            <div>
+              <EthereumAddress />
+            </div>
+          )}
+          {promptWithdrawEthereum && (
+            <div className="my-8">
+              <WithdrawingERC20 />
+            </div>
+          )}
+
+          {!showBackButtonEthereum && (
+            <div className="flex gap-4 mt-6">
+              <button
+                onClick={() => setPromptDepositEthereum(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-teal-500 text-white py-2 rounded-md hover:bg-primary/90 transition-colors"
+              >
+                <ArrowDownIcon className="w-4 h-4" />
+                Deposit
+              </button>
+              <button
+                onClick={() => setPromptWithdrawEthereum(true)}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-500 text-white py-2 rounded-md hover:bg-secondary/90 transition-colors"
+              >
+                <ArrowUpIcon className="w-4 h-4" />
+                Withdraw
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -1,6 +1,6 @@
 import { getAddress, parseUnits } from "ethers";
 import { Formik } from "formik";
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import * as yup from "yup";
 import ProgressIcon from "../UI/Progress";
 import SelectAsset from "../SelectAsset";
@@ -10,24 +10,23 @@ import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { _defaults } from "../../constants";
 import { Wallet } from "ethers";
 import Decimal from "decimal.js";
-import { dismissButtonStyle } from "../../styles";
+import { primaryButtonStyle } from "../../styles";
 
 type FormState = {
   type: "native" | "erc20";
   submitForm: (values: any) => any;
-  onCancel: () => void;
 };
-const Transfer = ({ type, submitForm, onCancel }: FormState) => {
-  const { _balance } = useWalletContext();
+const Transfer = ({ type, submitForm }: FormState) => {
   const {
+    _mainBalance,
     _currentNetwork,
     _defaultNetworks,
     _minimaBalance,
     getWalletBalance,
     getMainMinimaBalance,
-    promptWithdraw,
+    notify,
   } = useContext(appContext);
-  const { _network, callBalanceForApp } = useWalletContext();
+  const { _network, callBalanceForApp, _balance} = useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   const [ethWalletAddress, setEthWalletAddress] = useState("");
@@ -39,17 +38,30 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const [error, setError] = useState<string | false>(false);
 
   const initialTokenShouldBeMinimaIfExists = tokens.find(
-    (token) => token.address === _defaults["wMinima"][_network],
+    (token) => token.address === _defaults["wMinima"][_network]
   );
 
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const getBalances = async () => {
-    // Wait a few secs
-    await new Promise((resolve) => {
-      setTimeout(resolve, 5000);
-    });
+    // Call getWalletBalance and getMainMinimaBalance immediately
+    await getWalletBalance();
+    await getMainMinimaBalance();
 
-    getWalletBalance();
-    getMainMinimaBalance();
+    // Counter to track how many times getWalletBalance has been called
+    let callCount = 1;
+
+    // Set an interval to call getWalletBalance every 15 seconds
+    intervalRef.current = setInterval(async () => {
+      if (callCount < 3) {
+        await getWalletBalance(); // Call getWalletBalance again
+        callCount++;
+      } else {
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current); // Stop the interval after 3 calls
+          intervalRef.current = null; // Reset the intervalRef to null
+        }
+      }
+    }, 15000); // 15 seconds interval
   };
 
   useEffect(() => {
@@ -68,66 +80,102 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
     }
   }, [type]);
 
+  const mainWalletBalance =
+    _mainBalance && _mainBalance.unconfirmed === "0"
+      ? new Decimal(_mainBalance.sendable).toFixed(1)
+      : _mainBalance && _mainBalance.unconfirmed !== "0"
+      ? new Decimal(_mainBalance.sendable).toFixed(1) +
+        "/" +
+        new Decimal(_mainBalance.unconfirmed).toString()
+      : "-";
+
   return (
-    <Formik
-      initialValues={{
-        amount: "",
-        asset:
-          type === "erc20"
-            ? initialTokenShouldBeMinimaIfExists
+    <div className="bg-violet-50 p-6 rounded-md">
+      <Formik
+        initialValues={{
+          amount: "",
+          asset:
+            type === "erc20"
               ? initialTokenShouldBeMinimaIfExists
-              : {
-                  name: _defaultNetworks[_currentNetwork].name,
-                  symbol: _defaultNetworks[_currentNetwork].symbol,
-                  balance: _balance,
-                  address: "",
-                  type: "ether",
+                ? initialTokenShouldBeMinimaIfExists
+                : {
+                    name: _defaultNetworks[_currentNetwork].name,
+                    symbol: _defaultNetworks[_currentNetwork].symbol,
+                    balance: _balance,
+                    address: "",
+                    type: "ether",
+                  }
+              : {},
+          address: ethWalletAddress,
+          receipt: null,
+          gasPaid: "",
+        }}
+        validationSchema={yup.object().shape({
+          amount: yup
+            .number()
+            .required("Amount is required")
+            .test("has funds", function (val) {
+              const { path, createError, parent } = this;
+
+              try {
+                if (new Decimal(val).isZero()) {
+                  throw new Error("Please enter a valid amount");
                 }
-            : {},
-        address: ethWalletAddress,
-        receipt: null,
-        gasPaid: "",
-      }}
-      validationSchema={yup.object().shape({
-        amount: yup
-          .string()
-          .matches(/^\d*\.?\d+$/, "Enter a valid number.")
-          .required("Amount is required")
-          .test("has funds", function (val) {
-            const { path, createError, parent } = this;
+
+                if (type === "erc20") {
+                  if (
+                    parent.asset.type === "ether" &&
+                    (new Decimal(val).gt(_balance) || new Decimal(val).isZero())
+                    // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
+                  ) {
+                    throw new Error("Insufficient funds");
+                  }
+
+                  const assetBalance = parent.asset.balance;
+                  // TO-DO
+                  const decimals = parent.asset.name === "Tether" ? 6 : 18;
+                  if (
+                    parent.asset.type === "erc20" &&
+                    (new Decimal(parseUnits(val, decimals).toString()).gt(
+                      assetBalance
+                    ) ||
+                      new Decimal(assetBalance).isZero())
+                    // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
+                  ) {
+                    throw new Error("Insufficient funds");
+                  }
+                }
+                if (type === "native") {
+                  if (new Decimal(val).gt(_minimaBalance.confirmed)) {
+                    throw new Error("Insufficient funds");
+                  }
+                }
+
+                return true;
+              } catch (error) {
+                if (error instanceof Error) {
+                  return createError({
+                    path,
+                    message: error.message,
+                  });
+                }
+
+                return createError({
+                  path,
+                  message: "Something went wrong, try again in a few",
+                });
+              }
+            }),
+          address: yup.string().test("valid address", function (val) {
+            const { path, createError } = this;
 
             try {
-              if (new Decimal(val).isZero()) {
-                throw new Error("Please enter a valid amount");
-              }
-
               if (type === "erc20") {
-                if (
-                  parent.asset.type === "ether" &&
-                  (new Decimal(val).gt(_balance) || new Decimal(val).isZero())
-                  // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
-                ) {
-                  throw new Error("Insufficient funds");
+                if (!val) {
+                  return true;
                 }
 
-                const assetBalance = parent.asset.balance;
-                // TO-DO
-                const decimals = parent.asset.name === "Tether" ? 6 : 18;
-                if (
-                  parent.asset.type === "erc20" &&
-                  (new Decimal(parseUnits(val, decimals).toString()).gt(
-                    assetBalance,
-                  ) ||
-                    new Decimal(assetBalance).isZero())
-                  // || transactionTotal && new Decimal(transactionTotal!).gt(_wrappedMinimaBalance)
-                ) {
-                  throw new Error("Insufficient funds");
-                }
-              }
-              if (type === "native") {
-                if (new Decimal(val).gt(_minimaBalance.confirmed)) {
-                  throw new Error("Insufficient funds");
-                }
+                getAddress(val);
               }
 
               return true;
@@ -135,7 +183,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
               if (error instanceof Error) {
                 return createError({
                   path,
-                  message: error.message,
+                  message: "Invalid Ethereum address",
                 });
               }
 
@@ -145,251 +193,247 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
               });
             }
           }),
-        address: yup.string().test("valid address", function (val) {
-          const { path, createError } = this;
-
+        })}
+        onSubmit={async ({ amount, asset, address }, { resetForm }) => {
+          setError(false);
+          setLoading(true);
           try {
+            let action;
+
             if (type === "erc20") {
-              if (!val) {
-                return true;
+              if (asset.name === "wMinima") {
+                action = "SENDWMINIMA";
+              } else if (
+                asset.name === "Ethereum" ||
+                asset.name === "SepoliaETH"
+              ) {
+                action = "SENDETH";
+              } else if (asset.name === "Tether") {
+                action = "SENDUSDT";
               }
 
-              getAddress(val);
+              if (!address.length && !ethWalletAddress.length) {
+                throw new Error("Please enter an address");
+              }
             }
 
-            return true;
-          } catch (error) {
-            if (error instanceof Error) {
-              return createError({
-                path,
-                message: "Invalid Ethereum address",
-              });
+            await submitForm(
+              type === "native"
+                ? amount
+                : {
+                    amount,
+                    action,
+                    address: address.length ? address : ethWalletAddress,
+                  }
+            );
+
+            notify(
+              `Your withdrawal of ${amount} ${
+                type === "native" ? "MINIMA" : asset.name
+              } from the Swap Wallet is on the way!`
+            );
+
+            if (type === "native") {
+              await getBalances();
+            } else {
+              callBalanceForApp();
             }
 
-            return createError({
-              path,
-              message: "Something went wrong, try again in a few",
-            });
-          }
-        }),
-      })}
-      onSubmit={async (
-        { amount, asset, address },
-        { setStatus, resetForm },
-      ) => {
-        setError(false);
-        setLoading(true);
-        setStatus(undefined);
-        try {
-          let action;
-
-          if (type === "erc20") {
-            if (asset.name === "wMinima") {
-              action = "SENDWMINIMA";
-            } else if (
-              asset.name === "Ethereum" ||
-              asset.name === "SepoliaETH"
-            ) {
-              action = "SENDETH";
-            } else if (asset.name === "Tether") {
-              action = "SENDUSDT";
-            }
-
-            if (!address.length && !ethWalletAddress.length) {
-              throw new Error("Please enter an address");
-            }
-          }
-
-          await submitForm(
-            type === "native"
-              ? amount
-              : {
-                  amount,
-                  action,
-                  address: address.length ? address : ethWalletAddress,
-                },
-          );
-
-          setStatus("Successful");
-          if (type === "native") {
-            await getBalances();
-          } else {
-            callBalanceForApp();
-          }
-
-          resetForm();
-          promptWithdraw();
-        } catch (error: any) {
-          console.error(error);
-          // display error message
-          setStep(4);
-          setError(
-            error && error.shortMessage
-              ? error.shortMessage
-              : typeof error === "string"
+            resetForm();
+          } catch (error: any) {
+            console.error(error);
+            // display error message
+            setStep(4);
+            setError(
+              error && error.shortMessage
+                ? error.shortMessage
+                : typeof error === "string"
                 ? error
-                : "Transaction failed, please try again.",
-          );
-        } finally {
-          setLoading(false);
-        }
-      }}
-    >
-      {({
-        handleSubmit,
-        handleChange,
-        handleBlur,
-        isSubmitting,
-        values,
-        touched,
-        errors,
-        isValid,
-        dirty,
-        status,
-      }) => (
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">{type === "erc20" && <SelectAsset />}</div>
-          <div>
+                : "Transaction failed, please try again."
+            );
+          } finally {
+            setLoading(false);
+
+            await new Promise((resolve) => setTimeout(resolve, 3000));
+            setError(false);
+          }
+        }}
+      >
+        {({
+          handleSubmit,
+          handleChange,
+          handleBlur,
+          isSubmitting,
+          values,
+          errors,
+          isValid,
+          dirty,
+          setFieldValue,
+        }) => (
+          <form
+            onSubmit={handleSubmit}
+            className="bg-neutral-100 max-w-sm mx-auto space-y-4"
+          >
             {type === "erc20" && (
               <>
-                <div
-                  className={`my-2 flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${
-                    f.address && "!bg-white"
-                  } rounded ${
-                    f.address && !errors.address && "outline outline-violet-300"
-                  } ${
-                    touched.address && errors.address
-                      ? "!border-4 !outline-none !border-violet-500"
-                      : ""
-                  }`}
-                >
-                  <input
-                    disabled={isSubmitting}
-                    onBlur={(e) => {
-                      handleBlur(e);
-                      setF((prevState) => ({ ...prevState, address: false }));
-                    }}
-                    onChange={handleChange}
-                    value={values.address}
-                    id="address"
-                    name="address"
-                    onFocus={() =>
-                      setF((prevState) => ({ ...prevState, address: true }))
-                    }
-                    type="text"
-                    placeholder="Address"
-                    className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:focus:text-black dark:placeholder:text-white`}
-                  />
-                </div>
-                <p className="text-xs mb-2 font-bold">
-                  Leave address field empty if you want to withdraw to your ETH
-                  Wallet (
-                  {ethWalletAddress.substring(0, 4) +
-                    "..." +
-                    ethWalletAddress.substring(
-                      ethWalletAddress.length - 4,
-                      ethWalletAddress.length,
-                    )}
-                  )
-                </p>
-
-                {errors.address && (
-                  <div className="p-2 text-sm px-4 bg-violet-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2">
-                    {errors.address}
-                  </div>
-                )}
+                <SelectAsset />
               </>
             )}
-            <div
-              className={`flex space-x-2 bg-black dark:outline-gray-100 dark:outline ${
-                f.amount && "!bg-white"
-              } rounded ${
-                f.amount && !errors.amount && "outline outline-violet-300"
-              } ${
-                touched.amount && errors.amount
-                  ? "!border-4 !outline-none !border-violet-500"
-                  : ""
-              }`}
-            >
+
+            {type === "native" && (
+              <div className="bg-purple-100 text-purple-800 p-4 rounded-lg shadow-sm">
+                <p className="text-sm font-medium">Main Wallet Balance:</p>
+                <p className="text-2xl font-bold break-all">
+                  {mainWalletBalance} MINIMA
+                </p>
+              </div>
+            )}
+            <div className="bg-white border border-purple-200 flex rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-purple-500">
               <input
                 disabled={isSubmitting}
                 onBlur={(e) => {
                   handleBlur(e);
-                  setF((prevState) => ({ ...prevState, amount: false }));
+                  setF((prevState) => ({ ...prevState, ["amount"]: false }));
                 }}
-                onChange={handleChange}
-                value={values.amount}
                 id="amount"
                 name="amount"
+                onChange={handleChange}
+                value={values.amount}
                 onFocus={() =>
-                  setF((prevState) => ({ ...prevState, amount: true }))
+                  setF((prevState) => ({ ...prevState, ["amount"]: true }))
                 }
                 required
-                type="text"
+                type="number"
+                step="any"
+                autoFocus={false}
                 placeholder="Amount"
-                className={`bg-transparent truncate focus:outline-none focus:placeholder:text-black focus:bg-white placeholder:text-white text-white dark:text-white focus:text-black font-bold w-full py-3 rounded-lg px-4 dark:placeholder:text-white dark:focus:text-black`}
+                className="bg-transparent truncate focus:outline-none placeholder:text-purple-300 text-purple-800 font-bold w-full py-3 px-4"
               />
+              <div className="h-full my-auto pr-2">
+                <button
+                  onClick={() => {
+                    if (type === "native" && _minimaBalance) {
+                      setFieldValue("amount", _minimaBalance.confirmed);
+                    }
+                    
+                    if (type === "erc20" && tokens) {
+                      if (values.asset.type === "ether") {
+                        return setFieldValue("amount", _balance);                        
+                      }
+                      
+                      const selectedToken = tokens.find(token => token.name === values.asset.name);
+                      
+                      if (selectedToken) {
+                        const parsedBalance = parseUnits(selectedToken.balance, selectedToken.decimals);
+                        setFieldValue("amount", parsedBalance.toString());
+                      } else {
+                        console.error(`Token ${values.asset.name} not found in the tokens array`);
+                        setFieldValue("amount", "0");
+                      }
+                    }
+                  }}
+                  type="button"
+                  className={`bg-transparent text-purple-600 ${
+                    f ? "text-purple-800" : ""
+                  } focus:outline-none font-bold tracking-tighter px-2 py-1 rounded transition-colors duration-200 hover:bg-purple-100`}
+                >
+                  Max
+                </button>
+              </div>
             </div>
 
             {errors.amount && (
-              <div className="p-2 text-sm px-4 bg-violet-500 text-white dark:text-black font-bold rounded-lg mt-3 mb-2">
-                {errors.amount}
+              <div className="bg-red-50 border-red-500 px-4 py-2 my-4 rounded-r-lg flex items-start space-x-3">
+                <div className="flex-1">
+                  <h3 className="text-red-800 font-semibold text-lg flex items-center">
+                    <span>{errors.amount}</span>
+                  </h3>
+                </div>
               </div>
             )}
-          </div>
 
-          {status && (
-            <div
-              className={`text-center my-2 bg-teal-500 p-2 rounded ${
-                type === "erc20" && "!bg-orange-500"
-              }`}
-            >
-              <h6 className="font-bold text-teal-800 dark:text-black">
-                {type === "erc20" && "Withdrawal Requested"}
-                {type !== "erc20" && "Withdrawal Successful"}
-              </h6>
-            </div>
-          )}
+            {type === "erc20" && (
+              <>
+                <div className="bg-white border border-purple-200 flex rounded-lg overflow-hidden focus-within:ring-2 focus-within:ring-purple-500">
+                  <input
+                    disabled={isSubmitting}
+                    onBlur={(e) => {
+                      handleBlur(e);
+                      setF((prevState) => ({
+                        ...prevState,
+                        ["address"]: false,
+                      }));
+                    }}
+                    id="address"
+                    name="address"
+                    onChange={handleChange}
+                    value={values.address}
+                    onFocus={() =>
+                      setF((prevState) => ({ ...prevState, ["address"]: true }))
+                    }
+                    type="text"
+                    placeholder="Ethereum Address"
+                    className="bg-transparent truncate focus:outline-none placeholder:text-purple-300 text-purple-800 font-bold w-full py-3 px-4"
+                  />
+                  <div className="h-full my-auto pr-2">
+                    {ethWalletAddress &&
+                      values.address !== ethWalletAddress && (
+                        <button
+                          onClick={() => {
+                            setFieldValue("address", ethWalletAddress);
+                          }}
+                          type="button"
+                          className={`bg-transparent text-purple-600 ${
+                            f ? "text-purple-800" : ""
+                          } focus:outline-none font-bold tracking-tighter px-2 py-1 rounded transition-colors duration-200 hover:bg-purple-100`}
+                        >
+                          EthWallet
+                        </button>
+                      )}
+                  </div>
+                </div>{" "}
+                {errors.address && (
+                  <div className="bg-red-50 border-red-500 px-4 py-2 my-4 rounded-r-lg flex items-start space-x-3">
+                    <div className="flex-1">
+                      <h3 className="text-red-800 font-semibold text-lg flex items-center">
+                        <span>{errors.address}</span>
+                      </h3>
+                    </div>
+                  </div>
+                )}{" "}
+              </>
+            )}
 
-          {error && (
-            <div className="text-center my-2 bg-red-500 p-2 rounded">
-              <h6 className="font-bold text-white dark:text-black">
-                Withdrawal Failed!
-              </h6>
-              <p className="text-white dark:text-black">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="bg-red-50 border-l-4 border-red-500 p-4 my-4 rounded-r-lg flex items-start space-x-3">
+                <div className="flex-1">
+                  <h3 className="text-red-800 font-semibold text-lg flex items-center">
+                    <span>Withdrawal Failed</span>
+                  </h3>
+                  <p className="text-red-700 mt-1">{error}</p>
+                </div>
+              </div>
+            )}
 
-          <div className="grid grid-cols-1 my-4">
-            <div />
-            <div
-              className={`gap-1 grid ${
-                loading ? "grid-cols-1" : "grid-cols-2"
-              }`}
-            >
-              {loading && <div />}
-              {!loading && (
-                <button
-                  type="button"
-                  onClick={onCancel}
-                  className={dismissButtonStyle}
-                >
-                  Close
-                </button>
-              )}
+            <div>
               <button
                 disabled={loading || !isValid || !dirty}
                 type="submit"
-                className="bg-orange-600 font-bold flex justify-center text-white dark:text-black disabled:bg-opacity-50"
+                className={primaryButtonStyle}
               >
-                {!loading && "Withdraw"}
-                {loading && <ProgressIcon />}
+                {!loading ? (
+                  "Withdraw"
+                ) : (
+                  <span className="flex justify-center">
+                    <ProgressIcon />
+                  </span>
+                )}
               </button>
             </div>
-          </div>
-        </form>
-      )}
-    </Formik>
+          </form>
+        )}
+      </Formik>
+    </div>
   );
 };
 

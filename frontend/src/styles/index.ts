@@ -1,4 +1,4 @@
 export const dismissButtonStyle =
-  "bg-transparent border border-neutral-600 hover:border-neutral-500";
-export const primaryButtonStyle =
-  "bg-neutral-100 text-black font-bold hover:bg-neutral-50 dark:text-white dark:bg-neutral-900";
+  "w-full bg-black text-white py-4 rounded-lg font-bold hover:border-black transition-colors duration-200 disabled:bg-violet-300 disabled:cursor-not-allowed";
+export const primaryButtonStyle ="w-full bg-violet-600 text-white py-3 rounded-lg font-bold hover:bg-violet-700 transition-colors duration-200 disabled:bg-violet-300 disabled:cursor-not-allowed";
+export const warningWrapperStyle = "bg-card text-card-foreground rounded-lg shadow-lg p-6"

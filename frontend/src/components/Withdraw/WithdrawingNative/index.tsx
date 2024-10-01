@@ -1,4 +1,3 @@
-import NativeMinima from "../../NativeMinima";
 import Transfer from "../../Transfer";
 import { sendMinima } from "../../../../../dapp/js/apiminima.js";
 import { logWithdraw } from "../../../../../dapp/js/sql.js";
@@ -7,8 +6,7 @@ import { appContext } from "../../../AppContext.js";
 
 const WithdrawingNative = () => {
   const {
-    _userDetails,
-    promptWithdraw
+    _userDetails
   } = useContext(appContext);
 
   async function withdrawMinima(amount: string) {
@@ -33,12 +31,10 @@ const WithdrawingNative = () => {
   }
 
   return (
-    <div className="max-w-sm mx-auto my-4 px-2">
-      <NativeMinima display={false} />
+    <div>
       <Transfer
         type="native"
         submitForm={withdrawMinima}
-        onCancel={promptWithdraw}
       />
     </div>
   );

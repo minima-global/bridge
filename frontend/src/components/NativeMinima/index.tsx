@@ -1,65 +1,49 @@
-import { useContext } from "react";
-import { appContext } from "../../AppContext";
-import Decimal from "decimal.js";
+import { useContext, useEffect, useState } from "react"
+import { appContext } from "../../AppContext"
+import Decimal from "decimal.js"
 
-interface Props {
-  display: boolean;
-  external?: number | string;
-}
-const NativeMinima = ({ display = false, external }: Props) => {
-  const { _minimaBalance } = useContext(appContext);
+const NativeMinima = () => {
+  const { _minimaBalance } = useContext(appContext)
+  const [isLoading, setIsLoading] = useState(true)
 
-  if (_minimaBalance === null) {
-    return null;
+
+  useEffect(() => {
+    if (_minimaBalance !== null) {
+      setIsLoading(false)
+    }
+  }, [_minimaBalance])
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-1 animate-pulse">
+        <div className="w-[32px] h-[32px] bg-gray-300 dark:bg-gray-700 rounded-lg" />
+        <div className="h-9 bg-gray-300 dark:bg-gray-700 rounded w-40" />
+      </div>
+    )
   }
 
+  if (_minimaBalance === null) {
+    return null
+  }
+
+  const balance = _minimaBalance && _minimaBalance.unconfirmed === "0" 
+    ? new Decimal(_minimaBalance.confirmed).toFixed(1) 
+    : _minimaBalance && _minimaBalance.unconfirmed !== "0" 
+      ? new Decimal(_minimaBalance.confirmed).toFixed(1) + "/" + new Decimal(_minimaBalance.unconfirmed).toString()
+      : '-'
+
   return (
-    <div
-      className={`shadow-sm dark:shadow-none grid grid-cols-[40px,_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 ${
-        external && "dark:bg-opacity-10"
-      } mb-2 ${
-        display ? "!flex !flex-col !shadow-none !pb-0 hover:!bg-transparent !mb-0 !p-0" : ""
-      }`}
-    >
+    <div className="flex items-center gap-1">
       <img
         alt="token-icon"
         src="./assets/token.svg"
-        className="w-[36px] h-[36px] rounded-full"
+        className="w-[32px] h-[32px] rounded-lg"
       />
-
-      <div
-        className={`flex justify-between text-left truncate ${
-          display ? "ml-0" : "ml-2"
-        }`}
-      >
-        <div>
-          {!display && <h3 className="font-bold ">Minima</h3>}
-          {!external && (
-            <p
-              className={`font-mono text-sm truncate bg-transparent focus:outline-none ${
-                display ? "text-[11px]" : ""
-              }`}
-            >
-              {display && new Decimal(_minimaBalance.confirmed).toDecimalPlaces(4).toString()}
-
-              {!display &&
-                new Decimal(_minimaBalance.unconfirmed).isZero() ?
-                new Decimal(_minimaBalance.confirmed).toString() : ""}
-
-              {!display &&
-                new Decimal(_minimaBalance.unconfirmed).gt(0) ?
-                new Decimal(_minimaBalance.confirmed).toString() +
-                  "/" +
-                  new Decimal(_minimaBalance.unconfirmed).toString() : ""}
-            </p>
-          )}
-          {external && (
-            <input value={external} readOnly className="truncate focus:outline-none w-full bg-transparent text-sm tracking-wider" />            
-          )}
-        </div>
-      </div>
+      <p className="text-3xl font-bold">
+        {balance} MINIMA
+      </p>
     </div>
-  );
-};
+  )
+}
 
-export default NativeMinima;
+export default NativeMinima
