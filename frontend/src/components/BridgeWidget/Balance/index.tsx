@@ -1,20 +1,16 @@
 import { useContext, useEffect, useState } from "react";
 import { appContext } from "../../../AppContext";
 import TokenList from "../../TokenList";
-import InfoTooltip from "../../UI/InfoTooltip";
-import WalletIcon from "../../UI/Icons/WalletIcon";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../providers/WalletProvider/WalletProvider";
 
 import { differenceInSeconds } from "date-fns";
-import EthereumIcon from "../../UI/Icons/EthereumIcon";
 import { ArrowDownIcon, ArrowLeft, ArrowUpIcon, Wallet2 } from "lucide-react";
 import WithdrawingNative from "../../Withdraw/WithdrawingNative";
 import NativeAddress from "../../Deposit/NativeAddress";
 import NativeMinima from "../../NativeMinima";
 import EthereumAddress from "../../Deposit/EthereumAddress";
 import WithdrawingERC20 from "../../Withdraw/WithdrawingERC20";
-import { Wallet } from "ethers";
 import EthereumBalance from "../../Ethereum";
 
 const Balance = () => {

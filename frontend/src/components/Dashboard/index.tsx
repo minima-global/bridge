@@ -1,3 +1,4 @@
+import ActivitiesPage from "../Activities";
 import AppLoading from "../AppLoading";
 import BridgeWidget from "../BridgeWidget";
 import Allowance from "../BridgeWidget/Allowance";
@@ -19,6 +20,7 @@ const Dashboard = () => {
       <Settings />
       <DatabaseLocked />
       <Favorites />
+      <ActivitiesPage />
       <AppLoading />
       <ContentGrid>
         <Navigation />

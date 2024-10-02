@@ -4,7 +4,7 @@ import QRCode from "react-qr-code";
 import WalletAddress from "../WalletAddress";
 import ProgressIcon from "../../UI/Progress";
 import PrivateKey from "../PrivateKey";
-import { Eye, EyeOff, Copy, AlertTriangle } from "lucide-react";
+import { Eye, EyeOff, AlertTriangle } from "lucide-react";
 
 const EthereumAddress = () => {
   const { _userDetails } = useContext(appContext);

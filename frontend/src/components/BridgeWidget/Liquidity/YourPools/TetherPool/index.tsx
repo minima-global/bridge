@@ -1,20 +1,19 @@
 import { useContext, useState } from "react"
 import Decimal from "decimal.js"
 import { appContext } from "../../../../../AppContext.js"
-import Toolbar from "../Toolbar/index.js"
 import { useOrderBookContext } from "../../../../../hooks/useOrderBook.js"
 import { Formik, Form, Field } from "formik"
 import * as yup from "yup"
 import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js"
 import useAllowanceChecker from "../../../../../hooks/useAllowanceChecker.js"
-import { Lock, Info, ArrowRightLeft } from "lucide-react"
+import { Lock,  ArrowRightLeft } from "lucide-react"
 
 const TetherPool = () => {
   useAllowanceChecker()
 
   const { notify, _allowanceLock, setPromptAllowance } = useContext(appContext)
   const { _currentOrderBook, updateBook } = useOrderBookContext()
-  const [focused, setFocused] = useState(false)
+  const [_, setFocused] = useState(false)
 
   const handleDisable = () => {
     try {

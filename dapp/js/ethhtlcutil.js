@@ -69,7 +69,7 @@ function canCollect(contractid, callback){
 			var ret 		= parseInt(resulthex,16);
 			callback(ret!=0);
 		}else{
-			callback(false);	
+			callback(null);	
 		}
 	}); 
 }

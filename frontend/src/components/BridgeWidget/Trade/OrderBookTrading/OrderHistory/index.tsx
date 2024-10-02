@@ -1,31 +1,27 @@
-import { useContext, useEffect, useRef } from "react";
-import OrderItem from "./OrderItem/index.js";
-import { appContext } from "../../../../../AppContext.js";
-import ActivityIcon from "../../../../UI/Icons/ActivityIcon";
+import { useContext, useEffect, useRef, useState } from "react"
+import OrderItem from "./OrderItem/index.js"
+import { appContext } from "../../../../../AppContext.js"
+import { Activity, RefreshCw, ChevronDown, ChevronUp } from "lucide-react"
 
 const sortEventsByEvent = (data) => {
-  // Step 1: Create an array of keys with their first EVENTDATE
   const eventDateEntries = Object.entries(data).map(([key, eventsArray]) => {
-    const firstEventDate = (eventsArray as any)[0]?.EVENTDATE || 0; // Handle empty arrays
-    return { key, firstEventDate };
-  });
+    const firstEventDate = (eventsArray as any)[0]?.EVENTDATE || 0
+    return { key, firstEventDate }
+  })
 
-  // Step 2: Sort the entries based on the EVENTDATE in descending order
-  eventDateEntries.sort((a, b) => b.firstEventDate - a.firstEventDate);
+  eventDateEntries.sort((a, b) => b.firstEventDate - a.firstEventDate)
 
-  // Step 3: Create a new object with the keys ordered based on sorted EVENTDATE
-  const sortedData = {};
+  const sortedData = {}
   eventDateEntries.forEach(({ key }) => {
-    sortedData[key] = data[key];
-  });
+    sortedData[key] = data[key]
+  })
 
-  // Step 4: Sort the events within each array by EVENTDATE in descending order
   Object.keys(sortedData).forEach((key) => {
-    sortedData[key] = sortedData[key].sort((a, b) => b.EVENTDATE - a.EVENTDATE);
-  });
+    sortedData[key] = sortedData[key].sort((a, b) => b.EVENTDATE - a.EVENTDATE)
+  })
 
-  return sortedData;
-};
+  return sortedData
+}
 
 const OrderHistory = ({ full = false }) => {
   const {
@@ -35,96 +31,112 @@ const OrderHistory = ({ full = false }) => {
     promptLogs,
     setSwitchLogView,
     _promptLogs,
-  } = useContext(appContext);
+  } = useContext(appContext)
 
-  const intervalId = useRef<number | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const intervalId = useRef<number | null>(null)
 
   const startPolling = () => {
-    getAllOrders(10 + 1, offsetOrders);
+    setIsLoading(true)
+    getAllOrders(10 + 1, offsetOrders)
     intervalId.current = window.setInterval(
       () => getAllOrders(10 + 1, offsetOrders),
       30000,
-    );
-  };
+    )
+    setIsLoading(false)
+  }
 
   const stopPolling = () => {
     if (intervalId.current) {
-      clearInterval(intervalId.current);
-      intervalId.current = null;
+      clearInterval(intervalId.current)
+      intervalId.current = null
     }
-  };
+  }
 
   useEffect(() => {
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        stopPolling();
+        stopPolling()
       } else {
-        startPolling();
+        startPolling()
       }
-    };
+    }
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    // Start polling when the component mounts
-    startPolling();
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+    startPolling()
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      stopPolling();
-    };
-  }, [offsetOrders]);
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      stopPolling()
+    }
+  }, [offsetOrders])
+
+  const handleViewOrders = () => {
+    promptLogs()
+    setSwitchLogView("orders")
+  }
+
+  const toggleExpand = () => setIsExpanded(!isExpanded)
+
+  const hasOrders = orders !== null && Object.keys(orders).length > 0
 
   return (
-    <div
-      onDoubleClick={() => {
-        promptLogs();
-        setSwitchLogView("orders");
-      }}
-      className={`relative group my-4 dark:outline shadow-lg ${
-        orders === null ||
-        (JSON.stringify(orders) === "{}" &&
-          "shadow-none !my-8 text-neutral-500")
-      } dark:shadow-none dark:outline-violet-300 mt-0 bg- bg-gray-100 bg-opacity-50 dark:bg-[#1B1B1B] rounded-lg ${
-        orders === null && "min-h-[250px] grid grid-rows-1"
-      } ${full && "!outline-none"}`}
-    >
-      {!_promptLogs && orders !== null && Object.keys(orders).length > 0 && (
-        <div className="opacity-0 transition-opacity group-hover:opacity-100 mx-auto absolute right-0 bottom-2 left-0">
+    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden">
+      <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
+        <h2 className="text-lg font-semibold text-gray-800 dark:text-white flex items-center">
+          <Activity className="w-5 h-5 mr-2 text-teal-500" />
+          Order History
+        </h2>
+        <div className="flex items-center space-x-2">
           <button
-            onClick={() => {
-              promptLogs();
-              setSwitchLogView("orders");
-            }}
-            type="button"
-            className="bg-transparent outline w-max mx-auto dark:text-white flex justify-end gap-1 items-end dark:outline-neutral-800 text-neutral-800"
+            onClick={startPolling}
+            className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+            aria-label="Refresh orders"
           >
-            View Orders
-            <span className="text-black dark:text-white">
-              <ActivityIcon fill="currentColor" />
-            </span>
+            <RefreshCw className={`w-5 h-5 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+          {!full && (
+            <button
+              onClick={toggleExpand}
+              className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors duration-200"
+              aria-label={isExpanded ? "Collapse order history" : "Expand order history"}
+            >
+              {isExpanded ? (
+                <ChevronUp className="w-5 h-5" />
+              ) : (
+                <ChevronDown className="w-5 h-5" />
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+      <div className={`${!full && !isExpanded ? 'max-h-[300px]' : ''} overflow-y-auto transition-all duration-300 ease-in-out`}>
+        {!hasOrders ? (
+          <div className="h-[200px] flex items-center justify-center">
+            <p className="text-sm text-gray-500 dark:text-gray-400">No orders available</p>
+          </div>
+        ) : (
+          <ul className="divide-y divide-gray-200 dark:divide-gray-700">
+            {Object.keys(sortEventsByEvent(orders)).map((hash) => (
+              <OrderItem key={hash} order={{ ...orders[hash] }} />
+            ))}
+          </ul>
+        )}
+      </div>
+      {!_promptLogs && hasOrders && (
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700">
+          <button
+            onClick={handleViewOrders}
+            className="w-full py-2 px-4 bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center"
+          >
+            <Activity className="w-5 h-5 mr-2" />
+            View Full Order History
           </button>
         </div>
       )}
-
-      {orders === null ||
-        (JSON.stringify(orders) === "{}" && (
-          <div className="h-full flex items-center justify-center">
-            <p className="text-xs font-bold text-center">No orders available</p>
-          </div>
-        ))}
-      {orders !== null && (
-        <ul
-          className={`overflow-y-auto ${!full && "max-h-[300px]"} ${
-            full && "h-full"
-          }`}
-        >
-          {Object.keys(sortEventsByEvent(orders)).map((hash) => (
-            <OrderItem key={hash} order={{ ...orders[hash] }} />
-          ))}
-        </ul>
-      )}
     </div>
-  );
-};
+  )
+}
 
-export default OrderHistory;
+export default OrderHistory

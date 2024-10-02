@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../../AppContext";
-import { ArrowLeft, Droplets } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import YourPools from "./YourPools/index.js";
 
 const Liquidity = () => {

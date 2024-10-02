@@ -1,23 +1,34 @@
-import { useContext } from "react"
-import { appContext } from "../../../../AppContext"
-import useAllowanceChecker from "../../../../hooks/useAllowanceChecker"
-import OrderBookForm from "./OrderBookForm"
-import OrderHistory from "./OrderHistory"
-import CompleteOrderBook from "./CompleteOrderBook"
-import { ArrowLeft, History, Users, PlusCircle, AlertTriangle } from "lucide-react"
+import { useContext } from "react";
+import { appContext } from "../../../../AppContext";
+import useAllowanceChecker from "../../../../hooks/useAllowanceChecker";
+import OrderBookForm from "./OrderBookForm";
+import OrderHistory from "./OrderHistory";
+import CompleteOrderBook from "./CompleteOrderBook";
+import {
+  ArrowLeft,
+  Users,
+  PlusCircle,
+  AlertTriangle,
+} from "lucide-react";
 
 const OrderBookTrading = () => {
-  const { _currentTradeWindow, setCurrentTradeWindow, setCurrentNavigation, _allowanceLock, setPromptAllowance } = useContext(appContext)
+  const {
+    _currentTradeWindow,
+    setCurrentTradeWindow,
+    setCurrentNavigation,
+    _allowanceLock,
+    setPromptAllowance,
+  } = useContext(appContext);
 
-  useAllowanceChecker()
+  useAllowanceChecker();
 
   if (_currentTradeWindow !== "orderbook") {
-    return null
+    return null;
   }
 
   const handleAddLiquidity = () => {
-    setCurrentNavigation("liquidity")
-  }
+    setCurrentNavigation("liquidity");
+  };
 
   return (
     <div className="max-w-4xl mx-auto px-4 md:px-0">
@@ -47,13 +58,19 @@ const OrderBookTrading = () => {
       </div>
 
       {_allowanceLock && (
-        <div className="mb-8 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-md" role="alert">
+        <div
+          className="mb-8 bg-yellow-100 border-l-4 border-yellow-500 text-yellow-700 p-4 rounded-lg shadow-md"
+          role="alert"
+        >
           <div className="flex items-center">
             <AlertTriangle className="w-6 h-6 mr-2" />
             <p className="font-bold">Token Allowance Required</p>
           </div>
-          <p className="mt-2">To start trading, please allow allowance on your tokens. This is a one-time action.</p>
-          <button 
+          <p className="mt-2">
+            To start trading, please allow allowance on your tokens. This is a
+            one-time action.
+          </p>
+          <button
             className="mt-3 bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline transition duration-150 ease-in-out"
             onClick={() => setPromptAllowance(true)}
           >
@@ -67,13 +84,7 @@ const OrderBookTrading = () => {
           <OrderBookForm />
         </section>
 
-        <section className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
-          <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
-            <History className="w-5 h-5 mr-2 text-violet-600 dark:text-violet-400" />
-            Order History
-          </h2>
-          <OrderHistory />
-        </section>
+        <OrderHistory />
 
         <section className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
           <h2 className="text-xl font-semibold text-gray-800 dark:text-white mb-4 flex items-center">
@@ -84,7 +95,7 @@ const OrderBookTrading = () => {
         </section>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default OrderBookTrading
+export default OrderBookTrading;

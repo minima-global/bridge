@@ -219,6 +219,14 @@ function collectHTLC(hash, token, amount, txnhash, callback){
 	});
 }
 
+function logDisableOrderbook(hash, token, amount, txnhash, callback){
+	_insertCounterPartyEvent(hash,token,amount,"DISABLE_ORDERBOOK",txnhash,function(resp){
+		if(callback){
+			callback(resp);
+		}
+	});
+}
+
 function haveCollectHTLC(hash, callback){
 	_checkCounterPartyEvent(hash,"CPTXN_COLLECT",function(resp){
 		callback(resp);

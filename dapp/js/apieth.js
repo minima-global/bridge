@@ -112,6 +112,11 @@ function _collectExpiredETHCoin(htlclog,callback){
 	
 	//Make sure we can collect it..
 	canCollect(contid, function(canc){
+
+		if (canc === null) {
+			MDS.log("Not found");
+			return;
+		}
 		
 		if(canc){
 			

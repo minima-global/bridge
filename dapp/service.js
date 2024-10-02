@@ -236,11 +236,11 @@ MDS.init(function (msg) {
               msg.status = true;
               msg.message = "ETH balance below 0.01, disabled orderbook!";
               sendFrontendMSG("DISABLEORDERBOOK", msg);
-              collectHTLC(
-                "0x00",
+              logDisableOrderbook(
+                "0x00", 
                 "minima",
-                0,
-                "Ran out of ETH, disabled orderbook",
+                0.0000000001,
+                "You are running low on ETH, disabled orderbook",
                 function (sqlresp) {},
               );
             });

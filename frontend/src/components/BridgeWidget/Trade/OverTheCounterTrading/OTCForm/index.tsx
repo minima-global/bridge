@@ -188,7 +188,7 @@ const OTCForm = () => {
             label="Native Offering"
             action={
               <div className="flex items-center justify-center pb-1 sm:pb-0">
-                <NativeMinima display={true} />
+                <NativeMinima />
               </div>
             }
           />

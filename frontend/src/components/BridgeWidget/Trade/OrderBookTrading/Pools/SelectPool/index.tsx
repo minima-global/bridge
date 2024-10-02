@@ -1,5 +1,5 @@
 import { ChangeEventHandler } from "react"
-import { ArrowRightLeft, ChevronRight } from "lucide-react"
+import { ArrowRightLeft } from "lucide-react"
 
 interface IProps {
   selectedOption: "wminima" | "usdt"

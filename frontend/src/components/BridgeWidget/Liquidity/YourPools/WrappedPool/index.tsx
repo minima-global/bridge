@@ -13,7 +13,7 @@ const WrappedPool = () => {
 
   const { notify, _allowanceLock, setPromptAllowance } = useContext(appContext)
   const { _currentOrderBook, updateBook } = useOrderBookContext()
-  const [focused, setFocused] = useState(false)
+  const [_, setFocused] = useState(false)
 
   const handleDisable = () => {
     try {

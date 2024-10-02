@@ -136,7 +136,7 @@ const Transfer = ({ type, submitForm }: FormState) => {
                   const decimals = parent.asset.name === "Tether" ? 6 : 18;
                   if (
                     parent.asset.type === "erc20" &&
-                    (new Decimal(parseUnits(val, decimals).toString()).gt(
+                    (new Decimal(parseUnits(val.toString(), decimals).toString()).gt(
                       assetBalance
                     ) ||
                       new Decimal(assetBalance).isZero())
