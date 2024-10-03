@@ -34,7 +34,7 @@ const Navigation = () => {
             >
               Trade
             </button>
-          </li>          
+          </li>                                    
         </ul>
       </nav>
     </div>

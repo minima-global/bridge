@@ -1,6 +1,6 @@
 import { useContext } from "react";
 import { appContext } from "../../AppContext";
-import MainActivity from "../MainActivity";
+// import MainActivity from "../MainActivity";
 import SettingsIcon from "../UI/Icons/SettingsIcon";
 import FavoriteIcon from "../UI/Icons/FavoriteIcon";
 import HelpIcon from "../UI/Icons/HelpIcon";
@@ -41,7 +41,9 @@ const Header = () => {
               onClick={(e) => e.stopPropagation()}
               className="flex items-center"
             >
-              <MainActivity />
+              <span className="mr-2 p-2 rounded-full bg-yellow-100 text-yellow-800 text-sm" onClick={() => navigate("/activities")}>
+                Activity
+              </span>
               <span
                 className="pr-2 text-red-400"
                 onClick={() => navigate("/fav")}

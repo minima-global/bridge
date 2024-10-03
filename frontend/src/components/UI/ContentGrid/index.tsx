@@ -6,7 +6,7 @@ interface ContentGridProps {
 
 const ContentGrid = ({ children }: ContentGridProps) => {
   return (
-    <div className="grid grid-cols-[1fr_minmax(0,_900px),_1fr] sm:grid-cols-[1fr_minmax(0,_600px)_1fr] h-full">
+    <div className="grid grid-cols-[1fr_minmax(0,_900px),_1fr] sm:grid-cols-[1fr_minmax(0,_760px)_1fr] h-full">
       <div />
       <div className="relative">{children}</div>
       <div />

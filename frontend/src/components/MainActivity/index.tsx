@@ -1,543 +1,270 @@
-import { useContext, useEffect, useState } from "react";
-import { appContext } from "../../AppContext";
-import MostResponsiveTableEver from "../UI/MostResponsiveTableEver";
-import { getAllEvents } from "../../../../dapp/js/sql.js";
-import { config, useSpring, animated } from "react-spring";
-import { createPortal } from "react-dom";
-import { format } from "date-fns";
-import { useWalletContext } from "../../providers/WalletProvider/WalletProvider.js";
-import Decimal from "decimal.js";
+import React, { useState } from 'react'
+import { ChevronDown, ChevronUp, AlertCircle, ExternalLink } from "lucide-react"
 
-import * as utils from "../../utils";
-import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
-import Tabs from "./Tabs/index.js";
-import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
-import CloseIcon from "../UI/Icons/CloseIcon/index.js";
-import Activity from "./Activity/index.js";
+interface Log {
+  ID: string
+  HASH: string
+  EVENT: string
+  TOKEN: string
+  AMOUNT: string
+  TXNHASH: string | null
+  EVENTDATE: string
+}
 
-const renderCell = (
-  cellData,
-  index,
-  handleFocus,
-  focusStates,
-  txHashFocusStates
-) => {
-  const {
-    EVENT,
-    EVENTDATE,
-    HASH,
-    TOKEN,
-    AMOUNT,
-    TXNHASH,
-    getTokenType,
-    _network: network,
-  } = cellData;
+const eventTypes = [
+  'HTLC_STARTED',
+  'CPTXN_SENT',
+  'CPTXN_COLLECT',
+  'CPTXN_EXPIRED',
+  'CPTXN_DEPOSIT',
+  'CPTXN_WITHDRAW',
+  'CPTXN_APPROVE',
+  'CPTXN_SENDETH',
+  'DISABLE_ORDERBOOK'
+]
 
-  const isEthereumEvent =
-    TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
-  const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
+const tokens = ['MINIMA', 'ETH:0x67376c3bf3b5a336b14398920cfbc292013718ea', 'ETH:0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF']
 
-  return (
-    <>
-      <td className="p-3">
-        {EVENT.includes("WITHDRAW") ||
-        EVENT.includes("SENDETH") ||
-        TXNHASH.includes("Ran out of ETH, disabled orderbook") ? (
-          <Activity extraClass="text-center">-</Activity>
-        ) : (
-          <input
-            onFocus={() => handleFocus(index, "hash")}
-            onBlur={() => handleFocus(index, "hash")}
-            readOnly
-            className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
-            value={
-              !focusStates[index]
-                ? HASH.substring(0, 8) +
-                  "..." +
-                  HASH.substring(HASH.length - 8, HASH.length)
-                : HASH
-            }
-          />
-        )}
-      </td>
-      <td className="p-3">
-        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH")) && (
-          <Activity extraClass="text-center">Withdrew tokens</Activity>
-        )}
+const generateMockData = (count: number): Log[] => {
+  return Array.from({ length: count }, (_, i) => ({
+    ID: (i + 1).toString(),
+    HASH: `0x${Math.random().toString(16).substr(2, 40)}`,
+    EVENT: eventTypes[Math.floor(Math.random() * eventTypes.length)],
+    TOKEN: tokens[Math.floor(Math.random() * tokens.length)],
+    AMOUNT: (Math.random() * 1000).toFixed(4),
+    TXNHASH: Math.random() > 0.1 ? `0x${Math.random().toString(16).substr(2, 64)}` : null,
+    EVENTDATE: (Date.now() - Math.floor(Math.random() * 30 * 24 * 60 * 60 * 1000)).toString()
+  }))
+}
 
-        {EVENT.includes("STARTED") && (
-          <Activity extraClass="text-center">Created a contract</Activity>
-        )}
+const mockLogs = generateMockData(50)
 
-        {EVENT.includes("COLLECT") &&
-          !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <Activity extraClass="text-center">Attempted collection</Activity>
-          )}
-        {EVENT.includes("COLLECT") &&
-          TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <Activity extraClass="text-center">Disabled orderbook</Activity>
-          )}
-        {EVENT.includes("EXPIRED") && (
-          <Activity extraClass="text-center">Contract expired</Activity>
-        )}
-        {EVENT.includes("SENT") && (
-          <Activity extraClass="text-center">Sent counterparty tokens</Activity>
-        )}
-        {EVENT.includes("APPROVE") && (
-          <Activity extraClass="text-center">{EVENT}</Activity>
-        )}
-      </td>
-
-      <td className="p-3">
-        <div className="text-center">
-          <img
-            className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
-            src={
-              getTokenType(TOKEN) === "wMinima"
-                ? "./assets/wtoken.svg"
-                : getTokenType(TOKEN) === "Minima"
-                ? "./assets/token.svg"
-                : getTokenType(TOKEN) === "Tether"
-                ? "./assets/tether.svg"
-                : "./assets/eth.svg"
-            }
-          />
-          <p className="inline-block my-auto text-sm font-bold font-mono tracking-wide ml-1">
-            {new Decimal(AMOUNT).toString()}
-          </p>
-        </div>
-      </td>
-      <td className="p-3">
-        {EVENT.includes("EXPIRED") ? (
-          <Activity>{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</Activity>
-        ) : (
-          <>
-            {isEthereumEvent && (
-              <input
-                onFocus={() => handleFocus(index, "txnhash")}
-                onBlur={() => handleFocus(index, "txnhash")}
-                readOnly
-                className="w-30 bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
-                value={
-                  !txHashFocusStates[index]
-                    ? TXNHASH.substring(0, 8) +
-                      "..." +
-                      TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
-                    : TXNHASH
-                }
-                onClick={(e) => {
-                  if (window.navigator.userAgent.includes("Minima Browser")) {
-                    e.preventDefault();
-                    // @ts-ignore
-                    Android.openExternalBrowser(
-                      network === "mainnet"
-                        ? "https://etherscan.io/tx/" + TXNHASH
-                        : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                      "_blank"
-                    );
-                  }
-
-                  window.open(
-                    network === "mainnet"
-                      ? "https://etherscan.io/tx/" + TXNHASH
-                      : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                    "_blank"
-                  );
-                }}
-              />
-            )}
-
-            {isMinimaEvent && TXNHASH.includes("0x") && (
-              <input
-                onFocus={() => handleFocus(index, "txnhash")}
-                onBlur={() => handleFocus(index, "txnhash")}
-                onClick={async () => {
-                  if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
-                    return;
-                  }
-
-                  const link = await utils.dAppLink("Block");
-                  await new Promise((resolve) => setTimeout(resolve, 150));
-                  window.open(
-                    `${(window as any).MDS.filehost}${
-                      link.uid
-                    }/index.html?uid=${link.sessionid}#/t/${TXNHASH}`,
-                    window.innerWidth < 568 ? "_self" : "_blank"
-                  );
-                }}
-                readOnly
-                className="w-30 bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
-                value={
-                  !txHashFocusStates[index]
-                    ? TXNHASH.substring(0, 8) +
-                      "..." +
-                      TXNHASH.substring(TXNHASH.length - 8, TXNHASH.length)
-                    : TXNHASH
-                }
-              />
-            )}
-            {isMinimaEvent && !TXNHASH.includes("0x") && (
-              <p className="text-xs text-center">{TXNHASH}</p>
-            )}
-
-            {!isEthereumEvent && !isMinimaEvent && (
-              <p className="text-xs text-center">{TXNHASH}</p>
-            )}
-          </>
-        )}
-      </td>
-      <td className="p-4 text-right">
-        <div className="text-xs">
-          {format(parseInt(EVENTDATE), "MMMM dd, yyyy hh:mm a")}
-        </div>
-      </td>
-    </>
-  );
-};
-const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
-  const {
-    EVENT,
-    EVENTDATE,
-    HASH,
-    TOKEN,
-    AMOUNT,
-    TXNHASH,
-    getTokenType,
-    _network: network,
-  } = cellData;
-
-  const isEthereumEvent =
-    TXNHASH !== "0x00" && TXNHASH.includes("0x") && TOKEN !== "minima";
-  const isMinimaEvent = TXNHASH === "0x00" || TOKEN === "minima";
+const EventBadge: React.FC<{ event: string }> = ({ event }) => {
+  const colorClass = {
+    'HTLC_STARTED': 'bg-blue-100 text-blue-800',
+    'CPTXN_SENT': 'bg-green-100 text-green-800',
+    'CPTXN_COLLECT': 'bg-purple-100 text-purple-800',
+    'CPTXN_EXPIRED': 'bg-red-100 text-red-800',
+    'CPTXN_DEPOSIT': 'bg-yellow-100 text-yellow-800',
+    'CPTXN_WITHDRAW': 'bg-orange-100 text-orange-800',
+    'CPTXN_APPROVE': 'bg-indigo-100 text-indigo-800',
+    'CPTXN_SENDETH': 'bg-pink-100 text-pink-800',
+    'DISABLE_ORDERBOOK': 'bg-teal-100 text-teal-800'
+  }[event] || 'bg-gray-100 text-gray-800'
 
   return (
-    <>
-      <div className="p-4 pt-3">
-        {EVENT.includes("WITHDRAW") ||
-        EVENT.includes("SENDETH") ||
-        TXNHASH.includes("Ran out of ETH, disabled orderbook") ? (
-          <Activity extraClass="text-center">-</Activity>
-        ) : (
-          <input
-            onFocus={() => handleFocus(index, "hash")}
-            onBlur={() => handleFocus(index, "hash")}
-            readOnly
-            className="w-30 bg-transparent focus:outline-none truncate font-mono text-sm font-bold"
-            value={
-              !focusStates[index]
-                ? HASH.substring(0, 8) +
-                  "..." +
-                  HASH.substring(HASH.length - 8, HASH.length)
-                : HASH
-            }
-          />
-        )}
+    <span className={`px-2 py-1 rounded-full text-xs font-medium ${colorClass}`}>
+      {event}
+    </span>
+  )
+}
+
+const TokenAmount: React.FC<{ token: string; amount: string }> = ({ token, amount }) => {
+  let tokenName: string
+  let tokenImage: string
+  let displayName: string
+
+  if (token === 'MINIMA') {
+    tokenName = 'Native Minima'
+    tokenImage = './assets/token.svg'
+    displayName = 'MINIMA'
+  } else if (token === 'ETH:0x67376c3bf3b5a336b14398920cfbc292013718ea') {
+    tokenName = 'USDT'
+    tokenImage = './assets/tether.svg'
+    displayName = 'USDT'
+  } else {
+    tokenName = 'WMINIMA'
+    tokenImage = './assets/wtoken.svg'
+    displayName = 'WMINIMA'
+  }
+
+  return (
+    <div className="flex items-center space-x-2 bg-gray-100 dark:bg-gray-800 rounded-full py-2 px-4 md:max-w-max">
+      <img
+        alt={tokenName}
+        src={tokenImage}
+        className="w-10 h-10 rounded-full"
+      />
+      <div>
+        <p className="text-sm font-medium text-gray-500 dark:text-gray-400">{tokenName}</p>
+        <p className="text-lg font-bold text-gray-900 dark:text-white">
+          {amount} <span className="text-sm font-normal">{displayName}</span>
+        </p>
       </div>
-      <div className="p-4 pt-5">
-        {(EVENT.includes("WITHDRAW") || EVENT.includes("SENDETH")) && (
-          <Activity extraClass="">Withdrew tokens</Activity>
-        )}
+    </div>
+  )
+}
 
-        {EVENT.includes("STARTED") && (
-          <Activity extraClass="">Created a contract</Activity>
-        )}
+const ViewTransactionButton: React.FC<{ txnHash: string; token: string; network: string }> = ({ txnHash, token, network }) => {
+  const isEthereumEvent = txnHash !== "0x00" && txnHash.includes("0x") && token !== "MINIMA";
+  const isMinimaEvent = txnHash === "0x00" || token === "MINIMA";
 
-        {EVENT.includes("COLLECT") &&
-          !TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <Activity extraClass="">Attemped collection</Activity>
-          )}
-        {EVENT.includes("COLLECT") &&
-          TXNHASH.includes("Ran out of ETH, disabled orderbook") && (
-            <Activity extraClass="">Disabled orderbook</Activity>
-          )}
-        {EVENT.includes("EXPIRED") && (
-          <Activity extraClass="">Contract expired</Activity>
-        )}
-        {EVENT.includes("SENT") && (
-          <Activity>Sent counterparty tokens</Activity>
-        )}
-        {EVENT.includes("APPROVE") && <Activity>{EVENT}</Activity>}
-      </div>
-      <div className="p-4">
-        <div>
-          <img
-            className="w-[24px] h-[24px] rounded-full inline-block pl-0.5 pb-0.5"
-            src={
-              getTokenType(TOKEN) === "wMinima"
-                ? "./assets/wtoken.svg"
-                : getTokenType(TOKEN) === "Minima"
-                ? "./assets/token.svg"
-                : getTokenType(TOKEN) === "Tether"
-                ? "./assets/tether.svg"
-                : "./assets/eth.svg"
-            }
-          />
-          <p className="inline-block my-auto text-sm font-bold font-mono tracking-wide ml-1">
-            {new Decimal(AMOUNT).toString()}
-          </p>
-        </div>
-      </div>
-      <div className="p-4 pt-2">
-        {EVENT.includes("EXPIRED") ? (
-          <Activity>{TXNHASH.includes("SECRET") ? TXNHASH : "-"}</Activity>
-        ) : (
-          <>
-            {isEthereumEvent && (
-              <input
-                readOnly
-                className="w-full bg-transparent cursor-pointer focus:outline-none hover:opacity-80 truncate font-mono text-sm font-bold"
-                value={TXNHASH}
-                onClick={(e) => {
-                  if (window.navigator.userAgent.includes("Minima Browser")) {
-                    e.preventDefault();
-                    // @ts-ignore
-                    Android.openExternalBrowser(
-                      network === "mainnet"
-                        ? "https://etherscan.io/tx/" + TXNHASH
-                        : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                      "_blank"
-                    );
-                  }
+  const handleClick = async () => {
+    if (isEthereumEvent) {
+      const url = network === "mainnet"
+        ? `https://etherscan.io/tx/${txnHash}`
+        : `https://sepolia.etherscan.io/tx/${txnHash}`;
 
-                  window.open(
-                    network === "mainnet"
-                      ? "https://etherscan.io/tx/" + TXNHASH
-                      : "https://sepolia.etherscan.io/tx/" + TXNHASH,
-                    "_blank"
-                  );
-                }}
-              />
-            )}
-
-            {isMinimaEvent && TXNHASH.includes("0x") && (
-              <input
-                onClick={async () => {
-                  if (TXNHASH === "0x00" || TXNHASH.includes("Incorrect")) {
-                    return;
-                  }
-
-                  const link = await utils.dAppLink("Block");
-                  await new Promise((resolve) => setTimeout(resolve, 150));
-                  window.open(
-                    `${(window as any).MDS.filehost}${
-                      link.uid
-                    }/index.html?uid=${link.sessionid}#/t/${TXNHASH}`,
-                    window.innerWidth < 568 ? "_self" : "_blank"
-                  );
-                }}
-                readOnly
-                className="w-full bg-transparent cursor-pointer hover:opacity-80 focus:outline-none truncate font-mono text-sm font-bold"
-                value={TXNHASH}
-              />
-            )}
-            {isMinimaEvent && !TXNHASH.includes("0x") && (
-              <p className="text-xs">{TXNHASH}</p>
-            )}
-
-            {!isEthereumEvent && !isMinimaEvent && (
-              <p className="text-xs">{TXNHASH}</p>
-            )}
-          </>
-        )}
-      </div>
-
-      <div className="p-4 font-bold">
-        <div className="text-xs">
-          {format(parseInt(EVENTDATE), "MMMM dd, yyyy hh:mm a")}
-        </div>
-      </div>
-    </>
-  );
-};
-
-const MainActivity = () => {
-  const {
-    _promptLogs,
-    promptLogs,
-    _switchLogView,
-    offsetAllEvents,
-    offsetOrders,
-    setOffsetAllEvents,
-    setOffsetOrders,
-    allHasMore,
-    setAllHasMore,
-    ordersHasMore,
-  } = useContext(appContext);
-  const { getTokenType, _network } = useWalletContext();
-  const [data, setData] = useState<any[]>([]);
-
-  const springProps = useSpring({
-    opacity: _promptLogs ? 1 : 0,
-    config: config.gentle,
-  });
-
-  const handleNext = () => {
-    if (_switchLogView === "all") {
-      setOffsetAllEvents((prevState) => prevState + 20);
-    }
-
-    if (_switchLogView === "orders") {
-      setOffsetOrders((prevState) => prevState + 1);
+      if (window.navigator.userAgent.includes("Minima Browser")) {
+        // @ts-ignore
+        Android.openExternalBrowser(url, "_blank");
+      } else {
+        window.open(url, "_blank");
+      }
+    } else if (isMinimaEvent && txnHash.includes("0x")) {
+      // Assuming utils.dAppLink is available in the global scope
+      const link = await (window as any).utils.dAppLink("Block");
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      const url = `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${link.sessionid}#/t/${txnHash}`;
+      window.open(url, window.innerWidth < 568 ? "_self" : "_blank");
     }
   };
 
-  const handlePrev = () => {
-    if (_switchLogView === "all") {
-      setOffsetAllEvents((prevState) => prevState - 20);
-    }
-
-    if (_switchLogView === "orders") {
-      setOffsetOrders((prevState) => prevState - 1);
-    }
-  };
-
-  useEffect(() => {
-    if (_promptLogs && _switchLogView === "all") {
-      getAllEvents(20 + 1, offsetAllEvents, (events) => {
-        const _evts = events.map((e) => {
-          return {
-            ...e,
-            getTokenType,
-            _network,
-          };
-        });
-
-        if (_evts.length > 20) {
-          setAllHasMore(true);
-          setData(_evts.slice(0, 20));
-        } else {
-          setAllHasMore(false);
-          setData(_evts);
-        }
-      });
-    }
-  }, [_promptLogs, offsetAllEvents, _switchLogView]);
+  if (txnHash === "0x00" || txnHash.includes("Incorrect")) {
+    return <span className="text-sm text-gray-500 dark:text-gray-400">N/A</span>;
+  }
 
   return (
-    <>
-      <span
-        onClick={promptLogs}
-        className="mr-2 text-xs text-yellow-300 cursor-pointer"
-      >
-        <ActivityIcon fill="currentColor" />
-      </span>
-      {_promptLogs &&
-        createPortal(
-          <animated.div
-            style={springProps}
-            className="bg-slate-100 dark:bg-[#1B1B1B] fixed top-0 right-0 bottom-0 left-0 grid grid-cols-[1fr_minmax(0,_860px)_1fr] overflow-y-auto"
-          >
-            <div className="bg-slate-100 dark:bg-[#1B1B1B]" />
-            <div>
-              <div className="grid grid-cols-[auto_1fr] items-center pr-4 my-3">
-                <Tabs />
+    <button
+      onClick={handleClick}
+      className="flex items-center space-x-1 px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 rounded-md text-sm font-medium transition-colors duration-200"
+    >
+      <span>View Transaction</span>
+      <ExternalLink size={14} />
+    </button>
+  );
+};
 
-                <div className="grid grid-cols-[1fr_minmax(80px,_240px)_auto] items-center">
-                  <div />
-                  <div className="block sm:hidden" />
-                  <div className="hidden sm:grid gap-2 grid-cols-2 mx-8">
-                    <button
-                      disabled={
-                        (_switchLogView === "all" && offsetAllEvents === 0) ||
-                        (_switchLogView === "orders" && offsetOrders === 1)
-                      }
-                      onClick={handlePrev}
-                      type="button"
-                      className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-full p-0 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
+export default function ActivityLogs() {
+  const [logs, _] = useState<Log[]>(mockLogs)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [entriesPerPage, setEntriesPerPage] = useState(10)
+  const [sortColumn, setSortColumn] = useState<keyof Log>('ID')
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('desc')
+  const [network] = useState("mainnet") // You might want to get this from a context or prop
+
+  const indexOfLastEntry = currentPage * entriesPerPage
+  const indexOfFirstEntry = indexOfLastEntry - entriesPerPage
+  const currentEntries = logs
+    .sort((a, b) => {
+      if (a[sortColumn]! < b[sortColumn]!) return sortDirection === 'asc' ? -1 : 1
+      if (a[sortColumn]! > b[sortColumn]!) return sortDirection === 'asc' ? 1 : -1
+      return 0
+    })
+    .slice(indexOfFirstEntry, indexOfLastEntry)
+
+  const paginate = (pageNumber: number) => setCurrentPage(pageNumber)
+
+  const handleSort = (column: keyof Log) => {
+    if (column === sortColumn) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc')
+    } else {
+      setSortColumn(column)
+      setSortDirection('asc')
+    }
+  }
+
+
+  return null;
+
+  return (
+    <div className="px-4 py-8">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
+        <div className="p-6">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+            Activity logs
+          </h1>
+          
+          <div className="flex items-center text-sm text-yellow-600 dark:text-yellow-400 mb-4 bg-yellow-50 dark:bg-yellow-900 p-2 rounded">
+            <AlertCircle className="w-4 h-4 mr-2" />
+            <span>Note: Some CPTXN_EXPIRED events may not have a transaction hash if the transaction was not processed.</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-700">
+                <tr>
+                  {['ID', 'Hash', 'Event', 'Token/Amount', 'Event Message', 'Event Date'].map((header) => (
+                    <th
+                      key={header}
+                      className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider cursor-pointer"
+                      onClick={() => handleSort(header.replace(/\s+/g, '').toUpperCase() as keyof Log)}
                     >
-                      Prev
-                    </button>
-                    <button
-                      disabled={
-                        (_switchLogView === "all" && !allHasMore) ||
-                        (_switchLogView === "orders" && !ordersHasMore)
-                      }
-                      onClick={handleNext}
-                      type="button"
-                      className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-full p-0 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
-                    >
-                      Next
-                    </button>
-                  </div>
-
-                  <span onClick={promptLogs}>
-                    <CloseIcon fill="currentColor" />
-                  </span>
-                </div>
-              </div>
-
-              <div className="grid sm:hidden grid-cols-2 gap-1">
-                <button
-                  disabled={
-                    (_switchLogView === "all" && offsetAllEvents === 0) ||
-                    (_switchLogView === "orders" && offsetOrders === 1)
-                  }
-                  onClick={handlePrev}
-                  type="button"
-                  className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-none p-0 py-2 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
-                >
-                  Prev
-                </button>
-                <button
-                  disabled={
-                    (_switchLogView === "all" && !allHasMore) ||
-                    (_switchLogView === "orders" && !ordersHasMore)
-                  }
-                  onClick={handleNext}
-                  type="button"
-                  className="disabled:bg-white disabled:dark:bg-transparent disabled:dark:border disabled:dark:border-black disabled:dark:text-neutral-600 disabled:text-neutral-200 rounded-none p-0 py-2 text-white bg-[#1B1B1B] dark:bg-black font-bold text-sm"
-                >
-                  Next
-                </button>
-              </div>
-
-              {_switchLogView === "all" && (
-                <>
-                  {!data.length && (
-                    <div className="h-full flex items-center justify-center">
-                      <p className="text-xs font-bold text-center">
-                        No activity yet
-                      </p>
-                    </div>
-                  )}
-                  {!!data.length && (
-                    <MostResponsiveTableEver
-                      headerClasses="border-b"
-                      headerClassesMobile="divide-y dark:divide-teal-300"
-                      headerCellClassesMobile={[
-                        "tracking-wider text-sm p-4 text-teal-600 dark:text-teal-300 font-bold shadow-sm dark:shadow-teal-300 border-l border-t dark:border-teal-300",
-                        "tracking-wider text-sm p-4 font-bold",
-                        "tracking-wider text-sm p-4 font-bold",
-                        "tracking-wider text-sm p-4 font-bold",
-                        "tracking-wider text-sm p-4 font-bold",
-                        "tracking-wider text-sm p-4 font-bold",
-                        "tracking-wider text-sm p-4 font-bold",
-                      ]}
-                      headerCellClasses={[
-                        "tracking-wider font-semibold text-sm p-3 w-10",
-                        "tracking-wider font-semibold text-sm p-3 w-40",
-                        "tracking-wider font-semibold text-sm p-3 w-40",
-                        "tracking-wider font-semibold text-sm p-3 w-20",
-                        "tracking-wider font-semibold text-sm p-3 w-40",
-                        "tracking-wider font-semibold text-sm p-3 w-40 text-right",
-                      ]}
-                      headers={["ID", "Event", "Token", "TXNHash", "Timestamp"]}
-                      data={data}
-                      renderCell={renderCell}
-                      renderCellMobile={renderCellMobile}
-                    />
-                  )}
-                </>
-              )}
-
-              {_switchLogView === "orders" && <OrderHistory full={true} />}
+                      <div className="flex items-center">
+                        {header}
+                        {sortColumn === header.replace(/\s+/g, '').toUpperCase() && (
+                          sortDirection === 'asc' ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />
+                        )}
+                      </div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {currentEntries.map((log) => (
+                  <tr key={log.ID}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-gray-300">{log.ID}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="max-w-[150px] overflow-x-auto whitespace-nowrap scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 dark:scrollbar-thumb-gray-600 dark:scrollbar-track-gray-800">
+                        <span className="font-mono text-sm text-gray-500 dark:text-gray-400">
+                          {log.HASH}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <EventBadge event={log.EVENT} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <TokenAmount token={log.TOKEN} amount={log.AMOUNT} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <ViewTransactionButton txnHash={log.TXNHASH || ''} token={log.TOKEN} network={network} />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {new Date(parseInt(log.EVENTDATE)).toLocaleString()}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div className="bg-gray-50 dark:bg-gray-700 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <span className="text-sm text-gray-700 dark:text-gray-300">Show</span>
+              <select
+                className="bg-transparent mx-2 border-gray-300 dark:border-gray-600 rounded-md text-gray-600 dark:text-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-100 focus:ring-blue-500"
+                value={entriesPerPage}
+                onChange={(e) => {
+                  setEntriesPerPage(Number(e.target.value))
+                  setCurrentPage(1)
+                }}
+              >
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+              </select>
+              <span className="text-sm text-gray-700 dark:text-gray-300">entries</span>
             </div>
-            <div className="bg-slate-100 dark:bg-[#1B1B1B]" />
-          </animated.div>,
-          document.body
-        )}
-    </>
-  );
-};
-
-export default MainActivity;
+            <div className="flex items-center space-x-2">
+              <button
+                className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                onClick={() => paginate(currentPage - 1)}
+                disabled={currentPage === 1}
+              >
+                Previous
+              </button>
+              <button
+                className="px-3 py-1 border border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 disabled:opacity-50"
+                onClick={() => paginate(currentPage + 1)}
+                disabled={indexOfLastEntry >= logs.length}
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

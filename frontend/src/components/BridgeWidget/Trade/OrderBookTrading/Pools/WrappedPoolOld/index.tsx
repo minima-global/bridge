@@ -205,9 +205,7 @@ const WrappedPoolOld = () => {
 
             <div className="mb-4">
               <Charts
-                fav={values.favorites}
                 book="wminima"
-                type={_currentNavigation.toLowerCase()}
               />
             </div>
 

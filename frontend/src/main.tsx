@@ -12,7 +12,7 @@ import Secret from "./components/Secret/index.tsx";
 import { ToastContainer } from "react-toastify";
 import Favorites from "./components/Favorites/index.tsx";
 import NotFound from "./components/NotFound/index.tsx";
-import ActivitiesPage from "./components/Activities/index.tsx";
+import ActivityLogs from "./components/Activities/index.tsx";
 
 const router = createHashRouter([
   {
@@ -27,7 +27,7 @@ const router = createHashRouter([
       },
       {
         path: "activities",
-        element: <ActivitiesPage />,
+        element: <ActivityLogs />,
         errorElement: <NotFound />,
       },
     ],

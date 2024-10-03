@@ -203,9 +203,7 @@ const TetherPoolOld = () => {
 
           <div className="mb-4 px-4">
             <Charts
-              fav={values.favorites}
               book="usdt"
-              type={_currentNavigation.toLowerCase()}
             />
           </div>
 

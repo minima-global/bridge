@@ -17,8 +17,7 @@ const TetherPool = ({ onShowConfirm }) => {
   const [showAdvanced, setShowAdvanced] = useState(false)
 
   const formik: FormikContextType<FormikValues> = useFormikContext()
-  const { dirty, errors, touched, values, getFieldProps } = formik
-  const { favorites } = values
+  const { dirty, errors, touched,  getFieldProps } = formik
 
   return (
     <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden">
@@ -97,8 +96,8 @@ const TetherPool = ({ onShowConfirm }) => {
 
       {showAdvanced && (
         <div className="p-6 bg-gray-50 dark:bg-gray-900">
-          <Charts fav={favorites} book="usdt" type="buy" />
-          <Charts fav={favorites} book="usdt" type="sell" />
+          <Charts  book="usdt"  />
+          <Charts  book="usdt"  />
         </div>
       )}
     </div>
