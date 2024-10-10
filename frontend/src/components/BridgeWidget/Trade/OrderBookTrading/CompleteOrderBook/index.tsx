@@ -1,191 +1,111 @@
 import { useContext, useEffect, useState } from "react";
-
-import { getCompleteOrderBook } from "../../../../../../../dapp/js/orderbook.js";
+import { getCompleteOrderBook, getMyOrderBook } from "../../../../../../../dapp/js/orderbook.js";
 import Order from "./Order/index.js";
 import { Order as OrderInterface } from "../../../../../types/Order.js";
-import { appContext } from "../../../../../AppContext.js";
-
-import { getMyOrderBook } from "../../../../../../../dapp/js/orderbook.js";
 import { PoolData } from "../../../../../types/Pool.js";
+import { appContext } from "../../../../../AppContext.js";
 import Bear from "../../../../UI/Avatars/Bear/index.js";
 
-const CompleteOrderBook = () => {
-  const [orderBook, setOrderBook] = useState<OrderInterface[]>();
+export default function CompleteOrderBook() {
+  const [orderBook, setOrderBook] = useState<OrderInterface[]>([]);
   const [_currentOrderBook, setMyOrderBook] = useState<PoolData | null>(null);
-
-  // Fetch the order book on component mount
-  useEffect(() => {
-    getBook();
-  }, []);
-
-  // Function to fetch the order book
-  const getBook = () => {
-    getMyOrderBook(function (orderBook) {
-      setMyOrderBook(orderBook);
-    });
-  };
-
-  const { getAndSetFavorites, _userDetails, _currentNavigation } =
-    useContext(appContext);
+  const { getAndSetFavorites, _userDetails, _currentNavigation } = useContext(appContext);
 
   useEffect(() => {
     if (_currentNavigation === "trade") {
+      getMyOrderBook(setMyOrderBook);
       getCompleteOrderBook((resp) => {
-        setOrderBook(
-          resp.filter((o) => o.maximapublickey !== _userDetails.maximapublickey)
-        );
+        setOrderBook(resp.filter((o) => o.maximapublickey !== _userDetails.maximapublickey));
       });
-
       getAndSetFavorites();
     }
-  }, [_currentNavigation]);
-
+  }, [_currentNavigation, _userDetails.maximapublickey]);
 
   return (
-    <div className="bg-neutral-100 dark:bg-[#1B1B1B] rounded-lg">
-      <ul>
-        {!orderBook ||
-          (!orderBook.filter(
-            (o) => o.maximapublickey !== _userDetails.maximapublickey
-          ).length && (
-            <p className="text-center text-xs font-bold">No orderbook found</p>
-          ))}
-
-        {_currentOrderBook && (
-          <div className="p-4 shadow-sm">
-            <div className="grid grid-cols-[46px_1fr_auto] gap-1">
-              <div className="my-auto">
-                <Bear
-                  extraClass="w-[46px]"
-                  input={_userDetails.minimapublickey}
-                />
-              </div>
-              <div className="pt-2 pl-1">
-                <p className="text-xs font-bold">My Book</p>
-                <input
-                  onClick={(e) => e.stopPropagation()}
-                  readOnly
-                  value={_userDetails.minimapublickey}
-                  className="bg-transparent cursor-default focus:outline-none text-xs w-full truncate font-mono"
-                />
-              </div>
-              <div className="flex gap-1 my-auto">
-                {_currentOrderBook.wminima.enable && (
-                  <img
-                    className="w-[20px] h-[20px] rounded-full"
-                    alt="wminima"
-                    src="./assets/wtoken.svg"
-                  />
-                )}
-                {_currentOrderBook.usdt.enable && (
-                  <img
-                    className="w-[18px] h-[18px]"
-                    alt="usdt"
-                    src="./assets/tether.svg"
-                  />
-                )}
-                {!_currentOrderBook.wminima.enable && !_currentOrderBook.usdt.enable && <p className="text-xs font-bold text-neutral-400 dark:text-neutral-600">Disabled</p>}
-              </div>
-            </div>
-
-            <div className="w-full mb-4">
-              <hr className="w-full border border-neutral-200 dark:border-neutral-800 mt-4" />
-
-              <div
-                className={`my-auto ${
-                  !_currentOrderBook.usdt.enable && "opacity-50"
-                }`}
-              >
-                <div className="grid bg-gray-50 grid-cols-[1fr_auto_1fr] items-center dark:bg-[#1B1B1B] py-2 dark:bg-opacity-10">
-                  <div />
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                    <h3 className="text-xs font-bold text-center">Native</h3>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M7 10h14l-4 -4" />
-                      <path d="M17 14h-14l4 4" />
-                    </svg>
-                    <h3 className="text-xs font-bold text-center">USDT</h3>
-                  </div>
-                  <div />
-                </div>
-                <div className="grid grid-cols-2 bg-gray-50 bg-opacity-30 dark:bg-[#1B1B1B] dark:bg-opacity-50 p-2">
-                  <div className="text-center border-r dark:border-teal-300">
-                    <h6 className="text-xs font-bold">Buying</h6>
-                    <p className="font-mono text-sm">
-                      {_currentOrderBook.usdt.buy}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <h6 className="text-xs font-bold">Selling</h6>
-                    <p className="font-mono text-sm">
-                      {_currentOrderBook.usdt.sell}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div
-                className={`my-auto ${
-                  !_currentOrderBook.wminima.enable && "opacity-50"
-                }`}
-              >
-                <div className="grid bg-gray-50 grid-cols-[1fr_auto_1fr] items-center dark:bg-[#1B1B1B] py-2 dark:bg-opacity-10">
-                  <div />
-                  <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-2">
-                    <h3 className="text-xs font-bold text-center">Native</h3>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="22"
-                      height="22"
-                      viewBox="0 0 24 24"
-                      strokeWidth="1.5"
-                      stroke="currentColor"
-                      fill="none"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M7 10h14l-4 -4" />
-                      <path d="M17 14h-14l4 4" />
-                    </svg>
-                    <h3 className="text-xs font-bold text-center">WMINIMA</h3>
-                  </div>
-                  <div />
-                </div>
-                <div className="grid grid-cols-2 bg-gray-50 bg-opacity-30 dark:bg-[#1B1B1B] dark:bg-opacity-50 p-2">
-                  <div className="text-center border-r dark:border-teal-300">
-                    <h6 className="text-xs font-bold">Buying</h6>
-                    <p className="font-mono text-sm">
-                      {_currentOrderBook.wminima.buy}
-                    </p>
-                  </div>
-                  <div className="text-center">
-                    <h6 className="text-xs font-bold">Selling</h6>
-                    <p className="font-mono text-sm">
-                      {_currentOrderBook.wminima.sell}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <div className="bg-neutral-100 shadow-lg dark:shadow-none dark:bg-[#1b1b1b] rounded-lg p-4">
+      {_currentOrderBook && <MyOrderBook orderBook={_currentOrderBook} userDetails={_userDetails} />}
+      
+      <ul className="space-y-4 mt-4">
+        {orderBook.length === 0 && (
+          <p className="text-center text-xs font-bold text-gray-600 dark:text-gray-400">No orderbook found</p>
         )}
-
-        {orderBook?.map((order) => (
+        {orderBook.map((order) => (
           <Order data={order} key={order.data.publickey} />
         ))}
       </ul>
     </div>
   );
-};
+}
 
-export default CompleteOrderBook;
+interface MyOrderBookProps {
+  orderBook: PoolData;
+  userDetails: { minimapublickey: string };
+}
+
+function MyOrderBook({ orderBook, userDetails }: MyOrderBookProps) {
+  return (
+    <div className="bg-white dark:bg-neutral-800 rounded-lg shadow-sm p-3">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2">
+          <Bear extraClass="w-[32px]" input={userDetails.minimapublickey} />
+          <div>
+            <p className="text-xs font-bold text-gray-800 dark:text-gray-200">My Book</p>
+            <input
+              readOnly
+              value={userDetails.minimapublickey}
+              className="bg-transparent cursor-default focus:outline-none text-[10px] w-full truncate font-mono text-gray-600 dark:text-gray-400"
+            />
+          </div>
+        </div>
+        <div className="flex items-center space-x-1">
+          {orderBook.wminima.enable && (
+            <img className="w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
+          )}
+          {orderBook.usdt.enable && (
+            <img className="w-[14px] h-[14px]" alt="usdt" src="./assets/tether.svg" />
+          )}
+          {!orderBook.wminima.enable && !orderBook.usdt.enable && (
+            <p className="text-xs font-bold text-gray-400 dark:text-gray-500">Disabled</p>
+          )}
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {orderBook.usdt.enable && (
+          <OrderBookRow
+            title="USDT"
+            buy={orderBook.usdt.buy}
+            sell={orderBook.usdt.sell}
+          />
+        )}
+        {orderBook.wminima.enable && (
+          <OrderBookRow
+            title="WMINIMA"
+            buy={orderBook.wminima.buy}
+            sell={orderBook.wminima.sell}
+          />
+        )}
+      </div>
+    </div>
+  );
+}
+
+interface OrderBookRowProps {
+  title: string;
+  buy: number;
+  sell: number;
+}
+
+function OrderBookRow({ title, buy, sell }: OrderBookRowProps) {
+  return (
+    <div className="bg-gray-50 dark:bg-gray-700 rounded p-2 text-xs">
+      <div className="flex items-center justify-between">
+        <span className="font-bold text-gray-800 dark:text-gray-200">Native ↔ {title}</span>
+        <div className="flex space-x-4">
+          <span className="text-gray-700 dark:text-gray-300">Buy: <span className="font-mono text-gray-900 dark:text-gray-100">{buy}</span></span>
+          <span className="text-gray-700 dark:text-gray-300">Sell: <span className="font-mono text-gray-900 dark:text-gray-100">{sell}</span></span>
+        </div>
+      </div>
+    </div>
+  );
+}

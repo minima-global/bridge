@@ -185,3 +185,9 @@
 ##### [2.15.3] - 27 Sept 24
 
 - Notify on trades
+
+##### [2.16.0] - 10 Oct 24
+
+- Fix check on low funds
+- Make liquidity providers compact and update design
+- Bug fixes

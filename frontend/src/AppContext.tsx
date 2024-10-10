@@ -117,7 +117,7 @@ const AppProvider = ({ children }: IProps) => {
   const [_mainBalance, setMainBalance] = useState<null | CoinStats>(null);
   // User Favorite Traders
   const [_favorites, setFavorites] = useState<Favorite[]>([]);
-  console.log(_userDetails);
+
   // display db locked, ask for unlock
   const [_promptDatabaseLocked, setPromptDatabaseLocked] = useState(false);
 

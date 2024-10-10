@@ -33,6 +33,7 @@ type Context = {
   getTokenType: (tokeName: string, currentNetwork: string) => string;
   getEthereumBalance: () => void;
   callBalanceForApp: () => void;
+  setCurrentPoolPrice: Dispatch<SetStateAction<number | null>>;
 };
 
 const WalletContext = createContext<Context | null>(null);
@@ -84,10 +85,6 @@ export const WalletContextProvider = ({ children }: Props) => {
 
     // Get Swap Wallet Balance...
     await getWalletBalance();
-
-    // get current pool price for wM vs usdt
-    const poolPrice = await getCurrentPoolPrice(_provider);
-    setCurrentPoolPrice(poolPrice);
 
     // Trigger Ethereum Balance update...
     setTimeout(() => {
@@ -160,8 +157,14 @@ export const WalletContextProvider = ({ children }: Props) => {
 
   const getEthereumBalance = async () => {
     if (!_address) return;
-    const balance = await _provider.getBalance(_address);
-    setBalance(formatEther(balance));
+    try {
+      const balance = await _provider.getBalance(_address);
+      setBalance(formatEther(balance));
+      
+    } catch (error) {
+      // err
+      console.error(error);
+    }
   };
 
   return (
@@ -180,6 +183,7 @@ export const WalletContextProvider = ({ children }: Props) => {
         getTokenType,
         getEthereumBalance,
         callBalanceForApp,
+        setCurrentPoolPrice
       }}
     >
       {children}

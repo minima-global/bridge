@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { appContext } from "../../AppContext";
 import { useWalletContext } from "../../providers/WalletProvider/WalletProvider";
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
@@ -6,21 +6,36 @@ import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
 import RefreshIcon from "../UI/Icons/RefreshIcon";
 import Decimal from "decimal.js";
+import { getCurrentPoolPrice } from "../../libs/getPrice";
 
 const TokenList = () => {
   const {
+    _provider,
     _currentNavigation,
     setTriggerBalanceUpdate,
     _triggerBalanceUpdate,
     getWalletBalance,
   } = useContext(appContext);
-  const { _balance, _network, _poolPrice, getEthereumBalance } =
+    const { _balance, _network, _poolPrice, getEthereumBalance, setCurrentPoolPrice } =
     useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   if (_currentNavigation !== "balance") {
     return null;
   }
+
+  useEffect(() => {
+    (async () => {
+      try {
+        // get current pool price for wM vs usdt
+        const poolPrice = await getCurrentPoolPrice(_provider);
+        setCurrentPoolPrice(poolPrice);
+        
+      } catch (error) {
+        console.warn(error);
+      }
+    })();
+  }, []);
 
   const handlePullBalance = () => {
     setTriggerBalanceUpdate(true);
