@@ -65,6 +65,12 @@ const TokenList = () => {
       )}
       {!_triggerBalanceUpdate && (
         <ul>
+          <li className="flex items-center">
+            <div className="flex-grow"/>
+            <p className="text-xs py-1 font-bold text-neutral-500 dark:text-neutral-700">
+              {_poolPrice && "1 WMINIMA ≈ $" + new Decimal(_poolPrice).toFixed(6)}
+            </p>
+          </li>
           {tokens.map((token) => (
             <li
               key={token.address}
@@ -102,13 +108,13 @@ const TokenList = () => {
                       formatUnits(token.balance, token.decimals).toString()}
                   </p>
                 </div>
-                {_defaults["wMinima"][_network] === token.address && (
+                {/* {_defaults["wMinima"][_network] === token.address && (
                   <div>
                     <p className="text-xs font-bold text-neutral-500 dark:text-neutral-700">
                       {_poolPrice && "$" + new Decimal(_poolPrice).toFixed(6)}
                     </p>
                   </div>
-                )}
+                )} */}
               </div>
             </li>
           ))}

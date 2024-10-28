@@ -349,7 +349,7 @@ MDS.init(function (msg) {
       } else if (comms.action == "STARTETHSWAP") {
 
         var erc20contract = comms.erc20contract.toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
-        MDS.notify(`Locking up ${comms.amount} ${erc20contract} for ${comms.reqamount} MINIMA`);
+        MDS.notify(`Locking up ${comms.reqamount} ${erc20contract} for ${comms.amount} MINIMA`);
 
         startETHSwap(
           USER_DETAILS,

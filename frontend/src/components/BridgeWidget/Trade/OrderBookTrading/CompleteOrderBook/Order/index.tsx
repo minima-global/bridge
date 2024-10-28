@@ -25,11 +25,11 @@ export default function Order({ data }: IProps) {
       <li className="group transition-all ease-in-out hover:bg-white  bg-gray-100 bg-opacity-20 dark:bg-neutral-800 dark:bg-opacity-50 p-2 rounded-lg shadow-sm">
         <div className="flex items-center justify-between mb-2">
           <div className="flex items-center space-x-2">
-            <Bear extraClass="w-[24px]" input={data.data.publickey} />
+            <Bear extraClass="!w-[32px]" input={data.data.publickey} />
             <div>
               <input
                 readOnly
-                value={contact ? contact.NAME : "-"}
+                value={contact ? contact.NAME : "N/A"}
                 className="bg-transparent cursor-default text-xs focus:outline-none w-full truncate font-bold text-gray-800 dark:text-gray-200"
               />
               <input
@@ -39,20 +39,20 @@ export default function Order({ data }: IProps) {
               />
             </div>
           </div>
-          <div className="flex items-center space-x-2">            
+          <div className="flex items-center space-x-2 mr-2">            
             <div className="flex gap-1">
               {data.data.orderbook.wminima.enable && (
-                <img className="w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
+                <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
               )}
               {data.data.orderbook.usdt.enable && (
-                <img className="w-[14px] h-[14px]" alt="usdt" src="./assets/tether.svg" />
+                <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px]" alt="usdt" src="./assets/tether.svg" />
               )}
             </div>
             {!contact && (
               <Link
                 to={`/fav?uid=${data.data.publickey}&action=add`}
                 onClick={() => promptFavorites("read")}
-                className="transition-opacity text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-300"
+                className="text-teal-500 hover:text-teal-400 dark:text-neutral-300 w-4"
               >
                 <AddIcon fill="currentColor" />
               </Link>

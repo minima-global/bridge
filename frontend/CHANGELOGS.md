@@ -191,3 +191,10 @@
 - Fix check on low funds
 - Make liquidity providers compact and update design
 - Bug fixes
+
+##### [2.17.0] - 28 Oct 24
+
+- Fix bug on order book trade (eth to minima)
+- Fix notify message on Android
+- Design tweak on wminima price
+- Design tweak on Liquidity providers

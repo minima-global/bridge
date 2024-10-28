@@ -57,12 +57,12 @@ function MyOrderBook({ orderBook, userDetails }: MyOrderBookProps) {
             />
           </div>
         </div>
-        <div className="flex items-center space-x-1">
+        <div className="flex items-center space-x-1 pr-2">
           {orderBook.wminima.enable && (
-            <img className="w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
+            <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
           )}
           {orderBook.usdt.enable && (
-            <img className="w-[14px] h-[14px]" alt="usdt" src="./assets/tether.svg" />
+            <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px]" alt="usdt" src="./assets/tether.svg" />
           )}
           {!orderBook.wminima.enable && !orderBook.usdt.enable && (
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500">Disabled</p>
@@ -98,7 +98,7 @@ interface OrderBookRowProps {
 
 function OrderBookRow({ title, buy, sell }: OrderBookRowProps) {
   return (
-    <div className="bg-gray-50 dark:bg-gray-700 rounded p-2 text-xs">
+    <div className="bg-white dark:bg-[#1b1b1b] p-1 rounded text-xs">
       <div className="flex items-center justify-between">
         <span className="font-bold text-gray-800 dark:text-gray-200">Native ↔ {title}</span>
         <div className="flex space-x-4">
