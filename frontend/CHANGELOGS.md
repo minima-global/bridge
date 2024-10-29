@@ -198,3 +198,4 @@
 - Fix notify message on Android
 - Design tweak on wminima price
 - Design tweak on Liquidity providers
+- Open new block explorer for Minima txn hashes

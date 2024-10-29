@@ -8,7 +8,6 @@ import { format } from "date-fns";
 import { useWalletContext } from "../../providers/WalletProvider/WalletProvider.js";
 import Decimal from "decimal.js";
 
-import * as utils from "../../utils";
 import ActivityIcon from "../UI/Icons/ActivityIcon/index.js";
 import Tabs from "./Tabs/index.js";
 import OrderHistory from "../BridgeWidget/Trade/OrderBookTrading/OrderHistory/index.js";
@@ -156,12 +155,9 @@ const renderCell = (
                     return;
                   }
 
-                  const link = await utils.dAppLink("Block");
                   await new Promise((resolve) => setTimeout(resolve, 150));
                   window.open(
-                    `${(window as any).MDS.filehost}${
-                      link.uid
-                    }/index.html?uid=${link.sessionid}#/t/${TXNHASH}`,
+                    `https://explorer.minima.global/transactions/${TXNHASH}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
                 }}
@@ -316,12 +312,8 @@ const renderCellMobile = (cellData, index, handleFocus, focusStates) => {
                     return;
                   }
 
-                  const link = await utils.dAppLink("Block");
-                  await new Promise((resolve) => setTimeout(resolve, 150));
                   window.open(
-                    `${(window as any).MDS.filehost}${
-                      link.uid
-                    }/index.html?uid=${link.sessionid}#/t/${TXNHASH}`,
+                    `https://explorer.minima.global/transactions/${TXNHASH}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
                 }}

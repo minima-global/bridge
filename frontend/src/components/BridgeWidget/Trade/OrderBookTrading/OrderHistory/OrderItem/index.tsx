@@ -4,7 +4,6 @@ import TokenExchange from "../TokenExchange";
 import { useState } from "react";
 import { useWalletContext } from "../../../../../../providers/WalletProvider/WalletProvider";
 import DoneIcon from "../../../../../UI/Icons/DoneIcon";
-import * as utils from "../../../../../../utils";
 import CloseIcon from "../../../../../UI/Icons/CloseIcon";
 
 // Type safe the date
@@ -113,12 +112,9 @@ const OrderItem = ({ order }: IProps) => {
 
                 if (order[0].TOKEN === 'minima') {           
                   e.preventDefault();       
-                  const link = await utils.dAppLink("Block");
-                  await new Promise((resolve) => setTimeout(resolve, 150));
+                  
                   window.open(
-                    `${(window as any).MDS.filehost}${link.uid}/index.html?uid=${
-                      link.sessionid
-                    }#/t/${order[0].TXNHASH.split("-")[0]}`,
+                    `https://explorer.minima.global/transactions/${order[0].TXNHASH.split("-")[0]}`,
                     window.innerWidth < 568 ? "_self" : "_blank"
                   );
 
