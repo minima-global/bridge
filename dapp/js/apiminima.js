@@ -368,7 +368,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 					
 					var requestedtoken = tkn.toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
 					MDS.notify(`Collecting ${coin.amount} MINIMA for ${htlc_info.amount} ${requestedtoken}`);														
-				} catch (error) {I 
+				} catch (error) { 
 					MDS.log("ERROR: notifying "+reqamount.TOKEN + " " + error.message);
 				}
 								
