@@ -213,13 +213,13 @@ const OTCForm = () => {
             }
           />
 
-          {_allowanceLock && (
+          {!_allowanceLock && (
             <div className="my-8 px-4 dark:px-0">
               <button
                 // disabled={true}
                 disabled={!isValid}
                 type="submit"
-                className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black disabled:bg-opacity-10"
+                className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black!disabled:!opacity-50"
               >
                 Trade
               </button>

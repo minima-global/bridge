@@ -325,7 +325,7 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 			
 			//Check the value..
 			getRequestFromHash(hash,function(reqamount){
-				
+
 				//Check there is a value.. if NOT we did not start this HTLC
 				// SO - we must have checked the amount when we did the counterparty txn..
 				//AND then received the secret when they collected..
@@ -357,19 +357,12 @@ function _checkCanSwapCoin(userdets, coin, block, callback){
 				//We can collect
 				MDS.log("Can Collect Minima HTLC coin as we know secret for hash "+hash);
 				try {
-					var htlc_info = JSON.parse(reqamount['HTLC_INFO']);
-					var tkn;
-
-					if (htlc_info.token.startsWith("ETH:")) {
-						tkn = htlc_info.token.substring(4);
-					} else {
-						tkn = htlc_info.token;
-					}
-					
-					var requestedtoken = tkn.toUpperCase() === wMinimaContractAddress.toUpperCase() ? "WMINIMA" : "USDT";
-					MDS.notify(`Collecting ${coin.amount} MINIMA for ${htlc_info.amount} ${requestedtoken}`);														
+					var type = getCoinHTLCData(coin, "requesttokentype");					
+					var requestamount = getCoinHTLCData(coin, "requestamount");					
+										
+					MDS.notify(`Collecting ${coin.amount} MINIMA for ${requestamount} ${type}`);														
 				} catch (error) { 
-					MDS.log("ERROR: notifying "+reqamount.TOKEN + " " + error.message);
+					MDS.log("ERROR: notifying " + error.message);
 				}
 								
 				_collectMinimaHTLCCoin(userdets, hash, secret, coin, function(resp){});

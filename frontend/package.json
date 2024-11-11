@@ -1,7 +1,7 @@
 {
   "name": "miniswap",
   "private": true,
-  "version": "2.18.0",
+  "version": "2.18.6",
   "description": "Swap tokens OTC or Order book DEX and provide liquidity",
   "type": "module",
   "homepage": ".",
