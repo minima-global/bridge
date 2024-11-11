@@ -2,14 +2,21 @@ import InputWrapper from "../../../../UI/FormComponents/InputWrapper";
 import FavoriteIcon from "../../../../UI/Icons/FavoriteIcon";
 import NativeMinima from "../../../../NativeMinima";
 import EthereumTokenSelect from "../EthereumTokenSelect";
-import { Formik } from "formik";
+import { Formik, FormikProps } from "formik";
 import * as yup from "yup";
-import { useContext } from "react";
+import { useContext, useEffect, useRef } from "react";
 import { appContext } from "../../../../../AppContext";
 import Decimal from "decimal.js";
 import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
 import { _defaults } from "../../../../../constants";
 import { useNavigate, useSearchParams } from "react-router-dom";
+
+interface FormValues {
+  uid: string;
+  native: string;
+  token: { name: string; amount: string };
+  locked: boolean;
+}
 
 const OTCForm = () => {
   const navigate = useNavigate();
@@ -22,16 +29,28 @@ const OTCForm = () => {
     setPromptAllowance,
   } = useContext(appContext);
   const { _network } = useWalletContext();
+  const formikRef = useRef<FormikProps<FormValues>>(null);
+  
+  const initialValues: FormValues = {
+    uid: searchParams.get("contact") || "",
+    native: "",
+    token: { name: "WMINIMA", amount: "" },
+    locked: false,
+  };
+
+
+  useEffect(() => {
+    const contact = searchParams.get("contact");
+    if (contact && formikRef.current) {
+      formikRef.current.setFieldValue("uid", contact);
+    }
+  }, [searchParams]);
 
   return (
     <Formik
-      enableReinitialize={!!searchParams && !!searchParams.get("contact")}
-      initialValues={{
-        uid: searchParams.get("contact") || "",
-        native: "",
-        token: { name: "WMINIMA", amount: "" },
-        locked: false,
-      }}
+      innerRef={formikRef}
+      enableReinitialize={true}
+      initialValues={initialValues}
       onSubmit={async (data, { resetForm }) => {
         const { uid, native, token } = data;
         try {
@@ -62,7 +81,7 @@ const OTCForm = () => {
           }
 
           notify(
-            error.message ? error.message : "Error, something went wrong!",
+            error.message ? error.message : "Error, something went wrong!"
           );
         }
       }}
@@ -159,13 +178,24 @@ const OTCForm = () => {
                 ? errors.uid
                 : false
             }
-            inputProps={{ placeholder: "uid", ...getFieldProps("uid") }}
+            inputProps={{
+              placeholder: "uid",
+              ...getFieldProps("uid"),
+              onChange: (e) => {
+                setFieldValue("uid", e.target.value);
+                const newParams = new URLSearchParams(searchParams);
+                newParams.set("contact", e.target.value);
+                navigate(`?${newParams.toString()}`, { replace: true });
+              },
+            }}
             action={
               <div className="flex items-center justify-center">
                 <button
                   onClick={() => {
-                    searchParams.set("form", "true");
-                    navigate(`/fav?${searchParams.toString()}`);
+                    const newParams = new URLSearchParams(searchParams);
+                    newParams.set("form", "true");
+                    newParams.set("contact", values.uid);
+                    navigate(`/fav?${newParams.toString()}`);
                   }}
                   type="button"
                   className="hover:animate-pulse text-sm flex items-center text-center"
@@ -214,12 +244,12 @@ const OTCForm = () => {
           />
 
           {!_allowanceLock && (
-            <div className="my-8 px-4 dark:px-0">
+            <div className="my-8">
               <button
                 // disabled={true}
                 disabled={!isValid}
                 type="submit"
-                className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black!disabled:!opacity-50"
+                className="w-full bg-[#1B1B1B] dark:bg-neutral-300 py-4 dark:text-[#1B1B1B] hover:dark:bg-neutral-200 text-neutral-100 font-bold tracking-wider rounded hover:bg-black disabled:bg-opacity-30 dark:disabled:bg-opacity-30"
               >
                 Trade
               </button>

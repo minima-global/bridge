@@ -199,3 +199,9 @@
 - Design tweak on wminima price
 - Design tweak on Liquidity providers
 - Open new block explorer for Minima txn hashes
+
+##### [2.18.7] - 11 Nov 24
+
+- Fix orderbook trade notification
+- Fix OTC button / design tweaks
+- Fix favorite selection on OTC

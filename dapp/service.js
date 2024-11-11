@@ -398,7 +398,7 @@ MDS.init(function (msg) {
         resetLastCheckedETHBlock();
 
         //Now send to front end..
-        sendFrontendMSG(comms.action, "Switched to ETH Main Network");
+        // sendFrontendMSG(comms.action, "Switched to ETH Main Network");
       } else if (comms.action == "FRONTENDMSG") {
         //Ignore..
       } else if (comms.action == "MANUALETHREFUND") {
