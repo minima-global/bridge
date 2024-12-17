@@ -234,7 +234,7 @@ function runEthCommand(payload, callback){
 			
 			//Did it work..?
 			if(!resp.status){
-				MDS.log("NETWORK ERROR running ETH network command : "+JSON.stringify(resp));
+				// MDS.log("NETWORK ERROR running ETH network command : "+JSON.stringify(resp));
 				ethresp.status 			= false;
 				ethresp.error 		  	= resp.error.message;
 				ethresp.error.message 	= resp.error;
