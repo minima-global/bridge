@@ -190,8 +190,7 @@ function setGasAuto(callback){
 /**
  * Run an ETH command  
  */
-function runEthCommand(payload, callback){
-	
+function runEthCommand(payload, callback){	
 	//Get the current INFURA HOST
 	getInfuraApiKeys(function(apikeys){
 		
@@ -216,8 +215,6 @@ function runEthCommand(payload, callback){
 		
 		//Now make the call
 		MDS.net.POST(rpchost,JSON.stringify(payload),function (resp) {
-		 	//MDS.log(resp.response);
-		
 			var ethresp 			= {};
 			ethresp.networkstatus 	= resp.status;
 			/**
@@ -233,14 +230,26 @@ function runEthCommand(payload, callback){
 			 */
 			
 			//Did it work..?
-			if(!resp.status){
-				// MDS.log("NETWORK ERROR running ETH network command : "+JSON.stringify(resp));
+			if(!resp.status){				
 				ethresp.status 			= false;
-				ethresp.error 		  	= resp.error.message;
+
+				if (typeof resp.error === "object") {
+					if (resp.error.message && typeof resp.error.message === "string") {
+						ethresp.error = resp.error.message;
+					}
+				}
+
+				if (typeof resp.error === "string") {
+					ethresp.error = resp.error;
+				}
+
+				if (!resp.error) {
+					ethresp.error = "Unknown error";
+				}
+
 				ethresp.error.message 	= resp.error;
 				
 			}else{
-				
 				//Parse the returned result
 				var ethreturned = JSON.parse(resp.response);
 				if(ethreturned.error){
@@ -307,6 +316,12 @@ function getETHEREUMWeiBalance(address, callback) {
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+
+		if (!ethresp.status) {
+			// MDS.log("Bad request on eth_getBalance");
+			return;
+		}
+
 		callback(ethresp.result);
 	});
 }
