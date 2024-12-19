@@ -287,6 +287,11 @@ function ethCallCommand(contractAddress, functionData, callback){
 		
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		
+		if (!ethresp.status) {
+			// MDS.log("Bad request on eth_getBalance");
+			return;
+		}
 		callback(ethresp);
 	});
 }
@@ -301,6 +306,12 @@ function getCurrentETHBlock(callback) {
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		
+		if (!ethresp.status) {
+			// MDS.log("Bad request on eth_getBalance");
+			return;
+		}
+
 		callback( parseInt(ethresp.result,16) );
 	});
 }
@@ -357,6 +368,11 @@ function estimateGas(transaction,callback){
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		if (!ethresp.status) {
+			// MDS.log("Bad request on eth_getBalance");
+			return;
+		}
+
 		callback(ethresp);
 	});
 }
@@ -369,6 +385,11 @@ function getTransactionReceipt(txnhash,callback){
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		if (!ethresp.status) {
+			// MDS.log("Bad request on eth_getBalance");
+			return;
+		}
+
 		callback(ethresp);
 	});
 }
@@ -549,6 +570,11 @@ function checkETHTransaction(txnhash, callback){
 	  
 	//Run it..
 	runEthCommand(payload,function(ethresp){
+		if (!ethresp.status) {
+			// MDS.log("Bad request on eth_getBalance");
+			return;
+		}
+
 		callback(ethresp);
 	});
 }
@@ -598,6 +624,11 @@ function boostTransaction(transactionid,callback){
         
         //Run it..
         runEthCommand(payload,function(ethresp){
+			if (!ethresp.status) {
+				// MDS.log("Bad request on eth_getBalance");
+				return;
+			}
+			
             //Message
             MDS.log("BOOST txn:"+JSON.stringify(transaction)+" result:"+JSON.stringify(ethresp));
             
