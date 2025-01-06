@@ -18,7 +18,14 @@ function createDB(callback){
 				+"  `hash` varchar(128) NOT NULL, "
 				+"  `addeddate` bigint NOT NULL "
 				+" )";
-				
+
+	const createLogsTableQuery = "CREATE TABLE IF NOT EXISTS `logs` ( " 
+					+"`id` INT AUTO_INCREMENT PRIMARY KEY,"
+					+"`type` VARCHAR(100) NOT NULL,"
+					+"`message` TEXT NOT NULL,"
+					+"`timestamp` TIMESTAMP DEFAULT CURRENT_TIMESTAMP "
+				+" )";
+		
 	//Run this..
 	MDS.sql(initsql,function(msg){
 		
@@ -69,7 +76,10 @@ function createDB(callback){
 						MDS.sql(favourites,function(ethmsg){					
 							
 							if(callback){
-								callback(ethmsg);
+								MDS.sql(createLogsTableQuery, function(logsmsg){
+									MDS.log(JSON.stringify(logsmsg));
+									callback(ethmsg);
+								});
 							}	
 						});
 					});
@@ -78,6 +88,16 @@ function createDB(callback){
 			});	
 		});
 	});
+}
+
+function insertLog(type, message) {
+    var insertQuery = `INSERT INTO logs (type, message) VALUES (?, ?)`;
+    var params = [type, message];
+    var finalQuery = cleanseForSQL(insertQuery, params);
+    
+    MDS.sql(finalQuery, function (res) {
+    //   MDS.log("Log inserted: " + JSON.stringify(res));
+    });
 }
 
 function createSecretHash(callback){
@@ -393,6 +413,44 @@ function getFavourites(callback){
 	});
 }
 
+var MAX_PER_PAGE = 10;
+function getLogs(page, callback){
+	const currentPage = (page - 1) * MAX_PER_PAGE;
+
+	MDS.sql("SELECT * FROM logs ORDER BY timestamp DESC LIMIT " + MAX_PER_PAGE + " OFFSET " + currentPage, function(sqlmsg){
+		console.log(sqlmsg);
+		callback(sqlmsg);
+	});
+}
+
+// helper
+function cleanseForSQL(query, params) {
+	return query.replace(/\?/g, function () {
+	  var param = params.shift();
+  
+	  // Check for strings
+	  if (typeof param === "string") {
+		// Escape single quotes and backslashes
+		return "'" + param.replace(/'/g, "''").replace(/\\/g, "\\\\") + "'";
+	  }
+  
+	  // Check for objects (assumed to be JSON)
+	  if (typeof param === "object") {
+		// Convert object to a JSON string and escape single quotes and backslashes
+		return (
+		  "'" +
+		  JSON.stringify(param)
+			.replace(/'/g, "''") // Escape single quotes
+			.replace(/\\/g, "\\\\") +
+		  "'"
+		); // Escape backslashes
+	  }
+  
+	  // Return the parameter as-is for numbers, booleans, etc.
+	  return param !== null ? param : "NULL";
+	});
+  }
 
 
-export { createDB, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllEventsForOrders, getAllOrders, getFavourites, addFavourites, removeFavourite, removeAllFavourites };
+
+export { createDB, insertLog, getLogs, logWithdraw, haveSentCounterPartyTxn, getSingleEvent, getAllEvents, getAllEventsForOrders, getAllOrders, getFavourites, addFavourites, removeFavourite, removeAllFavourites };

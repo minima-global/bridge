@@ -229,6 +229,8 @@ function checkExpiredMinimaHTLC(userdets, block, callback){
 						
 							//Add to our list
 							expired.push(coin);
+
+							insertLog("Expired Minima coin search found", "Attempting to collect expired Minima HTLC");
 							
 							//Collect the coin
 							_collectExpiredCoin(userdets,coin,function(){});	
@@ -292,6 +294,9 @@ function checkMinimaSwapHTLC(userdets, block, callback){
 			var coin=resp.response[i];
 			try{
 				if(getCoinHTLCData(coin,"receiver") == USER_DETAILS.minimapublickey){
+
+					insertLog("Check for swap coins", "Found a swap coin and checking if we can swap");
+					
 					_checkCanSwapCoin(userdets, coin, block, function(res){});		
 				}
 			}catch(e){

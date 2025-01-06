@@ -15,6 +15,7 @@ export default function CompleteOrderBook() {
     if (_currentNavigation === "trade") {
       getMyOrderBook(setMyOrderBook);
       getCompleteOrderBook((resp) => {
+        console.log("Total order book ", resp);
         setOrderBook(resp.filter((o) => o.maximapublickey !== _userDetails.maximapublickey));
       });
       getAndSetFavorites();

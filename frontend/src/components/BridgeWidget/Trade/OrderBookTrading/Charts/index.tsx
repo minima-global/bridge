@@ -43,6 +43,7 @@ const Charts = ({ book, type, fav = false }: IProps) => {
   useEffect(() => {
     if (!fav) {
       getSimpleOrderBookTotals((totals) => {
+        console.log('totals', totals);
         if (totals.length === 0) return;
 
         const bk = totals[book][`${type}book`];
@@ -95,6 +96,8 @@ const Charts = ({ book, type, fav = false }: IProps) => {
       });
     }
   }, [type, book, fav]);
+
+  console.log(chart);
 
   const hasOrderBook = chart && chart.price.length && chart.quantity.length;
   return (

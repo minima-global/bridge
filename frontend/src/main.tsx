@@ -12,6 +12,7 @@ import Secret from "./components/Secret/index.tsx";
 import { ToastContainer } from "react-toastify";
 import Favorites from "./components/Favorites/index.tsx";
 import NotFound from "./components/NotFound/index.tsx";
+import AppLogs from "./components/AppLogs/index.tsx";
 
 const router = createHashRouter([
   {
@@ -25,6 +26,10 @@ const router = createHashRouter([
         errorElement: <NotFound />,
       },
     ],
+  },
+  {
+    path: "/app_logs",
+    element: <AppLogs />
   },
   {
     path: "/secret",

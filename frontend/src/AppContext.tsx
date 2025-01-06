@@ -15,7 +15,7 @@ import { OTCDeal } from "./types/OTCDeal.js";
 import { Favorite } from "./types/Favorite.js";
 import { getFavourites } from "../../dapp/js/sql.js";
 
-import { getAllEventsForOrders } from "../../dapp/js/sql.js";
+import { getAllEventsForOrders, getLogs } from "../../dapp/js/sql.js";
 import * as _ from "lodash";
 import { OrderActivityEventGrouped } from "./types/Order.js";
 
@@ -25,6 +25,13 @@ export const appContext = createContext({} as any);
 interface IProps {
   children: any;
 }
+
+(window as any).getLogs = function () {
+  getLogs(function(logs) {
+    console.log(logs);
+  })
+}
+
 const AppProvider = ({ children }: IProps) => {
   const loaded = useRef(false);
 

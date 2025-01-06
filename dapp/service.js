@@ -75,6 +75,8 @@ function serviceCheckBridgeInited() {
 MDS.init(function (msg) {
   //Do initialisation
   if (msg.event == "inited") {
+    
+    insertLog("Initialisation", "Service.js backend system initialized");
     //Create the DB - if not yet
     createDB();
 
@@ -86,11 +88,17 @@ MDS.init(function (msg) {
 
     //Set the correct ETH Network
     setCurrentNetwork();
+    insertLog("Initialisation", "Ethereum network set");
+
 
     //Are we already inited.. then check order book
     if (BRIDGE_INITED) {
+      insertLog("Initialisation", "Attempting to create complete order book");
+
       //Check the Complete Order Book - will only check sigs for NEW entries..
-      createCompleteOrderBook(USER_DETAILS, function (completeorderbook) {});
+      createCompleteOrderBook(USER_DETAILS, function (completeorderbook) {
+        insertLog("Order-book creation complete", JSON.stringify(completeorderbook));
+      });
 
       //Send out your order book if required.. TAKES TIME..
       //createAndSendOrderBook(USER_DETAILS,function(){});
@@ -139,7 +147,9 @@ MDS.init(function (msg) {
     //Has nonce been set
     if (NONCE_TRACK == -1) {
       //REDO the NONCE
-      setNonceAuto(function (nonce) {});
+      setNonceAuto(function (nonce) {
+        insertLog("Resetting nonce", "Nonce count: " + nonce);
+      });
 
       //And check again..
       if (NONCE_TRACK == -1) {
@@ -243,6 +253,8 @@ MDS.init(function (msg) {
                 "Ran out of ETH, disabled orderbook",
                 function (sqlresp) {},
               );
+
+              insertLog("Disable order-book", "Our ethereum balance is low so disabling order-book");
             });
           }
         });
@@ -252,9 +264,13 @@ MDS.init(function (msg) {
     //Do we have to send the orderbook..
     ORDERSEND_COUNTER += 2;
     if (ORDERSEND_COUNTER % ORDERBOOK_UPDATE_TIME_MINUTES == 0) {
+      insertLog("Re-publish order-book", "Time for a re-publish of order-book");
+
+
+      insertLog("Clear previous valid sigs", "We clear this list and so the list does not grow large");
       //Clear the previous validated signatures.. so list does not grow endlessly
       clearPreviousValidSigs();
-
+      
       //Always publish your book timeout..
       createAndSendOrderBook(USER_DETAILS);
     } else {

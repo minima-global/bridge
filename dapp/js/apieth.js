@@ -82,6 +82,9 @@ function checkExpiredETHHTLC(ethblock, callback){
 							
 							//Add to our list
 							expired.push(htlclog);
+
+							insertLog("Expired Ethereum contract found", "Attempting to refund it");
+							
 							
 							//Collect the coin
 							_collectExpiredETHCoin(htlclog, function(){});		
@@ -230,6 +233,7 @@ function checkETHNewSecrets(currentethblock, callback){
 			insertSecret(withdrawlog.secret, withdrawlog.hashlock,function(added){
 				if(added){
 					MDS.log("NEW SECRET from ETH for hash "+withdrawlog.hashlock);
+					insertLog("Secret search found", "Added a new secret to secrets table");
 					
 					//Put a log in db so no need to call ETH..
 					collectExpiredHTLC(withdrawlog.hashlock, "wMinima / USDT", 0, "SECRET REVEALED", function(){});
@@ -279,6 +283,9 @@ function checkETHSwapHTLC(userdets, ethblock, minimablock, callback){
 						
 						//Add to our list
 						collectlist.push(htlclog);
+
+						insertLog("Check for ethereum swap contracts", "Found a contract and checking if we can collect it");
+
 						
 						//Try and collect
 						_checkCanCollectETHCoin(userdets,htlclog, minimablock, function(){});

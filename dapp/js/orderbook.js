@@ -3,6 +3,21 @@ import { getFavsOrderBook , _searchAllOrderBooksWithBook} from "./orderbookutil.
 import { min, max } from "./jslib.js";
 import { MAXIMUM_MINIMA_TRADE, PRICE_BOOK_STEPS} from "./htlcvars.js";
 
+function logWithTimestamp(message) {
+	var now = new Date();
+    var timestamp = now.toLocaleString('en-US', {
+        hour12: false,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    });
+    MDS.log(`[${timestamp}] ${message}`);
+	MDS.notify(`[${timestamp}] ${message}`);
+}
+
 //The Bridge order book address
 var BRIDGEORDERBBOK = "0xDEADDEADDEADFFFF";
 
@@ -30,7 +45,7 @@ function verifyData(publickey,data,signature, callback){
 }
 
 function sendOrderBook(userdetails, objson, callback){
-	
+	logWithTimestamp("Attempting to publish your order-book");
 	//Convert to String..
 	var obstr = encodeStringForDB(JSON.stringify(objson));
 	
@@ -54,9 +69,10 @@ function sendOrderBook(userdetails, objson, callback){
 		var func = "send "+sendfrom+" amount:0.0000000001 address:"+BRIDGEORDERBBOK+" state:"+JSON.stringify(state);
 			
 		MDS.cmd(func,function(resp){
-			
+
 			//Did it work ?
 			if(!resp.status){
+				logWithTimestamp("Failed to publish your order-book from bridge wallet, attempting from main wallet");
 				
 				//Hmm.. Try sending from the main account..
 				var func = "send amount:0.0000000001 address:"+BRIDGEORDERBBOK+" state:"+JSON.stringify(state);
@@ -87,8 +103,11 @@ function setCompleteOrderBook(orderbook,callback){
 function getCompleteOrderBook(callback){
 	MDS.keypair.get("_completeorderbook",function(getresult){
 		if(getresult.status){
+			logWithTimestamp(`Total count of orderbooks retrieved: ${JSON.parse(getresult.value).length}`);
 			callback(JSON.parse(getresult.value));
 		}else{
+			logWithTimestamp(`Total count of orderbooks retrieved: ${0}`);
+
 			callback([]);	
 		}
 	}); 	
@@ -113,7 +132,7 @@ function getSimpleOrderBookTotals(callback){
 }
 
 function createCompleteOrderBook(userdets,callback){
-	
+	insertLog("Order-book creation", "Attempting to parse on-chain order-book coins");
 	//First get ALL the records..
 	_getAllOrderCoins(function(allrecords){
 		
@@ -129,7 +148,8 @@ function createCompleteOrderBook(userdets,callback){
 				
 			//Now we have all the valid records.. only add the latest per owner..
 			var unique = getUniqueRecords(validsignedrecords);
-			
+		
+		
 			//Did we check any new coins..
 			if(SIGS_CHECKED > 0){
 				//MDS.log("NEW orderbook coins checksigned:"+SIGS_CHECKED+" total:"+validsignedrecords.length+" unique:"+unique.length);	
@@ -152,10 +172,14 @@ function createCompleteOrderBook(userdets,callback){
 			
 			//Now STORE this..
 			setCompleteOrderBook(finallist,function(){
-				
+
+				insertLog("Storing complete order-book...", JSON.stringify(finallist));
+
+		
 				//Create the totals list
 				createOrderBookSimpleTotals(userdets,finallist,function(totals){
-					
+			
+
 					//Set for fast access
 					setSimpleOrderBookTotals(totals);
 					

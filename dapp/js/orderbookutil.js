@@ -125,6 +125,7 @@ function createAndSendOrderBook(userdets, callback){
 					});
 					
 				}else{
+					insertLog("Re-publish order-book failed", JSON.stringify(sendvalid));
 					
 					//Wipe the order book so the timer check sends again..
 					var warpedorderbook 	= getEmptyOrderBook();
@@ -135,6 +136,9 @@ function createAndSendOrderBook(userdets, callback){
 				}
 				
 				if(callback){
+
+					insertLog("Re-publish order-book successful", "");
+
 					callback(true);
 				}	
 			});			
@@ -143,7 +147,7 @@ function createAndSendOrderBook(userdets, callback){
 }
 
 function checkNeedPublishOrderBook(userdets,callback){
-	
+	insertLog("Check if order-book changed", "Attempting to check if order-book changed");
 	//First check if your orderbook has changed - default is empty
 	getMyOrderBook(function(currentorderbook){
 		
@@ -210,14 +214,15 @@ function checkNeedPublishOrderBook(userdets,callback){
 					
 					//Get his balance..
 					broadcastMyOrderBook(userdets, orderbookmsg, function(sendvalid){
-						
 						//Success send..?
 						if(sendvalid){
+							insertLog("Check if order-book changed", "Successfully re-published new order-book");
 							setOldOrderBook(currentorderbook,function(oldbk){
 								myoldbalance = currentbalances;	
 							});
 					
 						}else{
+							insertLog("Check if order-book changed", "Failed and should re-send order-book next round");
 							
 							//Wipe so send again..
 							var warpedorderbook 	= getEmptyOrderBook();
@@ -314,7 +319,7 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 		var user		= data.publickey;
 		var orderbook 	= data.orderbook;
 		var balance 	= data.balance;
-		
+
 		//Which side of the trade are we checking..
 		if(user != ignoreme){
 			
@@ -366,6 +371,7 @@ function _searchAllOrderBooksWithBook(completeorderbook, action, amount, token, 
 				}
 			
 			}else if(action == "sell"){
+				
 				
 				//Trying to SELL this much MINIMA - so look for BUYERS
 				var totalamounttoken = toFixedNumber(+amount * +ob.buy);

@@ -7,6 +7,7 @@ import Cross from "../UI/Cross";
 import APIIcon from "../UI/Icons/APIIcon";
 import ManualRefund from "../ManualRefund";
 import RefreshNonce from "../RefreshNonce";
+import { Link } from "react-router-dom";
 
 const Settings = () => {
   const { _promptSettings, promptSettings, promptJsonRpcSetup } =
@@ -20,10 +21,12 @@ const Settings = () => {
           <Cross dismiss={promptSettings} />
         </div>
 
-        <div></div>
         <div className="flex items-center gap-2">
           <SelectNetwork />
           <AppThemeSwitch />
+          <Link to="app_logs" className="text-inherit bg-neutral-100 hover:text-inherit hover:cursor-pointer hover:bg-neutral-50 dark:bg-[#1B1B1B] dark:hover:bg-[#2C2C2C] rounded-full flex items-center p-2 pr-3 shadow-lg">
+            <p className="text-xs ml-2">Debug logs</p>
+          </Link>
         </div>
 
         <div
