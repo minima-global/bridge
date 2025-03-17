@@ -133,7 +133,7 @@ const SelectAsset = () => {
           aria-labelledby="options-menu"
         >
           <ul>
-            {tokens.map((token) => (
+            {tokens.filter(t => t.address != "0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF").map((token) => (
               <li
                 key={token.address}
                 onClick={() => handleSelect(token)}

@@ -1,9 +1,7 @@
 import { FormikContextType, FormikValues, useFormikContext } from "formik";
 import Charts from "../../Charts";
-import NativeMinima from "../../../../../NativeMinima";
 import InputWrapper from "../../../../../UI/FormComponents/InputWrapper";
 import { useState } from "react";
-import TetherToken from "../TetherPoolOld/TetherToken";
 
 const TetherPool = ({ onShowConfirm }) => {
   const [f, setF] = useState(false);
@@ -22,27 +20,7 @@ const TetherPool = ({ onShowConfirm }) => {
       <Charts fav={favorites} book="usdt" type="buy" />
       <Charts fav={favorites} book="usdt" type="sell" />
 
-      <form className={`pb-8 pt-4`}>
-        <div className="flex items-center mt-5 justify-center pb-1 sm:pb-0 mx-auto gap-2">
-          <NativeMinima display={true} />
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="22"
-            height="22"
-            viewBox="0 0 24 24"
-            strokeWidth="1.5"
-            stroke="currentColor"
-            fill="none"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="mx-2"
-          >
-            <path d="M7 10h14l-4 -4" />
-            <path d="M17 14h-14l4 4" />
-          </svg>
-          <TetherToken extraClass="flex-col-reverse gap-0 text-sm" />
-        </div>
-
+      <form className={`pb-8 pt-4`}>        
         <div className="mx-4">
           <InputWrapper
             orderbook={true}

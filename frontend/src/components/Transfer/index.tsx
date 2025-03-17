@@ -39,7 +39,7 @@ const Transfer = ({ type, submitForm, onCancel }: FormState) => {
   const [error, setError] = useState<string | false>(false);
 
   const initialTokenShouldBeMinimaIfExists = tokens.find(
-    (token) => token.address === _defaults["wMinima"][_network],
+    (token) => token.address === _defaults["Tether"][_network],
   );
 
   const getBalances = async () => {

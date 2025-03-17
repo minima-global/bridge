@@ -34,7 +34,7 @@ const OTCForm = () => {
   const initialValues: FormValues = {
     uid: searchParams.get("contact") || "",
     native: "",
-    token: { name: "WMINIMA", amount: "" },
+    token: { name: "USDT", amount: "" },
     locked: false,
   };
 
