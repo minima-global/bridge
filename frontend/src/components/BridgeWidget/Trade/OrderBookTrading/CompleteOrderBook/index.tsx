@@ -58,13 +58,13 @@ function MyOrderBook({ orderBook, userDetails }: MyOrderBookProps) {
           </div>
         </div>
         <div className="flex items-center space-x-1 pr-2">
-          {orderBook.wminima.enable && (
+          {/* {orderBook.wminima.enable && (
             <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
-          )}
+          )} */}
           {orderBook.usdt.enable && (
             <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px]" alt="usdt" src="./assets/tether.svg" />
           )}
-          {!orderBook.wminima.enable && !orderBook.usdt.enable && (
+          {!orderBook.usdt.enable && (
             <p className="text-xs font-bold text-gray-400 dark:text-gray-500">Disabled</p>
           )}
         </div>
@@ -78,13 +78,13 @@ function MyOrderBook({ orderBook, userDetails }: MyOrderBookProps) {
             sell={orderBook.usdt.sell}
           />
         )}
-        {orderBook.wminima.enable && (
+        {/* {orderBook.wminima.enable && (
           <OrderBookRow
             title="WMINIMA"
             buy={orderBook.wminima.buy}
             sell={orderBook.wminima.sell}
           />
-        )}
+        )} */}
       </div>
     </div>
   );

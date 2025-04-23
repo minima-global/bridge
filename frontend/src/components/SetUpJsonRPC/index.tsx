@@ -81,9 +81,9 @@ const SetUpJsonRPC = () => {
     setError(false);
     setLoading(true);
     /** We create a base64 encoded token for authorisation header */
-    const preAuth = btoa(apiKey + ":" + apiKeySecret);
-    const mainnet = `https://mainnet.infura.io/v3/${apiKey}`;
-    const sepolia = `https://sepolia.infura.io/v3/${apiKey}`;
+    const preAuth = btoa(apiKey.trim() + ":" + apiKeySecret.trim());
+    const mainnet = `https://mainnet.infura.io/v3/${apiKey.trim()}`;
+    const sepolia = `https://sepolia.infura.io/v3/${apiKey.trim()}`;
     const gasApi = `https://gas.api.infura.io/networks/1/suggestedGasFees`;
 
     try {

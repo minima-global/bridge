@@ -41,9 +41,9 @@ export default function Order({ data }: IProps) {
           </div>
           <div className="flex items-center space-x-2 mr-2">            
             <div className="flex gap-1">
-              {data.data.orderbook.wminima.enable && (
+              {/* {data.data.orderbook.wminima.enable && (
                 <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px] rounded-full" alt="wminima" src="./assets/wtoken.svg" />
-              )}
+              )} */}
               {data.data.orderbook.usdt.enable && (
                 <img className="min-w-[16px] min-h-[16px] w-[16px] h-[16px]" alt="usdt" src="./assets/tether.svg" />
               )}
@@ -68,13 +68,13 @@ export default function Order({ data }: IProps) {
               sell={data.data.orderbook.usdt.sell}
             />
           )}
-          {data.data.orderbook.wminima.enable && (
+          {/* {data.data.orderbook.wminima.enable && (
             <OrderBook
               title="WMINIMA"
               buy={data.data.orderbook.wminima.buy}
               sell={data.data.orderbook.wminima.sell}
             />
-          )}
+          )} */}
         </div>
       </li>
     </>

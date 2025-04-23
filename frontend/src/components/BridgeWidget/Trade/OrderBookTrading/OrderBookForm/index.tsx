@@ -1,8 +1,6 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext } from "react";
 import TetherPool from "../Pools/TetherPool";
-import WrappedPool from "../Pools/WrappedPool";
 import { appContext } from "../../../../../AppContext";
-import SelectPool from "../Pools/SelectPool";
 import withConfirmation from "../Pools/withConfirmation";
 
 import { Formik } from "formik";
@@ -11,38 +9,18 @@ import Decimal from "decimal.js";
 import { MAXIMUM_MINIMA_TRADE } from "../../../../../../../dapp/js/htlcvars.js";
 import { useWalletContext } from "../../../../../providers/WalletProvider/WalletProvider";
 import SelectFavorites from "../Pools/SelectFavorites";
+import BalanceOverview from "../Pools/BalanceOverview/index.js";
 
-const WrappedPoolWithConfirmation = withConfirmation(WrappedPool, "wminima");
+// const WrappedPoolWithConfirmation = withConfirmation(WrappedPool, "wminima");
 const TetherPoolWithConfirmation = withConfirmation(TetherPool, "usdt");
 
 const OrderBookForm = () => {
-  const { loaded, handleActionViaBackend, notify } = useContext(appContext);
+  const { handleActionViaBackend, notify } = useContext(appContext);
   const { callBalanceForApp } = useWalletContext();
-  const [selectedOption, setSelectedOption] = useState<'wminima' | 'usdt'>("wminima");
 
-  useEffect(() => {
-    if (loaded && loaded.current) {
-      callBalanceForApp();
-    }
-  }, [loaded, selectedOption]);
-
-  const handleOptionChange = (e) => {
-    const val = e.target.value;
-
-    setSelectedOption(val);
-  };
 
   return (
     <div>
-      <h3 className="text-center mb-3 font-bold">
-        Choose a book to trade native Minima on
-      </h3>
-
-      <SelectPool
-        selectedOption={selectedOption}
-        handleOptionChange={handleOptionChange}
-      />
-
       <Formik
         initialValues={{ native: "", favorites: false, transaction: "" }}
         validationSchema={yup.object().shape({
@@ -109,16 +87,14 @@ const OrderBookForm = () => {
           <>
             <div className="flex justify-end px-1 my-2">
               <SelectFavorites />
-            </div>
-            {selectedOption === 'wminima' && (
-              <WrappedPoolWithConfirmation onSubmit={() => submitForm()} />
-            )}
-            {selectedOption === 'usdt' && (
-              <TetherPoolWithConfirmation onSubmit={() => submitForm()} />
-            )}
+            </div>            
+            <TetherPoolWithConfirmation onSubmit={() => submitForm()} />
           </>
         )}
       </Formik>
+
+      <BalanceOverview />
+
     </div>
   );
 };

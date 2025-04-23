@@ -1,41 +1,25 @@
-import { useContext, useEffect } from "react";
+import { useContext } from "react";
 import { appContext } from "../../AppContext";
 import { useWalletContext } from "../../providers/WalletProvider/WalletProvider";
 import { useTokenStoreContext } from "../../providers/TokenStoreProvider";
 import { formatUnits } from "ethers";
 import { _defaults } from "../../constants";
 import RefreshIcon from "../UI/Icons/RefreshIcon";
-import Decimal from "decimal.js";
-import { getCurrentPoolPrice } from "../../libs/getPrice";
 
 const TokenList = () => {
   const {
-    _provider,
     _currentNavigation,
     setTriggerBalanceUpdate,
     _triggerBalanceUpdate,
     getWalletBalance,
   } = useContext(appContext);
-    const { _balance, _network, _poolPrice, getEthereumBalance, setCurrentPoolPrice } =
+    const { _balance, _network, getEthereumBalance } =
     useWalletContext();
   const { tokens } = useTokenStoreContext();
 
   if (_currentNavigation !== "balance") {
     return null;
   }
-
-  useEffect(() => {
-    (async () => {
-      try {
-        // get current pool price for wM vs usdt
-        const poolPrice = await getCurrentPoolPrice(_provider);
-        setCurrentPoolPrice(poolPrice);
-        
-      } catch (error) {
-        console.warn(error);
-      }
-    })();
-  }, []);
 
   const handlePullBalance = () => {
     setTriggerBalanceUpdate(true);
@@ -64,25 +48,13 @@ const TokenList = () => {
         </p>
       )}
       {!_triggerBalanceUpdate && (
-        <ul>
-          <li className="flex items-center">
-            <div className="flex-grow"/>
-            <p className="text-xs py-1 font-bold text-neutral-500 dark:text-neutral-700">
-              {_poolPrice && "1 WMINIMA ≈ $" + new Decimal(_poolPrice).toFixed(6)}
-            </p>
-          </li>
-          {tokens.map((token) => (
+        <ul>          
+          {tokens.filter(t => t.address !== "0x669c01CAF0eDcaD7c2b8Dc771474aD937A7CA4AF").map((token) => (
             <li
               key={token.address}
               className="shadow-sm dark:shadow-none grid grid-cols-[auto_1fr] bg-white items-center rounded-md bg-opacity-30 dark:bg-[#1B1B1B] p-2 hover:bg-opacity-80 dark:hover:bg-opacity-30 mb-2"
             >
-              {_defaults["wMinima"][_network] === token.address ? (
-                <img
-                  alt="token-icon"
-                  src="./assets/wtoken.svg"
-                  className="w-[36px] h-[36px] rounded-full"
-                />
-              ) : _defaults["Tether"][_network] === token.address ? (
+              {_defaults["Tether"][_network] === token.address ? (
                 <img
                   alt="token-icon"
                   src="./assets/tether.svg"
@@ -97,24 +69,13 @@ const TokenList = () => {
               <div className="flex justify-between ml-2">
                 <div className="flex-grow">
                   <h3 className="font-bold">{token.name}</h3>
-                  <p className="font-mono text-sm">
-                    {token.address ===
-                      "0xb3BEe194535aBF4E8e2C0f0eE54a3eF3b176703C" &&
-                      token.balance &&
-                      formatUnits(token.balance, 18).toString()}
+                  <p className="font-mono text-sm">                    
                     {token.address !==
                       "0xb3BEe194535aBF4E8e2C0f0eE54a3eF3b176703C" &&
                       token.balance &&
                       formatUnits(token.balance, token.decimals).toString()}
                   </p>
-                </div>
-                {/* {_defaults["wMinima"][_network] === token.address && (
-                  <div>
-                    <p className="text-xs font-bold text-neutral-500 dark:text-neutral-700">
-                      {_poolPrice && "$" + new Decimal(_poolPrice).toFixed(6)}
-                    </p>
-                  </div>
-                )} */}
+                </div>                
               </div>
             </li>
           ))}
