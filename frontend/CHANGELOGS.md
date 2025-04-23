@@ -205,3 +205,8 @@
 - Fix orderbook trade notification
 - Fix OTC button / design tweaks
 - Fix favorite selection on OTC
+
+
+##### [2.21.0] - 23 Apr 2025
+
+- Remove wMinima from complete orderbook on trade window
